@@ -1,0 +1,73 @@
+name: CI
+
+# Validate the toolkit on every push / PR: shell + PowerShell syntax,
+# JSON/YAML validity, and that both LSP servers actually build.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate setup.sh syntax
+        run: bash -n setup.sh
+
+      - name: Validate setup.ps1 (PowerShell parser)
+        shell: pwsh
+        run: |
+          $errs = $null
+          $null = [System.Management.Automation.Language.Parser]::ParseFile(
+            "$PWD/setup.ps1", [ref]$null, [ref]$errs)
+          if ($errs.Count -gt 0) { $errs | ForEach-Object { Write-Error $_.Message }; exit 1 }
+          Write-Host "setup.ps1 OK"
+
+      - name: Validate JSON configs
+        run: |
+          for f in $(find . -path ./lsp -prune -o -name '*.json' -print); do
+            python3 -c "import json,sys; json.load(open('$f'))" || { echo "Invalid JSON: $f"; exit 1; }
+          done
+          echo "All JSON valid"
+
+      - name: Validate YAML
+        run: |
+          python3 - <<'PY'
+          import sys, glob
+          try:
+              import yaml
+          except ImportError:
+              import subprocess; subprocess.run([sys.executable,"-m","pip","install","-q","pyyaml"]); import yaml
+          for f in glob.glob(".github/**/*.yml", recursive=True) + glob.glob("*.yml"):
+              yaml.safe_load(open(f))
+          print("All YAML valid")
+          PY
+
+      - name: Check doc count (expect 107 gitbook pages)
+        run: |
+          count=$(find docs -name '*.md' ! -name 'INDEX.md' | wc -l)
+          echo "Doc pages: $count"
+          [ "$count" -ge 107 ] || { echo "Expected >= 107 doc pages"; exit 1; }
+
+  build-lsp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build enma-lsp
+        working-directory: lsp/enma-lsp
+        run: npm install && npm run compile && test -f server/dist/server.js
+
+      - name: Build angel-lsp-pcx
+        working-directory: lsp/angel-lsp-pcx
+        run: npm install && npm run compile && test -f server/out/server.js

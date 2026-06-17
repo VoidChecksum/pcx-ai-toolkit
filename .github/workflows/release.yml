@@ -1,0 +1,69 @@
+name: Build and Release VSIX
+
+# Build both LSP extensions into .vsix and attach them to a GitHub Release
+# whenever a version tag (v*) is pushed.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-vsix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with LSP submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Build and package enma-lsp
+        working-directory: lsp/enma-lsp
+        run: |
+          npm install
+          npm run compile
+          vsce package --allow-missing-repository --skip-license
+
+      - name: Build and package angel-lsp-pcx
+        working-directory: lsp/angel-lsp-pcx
+        run: |
+          npm install
+          npm run compile
+          vsce package --allow-missing-repository --skip-license
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p dist
+          cp lsp/enma-lsp/*.vsix dist/
+          cp lsp/angel-lsp-pcx/*.vsix dist/
+          ls -lh dist/
+
+      - name: Create / update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.vsix
+          generate_release_notes: true
+          body: |
+            ## VS Code Extensions
+
+            Drag-and-drop install: download a `.vsix`, then in VS Code run
+            **Extensions: Install from VSIX...** from the command palette.
+
+            | Extension | Language | Install |
+            |-----------|----------|---------|
+            | `enma-language-*.vsix` | Enma (`.em`) | Syntax, completion, hover docs, diagnostics, Perception API |
+            | `angel-lsp-*.vsix` | AngelScript (`.as`) | Syntax, completion, hover docs, diagnostics, Perception API |
+
+            Both extensions are MIT-licensed and bundle the Perception.cx API surface.
+            See the [toolkit README](https://github.com/VoidChecksum/pcx-ai-toolkit) for full setup.

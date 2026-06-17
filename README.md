@@ -14,6 +14,8 @@
 [![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
 [![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
 [![Skills](https://img.shields.io/badge/AI%20Skills-2-yellow.svg)](#ai-skills)
+[![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
+[![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
 **Turn any LLM into an expert Perception.cx developer.**<br>
 Complete Enma language docs, every PCX API, coding guidelines, MCP configs, and LSP servers — in one package.
@@ -468,14 +470,22 @@ Each is a correct skeleton: the structure and API calls are real, the offsets an
 
 ---
 
-## LSP Language Servers
+## VS Code Extensions
 
-| Server | Language | Features |
-|:-------|:---------|:---------|
-| [enma-lsp](https://github.com/sinnafuls/enma-lsp) | Enma (`.em`) | Syntax highlighting, completion, hover docs, diagnostics, Perception API surface |
-| [angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx) | AngelScript (`.as`) | Syntax highlighting, completion, hover docs, diagnostics, Perception API surface |
+Prebuilt `.vsix` packages are attached to every [release](https://github.com/VoidChecksum/pcx-ai-toolkit/releases) — no build step needed.
 
-Built automatically by `setup.sh` / `setup.ps1`. Editor config:
+**Install:** download the `.vsix`, then in VS Code open the command palette (`Ctrl+Shift+P`) → **Extensions: Install from VSIX...** → pick the file.
+
+| Extension | Language | Provides |
+|:----------|:---------|:---------|
+| `enma-language-*.vsix` | Enma (`.em`) | Syntax highlighting, completion, hover docs (full Perception API bundled), diagnostics, snippets |
+| `angel-lsp-*.vsix` | AngelScript (`.as`) | Syntax highlighting, completion, hover docs, diagnostics, Perception API surface |
+
+Both are MIT-licensed builds of [enma-lsp](https://github.com/sinnafuls/enma-lsp) and [angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx), repackaged for one-click install.
+
+### Manual / headless LSP
+
+`setup.sh` / `setup.ps1` build the servers from source. Wire them into any LSP client:
 
 ```
 # Linux / macOS

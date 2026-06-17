@@ -2,6 +2,17 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.3.0] — 2025-06-17
+
+### Added
+- **Prebuilt VS Code extensions** — `enma-language.vsix` and `angel-lsp.vsix` attached to GitHub Releases for one-click install (no build step)
+- **GitHub Actions** — `release.yml` auto-builds and attaches both `.vsix` on every version tag; `ci.yml` validates shell/PowerShell syntax, JSON/YAML, doc count, and that both LSP servers build
+- LSP servers registered as proper git submodules so `git clone --recursive` and CI work correctly
+
+### Changed
+- `.gitignore` — stop ignoring the submodule paths; ignore built `*.vsix` instead
+- README — new "VS Code Extensions" section with VSIX install instructions
+
 ## [1.2.0] — 2025-06-17
 
 ### Added
