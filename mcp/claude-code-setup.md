@@ -67,3 +67,43 @@ Read docs/enma/llms-language.md and then write me a ...
 ```
 
 Or let the skill handle it — the `game-hacking-pcx` skill instructs Claude to read the relevant doc before writing any code.
+
+## 6. Binary Analysis MCP (Optional)
+
+Gives Claude Code static analysis tools (disassemble, decompile, xrefs, type info,
+pattern search, rename, …) without needing the GUI open.
+
+**Suite not installed yet** — full install (pulls LFS files, installs + patches + MCP):
+```bash
+git lfs pull
+./installers/install.sh          # Linux / macOS / WSL
+.\installers\install.ps1         # Windows
+```
+
+**Suite already installed** — MCP only:
+```bash
+./mcp/setup-binary-analysis.sh                           # Linux / macOS / WSL
+./mcp/setup-binary-analysis.sh --skip-pkg                # already have ida-pro-mcp
+./mcp/setup-binary-analysis.sh --install-dir /your/path  # non-standard location
+```
+```powershell
+.\mcp\setup-binary-analysis.ps1
+.\mcp\setup-binary-analysis.ps1 -SkipPkg
+.\mcp\setup-binary-analysis.ps1 -InstallDir "D:\tools\ida"
+```
+
+Both scripts write this entry to `~/.claude/mcp.json` automatically:
+```json
+{
+  "mcpServers": {
+    "binary-analysis": {
+      "command": "uvx",
+      "args": ["idalib-mcp", "--stdio"],
+      "env": { "IDADIR": "/path/to/installation" }
+    }
+  }
+}
+```
+
+Restart Claude Code after running either script.
+Full reference: [`binary-analysis-setup.md`](binary-analysis-setup.md)

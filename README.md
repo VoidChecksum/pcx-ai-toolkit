@@ -75,6 +75,44 @@ That's it. The AI now reads docs before writing code.
 
 > **Requirements:** [Node.js 18+](https://nodejs.org/) and [Git](https://git-scm.com/) on PATH. Everything else (docs, skills, rules, templates) is plain text and needs no build.
 
+### Analysis Suite + MCP Server (optional)
+
+Permanently installs the analysis tool for your OS, patches it, activates the
+Python bindings, and sets up the binary analysis MCP server — one command.
+Requires [Git LFS](https://git-lfs.github.com/) to pull the bundled installers.
+
+```bash
+# Pull installer binaries (Git LFS)
+git lfs pull
+
+# Linux / macOS / WSL
+./installers/install.sh
+
+# Custom install location
+./installers/install.sh --prefix /opt/mydir
+
+# Skip MCP server setup
+./installers/install.sh --skip-mcp
+```
+
+```powershell
+# Windows (PowerShell, run as Administrator if installing to Program Files)
+git lfs pull
+powershell -ExecutionPolicy Bypass -File installers\install.ps1
+
+# Custom install location
+.\installers\install.ps1 -Prefix "D:\tools\ida"
+```
+
+What each script does, in order:
+1. Runs the native platform installer silently to the chosen prefix
+2. Applies the patch (replaces DLLs on Windows; patches `.so`/`.dylib` on Linux/macOS)
+3. Generates and writes the license file via `keygen.js`
+4. Installs `uv` and Python 3.11+ if not present
+5. Activates the idalib Python bindings
+6. Installs `ida-pro-mcp` (MCP server) via `uv tool install`
+7. Writes the `binary-analysis` entry into `~/.claude/mcp.json`
+
 ---
 
 ## What's Inside
@@ -190,6 +228,17 @@ pcx-ai-toolkit/
 │   ├── common-patterns.md                13 working code recipes
 │   └── offset-methodology.md             Sig scanning methodology
 │
+├── installers/                       ── Analysis Suite Installers (Git LFS)
+│   ├── install.sh                        Full install — Linux / macOS / WSL
+│   ├── install.ps1                       Full install — Windows
+│   ├── keygen.js                         License generator + in-place patcher
+│   ├── ida-pro_93_x64linux.run           Linux x64 installer  [LFS]
+│   ├── ida-pro_93_armlinux.run           Linux ARM64 installer [LFS]
+│   ├── ida-pro_93_x64mac.app.zip         macOS x64 installer  [LFS]
+│   ├── ida-pro_93_armmac.app.zip         macOS ARM64 installer [LFS]
+│   ├── ida-pro_93_x64win.exe             Windows x64 installer [LFS]
+│   └── kg_patch/win/                     Pre-patched Windows DLLs [LFS]
+│
 ├── rules/                            ── Project Rules
 │   ├── CLAUDE.md                         Drop-in for Claude Code
 │   └── AGENTS.md                         5 agent role definitions
@@ -197,7 +246,10 @@ pcx-ai-toolkit/
 ├── mcp/                              ── MCP Configs
 │   ├── perception-mcp-config.json        42+ tool definitions
 │   ├── claude-code-setup.md              Claude Code guide
-│   └── cursor-setup.md                   Cursor guide
+│   ├── cursor-setup.md                   Cursor guide
+│   ├── binary-analysis-setup.md          Binary analysis MCP reference
+│   ├── setup-binary-analysis.sh          MCP-only setup (if already installed)
+│   └── setup-binary-analysis.ps1         MCP-only setup — Windows
 │
 ├── lsp/                              ── Language Servers (submodules)
 │   ├── enma-lsp/                         Enma: completion + diagnostics
@@ -214,7 +266,7 @@ pcx-ai-toolkit/
 │
 ├── signatures/source-engine/         ── Signature Examples
 │
-├── setup.sh                          One-command install
+├── setup.sh                          One-command LSP + skills install
 ├── CONTRIBUTING.md                   Contribution guide
 └── LICENSE                           MIT
 ```

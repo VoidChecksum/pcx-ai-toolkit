@@ -1,0 +1,1 @@
+Place the keygen in the same folder as your ida installation, run it with node, and it will patch ida32.so and ida.so for you.
