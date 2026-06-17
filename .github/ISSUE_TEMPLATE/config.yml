@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    url: https://github.com/VoidChecksum/pcx-ai-toolkit/discussions/categories/q-a
+    about: Get help with setup, Enma scripting, or PCX APIs
+  - name: Share your work
+    url: https://github.com/VoidChecksum/pcx-ai-toolkit/discussions/categories/show-and-tell
+    about: Show scripts you built using this toolkit
+  - name: Suggest an idea
+    url: https://github.com/VoidChecksum/pcx-ai-toolkit/discussions/2
+    about: Vote on the roadmap or propose new features

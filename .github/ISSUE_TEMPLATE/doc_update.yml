@@ -1,0 +1,35 @@
+name: Documentation Update
+description: Report outdated, missing, or incomplete documentation
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: Documentation area
+      options:
+        - Enma Language
+        - Enma Addons
+        - Enma SDK
+        - PCX Enma API
+        - PCX AngelScript API
+        - PCX Lua API
+        - Knowledge Base / Cheatsheet
+        - Common Patterns
+        - Offset Methodology
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: file
+    attributes:
+      label: File path
+      placeholder: "docs/perception/proc-api.md"
+  - type: textarea
+    id: description
+    attributes:
+      label: What needs updating?
+      description: Describe what's outdated or missing
+      placeholder: "New function `proc.scan_aob` was added in PCX v2.5 but isn't documented..."
+    validations:
+      required: true

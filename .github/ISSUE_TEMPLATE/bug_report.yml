@@ -1,0 +1,40 @@
+name: Bug Report
+description: Report incorrect documentation, broken setup, or wrong API signatures
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Documentation (docs/)
+        - AI Skill (.claude/skills/)
+        - Knowledge Base (knowledge/)
+        - MCP Config (mcp/)
+        - LSP Server (lsp/)
+        - Setup Script (setup.sh)
+        - Rules (rules/)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What's wrong?
+      description: Describe the issue clearly
+      placeholder: "The proc-api.md doc says ru64 returns int64, but it actually returns uint64..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Game, Enma version, AI tool used, OS, etc.
