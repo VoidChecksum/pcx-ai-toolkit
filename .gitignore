@@ -1,0 +1,11 @@
+node_modules/
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+lsp/enma-lsp/
+lsp/angel-lsp-pcx/
+lsp/LspCpp/
+lsp/cpp-language-server/
+*.i64
+*.idb

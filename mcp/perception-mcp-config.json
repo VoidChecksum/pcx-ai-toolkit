@@ -1,0 +1,50 @@
+{
+  "mcpServers": {
+    "perception": {
+      "command": "node",
+      "args": [],
+      "url": "http://127.0.0.1:42069",
+      "transport": "http",
+      "description": "Perception.cx MCP server — JSON-RPC over local HTTP. Launched automatically by the Perception IDE when MCP is enabled in settings.",
+      "tools": [
+        "list_processes",
+        "get_process_info",
+        "read_memory",
+        "read_typed_value",
+        "find_pattern",
+        "read_pointer_chain",
+        "read_string",
+        "get_module_exports",
+        "get_module_imports",
+        "memory_write",
+        "scan_string",
+        "scan_wstring",
+        "disassemble",
+        "scan_pointer_to",
+        "scan_value",
+        "scan_changed",
+        "diff_memory",
+        "struct_dump",
+        "find_xrefs",
+        "find_string_refs",
+        "find_function_bounds",
+        "analyze_function",
+        "trace_register",
+        "analyze_vtable",
+        "read_rtti",
+        "generate_signature",
+        "build_call_graph",
+        "read_file",
+        "write_file",
+        "edit_file",
+        "search_text",
+        "find_references",
+        "check_script",
+        "validate_script",
+        "execute_script",
+        "get_script_api",
+        "web_search"
+      ]
+    }
+  }
+}
