@@ -49,7 +49,6 @@ Result:  Compiles. Runs. Correct API calls.
 ## Quick Start
 
 **Linux / macOS / WSL / Git Bash:**
-
 ```bash
 git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
 cd pcx-ai-toolkit
@@ -57,61 +56,151 @@ cd pcx-ai-toolkit
 ```
 
 **Windows 10 / 11 (PowerShell):**
-
 ```powershell
 git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
 cd pcx-ai-toolkit
 powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
-Both installers clone and build the LSP servers and install the AI skills to Claude Code if it's detected. Then drop the rules into your project:
-
+Drop the rules into your project and the AI reads docs before writing code:
+```bash
+cp rules/CLAUDE.md /path/to/your/pcx-project/   # Linux/macOS
+copy rules\CLAUDE.md C:\path\to\your\project\   # Windows
 ```
-# Linux/macOS:  cp rules/CLAUDE.md /path/to/your/pcx-project/
-# Windows:      copy rules\CLAUDE.md C:\path\to\your\pcx-project\
-```
 
-That's it. The AI now reads docs before writing code.
+> **Requirements:** [Node.js 18+](https://nodejs.org/) · [Git](https://git-scm.com/) · [Git LFS](https://git-lfs.github.com/) (for the analysis suite)
 
-> **Requirements:** [Node.js 18+](https://nodejs.org/) and [Git](https://git-scm.com/) on PATH. Everything else (docs, skills, rules, templates) is plain text and needs no build.
+---
 
-### Analysis Suite + MCP Server (optional)
+## Installation Guide
 
-Permanently installs the analysis tool for your OS, patches it, activates the
-Python bindings, and sets up the binary analysis MCP server — one command.
-Requires [Git LFS](https://git-lfs.github.com/) to pull the bundled installers.
+### Part 1 — Toolkit (docs, skills, rules, LSP)
+
+This is the main repo. No binary payloads, no build step.
 
 ```bash
-# Pull installer binaries (Git LFS)
-git lfs pull
+git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
+cd pcx-ai-toolkit
 
 # Linux / macOS / WSL
-./installers/install.sh
+./setup.sh
 
-# Custom install location
+# Windows
+powershell -ExecutionPolicy Bypass -File setup.ps1
+```
+
+`setup.sh` / `setup.ps1` installs:
+- LSP servers (Enma + AngelScript) built from submodules
+- AI skills registered with Claude Code (if detected)
+- Skill docs copied to `~/.claude/skills/`
+
+---
+
+### Part 2 — Analysis Suite (headless, fully automatic)
+
+Installs the static analysis tool permanently for your OS, patches the binaries,
+generates the license, activates the Python bindings, and wires up the binary
+analysis MCP server for Claude Code — **zero interaction, one command**.
+
+#### Prerequisites
+
+| Prerequisite | Linux / WSL | macOS | Windows |
+|---|---|---|---|
+| [Node.js 18+](https://nodejs.org/) | `sudo apt-get install nodejs` | `brew install node` | installer from nodejs.org |
+| [Xvfb](https://www.x.org/releases/individual/app/) | `sudo apt-get install xvfb` | not needed | not needed |
+| Git LFS | `sudo apt-get install git-lfs` | `brew install git-lfs` | [git-lfs.github.com](https://git-lfs.github.com/) |
+| Python 3.11+ | installed automatically via uv | installed automatically via uv | installed automatically via uv |
+
+> **Why Xvfb?** The installer binary uses Qt for its UI layer even in unattended mode.
+> The script spins up a throwaway virtual display, runs the installer through it, then
+> tears it down. You never see a window.
+
+#### Install
+
+```bash
+# Pull the installer binaries (stored in Git LFS, ~3 GB)
+git lfs pull
+
+# Linux / macOS / WSL — one command does everything
+./installers/install.sh
+```
+
+```powershell
+# Windows — run PowerShell as Administrator if installing to Program Files
+git lfs pull
+powershell -ExecutionPolicy Bypass -File installers\install.ps1
+```
+
+#### What happens, step by step
+
+| Step | Linux / macOS | Windows |
+|---|---|---|
+| 1 | Checks Node.js + Xvfb are available | Checks Node.js is available |
+| 2 | Spins up a Xvfb virtual display | — |
+| 3 | Runs the native `.run` / `.app.zip` installer silently via `--mode unattended` | Runs `.exe` installer silently via `--mode unattended` |
+| 4 | `node keygen.js` patches `libida.so` + `libida32.so` (or `.dylib`) in-place | Pre-patched `ida.dll` + `ida32.dll` dropped into the install dir |
+| 5 | `node keygen.js` writes `idapro.hexlic` to the install dir | Same |
+| 6 | Installs `uv` if not present | Same |
+| 7 | Installs Python 3.11+ via uv if not present | Same |
+| 8 | Activates idalib Python bindings via `py-activate-idalib.py` | Same |
+| 9 | `uv tool install ida-pro-mcp` | Same |
+| 10 | Merges `binary-analysis` entry into `~/.claude/mcp.json` | Merges into `%USERPROFILE%\.claude\mcp.json` |
+
+#### Options
+
+```bash
+# Custom install location (default: /opt/ida-pro-9.3 or ~/ida-pro-9.3)
 ./installers/install.sh --prefix /opt/mydir
 
-# Skip MCP server setup
+# Skip MCP server install (just install + patch the suite)
 ./installers/install.sh --skip-mcp
 ```
 
 ```powershell
-# Windows (PowerShell, run as Administrator if installing to Program Files)
-git lfs pull
-powershell -ExecutionPolicy Bypass -File installers\install.ps1
-
-# Custom install location
+# Custom install location (default: C:\Program Files\IDA Professional 9.3)
 .\installers\install.ps1 -Prefix "D:\tools\ida"
+
+# Skip MCP server install
+.\installers\install.ps1 -SkipMcp
 ```
 
-What each script does, in order:
-1. Runs the native platform installer silently to the chosen prefix
-2. Applies the patch (replaces DLLs on Windows; patches `.so`/`.dylib` on Linux/macOS)
-3. Generates and writes the license file via `keygen.js`
-4. Installs `uv` and Python 3.11+ if not present
-5. Activates the idalib Python bindings
-6. Installs `ida-pro-mcp` (MCP server) via `uv tool install`
-7. Writes the `binary-analysis` entry into `~/.claude/mcp.json`
+#### Already have it installed?
+
+Skip the 3 GB download — just activate the bindings and wire up MCP:
+
+```bash
+# Linux / macOS / WSL
+./mcp/setup-binary-analysis.sh                            # auto-detect install dir
+./mcp/setup-binary-analysis.sh --install-dir /your/path  # explicit path
+./mcp/setup-binary-analysis.sh --skip-pkg                # skip package download too
+```
+
+```powershell
+# Windows
+.\mcp\setup-binary-analysis.ps1
+.\mcp\setup-binary-analysis.ps1 -InstallDir "D:\tools\ida"
+.\mcp\setup-binary-analysis.ps1 -SkipPkg
+```
+
+#### After install
+
+Restart Claude Code. The `binary-analysis` MCP server is now available:
+
+```bash
+# Headless — stdio (used automatically by Claude Code)
+uvx idalib-mcp --stdio
+
+# HTTP — for persistent sessions or multiple clients
+uvx idalib-mcp --host 127.0.0.1 --port 8745
+
+# Optional GUI plugin (connects to a live interactive session via SSE)
+pip install ida-pro-mcp && ida-pro-mcp --install
+```
+
+Upgrade the MCP server at any time:
+```bash
+uv tool upgrade ida-pro-mcp
+```
 
 ---
 
