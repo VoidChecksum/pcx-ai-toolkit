@@ -10,3 +10,10 @@ lsp/cpp-language-server/
 *.vsix
 *.i64
 *.idb
+
+# Visual Studio extension build outputs + staged server payloads
+packages/
+bin/
+obj/
+visualstudio/*/Server/**
+!visualstudio/*/Server/.gitkeep

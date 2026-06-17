@@ -203,6 +203,10 @@ pcx-ai-toolkit/
 │   ├── enma-lsp/                         Enma: completion + diagnostics
 │   └── angel-lsp-pcx/                   AngelScript: completion + diagnostics
 │
+├── visualstudio/                     ── Visual Studio 2022 Extensions
+│   ├── EnmaVS/                           Enma ILanguageClient (.vsix source)
+│   └── AngelScriptVS/                    AngelScript ILanguageClient (.vsix source)
+│
 ├── templates/                       ── Starter Scripts
 │   ├── hello-world.em                    Minimal lifecycle + render
 │   ├── overlay-basic.em                  GUI menu + config-driven overlay
@@ -470,18 +474,31 @@ Each is a correct skeleton: the structure and API calls are real, the offsets an
 
 ---
 
-## VS Code Extensions
+## Editor Extensions
 
-Prebuilt `.vsix` packages are attached to every [release](https://github.com/VoidChecksum/pcx-ai-toolkit/releases) — no build step needed.
+Prebuilt extensions are attached to every [release](https://github.com/VoidChecksum/pcx-ai-toolkit/releases) — no build step needed. Both VS Code and Visual Studio 2022 are supported.
 
-**Install:** download the `.vsix`, then in VS Code open the command palette (`Ctrl+Shift+P`) → **Extensions: Install from VSIX...** → pick the file.
+### VS Code
+
+Download the `.vsix`, then command palette (`Ctrl+Shift+P`) → **Extensions: Install from VSIX...**
 
 | Extension | Language | Provides |
 |:----------|:---------|:---------|
 | `enma-language-*.vsix` | Enma (`.em`) | Syntax highlighting, completion, hover docs (full Perception API bundled), diagnostics, snippets |
 | `angel-lsp-*.vsix` | AngelScript (`.as`) | Syntax highlighting, completion, hover docs, diagnostics, Perception API surface |
 
-Both are MIT-licensed builds of [enma-lsp](https://github.com/sinnafuls/enma-lsp) and [angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx), repackaged for one-click install.
+### Visual Studio 2022
+
+Double-click the `.vsix`, or **Extensions → Manage Extensions → Install from VSIX**. Requires [Node.js 18+](https://nodejs.org/) on PATH.
+
+| Extension | Language | Provides |
+|:----------|:---------|:---------|
+| `PcxEnmaVS.vsix` | Enma (`.em`) | Completion, hover docs, diagnostics via LSP |
+| `PcxAngelScriptVS.vsix` | AngelScript (`.as`) | Completion, hover docs, diagnostics via LSP |
+
+VS extensions are native `ILanguageClient` MEF components — see [`visualstudio/`](visualstudio/) for source and build details.
+
+All extensions are MIT-licensed builds of [enma-lsp](https://github.com/sinnafuls/enma-lsp) and [angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx).
 
 ### Manual / headless LSP
 

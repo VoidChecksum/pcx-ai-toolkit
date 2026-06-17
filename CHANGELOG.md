@@ -2,6 +2,17 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.5.0] — 2026-06-17
+
+### Added
+- **Visual Studio 2022 support** — native `ILanguageClient` MEF extensions for Enma and AngelScript under `visualstudio/`, producing VS-compatible `.vsix` (a separate extension model from the VS Code `.vsix`)
+- `release-vs.yml` — Windows CI that builds both VS extensions and attaches them to releases
+- `visualstudio/README.md` — install + build-from-source guide
+- README "Editor Extensions" section now covers both VS Code and Visual Studio 2022
+
+### Verified
+- Both language servers respond to a real LSP `initialize` handshake from the exact VSIX bundle layout (Enma via `bin/` launcher + `server/dist`; AngelScript via `server/out` + bundled `server/node_modules`)
+
 ## [1.4.0] — 2026-06-17
 
 ### Added

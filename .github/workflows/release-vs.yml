@@ -1,0 +1,94 @@
+name: Build and Release Visual Studio VSIX
+
+# Builds the Visual Studio 2022 extensions (.vsix) on a Windows runner and
+# attaches them to the GitHub Release. VS extensions need MSBuild + VSSDK,
+# which only exist on Windows — hence a separate workflow from the VS Code one.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-vs-vsix:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout (with LSP submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Enma language server
+        working-directory: lsp/enma-lsp
+        run: |
+          npm install
+          npm run compile
+
+      - name: Build AngelScript language server
+        working-directory: lsp/angel-lsp-pcx
+        run: |
+          npm install
+          npm install --prefix server
+          npm run compile
+
+      - name: Stage Enma server payload
+        shell: pwsh
+        run: |
+          $dst = "visualstudio/EnmaVS/Server"
+          New-Item -ItemType Directory -Force -Path "$dst/bin", "$dst/server/dist" | Out-Null
+          Copy-Item -Recurse -Force lsp/enma-lsp/bin/*          "$dst/bin/"
+          Copy-Item -Recurse -Force lsp/enma-lsp/server/dist/*  "$dst/server/dist/"
+          Get-ChildItem -Recurse "$dst" | Measure-Object | % { "Enma payload files: $($_.Count)" }
+
+      - name: Stage AngelScript server payload
+        shell: pwsh
+        run: |
+          $dst = "visualstudio/AngelScriptVS/Server"
+          New-Item -ItemType Directory -Force -Path "$dst/out" | Out-Null
+          Copy-Item -Recurse -Force lsp/angel-lsp-pcx/server/out/*           "$dst/out/"
+          Copy-Item -Recurse -Force lsp/angel-lsp-pcx/server/node_modules    "$dst/node_modules"
+          Copy-Item -Force         lsp/angel-lsp-pcx/server/package.json     "$dst/package.json"
+          Get-ChildItem -Recurse "$dst" | Measure-Object | % { "Angel payload files: $($_.Count)" }
+
+      - name: Restore NuGet packages
+        run: |
+          nuget restore visualstudio/EnmaVS/EnmaVS.csproj -PackagesDirectory packages
+          nuget restore visualstudio/AngelScriptVS/AngelScriptVS.csproj -PackagesDirectory packages
+
+      - name: Build Enma VSIX
+        run: msbuild visualstudio/EnmaVS/EnmaVS.csproj /p:Configuration=Release /p:DeployExtension=false /restore
+
+      - name: Build AngelScript VSIX
+        run: msbuild visualstudio/AngelScriptVS/AngelScriptVS.csproj /p:Configuration=Release /p:DeployExtension=false /restore
+
+      - name: Collect VSIX artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Get-ChildItem -Recurse -Filter *.vsix visualstudio | ForEach-Object {
+            Copy-Item $_.FullName "dist/$($_.Name)"
+          }
+          Get-ChildItem dist
+
+      - name: Upload VSIX as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-studio-vsix
+          path: dist/*.vsix
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.vsix
