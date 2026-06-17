@@ -2,6 +2,16 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.10.0] — 2026-06-17
+
+### Added
+- **`tools/` directory** — standalone RE tools, zero external dependencies (stdlib Python only):
+  - `identify-protector.py` — detect VMProtect/Themida/UPX/Enigma/Obsidium/ASPack/etc. by PE section names, byte signatures (VM entry stubs, RDTSC pairs, PEB.BeingDebugged, INT 2D), import analysis, and packing heuristics. JSON output mode for scripting.
+  - `pe-section-analyzer.py` — per-section entropy analysis with visual bar graph, packed-section detection (VS/RS ratio), writable+executable flags, empty-on-disk sections, overlay detection. Tested on 237MB PE.
+  - `resolve-api-hashes.py` — resolve API hashes used by obfuscated binaries for dynamic import resolution. 6 algorithms (ROR13+ADD, CRC32, DJB2, FNV-1a, MurmurHash3-32, SDBM), 1,560 precomputed hashes across 130 common Windows APIs. Batch mode, binary scan mode (finds hash constants in .text).
+  - `dump-strings-xor.py` — extract XOR-encrypted strings by brute-forcing single-byte keys (0x01–0xFF), scoring by printable ASCII ratio, filtering junk. Per-section targeting, known-key mode, JSON output.
+  - `install-re-tools.sh` — one-command installer: clones 17 repos (IDA plugins: hrtng, CodeXplorer, ClassInformer, SigMakerEx, FIRST, RevEng.AI, D-810, HashDB, Diaphora; Ghidra: GhidrAssist, BinDiffHelper, Pharos, RevEng.AI; deobf: NoVmp, VTIL, ScyllaHide, Scylla, pe-sieve; sync: ret-sync; sigs: FLIRTDB, sig-database), installs Python packages (capstone, unicorn, keystone, pefile, lief, triton, miasm, floss, frida, angr), copies plugins to `~/.idapro/plugins/` and FLIRT sigs to IDA sig dirs.
+
 ## [1.9.0] — 2026-06-17
 
 ### Added

@@ -370,7 +370,14 @@ pcx-ai-toolkit/
 ├── signatures/anti-cheat/            ── AC Driver Patterns (EAC, BE, Vanguard, callbacks)
 ├── signatures/unity-il2cpp/          ── IL2CPP Patterns (metadata, static fields, schemas)
 ├── signatures/source2-engine/        ── Source 2 Patterns (schema system, entity list, W2S)
+├── signatures/obfuscation/           ── Protector ID Patterns (VMP, Themida, OLLVM, packers)
 │
+├── tools/                            ── Standalone RE Tools (Python, no deps beyond stdlib)
+│   ├── identify-protector.py            Detect VMProtect/Themida/UPX/etc. by sections + byte sigs
+│   ├── pe-section-analyzer.py           Entropy analysis, packing detection, anomaly flagging
+│   ├── resolve-api-hashes.py            Resolve API hashes (ROR13, CRC32, DJB2, FNV-1a, MurmurHash3, SDBM)
+│   ├── dump-strings-xor.py              Extract XOR-encrypted strings (brute-force single-byte keys)
+│   └── install-re-tools.sh              One-command installer: IDA/Ghidra plugins + Python packages
 ├── setup.sh                          One-command LSP + skills install
 ├── CONTRIBUTING.md                   Contribution guide
 └── LICENSE                           MIT
