@@ -39,7 +39,6 @@ jobs:
         working-directory: lsp/angel-lsp-pcx
         run: |
           npm install
-          npm install --prefix server
           npm run compile
 
       - name: Stage Enma server payload
@@ -55,10 +54,14 @@ jobs:
         shell: pwsh
         run: |
           $dst = "visualstudio/AngelScriptVS/Server"
-          New-Item -ItemType Directory -Force -Path "$dst/out" | Out-Null
-          Copy-Item -Recurse -Force lsp/angel-lsp-pcx/server/out/*           "$dst/out/"
-          Copy-Item -Recurse -Force lsp/angel-lsp-pcx/server/node_modules    "$dst/node_modules"
-          Copy-Item -Force         lsp/angel-lsp-pcx/server/package.json     "$dst/package.json"
+          New-Item -ItemType Directory -Force -Path "$dst/out", "$dst/node_modules" | Out-Null
+          Copy-Item -Recurse -Force lsp/angel-lsp-pcx/server/out/*       "$dst/out/"
+          Copy-Item -Force          lsp/angel-lsp-pcx/server/package.json "$dst/package.json"
+          # Copy ONLY the vscode-* runtime deps — avoids any self-referential
+          # node_modules/angel-lsp symlink loop npm can create.
+          Get-ChildItem -Directory lsp/angel-lsp-pcx/server/node_modules -Filter "vscode-*" | ForEach-Object {
+            Copy-Item -Recurse -Force $_.FullName "$dst/node_modules/$($_.Name)"
+          }
           Get-ChildItem -Recurse "$dst" | Measure-Object | % { "Angel payload files: $($_.Count)" }
 
       - name: Restore NuGet packages
