@@ -13,7 +13,7 @@
 [![Lines](https://img.shields.io/badge/Doc%20Lines-34%2C000%2B-brightgreen.svg)](#documentation-coverage)
 [![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
 [![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
-[![Skills](https://img.shields.io/badge/AI%20Skills-6-yellow.svg)](#ai-skills)
+[![Skills](https://img.shields.io/badge/AI%20Skills-11-yellow.svg)](#ai-skills)
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
@@ -223,16 +223,21 @@ uv tool upgrade ida-pro-mcp
 <td width="50%" valign="top">
 
 ### AI Skills
-6 Claude Code / OMC skills
+11 Claude Code / OMC skills
 
 - **game-hacking-pcx** — doc index, API rules
-- **game-cheat-guidelines** — 12 behavioral rules
+- **game-cheat-guidelines** — 12 behavioral rules (Enma)
+- **pcx-angelscript-discipline** — 10 AS-specific rules (`@` handles, `&out`, `array<T>`)
+- **pcx-lua-discipline** — 10 Lua-specific rules (int subtype, `pcall`, hot-reload)
 - **pcx-coding-discipline** — Karpathy workflow: scripts
 - **pcx-re-discipline** — Karpathy workflow: RE
+- **pcx-patch-day-playbook** — ordered triage when the game updates
+- **pcx-perf-budget** — frame-time targets + `mono_us` profiler recipe
+- **pcx-streamproof** — capture-path taxonomy for OBS / Discord / capture cards
 - **anti-cheat-re** — kernel AC methodology
 - **kernel-analysis** — driver analysis patterns
 
-Auto-trigger on `.em`/`.as` work and PCX topics
+Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
 
 </td>
 </tr>
@@ -240,12 +245,14 @@ Auto-trigger on `.em`/`.as` work and PCX topics
 <td width="50%" valign="top">
 
 ### Knowledge Base
-4 reference files, 865 lines
+13 reference files
 
-- Enma language cheatsheet
-- PCX API cheatsheet
+- Enma + PCX API cheatsheets
 - Working code patterns (13 recipes)
-- Offset-finding methodology
+- Offset-finding methodology, RE plugin reference
+- Aimbot math (atan2, FOV, prediction, smoothing)
+- Anti-cheat architecture (EAC/BE/Vanguard/...) + kernel-RE tools
+- 4 engine RE references: CryEngine, Frostbite, RE Engine, REDengine
 
 </td>
 <td width="50%" valign="top">
@@ -311,11 +318,16 @@ pcx-ai-toolkit/
 │       ├── angelscript/                  AngelScript APIs (23 files)
 │       └── lua/                          Lua APIs (17 files)
 │
-├── .claude/skills/                   ── AI Skills
+├── .claude/skills/                   ── AI Skills (11)
 │   ├── game-hacking-pcx/                Doc index + coding rules
-│   ├── game-cheat-guidelines/           12 behavioral guidelines
+│   ├── game-cheat-guidelines/           12 behavioral guidelines (Enma)
+│   ├── pcx-angelscript-discipline/      10 AS-specific rules
+│   ├── pcx-lua-discipline/              10 Lua-specific rules
 │   ├── pcx-coding-discipline/           Karpathy workflow — writing scripts
 │   ├── pcx-re-discipline/               Karpathy workflow — reverse engineering
+│   ├── pcx-patch-day-playbook/          Patch-day triage workflow (7 steps)
+│   ├── pcx-perf-budget/                 Frame-time targets + profiler recipe
+│   ├── pcx-streamproof/                 Capture-path taxonomy for OBS / Discord / cards
 │   ├── anti-cheat-re/                   Kernel AC RE methodology (6 steps)
 │   └── kernel-analysis/                 Driver analysis patterns (WDM/KMDF)
 │
@@ -326,7 +338,12 @@ pcx-ai-toolkit/
 │   ├── kernel-re-tools.md                Kernel RE tool reference (WinDbg, HyperDbg, Volatility, etc.)
 │   ├── common-patterns.md                13 working code recipes
 │   ├── re-plugins-and-tools.md           IDA/Ghidra plugins, FLIRT sigs, diffing, ret-sync
-│   └── offset-methodology.md             Sig scanning methodology
+│   ├── offset-methodology.md             Sig scanning methodology
+│   ├── aimbot-math.md                    angles, FOV, prediction, recoil comp, smoothing
+│   ├── engine-cryengine.md               CryEngine family (Hunt: Showdown, Star Citizen, KCD)
+│   ├── engine-frostbite.md               Frostbite (Battlefield, FIFA, Anthem, Andromeda)
+│   ├── engine-re-engine.md               RE Engine (RE2/3/4, MH Rise/Wilds, SF6, DD2)
+│   └── engine-redengine.md               REDengine (Cyberpunk 2077, Witcher 3)
 │
 ├── installers/                       ── Analysis Suite Installers (Git LFS)
 │   ├── install.sh                        Full install — Linux / macOS / WSL
@@ -341,6 +358,7 @@ pcx-ai-toolkit/
 │
 ├── rules/                            ── Project Rules
 │   ├── CLAUDE.md                         Drop-in for Claude Code
+│   ├── CURSOR.md                         Drop-in `.cursorrules` for Cursor
 │   ├── AGENTS.md                         6 agent role definitions
 │   └── KARPATHY.md                       Work-discipline drop-in (4 principles)
 │
@@ -363,6 +381,8 @@ pcx-ai-toolkit/
 ├── templates/                       ── Starter Scripts
 │   ├── hello-world.em                    Minimal lifecycle + render
 │   ├── overlay-basic.em                  GUI menu + config-driven overlay
+│   ├── aimbot-skeleton.em                Closest-target-in-FOV with smoothing + RIP resolver
+│   ├── minimap.em                        Rotation-aware radar with rim clamping
 │   └── full-project/                     5-file project scaffold
 │
 ├── signatures/source-engine/         ── Signature Examples
@@ -377,6 +397,10 @@ pcx-ai-toolkit/
 │   ├── pe-section-analyzer.py           Entropy analysis, packing detection, anomaly flagging
 │   ├── resolve-api-hashes.py            Resolve API hashes (ROR13, CRC32, DJB2, FNV-1a, MurmurHash3, SDBM)
 │   ├── dump-strings-xor.py              Extract XOR-encrypted strings (brute-force single-byte keys)
+│   ├── offset-diff.py                   Diff named sigs between two binary versions (patch-day workflow)
+│   ├── sig-uniqueness-checker.py        Verdict per sig: UNIQUE / AMBIGUOUS / STALE / BRITTLE
+│   ├── pattern-format-converter.py      Round-trip patterns: IDA / Ghidra / x64dbg / CE / Enma / C
+│   ├── dumper-to-enma.py                Dumper-7 / IL2CPPDumper / hazedumper → offsets.em
 │   └── install-re-tools.sh              One-command installer: IDA/Ghidra plugins + Python packages
 ├── setup.sh                          One-command LSP + skills install
 ├── CONTRIBUTING.md                   Contribution guide

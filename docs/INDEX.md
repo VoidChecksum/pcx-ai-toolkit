@@ -123,6 +123,16 @@ Covers: Overview, Life Cycle, Engine, Proc API, Render API, GUI API, Input API, 
 | [`../knowledge/re-plugins-and-tools.md`](../knowledge/re-plugins-and-tools.md) | IDA/Ghidra plugins, FLIRT sigs, binary diffing, ret-sync |
 | [`../knowledge/obfuscation-taxonomy.md`](../knowledge/obfuscation-taxonomy.md) | Protector architecture: Themida, VMProtect, OLLVM, runtime techniques |
 | [`../knowledge/deobfuscation-tools.md`](../knowledge/deobfuscation-tools.md) | Deobfuscation tool reference (NoVmp, Triton, Miasm, D-810, ScyllaHide) |
+| [`../knowledge/aimbot-math.md`](../knowledge/aimbot-math.md) | Aimbot math: angles, FOV cone, prediction (linear + gravity), recoil compensation, smoothing |
+
+### Engine RE References
+
+| File | Description |
+|------|-------------|
+| [`../knowledge/engine-cryengine.md`](../knowledge/engine-cryengine.md) | CryEngine family (Hunt: Showdown, Star Citizen, Kingdom Come, Lumberyard / O3DE) — `gEnv`, entity system, camera math |
+| [`../knowledge/engine-frostbite.md`](../knowledge/engine-frostbite.md) | DICE/EA Frostbite (Battlefield, FC25/FIFA, Anthem, Andromeda, Need for Speed) — entity bus, manager chains, EAAC |
+| [`../knowledge/engine-re-engine.md`](../knowledge/engine-re-engine.md) | Capcom RE Engine (RE2/3/4 remakes, MH Rise/Wilds, SF6, DD2) — `via.*` reflected type system, REFramework |
+| [`../knowledge/engine-redengine.md`](../knowledge/engine-redengine.md) | CD Projekt Red REDengine (Cyberpunk 2077, Witcher 3) — RTTI, REDscript VM, RED4ext / CET parsing |
 
 ## Signatures & Reversal Guides
 
