@@ -13,7 +13,7 @@
 [![Lines](https://img.shields.io/badge/Doc%20Lines-34%2C000%2B-brightgreen.svg)](#documentation-coverage)
 [![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
 [![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
-[![Skills](https://img.shields.io/badge/AI%20Skills-16-yellow.svg)](#ai-skills)
+[![Skills](https://img.shields.io/badge/AI%20Skills-17-yellow.svg)](#ai-skills)
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
@@ -223,7 +223,7 @@ uv tool upgrade ida-pro-mcp
 <td width="50%" valign="top">
 
 ### AI Skills
-16 Claude Code / OMC skills
+17 Claude Code / OMC skills
 
 - **game-hacking-pcx** — doc index, API rules
 - **game-cheat-guidelines** — 12 behavioral rules (Enma)
@@ -231,6 +231,7 @@ uv tool upgrade ida-pro-mcp
 - **pcx-lua-discipline** — 10 Lua-specific rules (int subtype, `pcall`, hot-reload)
 - **pcx-coding-discipline** — Karpathy workflow: scripts
 - **pcx-re-discipline** — Karpathy workflow: RE
+- **pcx-debug-overlay** — diagnostic surfaces separate from production overlay
 - **ai-pair-programming** — workflow for driving Claude/Cursor/Cline/Aider/Copilot
 - **re-evidence-log** — every offset cites its proof (`E-NNN` cross-refs)
 - **pcx-patch-day-playbook** — ordered triage when the game updates
@@ -327,7 +328,7 @@ pcx-ai-toolkit/
 │       ├── angelscript/                  AngelScript APIs (23 files)
 │       └── lua/                          Lua APIs (17 files)
 │
-├── .claude/skills/                   ── AI Skills (16)
+├── .claude/skills/                   ── AI Skills (17)
 │   ├── game-hacking-pcx/                Doc index + coding rules
 │   ├── game-cheat-guidelines/           12 behavioral guidelines (Enma)
 │   ├── pcx-angelscript-discipline/      10 AS-specific rules
@@ -341,6 +342,7 @@ pcx-ai-toolkit/
 │   ├── script-bundler/                  Packaging + ship-day hygiene + .emb workflow
 │   ├── pcx-perf-budget/                 Frame-time targets + profiler recipe
 │   ├── pcx-streamproof/                 Capture-path taxonomy for OBS / Discord / cards
+│   ├── pcx-debug-overlay/               Diagnostic / profiler / status overlay (gated, read-only)
 │   ├── mcp-tool-routing/                Decision guide across the 37 Perception MCP tools
 │   ├── anti-cheat-re/                   Kernel AC RE methodology (6 steps)
 │   └── kernel-analysis/                 Driver analysis patterns (WDM/KMDF)
@@ -362,6 +364,7 @@ pcx-ai-toolkit/
 │   ├── engine-frostbite.md               Frostbite (Battlefield, FIFA, Anthem, Andromeda)
 │   ├── engine-godot.md                   Godot 3.x / 4.x (Brotato, Cassette Beasts, Halls of Torment)
 │   ├── engine-re-engine.md               RE Engine (RE2/3/4, MH Rise/Wilds, SF6, DD2)
+│   ├── network-protocol-re.md            Packet capture + dissection + wire-to-memory mapping
 │   └── engine-redengine.md               REDengine (Cyberpunk 2077, Witcher 3)
 │
 ├── installers/                       ── Analysis Suite Installers (Git LFS)
@@ -388,6 +391,8 @@ pcx-ai-toolkit/
 │   ├── claude-code-setup.md              Claude Code guide
 │   ├── cursor-setup.md                   Cursor guide
 │   ├── aider-setup.md                    Aider CLI integration (.aider.conf.yml, CONVENTIONS.md)
+│   ├── continue-setup.md                 Continue extension (VS Code / JetBrains) integration
+│   ├── zed-setup.md                      Zed editor MCP + agent panel setup
 │   ├── binary-analysis-setup.md          Binary analysis MCP reference
 │   ├── setup-binary-analysis.sh          MCP-only setup (if already installed)
 │   └── setup-binary-analysis.ps1         MCP-only setup — Windows
@@ -405,7 +410,8 @@ pcx-ai-toolkit/
 │   ├── overlay-basic.em                  GUI menu + config-driven overlay
 │   ├── aimbot-skeleton.em                Closest-target-in-FOV with smoothing + RIP resolver
 │   ├── minimap.em                        Rotation-aware radar with rim clamping
-│   └── full-project/                     5-file project scaffold
+│   ├── full-project/                     5-file Enma project scaffold
+│   └── full-project-as/                  3-file AngelScript scaffold (globals.as, feature.as, main.as)
 │
 ├── signatures/source-engine/         ── Signature Examples
 ├── signatures/unreal-engine/         ── UE Reversal (GWorld, GObjects, Dumper-7)
@@ -425,6 +431,7 @@ pcx-ai-toolkit/
 │   ├── sig-uniqueness-checker.py        Verdict per sig: UNIQUE / AMBIGUOUS / STALE / BRITTLE
 │   ├── pattern-format-converter.py      Round-trip patterns: IDA / Ghidra / x64dbg / CE / Enma / C
 │   ├── dumper-to-enma.py                Dumper-7 / IL2CPPDumper / hazedumper → offsets.em
+│   ├── binary-diff-summary.py           High-level diff between two PE versions (% changed, verdict)
 │   ├── evidence-log-validator.py        Cross-check offsets.em vs evidence/<hash>.md citations
 │   ├── script-linter.py                 Light 12-guidelines static check on .em files
 │   ├── pre-ship-check.sh                Pre-release hygiene checklist (12 checks, --json output)

@@ -2,6 +2,25 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.14.0] — 2026-06-17
+
+### Added
+- **1 new RE tool** in `tools/`:
+  - `binary-diff-summary.py` — high-level diff summary between two PE binaries (sister tool to `offset-diff.py`). Per-section table with `%SAME` / `%CHG` / `%NEW` / `%DEL` block counts (4 KB blocks, hash-based set comparison), `.text` classifier: `RECOMPILE` (>95% blocks identical → sigs likely survive, patch-day viable), `REFACTOR` (30-95% → many sigs break), `MAJOR_CHANGE` (<30% → full re-RE). Answers the patch-day prep question "how much did this binary actually change?" before you decide whether to patch or re-RE.
+- **1 new AI skill** under `.claude/skills/`:
+  - `pcx-debug-overlay` (330 lines) — the pattern for shipping diagnostic / profiler / address-dump info as a separate overlay routine gated behind a hotkey. 6 rules: two-overlays-always-separate, five-standard-sections (Process / Sigs / Runtime / Profile / Errors), hotkey-gated-off-by-default, read-only-diagnostics (lab features are separate), atomic counters for cross-routine state via `addon-atomic`, ship-two-builds (production + diagnostic via `#define BUILD_FLAVOR_DEBUG`). Cross-refs `pcx-perf-budget` (profiler recipe) and `gui-design-patterns` ("no debug panel by default").
+- **1 new knowledge reference** under `knowledge/`:
+  - `network-protocol-re.md` (296 lines) — packet-capture toolchain (Wireshark / tshark / mitmproxy / dumpcap / eBPF), message-boundary identification (length-prefixed / type-tagged / self-describing for TCP, sequence-numbered / type-prefixed / encrypted-blob for UDP), encoding scheme recognition (struct dump / length-prefixed strings / varint / protobuf-shaped / FlatBuffers / bit-packed / compressed), encryption recognition (TLS / DTLS / custom XOR / custom block cipher), wire-to-memory cross-referencing workflow, QUIC / HTTP3 capture options for modern AAA titles, Wireshark Lua dissector worked example. Authorized targets only — explicit scope callout to `skill://authorized-security-research`.
+- **1 new template scaffold** under `templates/`:
+  - `templates/full-project-as/` (4 files, 222 lines) — AngelScript parallel to the existing Enma `templates/full-project/`. `globals.as` (`proc_t@` handle, uint64 base/size, palette as 4 uint8s per AS draw API), `feature.as` (one tick callback combining update + read first / draws second), `main.as` (attach + resolve + `register_callback`, full `on_unload` deref cleanup per AS discipline rule #3), `README.md` documenting the differences from the Enma scaffold. Honors all 12 game-cheat-guidelines.
+- **2 new MCP setup guides** under `mcp/`:
+  - `zed-setup.md` (215 lines) — Zed editor integration (Rust-built AI-native editor, MCP via `context_servers` setting in `~/.config/zed/settings.json`, agent panel + `@file` references, Inline Assist, Edit Predictions, vim mode, multiplayer for pair-programming). Uses `mcp-remote` bridge to the authoritative HTTP MCP endpoint at `127.0.0.1:42069`.
+  - `continue-setup.md` (210 lines) — Continue extension integration (open-source AI for VS Code / JetBrains, model-agnostic, MCP servers via `config.yaml`'s `mcpServers` block, multi-model config — separate models for chat / autocomplete / inline edit, local-model support via Ollama / vLLM).
+
+### Changed
+- README.md — AI Skills badge `16` → `17`; tree, skills box, knowledge box, templates list, MCP setups list, tools list refreshed.
+- `docs/INDEX.md` — 1 new knowledge entry (`network-protocol-re.md`).
+
 ## [1.13.0] — 2026-06-17
 
 ### Added

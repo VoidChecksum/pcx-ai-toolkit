@@ -128,6 +128,7 @@ Covers: Overview, Life Cycle, Engine, Proc API, Render API, GUI API, Input API, 
 | [`../knowledge/script-organization-patterns.md`](../knowledge/script-organization-patterns.md) | Multi-file Enma project organization patterns (shared state, JSON persistence, utility extraction, dead-code policy) |
 | [`../knowledge/gui-design-patterns.md`](../knowledge/gui-design-patterns.md) | PCX sidebar GUI layout: section organization, widget order, slider ranges, hotkey conventions, color discipline, status visibility |
 | [`../knowledge/pcx-cross-language-bridge.md`](../knowledge/pcx-cross-language-bridge.md) | Enma vs AngelScript vs Lua decision guide (at-a-glance comparison, per-use-case routing, migration notes) |
+| [`../knowledge/network-protocol-re.md`](../knowledge/network-protocol-re.md) | Network protocol RE: packet capture, message-boundary identification, encoding/encryption recognition, wire-to-memory cross-referencing, QUIC/HTTP3 notes |
 
 ### Engine RE References
 
