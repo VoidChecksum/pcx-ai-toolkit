@@ -1,0 +1,35 @@
+# Changelog
+
+All notable changes to this toolkit are documented here.
+
+## [1.1.0] — 2025-06-17
+
+### Added
+- **Templates** — `hello-world.em`, `overlay-basic.em`, and a 5-file `full-project/` scaffold (globals, offsets, feature, menu, main), all following the 12 guidelines
+- `CONTRIBUTING.md`, `CHANGELOG.md`
+- GitHub community files: issue templates (bug, docs, feature), PR template, `FUNDING.yml`
+- Discussions enabled with welcome + roadmap threads
+- Social preview image (5120×2560)
+
+### Changed
+- Visual README redesign — badges, Perception banner, IDE screenshots, collapsible doc tables
+
+## [1.0.0] — 2025-06-17
+
+### Added
+- **Documentation** — 107/107 gitbook pages (34,032 lines): complete Enma language reference, all 18 standard library addons, full C++ SDK guide, and every Perception.cx API for Enma, AngelScript, and Lua
+- **AI Skills** — `game-hacking-pcx` (doc index + API rules) and `game-cheat-guidelines` (12 behavioral rules)
+- **Knowledge base** — Enma cheatsheet, PCX API cheatsheet, 13 working code patterns, offset methodology
+- **Rules** — drop-in `CLAUDE.md` and `AGENTS.md` (5 agent roles)
+- **MCP configs** — Perception.cx (42+ tools), Claude Code, and Cursor setup guides
+- **LSP servers** — enma-lsp and angel-lsp-pcx as git submodules, auto-built by `setup.sh`
+- **Signatures** — Source Engine methodology and example patterns
+- `setup.sh` one-command installer
+
+## Documentation Source Versions
+
+The `docs/` corpus is a snapshot of the upstream gitbooks. To refresh, re-download from:
+- Enma: `https://enma-1.gitbook.io/enma/llms.txt`
+- Perception.cx: `https://docs.perception.cx/perception/llms.txt`
+
+Last synced: **2025-06-17** — 107 pages.

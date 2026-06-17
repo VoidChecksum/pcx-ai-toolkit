@@ -188,6 +188,11 @@ pcx-ai-toolkit/
 │   ├── enma-lsp/                         Enma: completion + diagnostics
 │   └── angel-lsp-pcx/                   AngelScript: completion + diagnostics
 │
+├── templates/                       ── Starter Scripts
+│   ├── hello-world.em                    Minimal lifecycle + render
+│   ├── overlay-basic.em                  GUI menu + config-driven overlay
+│   └── full-project/                     5-file project scaffold
+│
 ├── signatures/source-engine/         ── Signature Examples
 │
 ├── setup.sh                          One-command install
@@ -433,6 +438,20 @@ Config: [`mcp/perception-mcp-config.json`](mcp/perception-mcp-config.json)
 | **Cline** | MCP config + system prompt | Use MCP config, paste CLAUDE.md |
 | **Perception IDE** | Native — built-in AI chat | Add `docs/` as workspace folder |
 | **Any OpenAI-compatible** | System prompt + docs | Paste `rules/CLAUDE.md` into prompt |
+
+---
+
+## Templates
+
+Ready-to-fill starter scripts, all following the 12 guidelines. See [`templates/`](templates/).
+
+| Template | What it demonstrates |
+|:---------|:---------------------|
+| [`hello-world.em`](templates/hello-world.em) | Minimal script — lifecycle, render routine, text drawing |
+| [`overlay-basic.em`](templates/overlay-basic.em) | GUI menu, config-driven rendering, update/render separation, input polling, FPS readout |
+| [`full-project/`](templates/full-project/) | 5-file scaffold: `globals` · `offsets` · `feature` · `menu` · `main` — one concern per file |
+
+Each is a correct skeleton: the structure and API calls are real, the offsets and read logic are placeholders you fill for your target.
 
 ---
 
