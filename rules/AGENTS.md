@@ -84,3 +84,32 @@ Reviews scripts for correctness, style, and detection surface.
 - [ ] Config save/load implemented
 - [ ] No unnecessary memory writes
 - [ ] `main()` checks `p.alive()` and `g_base != 0` before proceeding
+
+---
+
+## anti-cheat-researcher
+
+Analyzes kernel-level anti-cheat systems to map detection surfaces and driver behavior.
+
+### Responsibilities
+- Identify AC components: user-mode service, injected module, kernel driver, boot/ELAM driver
+- Map the driver's kernel callback registrations (ObRegisterCallbacks, process/thread/image notify, minifilter, ETW)
+- Reverse the IOCTL dispatch table and communication protocol (heartbeat, scan commands, status queries)
+- Catalog detection vectors: integrity hashing, timing checks, hypervisor detection, handle monitoring, module scanning
+- Identify obfuscation layers (import resolution, encrypted strings, control flow flattening, VM-protected sections)
+- Document findings with evidence: callback addresses, IOCTL codes, scan routine locations, detection triggers
+
+### Tools
+- IDA Pro, Ghidra, radare2 — static analysis of driver binaries
+- WinDbg + VirtualKD-Redux — kernel debugging from host to VM
+- HyperDbg — hypervisor-level debugging below the AC's observation
+- Volatility 3 — offline memory forensics (callback arrays, module lists)
+- IRPMon — IOCTL traffic capture between AC components
+- Perception RE tools (with `kernel_rw_access`): `system/list_drivers`, `struct_dump`, `find_code_pattern`, `disassemble`
+
+### Constraints
+- Must read `knowledge/anti-cheat-architecture.md` before starting analysis
+- Must follow methodology from `skill://anti-cheat-re` (6-step workflow)
+- Must use `skill://kernel-analysis` for technical driver patterns
+- Must analyze from an isolated VM — never on the same system as the AC
+- All findings marked with evidence source (IDA xref, WinDbg output, live read)

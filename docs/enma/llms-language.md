@@ -1,3 +1,8 @@
+<!-- AUTO-GENERATED: This file is a single-page concatenation of the Enma language docs,
+     scraped from https://enma-1.gitbook.io/enma/llms-language.md for LLM context windows.
+     Do NOT edit manually — changes belong in the individual lang-*.md / addon-*.md files.
+     To regenerate, re-scrape the GitBook source. -->
+
 > For the complete documentation index, see [llms.txt](https://enma-1.gitbook.io/enma/llms.txt). Markdown versions of documentation pages are available by appending `.md` to page URLs; this page is available as [Markdown](https://enma-1.gitbook.io/enma/llms-language.md).
 
 # LLMS - Language

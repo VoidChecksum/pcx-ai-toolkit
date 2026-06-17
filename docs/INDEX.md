@@ -8,6 +8,8 @@
 |------|-------|-------------|
 | [`enma/llms-language.md`](enma/llms-language.md) | 2,861 | **Complete language reference** — every feature, every addon, one file |
 | [`enma/llms-sdk.md`](enma/llms-sdk.md) | 832 | **Complete SDK reference** — embedding, type registration, native functions |
+| [`enma/readme.md`](enma/readme.md) | 137 | **Enma overview** — language intro and quick navigation |
+| [`enma/quick-access.md`](enma/quick-access.md) | 115 | **Quick access** — cross-reference links to all language features and addons |
 
 ### Language Guide (detailed breakdown)
 
@@ -115,7 +117,10 @@ Covers: Overview, Life Cycle, Engine, Proc API, Render API, GUI API, Input API, 
 | [`../knowledge/custom-draw-patterns.md`](../knowledge/custom-draw-patterns.md) | 8 Custom Draw API GPU rendering patterns |
 | [`../knowledge/offset-methodology.md`](../knowledge/offset-methodology.md) | Signature construction and pointer chain walking |
 | [`../knowledge/community-tools.md`](../knowledge/community-tools.md) | Community MCP servers, VS Code extensions, and utilities |
-| [`../knowledge/game-targets.md`](../knowledge/game-targets.md) | Complete game support reference (25+ games) |
+| [`../knowledge/game-targets.md`](../knowledge/game-targets.md) | Complete game support reference (29 games, with anti-cheat column) |
+| [`../knowledge/anti-cheat-architecture.md`](../knowledge/anti-cheat-architecture.md) | EAC/BattlEye/Vanguard/GameGuard/XIGNCODE3 architecture + detection matrix |
+| [`../knowledge/kernel-re-tools.md`](../knowledge/kernel-re-tools.md) | Kernel RE tool reference (WinDbg, HyperDbg, Volatility, PCILeech, etc.) |
+| [`../knowledge/re-plugins-and-tools.md`](../knowledge/re-plugins-and-tools.md) | IDA/Ghidra plugins, FLIRT sigs, binary diffing, ret-sync |
 
 ## Signatures & Reversal Guides
 
@@ -123,3 +128,6 @@ Covers: Overview, Life Cycle, Engine, Proc API, Render API, GUI API, Input API, 
 |------|-------------|
 | [`../signatures/source-engine/common-sigs.md`](../signatures/source-engine/common-sigs.md) | Source Engine example patterns (entity list, local player, view matrix) |
 | [`../signatures/unreal-engine/ue-reversal-guide.md`](../signatures/unreal-engine/ue-reversal-guide.md) | Unreal Engine reversal (GWorld/GObjects/GNames, Dumper-7, key structures) |
+| [`../signatures/anti-cheat/common-ac-patterns.md`](../signatures/anti-cheat/common-ac-patterns.md) | Anti-cheat driver identification and callback patterns |
+| [`../signatures/unity-il2cpp/il2cpp-patterns.md`](../signatures/unity-il2cpp/il2cpp-patterns.md) | Unity IL2CPP reversal (metadata dumping, static fields, GC handles) |
+| [`../signatures/source2-engine/source2-patterns.md`](../signatures/source2-engine/source2-patterns.md) | Source 2 reversal (schema system, entity system, view matrix) |

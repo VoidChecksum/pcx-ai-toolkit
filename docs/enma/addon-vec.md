@@ -112,7 +112,7 @@ float64 e3 = ease_in_out(t);             // quadratic in-out
 bool ok = approx_eq(a, b, eps);          // |a-b| <= eps
 ```
 
-For quaternions and 4×4 matrices see [3D Math](/enma/addons/math3d.md). For scalar math (`sin`, `cos`, `sqrt`, `pow`, ...) see [Math](/enma/addons/math.md).
+For quaternions and 4×4 matrices see [3D Math](addon-math3d.md). For scalar math (`sin`, `cos`, `sqrt`, `pow`, ...) see [Math](addon-math.md).
 
 
 ---

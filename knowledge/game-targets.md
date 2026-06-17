@@ -6,57 +6,57 @@ Every game with active scripts in the Perception.cx Script Market (as of June 20
 
 ## FPS / Battle Royale
 
-| Game | Engine | Scripts | Notable | Lang |
-|------|--------|---------|---------|------|
-| Counter-Strike 2 | Source 2 | 10+ | Official + community suite | AS, Lua |
-| Apex Legends | Source (Respawn) | 5+ | UFOHOOK, ATLAS, ARIEngine | AS |
-| COD: Black Ops 7 / Warzone | IW Engine | 2+ | — | AS |
-| Fortnite | Unreal Engine | 1+ | — | AS |
-| PUBG (Steam) | Unreal Engine | 2+ | — | AS |
-| Overwatch / Overwatch 2 | Custom | 3+ | — | AS |
-| The Finals | Embark / Theia | 2+ | — | AS |
-| Deadlock | Source 2 | 2+ | — | AS |
-| Arena Breakout Infinite | Unity | 3+ | — | AS |
-| BloodStrike | Unreal Engine | 1+ | — | AS |
-| Farlight 84 | Unreal Engine | 1+ | — | AS |
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| Counter-Strike 2 | Source 2 | 10+ | VAC | Official + community suite | AS, Lua |
+| Apex Legends | Source (Respawn) | 5+ | EAC (EOS) | UFOHOOK, ATLAS, ARIEngine | AS |
+| COD: Black Ops 7 / Warzone | IW Engine | 2+ | RICOCHET | — | AS |
+| Fortnite | Unreal Engine | 1+ | EAC (EOS) | — | AS |
+| PUBG (Steam) | Unreal Engine | 2+ | BattlEye | — | AS |
+| Overwatch / Overwatch 2 | Custom | 3+ | Custom (Blizzard) | — | AS |
+| The Finals | Embark / Theia | 2+ | EAC + Theia | — | AS |
+| Deadlock | Source 2 | 2+ | VAC | — | AS |
+| Arena Breakout Infinite | Unity | 3+ | EAC (EOS) | — | AS |
+| BloodStrike | Unreal Engine | 1+ | EAC | — | AS |
+| Farlight 84 | Unreal Engine | 1+ | EAC | — | AS |
 
 ## Survival / Open World
 
-| Game | Engine | Scripts | Notable | Lang |
-|------|--------|---------|---------|------|
-| Escape from Tarkov | Unity | 1+ | Official | AS |
-| Rust | Unity | 2+ | — | AS |
-| DayZ | Enfusion | 1+ | — | AS |
-| Scum | Unreal Engine | 1+ | — | AS |
-| Ark: Survival Evolved | Unreal Engine | 1+ | — | AS |
-| The Isle: Evrima | Unreal Engine | 1+ | — | AS |
-| Dark and Darker | Unreal Engine | SDK | SDK available | AS |
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| Escape from Tarkov | Unity | 1+ | BattlEye | Official | AS |
+| Rust | Unity | 2+ | EAC (EOS) | — | AS |
+| DayZ | Enfusion | 1+ | BattlEye | — | AS |
+| Scum | Unreal Engine | 1+ | EAC | — | AS |
+| Ark: Survival Evolved | Unreal Engine | 1+ | BattlEye | — | AS |
+| The Isle: Evrima | Unreal Engine | 1+ | EAC | — | AS |
+| Dark and Darker | Unreal Engine | SDK | EAC (EOS) | SDK available | AS |
 
 ## Tactical / Team
 
-| Game | Engine | Scripts | Notable | Lang |
-|------|--------|---------|---------|------|
-| Rainbow Six Siege | AnvilNext | 1+ | Private | AS |
-| Hunt: Showdown 1896 | CryEngine | 2+ | — | AS |
-| Marvel Rivals | Unreal Engine | 2+ | — | AS |
-| The Division 2 | Snowdrop | 1+ | — | AS |
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| Rainbow Six Siege | AnvilNext | 1+ | BattlEye | Private | AS |
+| Hunt: Showdown 1896 | CryEngine | 2+ | EAC (EOS) | — | AS |
+| Marvel Rivals | Unreal Engine | 2+ | EAC (EOS) | — | AS |
+| The Division 2 | Snowdrop | 1+ | EAC | — | AS |
 
 ## Horror / Other
 
-| Game | Engine | Scripts | Notable | Lang |
-|------|--------|---------|---------|------|
-| Dead by Daylight | Unreal Engine | 1+ | Official, Featured | AS |
-| Chivalry 2 | Unreal Engine | 1+ | — | AS |
-| Far Far West | Unknown | 1+ | — | AS |
-| KovaaK's | Unreal Engine | 1+ | Aim trainer | AS |
-| GeoGuessr | Web / Steam | 1+ | — | AS |
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| Dead by Daylight | Unreal Engine | 1+ | EAC (EOS) | Official, Featured | AS |
+| Chivalry 2 | Unreal Engine | 1+ | EAC | — | AS |
+| Far Far West | Unknown | 1+ | Unknown | — | AS |
+| KovaaK's | Unreal Engine | 1+ | None | Aim trainer | AS |
+| GeoGuessr | Web / Steam | 1+ | None | — | AS |
 
 ## Modded / Custom Clients
 
-| Game | Engine | Scripts | Notable | Lang |
-|------|--------|---------|---------|------|
-| GTA V (RAGE:MP / ALT:V) | RAGE | 1+ | Multiplayer mods | AS |
-| Roblox | Custom | 1+ | Official | AS |
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| GTA V (RAGE:MP / ALT:V) | RAGE | 1+ | None (mod client) | Multiplayer mods | AS |
+| Roblox | Custom | 1+ | Byfron (Hyperion) | Official | AS |
 
 **Total: 29 supported games.**
 

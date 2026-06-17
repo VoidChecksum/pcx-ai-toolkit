@@ -112,9 +112,9 @@ Matches or beats LuaJIT on 5/6 workloads (only bubble trails).
 
 ### Getting Started
 
-Writing scripts: [basics](/enma/language-guide/basics.md)
+Writing scripts: [basics](lang-basics.md)
 
-Embedding: [SDK Quick Start](/enma/sdk-guide/quick-start.md)
+Embedding: [SDK Quick Start](sdk-quick-start.md)
 
 
 ---

@@ -119,7 +119,7 @@ These produce a compile error, not a runtime fault:
 
 These are caught at runtime and reported via `execute()` returning `false`:
 
-* Null deref on array or struct pointer (script-catchable via `try`/`catch (string e)` when using `->`; see [Catching null-pointer dereferences](/enma/language-guide/advanced.md#catching-null-pointer-dereferences))
+* Null deref on array or struct pointer (script-catchable via `try`/`catch (string e)` when using `->`; see [Catching null-pointer dereferences](lang-advanced.md#catching-null-pointer-dereferences))
 * Out-of-bounds array subscript (positive or negative index)
 * Access to a freed array
 * Division by zero

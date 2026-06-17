@@ -2,6 +2,52 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.8.0] — 2026-06-17
+
+### Fixed
+- **100 broken internal links** — all Enma docs used GitBook-style absolute paths (`/enma/addons/vec.md`, `/enma/language-guide/basics.md`, etc.) that didn't resolve after files were flattened to `addon-vec.md`, `lang-basics.md` prefixed names. Built a 59-entry path mapping and batch-fixed every cross-reference across 22 files.
+- **`docs/INDEX.md` out of sync** — 44 docs missing from the index (AngelScript, Lua, 2 new Enma files, new knowledge/signature docs); 9 entries had wrong relative paths. Rebuilt with all files.
+- **README claimed "107 pages, 34,000+ lines"** — actual is 110 pages, 35,000+ lines. Updated both claims and the CI threshold.
+
+### Added
+- **CI link checker** — new workflow step validates all internal markdown links on every push/PR. Strips code fences to avoid false positives. Prevents the broken-link class of bug from recurring.
+- **`signatures/unity-il2cpp/il2cpp-patterns.md`** — IL2CPP reversal patterns: metadata dumping with Il2CppDumper, static field access via GC handle table, entity/camera/transform struct patterns, Perception integration example. Covers Tarkov, Rust, Arena Breakout Infinite.
+- **`signatures/source2-engine/source2-patterns.md`** — Source 2 reversal patterns: schema system resolution (field offsets are runtime, not hardcoded), entity list chunked iteration, view matrix W2S, key schema classes for CS2 (CCSPlayerPawn, CCSPlayerController, CGameSceneNode, CSkeletonInstance). Covers CS2 and Deadlock.
+- **`.editorconfig`** — enforces UTF-8, 2-space indent, LF line endings (CRLF for `.ps1`/`.bat`), final newline across all contributors' editors.
+
+### Changed
+- **`docs/enma/llms-language.md`** — added `<!-- AUTO-GENERATED -->` header clarifying this is a scraped concatenation of the individual `lang-*.md` / `addon-*.md` files, not to be edited manually.
+- **CI doc count threshold** — 107 → 110 to match actual page count.
+
+## [1.7.0] — 2026-06-17
+
+### Added
+- **Kernel anti-cheat RE skills** — two AI skills for reversing kernel-level anti-cheat systems:
+  - `anti-cheat-re` — six-step methodology: map the component stack, catalog kernel callbacks, trace driver↔user-mode communication, identify detection scans, analyze from below the AC's observation layer, verify against live behavior
+  - `kernel-analysis` — technical patterns for driver binary analysis: WDM/KMDF identification, IOCTL dispatch table extraction with `CTL_CODE` decoding, kernel callback structures (ObRegisterCallbacks, Ps* notify, minifilter, ETW TI), integrity check patterns (hashing, RDTSC, CPUID, module walks), obfuscation layers (import resolution, encrypted strings, CFG, VMProtect), shared memory communication
+- **`knowledge/anti-cheat-architecture.md`** — architecture reference for EAC, BattlEye, Vanguard, GameGuard, XIGNCODE3, and Theia: components, driver behavior, communication protocols, detection technique matrix (16 techniques × 5 ACs), AC-by-game mapping for all 29 PCX-supported titles
+- **`knowledge/kernel-re-tools.md`** — tool reference for kernel RE: static analysis (IDA, Ghidra, r2, Binary Ninja), kernel debugging (WinDbg, VirtualKD-Redux, HyperDbg, QEMU+GDB), memory forensics (Volatility 3, MemProcFS, PCILeech), runtime monitoring (Process Monitor, IRPMon, API Monitor), driver dev/test (WDK, OSR Driver Loader), Perception.cx kernel integration
+- **`signatures/anti-cheat/common-ac-patterns.md`** — byte patterns for AC driver identification: driver file names, device name strings, callback registration call sites, dynamic import resolution (MmGetSystemRoutineAddress, hash-based), integrity check patterns (RDTSC pairs, CPUID hypervisor detection)
+- **`anti-cheat-researcher` agent role** — added to `rules/AGENTS.md` for kernel AC analysis workflows
+- **`knowledge/re-plugins-and-tools.md`** — complete reference for the installed RE toolkit: 6 IDA plugins (hrtng, CodeXplorer, ClassInformer, SigMakerEx, FIRST, RevEng.AI), 4 Ghidra extensions (GhidrAssist, BinDiffHelper, OOAnalyzer, RevEng.AI), 3 FLIRT sig databases (51 MSVC v15 sigs), Diaphora + BinDiff for cross-patch diffing, ret-sync debugger↔disassembler sync, r5sdk (2438 headers). Includes first-load, post-patch, and live-debug workflows.
+
+### Changed
+- **`knowledge/game-targets.md`** — added Anti-Cheat column to all game tables (EAC, BattlEye, Vanguard, RICOCHET, Byfron, VAC, custom, none)
+- **`knowledge/community-tools.md`** — added "Kernel RE & Anti-Cheat Analysis Tools" section (HyperDbg, Volatility 3, MemProcFS, IRPMon, VirtualKD-Redux, PCILeech)
+- README — AI Skills count 4 → 6, directory tree + detail sections for all new content, agent count 5 → 6
+- **`game-hacking-pcx` skill** — expanded RE Tools section with cross-references to all new knowledge docs (plugins, AC architecture, kernel tools, AC patterns)
+
+## [1.6.0] — 2026-06-17
+
+### Added
+- **Karpathy work-discipline skills** — two AI skills derived from the four Karpathy principles, rewritten for PCX: `pcx-coding-discipline` (think → simplify → surgical → verify, for writing scripts) and `pcx-re-discipline` (the same loop for reverse engineering and offset maintenance). These are the *process* layer; `game-cheat-guidelines` stays the *code-shape* layer.
+- **`rules/KARPATHY.md`** — drop-in work-discipline rules (the four principles condensed to one screen), companion to `rules/CLAUDE.md`.
+
+### Changed
+- `setup.sh` / `setup.ps1` — install skills by globbing `.claude/skills/*/` instead of a hardcoded name list, so new skills install automatically and can't be silently omitted.
+- `rules/CLAUDE.md` — added a "Work Discipline (Karpathy)" section linking the new rules and skills.
+- README — AI Skills count 2 → 4, with the two new skills in the directory tree and AI Skills section, and `KARPATHY.md` in Project Rules.
+
 ## [1.5.0] — 2026-06-17
 
 ### Added

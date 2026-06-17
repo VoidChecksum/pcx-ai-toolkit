@@ -186,7 +186,7 @@ delete n;
 
 `T x = new T();` is a compile error, pick stack (`T x;`) or heap (`T* x = new T();`). `delete` on a non-pointer is a compile error. `delete null;` and double-delete are no-ops.
 
-See [Pointers](/enma/language-guide/pointers.md) for the full pointer reference.
+See [Pointers](lang-pointers.md) for the full pointer reference.
 
 Two flavours of heap array:
 
@@ -205,9 +205,9 @@ Point* ps = new Point[10](3, 4);    // every element constructed with (3, 4)
 delete[] ps;
 ```
 
-`T[] arr` is a growable, subscript-safe array with scope-drop cleanup. `T* p = new T[N]` is a raw contiguous block with per-element ctor/dtor and manual `delete[]`. Args after the size (`new T[N](args)`) are passed to each element's ctor; args are evaluated once, not N times. See [Structs & Classes](/enma/language-guide/structs-and-classes.md#contiguous-heap-arrays).
+`T[] arr` is a growable, subscript-safe array with scope-drop cleanup. `T* p = new T[N]` is a raw contiguous block with per-element ctor/dtor and manual `delete[]`. Args after the size (`new T[N](args)`) are passed to each element's ctor; args are evaluated once, not N times. See [Structs & Classes](lang-structs-and-classes.md#contiguous-heap-arrays).
 
-Use `p->field` for pointers, `p.field` for value structs. See [Lifecycle & RAII](/enma/sdk-guide/lifecycle.md).
+Use `p->field` for pointers, `p.field` for value structs. See [Lifecycle & RAII](sdk-lifecycle.md).
 
 ### Nested arrays
 

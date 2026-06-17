@@ -4,7 +4,7 @@
 
 All win natives are auto-registered into every loaded script.
 
-This API **sends** input and reads window state. For state polling (mouse position, key down/up etc.), see [Input API](/perception/enma/input-api.md).
+This API **sends** input and reads window state. For state polling (mouse position, key down/up etc.), see [Input API](input-api.md).
 
 `HWND` is exposed as raw `int64`. OS-owned; if the window disappears, subsequent calls reject via `IsWindow()`.
 

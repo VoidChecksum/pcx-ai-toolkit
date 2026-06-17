@@ -29,22 +29,22 @@ Enma is perception's proprietary full-module AOT and JIT-compiled scripting lang
 
 #### **Perception API**
 
-* [Lifecycle and Routines](/perception/enma/lifecycle-and-routines.md)
-* [Render](/perception/enma/render-api.md)
-* [Proc](/perception/enma/proc-api.md)
-* [CPU](/perception/enma/cpu-api.md)
-* [Filesystem](/perception/enma/filesystem-api.md)
-* [Sound](/perception/enma/sound-api.md)
-* [Zydis](/perception/enma/zydis-api.md)
-* [Win](/perception/enma/win-api.md)
-* [Input](/perception/enma/input-api.md)
-* [Unicorn](/perception/enma/unicorn-api.md)
-* [Net](/perception/enma/net-api.md)
-* [GUI](/perception/enma/gui-api.md)
+* [Lifecycle and Routines](lifecycle-and-routines.md)
+* [Render](render-api.md)
+* [Proc](proc-api.md)
+* [CPU](cpu-api.md)
+* [Filesystem](filesystem-api.md)
+* [Sound](sound-api.md)
+* [Zydis](zydis-api.md)
+* [Win](win-api.md)
+* [Input](input-api.md)
+* [Unicorn](unicorn-api.md)
+* [Net](net-api.md)
+* [GUI](gui-api.md)
 
 #### AI agent surface
 
-* [MCP](/perception/enma/mcp-api.md) — JSON-RPC over local TCP / HTTP for Claude Code, Cline, etc.
+* [MCP](mcp-api.md) — JSON-RPC over local TCP / HTTP for Claude Code, Cline, etc.
 
 ## Minimal example
 
@@ -67,7 +67,7 @@ int64 main() {
 }
 ```
 
-See [Lifecycle and Routines](/perception/enma/lifecycle-and-routines.md) for the entry point, return-value semantics, and how routines tick.
+See [Lifecycle and Routines](lifecycle-and-routines.md) for the entry point, return-value semantics, and how routines tick.
 
 ## Conventions
 

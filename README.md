@@ -13,7 +13,7 @@
 [![Lines](https://img.shields.io/badge/Doc%20Lines-34%2C000%2B-brightgreen.svg)](#documentation-coverage)
 [![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
 [![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
-[![Skills](https://img.shields.io/badge/AI%20Skills-2-yellow.svg)](#ai-skills)
+[![Skills](https://img.shields.io/badge/AI%20Skills-6-yellow.svg)](#ai-skills)
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
@@ -211,7 +211,7 @@ uv tool upgrade ida-pro-mcp
 <td width="50%" valign="top">
 
 ### Documentation
-107 pages, 34,000+ lines
+110 pages, 35,000+ lines
 
 - Complete Enma language spec
 - All 18 standard library addons
@@ -223,10 +223,14 @@ uv tool upgrade ida-pro-mcp
 <td width="50%" valign="top">
 
 ### AI Skills
-2 Claude Code / OMC skills
+6 Claude Code / OMC skills
 
 - **game-hacking-pcx** — doc index, API rules
 - **game-cheat-guidelines** — 12 behavioral rules
+- **pcx-coding-discipline** — Karpathy workflow: scripts
+- **pcx-re-discipline** — Karpathy workflow: RE
+- **anti-cheat-re** — kernel AC methodology
+- **kernel-analysis** — driver analysis patterns
 
 Auto-trigger on `.em`/`.as` work and PCX topics
 
@@ -294,7 +298,7 @@ MCP + LSP + Rules
 ```
 pcx-ai-toolkit/
 │
-├── docs/                             107 pages of documentation
+├── docs/                             110 pages of documentation
 │   ├── enma/                         ── Enma language, addons, SDK (50 files)
 │   │   ├── llms-language.md              Complete language reference (2,861 lines)
 │   │   ├── llms-sdk.md                   Complete SDK reference (832 lines)
@@ -309,12 +313,19 @@ pcx-ai-toolkit/
 │
 ├── .claude/skills/                   ── AI Skills
 │   ├── game-hacking-pcx/                Doc index + coding rules
-│   └── game-cheat-guidelines/           12 behavioral guidelines
+│   ├── game-cheat-guidelines/           12 behavioral guidelines
+│   ├── pcx-coding-discipline/           Karpathy workflow — writing scripts
+│   ├── pcx-re-discipline/               Karpathy workflow — reverse engineering
+│   ├── anti-cheat-re/                   Kernel AC RE methodology (6 steps)
+│   └── kernel-analysis/                 Driver analysis patterns (WDM/KMDF)
 │
 ├── knowledge/                        ── Quick References
 │   ├── enma-cheatsheet.md                Language quick-ref card
 │   ├── pcx-api-cheatsheet.md             All APIs at a glance
+│   ├── anti-cheat-architecture.md        EAC/BE/Vanguard/GG architecture + detection matrix
+│   ├── kernel-re-tools.md                Kernel RE tool reference (WinDbg, HyperDbg, Volatility, etc.)
 │   ├── common-patterns.md                13 working code recipes
+│   ├── re-plugins-and-tools.md           IDA/Ghidra plugins, FLIRT sigs, diffing, ret-sync
 │   └── offset-methodology.md             Sig scanning methodology
 │
 ├── installers/                       ── Analysis Suite Installers (Git LFS)
@@ -330,7 +341,8 @@ pcx-ai-toolkit/
 │
 ├── rules/                            ── Project Rules
 │   ├── CLAUDE.md                         Drop-in for Claude Code
-│   └── AGENTS.md                         5 agent role definitions
+│   ├── AGENTS.md                         6 agent role definitions
+│   └── KARPATHY.md                       Work-discipline drop-in (4 principles)
 │
 ├── mcp/                              ── MCP Configs
 │   ├── perception-mcp-config.json        42+ tool definitions
@@ -354,6 +366,10 @@ pcx-ai-toolkit/
 │   └── full-project/                     5-file project scaffold
 │
 ├── signatures/source-engine/         ── Signature Examples
+├── signatures/unreal-engine/         ── UE Reversal (GWorld, GObjects, Dumper-7)
+├── signatures/anti-cheat/            ── AC Driver Patterns (EAC, BE, Vanguard, callbacks)
+├── signatures/unity-il2cpp/          ── IL2CPP Patterns (metadata, static fields, schemas)
+├── signatures/source2-engine/        ── Source 2 Patterns (schema system, entity list, W2S)
 │
 ├── setup.sh                          One-command LSP + skills install
 ├── CONTRIBUTING.md                   Contribution guide
@@ -514,6 +530,22 @@ Contains: file-by-file index of all 107 docs, critical Enma type rules, address 
 
 Each rule includes wrong/right code examples using real Perception.cx APIs.
 
+### `pcx-coding-discipline` — Karpathy Workflow for Writing Scripts
+
+The four Karpathy principles rewritten for script development: state the target and tradeoff before coding, ship the simplest feature that works, keep edits to one feature per diff, and define "done" as visible success criteria on the live target — not "it compiles."
+
+### `pcx-re-discipline` — Karpathy Workflow for Reverse Engineering
+
+The same four principles for offset work: hypothesize and cite evidence before trusting a field, find the shortest unique signature, re-verify only what a patch broke, and trust live memory over a stale SDK. The discipline layer above `game-cheat-guidelines`' code-shape rules.
+
+### `anti-cheat-re` — Kernel Anti-Cheat RE Methodology
+
+Six-step workflow for reversing kernel-level anti-cheat systems (EAC, BattlEye, Vanguard, GameGuard, XIGNCODE3): map the component stack, catalog every kernel callback, trace the driver↔user-mode communication channel, identify what the AC actually scans for, analyze from below the AC's observation layer, and verify findings against live behavior.
+
+### `kernel-analysis` — Driver Analysis Patterns
+
+Technical patterns for reversing Windows kernel drivers: identify WDM vs KMDF, extract the IOCTL dispatch table and decode `CTL_CODE`, enumerate registered kernel callbacks with structures and WinDbg commands, analyze integrity check routines (hashing, RDTSC timing, CPUID hypervisor detection, unsigned driver scanning), decode obfuscation layers (import resolution, encrypted strings, control flow flattening, VMProtect), and reconstruct shared memory communication channels.
+
 ---
 
 ## Knowledge Base
@@ -554,6 +586,21 @@ Every function signature across all 13 Perception.cx APIs: Proc, Render, GUI, In
 > `knowledge/offset-methodology.md` — 130 lines
 
 Pattern scanning, wildcard strategy, RIP-relative resolution table, pointer chain walking, struct_dump discovery, IDA/Ghidra cross-referencing, offset table format, patch stability analysis.
+
+### Anti-Cheat Architecture
+> `knowledge/anti-cheat-architecture.md`
+
+Per-AC architecture reference (EAC, BattlEye, Vanguard, GameGuard, XIGNCODE3, Theia): components, driver behavior, communication protocols, known detection vectors, detection technique matrix. Includes AC-by-game mapping for all PCX-supported titles.
+
+### Kernel RE Tools
+> `knowledge/kernel-re-tools.md`
+
+Tool reference for kernel-level RE: static analysis (IDA, Ghidra, r2), kernel debugging (WinDbg, VirtualKD-Redux, HyperDbg), memory forensics (Volatility 3, MemProcFS, PCILeech), runtime monitoring (Process Monitor, IRPMon), driver development/testing (WDK, OSR Driver Loader), and Perception.cx kernel integration.
+
+### RE Plugins & Tools
+> `knowledge/re-plugins-and-tools.md`
+
+Complete reference for the installed RE toolkit: 6 IDA plugins (hrtng deobfuscation, CodeXplorer vtable recovery, ClassInformer RTTI, SigMakerEx pattern generation, FIRST function fingerprints, RevEng.AI similarity), 4 Ghidra extensions (GhidrAssist LLM integration, BinDiffHelper, OOAnalyzer C++ recovery, RevEng.AI), 3 FLIRT signature databases (51 pre-selected MSVC v15 sigs), Diaphora + BinDiff for cross-patch analysis, ret-sync for live debugger↔disassembler sync, and 2,438 reversed r5sdk headers.
 
 </td>
 </tr>
@@ -668,9 +715,13 @@ Copy into any PCX scripting project. Covers:
 - The 12 guidelines in one-line form
 - Recommended file structure
 
+### `rules/KARPATHY.md` — Work-Discipline Drop-In
+
+Companion to `CLAUDE.md`. Where `CLAUDE.md` covers *what the code looks like*, this covers *how to work*: the four Karpathy principles (think before coding, simplicity first, surgical changes, goal-driven execution) condensed to one screen and framed for cheat development. Copy both into your project.
+
 ### `rules/AGENTS.md` — Multi-Agent Role Definitions
 
-Five specialist roles for orchestrated workflows:
+Six specialist roles for orchestrated workflows:
 
 | Agent | Responsibility |
 |:------|:---------------|
@@ -679,6 +730,7 @@ Five specialist roles for orchestrated workflows:
 | **offset-maintainer** | Post-patch offset table updates and verification |
 | **feature-builder** | Feature implementation using common patterns |
 | **reviewer** | Correctness, style, and detection surface review |
+| **anti-cheat-researcher** | Kernel AC analysis, callback mapping, driver RE |
 
 ---
 

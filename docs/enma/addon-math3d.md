@@ -2,7 +2,7 @@
 
 # 3D Math (quat + mat4)
 
-`quat` and `mat4` are value-type structs in the `math` addon (same registration as [Vectors](/enma/addons/vec.md) and [Math](/enma/addons/math.md)). Register with `register_addon_math(engine)` on the host side and `import "math";` in your script if needed.
+`quat` and `mat4` are value-type structs in the `math` addon (same registration as [Vectors](addon-vec.md) and [Math](addon-math.md)). Register with `register_addon_math(engine)` on the host side and `import "math";` in your script if needed.
 
 * `quat` — unit quaternion, 32 bytes, four `float64` fields (`x`, `y`, `z`, `w`). `w` is the scalar.
 * `mat4` — 4×4 row-major matrix, 128 bytes, 16 `float64` fields named `m00` … `m33`.
@@ -155,7 +155,7 @@ vec3 facing = current.rotate(vec3(0.0, 0.0, 1.0));
 
 ## Notes
 
-* All angles are radians. Use `deg_to_rad` / `rad_to_deg` from [Vectors](/enma/addons/vec.md#scalar-helpers) to convert.
+* All angles are radians. Use `deg_to_rad` / `rad_to_deg` from [Vectors](addon-vec.md#scalar-helpers) to convert.
 * `mat4_perspective` uses right-handed coordinates and OpenGL-style depth (`z` clipped to `[-1, 1]` after perspective divide). Direct3D conventions need the depth row tweaked.
 * `mat4.inverse()` returns the identity when the matrix is singular (zero determinant). Check `m.determinant() != 0.0` if your code can produce non-invertible matrices.
 * Quaternion multiplication is non-commutative: `a * b != b * a` in general. `a * b` means "rotate by `b` first, then by `a`".

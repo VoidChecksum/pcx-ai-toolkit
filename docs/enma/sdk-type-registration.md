@@ -6,7 +6,7 @@
 
 ## Descriptions
 
-Every hook that takes a signature or name also takes an optional trailing `const char* description`. These surface via [`extract_documentation`](/enma/sdk-guide/introspection.md) and `extract_intellisense` for IDE tooling and auto-generated docs.
+Every hook that takes a signature or name also takes an optional trailing `const char* description`. These surface via [`extract_documentation`](sdk-introspection.md) and `extract_intellisense` for IDE tooling and auto-generated docs.
 
 ```cpp
 type_builder(e, "color", type_id::t_int64, "RGBA color, 8 bits per channel")

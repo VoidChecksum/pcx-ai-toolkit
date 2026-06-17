@@ -192,7 +192,7 @@ If the return expression is a temporary (`return T(args);` or `return new T();`)
 
 ### `[[noescape]]`
 
-Enforces no allocation in the function escapes. Most escape patterns are already compile errors without it. See [Annotations](/enma/language-guide/annotations.md).
+Enforces no allocation in the function escapes. Most escape patterns are already compile errors without it. See [Annotations](lang-annotations.md).
 
 ## For addon authors
 
@@ -200,11 +200,11 @@ Enforces no allocation in the function escapes. Most escape patterns are already
 2. Mark `.pure_methods()` for container-like types (methods don't retain receiver).
 3. Mark `.pure_args()` for value/math types (methods don't retain any arg).
 
-See [Type Registration](/enma/sdk-guide/type-registration.md) and [Custom Addons](/enma/sdk-guide/custom-addons.md).
+See [Type Registration](sdk-type-registration.md) and [Custom Addons](sdk-custom-addons.md).
 
 ## Measured impact
 
-Heavy-loop stress (1000 arrays in a loop): 2000 alloc, 2000 freed, 0 live. See [README](/enma/readme.md) for bench numbers.
+Heavy-loop stress (1000 arrays in a loop): 2000 alloc, 2000 freed, 0 live. See [README](readme.md) for bench numbers.
 
 
 ---

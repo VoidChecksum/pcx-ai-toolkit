@@ -4,7 +4,7 @@
 
 Perception's MCP server exposes the proc-API surface as JSON-RPC tools that any [Model Context Protocol](https://modelcontextprotocol.io/) client (Claude Code, Cline, Continue, ...) can call.
 
-Writing an Enma script? Use [Proc](/perception/enma/proc-api.md) / [CPU](/perception/enma/cpu-api.md) / [Zydis](/perception/enma/zydis-api.md) directly. Driving perception from an AI agent? Enable MCP.
+Writing an Enma script? Use [Proc](proc-api.md) / [CPU](cpu-api.md) / [Zydis](zydis-api.md) directly. Driving perception from an AI agent? Enable MCP.
 
 ## Enable
 
@@ -52,7 +52,7 @@ Most tools need a `handle` from `process/reference_by_pid` / `_by_name`. Handles
 
 ## Permissions
 
-Shared with [enma](/perception/enma/proc-api.md#permissions). Toggle in **Scripting → API permissions**:
+Shared with [enma](proc-api.md#permissions). Toggle in **Scripting → API permissions**:
 
 | Flag                        | Gates                                                                                                                                                                                                                |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

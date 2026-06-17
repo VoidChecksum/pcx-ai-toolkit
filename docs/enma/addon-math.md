@@ -2,7 +2,7 @@
 
 # Math
 
-Registered with `register_addon_math(engine)`. This addon also defines the [vec2/vec3/vec4](/enma/addons/vec.md) and [quat / mat4](/enma/addons/math3d.md) types — all math types live under the same addon registration.
+Registered with `register_addon_math(engine)`. This addon also defines the [vec2/vec3/vec4](addon-vec.md) and [quat / mat4](addon-math3d.md) types — all math types live under the same addon registration.
 
 ## Trigonometry
 

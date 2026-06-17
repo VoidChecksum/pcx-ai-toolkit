@@ -32,7 +32,7 @@ auto y = x + 1;
 nullable int32 n = null;
 ```
 
-`const` prevents reassignment. `constexpr` evaluates at compile time and folds into the IR as a literal — see [Compile-Time Evaluation](/enma/language-guide/advanced.md#compile-time-evaluation) for what's foldable and how to write `constexpr` functions and `static_assert`s. `nullable` allows a variable to hold `null`. `auto` infers the type from the right-hand side.
+`const` prevents reassignment. `constexpr` evaluates at compile time and folds into the IR as a literal — see [Compile-Time Evaluation](lang-advanced.md#compile-time-evaluation) for what's foldable and how to write `constexpr` functions and `static_assert`s. `nullable` allows a variable to hold `null`. `auto` infers the type from the right-hand side.
 
 ### Multi-declarator syntax
 
@@ -89,7 +89,7 @@ string newline = "line one\nline two";
 string utf8    = "\xEE\xA9\xB0";    // 3-byte UTF-8 sequence, length() == 3
 ```
 
-f-string interpolation (see [Advanced](/enma/language-guide/advanced.md)) follows the same escape rules.
+f-string interpolation (see [Advanced](lang-advanced.md)) follows the same escape rules.
 
 ## Number Literals
 
@@ -112,7 +112,7 @@ float64 m = 1.5_m;       // same for float literals
 int64 mix = 1_500_km;    // separator + UDL: parses as 1500 with _km suffix
 ```
 
-Float literals use `f` / `F` suffix for `float32`; bare `3.14` is `float64`. Integer literals default to `int32` in contexts that accept any integer but adapt when assigned to a wider type. Underscore digit separators (`1_000_000`) work in all numeric forms — they're stripped at lex time so `std::stoll`-style parsers see clean digits. User-defined literal suffixes (`_km`, `_m`, etc.) parse as calls to a same-named function - see [user-defined literals](/enma/language-guide/advanced.md) for details. The lexer distinguishes the two by what follows the underscore: digit → separator, alpha → UDL.
+Float literals use `f` / `F` suffix for `float32`; bare `3.14` is `float64`. Integer literals default to `int32` in contexts that accept any integer but adapt when assigned to a wider type. Underscore digit separators (`1_000_000`) work in all numeric forms — they're stripped at lex time so `std::stoll`-style parsers see clean digits. User-defined literal suffixes (`_km`, `_m`, etc.) parse as calls to a same-named function - see [user-defined literals](lang-advanced.md) for details. The lexer distinguishes the two by what follows the underscore: digit → separator, alpha → UDL.
 
 ## Operators
 

@@ -48,7 +48,7 @@ The sentinel for "no key" is `0`. Call `contains()` first if `0` is a valid key 
 
 ## Supported key/value types
 
-Same scalar-only caveat as [hash\_set](/enma/addons/hash_set.md): `K` and `V` each must fit in 64 bits and order/equate by raw bits. Works for integer, bool, float-bits, pointer. Not suitable for string keys.
+Same scalar-only caveat as [hash\_set](addon-hash_set.md): `K` and `V` each must fit in 64 bits and order/equate by raw bits. Works for integer, bool, float-bits, pointer. Not suitable for string keys.
 
 ## Type-check
 

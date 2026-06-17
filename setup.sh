@@ -67,9 +67,11 @@ install_lsp "angel-lsp-pcx" "https://github.com/sinnafuls/angel-lsp-pcx.git" "se
 if [ -d "$HOME/.claude" ]; then
     echo ""
     echo "[..] Claude Code detected — installing skills..."
-    for skill in game-hacking-pcx game-cheat-guidelines; do
+    for skill_dir in "$TOOLKIT_DIR"/.claude/skills/*/; do
+        [ -f "$skill_dir/SKILL.md" ] || continue
+        skill="$(basename "$skill_dir")"
         mkdir -p "$HOME/.claude/skills/$skill"
-        cp "$TOOLKIT_DIR/.claude/skills/$skill/SKILL.md" "$HOME/.claude/skills/$skill/"
+        cp "$skill_dir/SKILL.md" "$HOME/.claude/skills/$skill/"
     done
     echo "[ok] Skills installed to ~/.claude/skills/"
 else

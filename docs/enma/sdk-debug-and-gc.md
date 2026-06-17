@@ -30,7 +30,7 @@ When exhausted, `execute()` returns `false`.
 
 ## Memory Model
 
-Deterministic. No tracing collector. See [Lifecycle & RAII](/enma/sdk-guide/lifecycle.md) for the full model.
+Deterministic. No tracing collector. See [Lifecycle & RAII](sdk-lifecycle.md) for the full model.
 
 `heap_*` SDK entry points exist for stats and budget control only:
 

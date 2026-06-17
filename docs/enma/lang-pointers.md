@@ -119,7 +119,7 @@ delete[] ys;
 
 Args after `[N]` are evaluated once and forwarded to each element's ctor. Wrong arity is a compile error.
 
-`int64[] xs = new int64[256]` is the other form, a growable array with `push`/`pop`/`length`, scope-drop cleanup, no `delete[]` needed. See [Arrays](/enma/addons/arrays.md).
+`int64[] xs = new int64[256]` is the other form, a growable array with `push`/`pop`/`length`, scope-drop cleanup, no `delete[]` needed. See [Arrays](addon-arrays.md).
 
 ## Fixed-Size Arrays
 

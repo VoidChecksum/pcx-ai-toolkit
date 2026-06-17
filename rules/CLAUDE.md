@@ -53,6 +53,17 @@ project/
 11. **GUI for all tunables** — no magic constants in code
 12. **Verify with live reads** — trust the binary, not cached offsets
 
+## Work Discipline (Karpathy)
+
+*What the code looks like* is above; *how to work* is here. Full rules in `KARPATHY.md`.
+
+1. **Think before coding** — name target, offset source, and tradeoff before the first line; mark guesses `UNVERIFIED`.
+2. **Simplicity first** — ship the minimum feature; no speculative prediction, config, or framework.
+3. **Surgical changes** — one feature, one diff; don't churn working offsets or reformat unrelated files.
+4. **Goal-driven execution** — done = visible success criteria met on the live target, not "it compiles."
+
+Detail: `skill://pcx-coding-discipline` (writing scripts) · `skill://pcx-re-discipline` (reverse engineering).
+
 ## LSP Servers
 
 - Enma: `lsp/enma-lsp/server/dist/server.js` (node)

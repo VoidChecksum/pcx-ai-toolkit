@@ -187,7 +187,7 @@ What you get:
 * **Inline container storage** — `color_t[]` lays out N × `sizeof(color_t)` bytes contiguously, no handle indirection (arrays only; maps/sets still 8-byte handles).
 * **Direct property reads/writes** — `c.r` compiles to a single `mov` instead of a native call when the property has an `inline_offset`.
 
-`factory_in_place` ctor signature: `int64_t fn(int64_t dst, args...)` — write into `dst`, return `dst`. The regular `.factory(...)` is still used for explicit `new color(args)`. See [Type Registration](/enma/sdk-guide/type-registration.md#value-type-registration) for the full walkthrough, constraints, and benchmark numbers.
+`factory_in_place` ctor signature: `int64_t fn(int64_t dst, args...)` — write into `dst`, return `dst`. The regular `.factory(...)` is still used for explicit `new color(args)`. See [Type Registration](sdk-type-registration.md#value-type-registration) for the full walkthrough, constraints, and benchmark numbers.
 
 ## Source-Level Modules
 
@@ -268,7 +268,7 @@ A type can be registered both via `type_builder` and as part of a source module 
 
 ### Already shipped
 
-* **`math`** (`em_addon_math.cpp` — registered with `register_addon_math`). Defines `vec2`, `vec3`, `vec4`, `quat`, `mat4` as value structs plus the scalar math natives (`sin`, `cos`, `sqrt`, `pow`, `floor`, `ceil`, `rand`, ...). See [Math](/enma/addons/math.md), [Vectors](/enma/addons/vec.md), [3D Math](/enma/addons/math3d.md).
+* **`math`** (`em_addon_math.cpp` — registered with `register_addon_math`). Defines `vec2`, `vec3`, `vec4`, `quat`, `mat4` as value structs plus the scalar math natives (`sin`, `cos`, `sqrt`, `pow`, `floor`, `ceil`, `rand`, ...). See [Math](addon-math.md), [Vectors](addon-vec.md), [3D Math](addon-math3d.md).
 * **`color`** (perception's `enma_render_api.cpp` — registered by `register_render_api`). `[[packed]]` 4-byte struct matching the C `pixelcolor4` layout, with `r`/`g`/`b`/`a` fields and `with_alpha(uint8)`. Used by every `draw_*` native.
 
 ## Addon Registration Pattern
@@ -351,7 +351,7 @@ type_builder(e, "my_type", type_id::t_struct)
     .method("...", (void*)&some_method);
 ```
 
-See [Type Registration](/enma/sdk-guide/type-registration.md) for the full lifecycle flow.
+See [Type Registration](sdk-type-registration.md) for the full lifecycle flow.
 
 ### Copy Hook (for ref-counted / COW types)
 

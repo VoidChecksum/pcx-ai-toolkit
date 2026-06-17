@@ -167,8 +167,12 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 - **Enma LSP**: `lsp/enma-lsp/server/dist/server.js`
 - **AngelScript+PCX LSP**: `lsp/angel-lsp-pcx/server/out/server.js`
 
-## RE Tools
+## RE Tools & Knowledge
 
+- **Plugins & FLIRT sigs**: `knowledge/re-plugins-and-tools.md` — 6 IDA plugins, 4 Ghidra extensions, 51 FLIRT sigs, diffing, ret-sync
+- **Anti-cheat architecture**: `knowledge/anti-cheat-architecture.md` — EAC/BE/Vanguard/GG detection matrix
+- **Kernel RE tools**: `knowledge/kernel-re-tools.md` — WinDbg, HyperDbg, Volatility, PCILeech, IRPMon
+- **AC driver patterns**: `signatures/anti-cheat/common-ac-patterns.md` — driver ID, callback sigs, integrity check patterns
 - r5sdk: `sdks/r5sdk/` (2438 reversed headers for Apex Legends)
 - IDA IDB: `idb/r5apex_dx12_dump.i64` (28936 functions, FLIRT+types)
 - Ghidra: `ghidra-projects/r5apex/`

@@ -15,7 +15,7 @@ register_native(e, "int32 add(int32, int32)", (void*)&add);
 
 ## Attaching a Description
 
-Every `register_native` overload takes an optional trailing `description` string, surfaced via `extract_documentation` and `extract_intellisense` (see [Introspection](/enma/sdk-guide/introspection.md)). Use it for natives whose behavior isn't obvious from the signature alone.
+Every `register_native` overload takes an optional trailing `description` string, surfaced via `extract_documentation` and `extract_intellisense` (see [Introspection](sdk-introspection.md)). Use it for natives whose behavior isn't obvious from the signature alone.
 
 ```cpp
 register_native(e, "int64 log(string msg)", (void*)&log,
@@ -423,7 +423,7 @@ void worker_tick(context_t* ctx, int64_t fn_handle, int64_t user_data) {
 }
 ```
 
-See the [Invoking Script Closures from Background Threads](/enma/sdk-guide/custom-addons.md#invoking-script-closures-from-background-threads) section in the custom-addons guide for the full trampoline pattern.
+See the [Invoking Script Closures from Background Threads](sdk-custom-addons.md#invoking-script-closures-from-background-threads) section in the custom-addons guide for the full trampoline pattern.
 
 
 ---

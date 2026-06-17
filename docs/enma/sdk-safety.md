@@ -46,7 +46,7 @@ Custom natives can opt into the same gating via the trailing `permission` arg of
 
 ## Memory Safety
 
-Deterministic model. Structs stack-allocated by default. Escape patterns that would produce dangling stack pointers (return-pointer-to-local, store-to-global, escaping-closure-capture) are **compile errors**, not runtime bugs. Heap allocations have deterministic dtor + free. See [Lifecycle & RAII](/enma/sdk-guide/lifecycle.md).
+Deterministic model. Structs stack-allocated by default. Escape patterns that would produce dangling stack pointers (return-pointer-to-local, store-to-global, escaping-closure-capture) are **compile errors**, not runtime bugs. Heap allocations have deterministic dtor + free. See [Lifecycle & RAII](sdk-lifecycle.md).
 
 ## Type Verification
 

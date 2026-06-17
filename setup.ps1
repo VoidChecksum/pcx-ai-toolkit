@@ -74,10 +74,12 @@ $claudeDir = Join-Path $env:USERPROFILE ".claude"
 if (Test-Path $claudeDir) {
     Write-Host ""
     Write-Host "[..] Claude Code detected - installing skills..."
-    foreach ($skill in @("game-hacking-pcx", "game-cheat-guidelines")) {
-        $dest = Join-Path $claudeDir "skills\$skill"
+    foreach ($skillDir in Get-ChildItem (Join-Path $ToolkitDir ".claude\skills") -Directory) {
+        $src = Join-Path $skillDir.FullName "SKILL.md"
+        if (-not (Test-Path $src)) { continue }
+        $dest = Join-Path $claudeDir "skills\$($skillDir.Name)"
         New-Item -ItemType Directory -Force -Path $dest | Out-Null
-        Copy-Item (Join-Path $ToolkitDir ".claude\skills\$skill\SKILL.md") $dest -Force
+        Copy-Item $src $dest -Force
     }
     Write-Host "[ok] Skills installed to $claudeDir\skills\"
 } else {

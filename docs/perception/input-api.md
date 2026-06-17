@@ -4,7 +4,7 @@
 
 All input natives are auto-registered into every loaded script.
 
-Read-only complement to [Win API](/perception/enma/win-api.md) — Win API **sends** input, this **reads** state. Pollable per-frame from `my_draw` or routine callbacks.
+Read-only complement to [Win API](win-api.md) — Win API **sends** input, this **reads** state. Pollable per-frame from `my_draw` or routine callbacks.
 
 Virtual-key codes follow Win32 VK\_\* convention. The `vk` enum bundles the common ones so no `#include` is needed.
 

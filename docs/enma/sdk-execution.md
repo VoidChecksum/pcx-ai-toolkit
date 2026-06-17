@@ -61,7 +61,7 @@ destroy_context(mod, ctx);
 
 ## Calling Script Code from Background Threads
 
-`execute()` and `call()` set up enma's per-thread TLS automatically. If you need to invoke a script-side closure from a thread that *isn't* already inside one of those, wrap the invocation in an `execution_scope` first - see [Custom Addons / Invoking Script Closures from Background Threads](/enma/sdk-guide/custom-addons.md#invoking-script-closures-from-background-threads). Without it, the first native that touches TLS (heap\_alloc, string concat, etc.) dereferences nullptr.
+`execute()` and `call()` set up enma's per-thread TLS automatically. If you need to invoke a script-side closure from a thread that *isn't* already inside one of those, wrap the invocation in an `execution_scope` first - see [Custom Addons / Invoking Script Closures from Background Threads](sdk-custom-addons.md#invoking-script-closures-from-background-threads). Without it, the first native that touches TLS (heap\_alloc, string concat, etc.) dereferences nullptr.
 
 ## Example
 

@@ -279,3 +279,56 @@ SDK/offset dumping utility for Perception.
 Automated offset discovery tool (private beta).
 
 Available on perception.cx Script Market.
+
+---
+
+## Kernel RE & Anti-Cheat Analysis Tools
+
+Tools for kernel driver analysis and anti-cheat reverse engineering. Full reference with platform matrix and workflow: `knowledge/kernel-re-tools.md`.
+
+### HyperDbg
+
+Hypervisor-level debugger — sits below the OS, invisible to kernel anti-debug. Stealth breakpoints, EPT hooks, syscall interception. The only debugger an AC's kernel-mode anti-debug can't detect via standard means.
+
+**Source:** [github.com/HyperDbg/HyperDbg](https://github.com/HyperDbg/HyperDbg)
+
+---
+
+### Volatility 3
+
+Memory forensics framework. Analyze physical memory dumps: driver lists (`windows.driverscan`), callback arrays (`windows.callbacks`), handle tables, process trees. Essential for offline AC driver analysis.
+
+**Install:** `pip install volatility3`
+**Source:** [github.com/volatilityfoundation/volatility3](https://github.com/volatilityfoundation/volatility3)
+
+---
+
+### MemProcFS
+
+Mount a physical memory dump (or live DMA feed via PCILeech) as a virtual filesystem. Browse processes, modules, registry, network connections as files. Integrates with PCILeech for live DMA-based analysis invisible to software ACs.
+
+**Source:** [github.com/ufrisk/MemProcFS](https://github.com/ufrisk/MemProcFS)
+
+---
+
+### IRPMon
+
+Intercepts IRP (I/O Request Packets) to/from kernel drivers. Capture IOCTL traffic between the AC user-mode service and kernel driver — see the protocol in real time.
+
+**Source:** [github.com/MartinDrab/IRPMon](https://github.com/MartinDrab/IRPMon)
+
+---
+
+### VirtualKD-Redux
+
+Patches the VM's `kdcom.dll` to use a fast pipe instead of serial — 10–40× faster kernel debugging in VMware/VirtualBox. Use with WinDbg for practical-speed kernel debug sessions.
+
+**Source:** [github.com/4d61726b/VirtualKD-Redux](https://github.com/4d61726b/VirtualKD-Redux)
+
+---
+
+### PCILeech
+
+DMA-based memory acquisition via FPGA or Thunderbolt. Reads physical memory without software on the target — completely invisible to software-based ACs. Requires FPGA hardware (Screamer, LambdaConcept) or Thunderbolt access.
+
+**Source:** [github.com/ufrisk/pcileech](https://github.com/ufrisk/pcileech)
