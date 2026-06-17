@@ -110,11 +110,104 @@ Success criteria for "enemy ESP":
 
 ---
 
+## 5. Deletion Before Addition
+
+**Try removing code before writing new code. The shortest script that works is the one with the fewest lines to break after a patch.**
+
+When a feature request arrives, check what already exists first:
+
+- **Can you delete a workaround instead of adding a second one?** Two workarounds for the same stale offset is a sign one should die.
+- **Can you inline a wrapper?** A `ReadEntity()` function that calls `p.ru64()` once with no validation adds a name, not value. Inline it.
+- **Can you merge two features into one routine?** If `on_update_esp` and `on_update_radar` both walk the same entity list, one walk and two draw calls in `on_render` is fewer lines and fewer reads.
+- **Before adding a class, count its callers.** One caller = inline. Two = maybe. Three = extract, not before.
+
+```cpp
+// WRONG — utility wrapper around a one-liner
+uint64 ReadEntityBase(proc_t@ p, uint64 list, int idx) {
+    return p.ru64(list + idx * 0x20);
+}
+// ... called exactly once
+
+// RIGHT — inline it, the proc_t API is already the interface
+uint64 ent = p.ru64(entity_list + i * 0x20);
+```
+
+**Why:** Every line in a cheat script is a line you re-validate after a game patch. 80 lines is 80 potential breakpoints. 40 lines is half the post-patch work.
+
+---
+
+## 6. Question the Requirement
+
+**Ship the minimum, then challenge the rest — in the same response, not a separate conversation.**
+
+When the ask is vague or ambitious ("make a full ESP with health bars, distance, snaplines, team colors, and a config panel"):
+
+1. **Build the core** — boxes on enemies, W2S, null guards.
+2. **Ship it working.**
+3. **In the same response:** "Done: box ESP with W2S + null guards. Health bars and snaplines are 10 lines each when you want them. Team colors need a second read per entity — add when the base ESP is confirmed working. Config panel is overhead for 3 settings — `bool` globals + a sidebar checkbox cover it."
+
+Never stall on an answer you can default. Never build five features to avoid the conversation about whether three of them matter.
+
+```
+Pattern:  [working code] → skipped: [X]. add when [Y].
+```
+
+---
+
+## 7. Mark Deliberate Shortcuts
+
+**Every deliberate simplification gets a `// defer:` comment naming its ceiling and the trigger to revisit.**
+
+`// UNVERIFIED` marks offset confidence. `// defer:` marks *design* shortcuts — places where you chose the simple path and know the ceiling.
+
+```cpp
+// defer: single entity array walk, separate walks per feature if >200 entities tank FPS
+void on_update(int64 data) { ... }
+
+// defer: hardcoded team color, config panel if user asks for customization
+color enemy_col = color(255, 0, 0, 255);
+
+// defer: global proc_t handle, per-feature handles if multi-process support needed
+proc_t@ g_proc;
+```
+
+Format: `// defer: <what was simplified>, <when to revisit>`
+
+A `// defer:` with no trigger is a shortcut that rots silently. Always name the trigger.
+
+**Not deferred:** pointer validation, `w > 0` checks, `uint64` for addresses, `f` suffix on floats. Those are the floor, not shortcuts.
+
+---
+
+## 8. One Self-Check Per Non-Trivial Feature
+
+**You can't unit test against a live game, but non-trivial logic leaves one sanity print behind.**
+
+Cheat scripts run against a live target — no mock framework, no test harness. But logic bugs (wrong struct offset math, bad matrix indexing, off-by-one in entity iteration) can be caught with a visible sanity check:
+
+- **Entity count print:** `print("entities: " + g_positions.length());` in `on_update`. If it reads 0 or 9999, something's wrong before you even look at the overlay.
+- **Address range check:** `if (addr < 0x10000 || addr > 0x7FFFFFFFFFFF) print("suspect addr: " + addr);` — catches sign-extension and null-deref-adjacent reads.
+- **W2S validation:** draw the raw screen coords as text before drawing boxes. If they cluster at (0,0), a null read slipped.
+- **One `print()` per feature, gated behind a debug flag.** Not a logging framework — one line.
+
+```cpp
+// Self-check: remove or gate behind g_debug when stable
+if (g_debug) print("[esp] ents=" + ents.length() + " visible=" + drawn);
+```
+
+**Why:** The laziest debugger that catches real bugs. One print per feature is near-zero overhead. A logging framework for three features is debt you don't need.
+
+---
+
 ## Summary
 
-| # | Principle (Karpathy) | In PCX terms |
-|---|----------------------|--------------|
+| # | Principle | In PCX terms |
+|---|-----------|--------------|
 | 1 | Think Before Coding | Name target, offset source, and tradeoff before the first line |
 | 2 | Simplicity First | Ship the box, not the framework — no speculative features |
 | 3 | Surgical Changes | One feature, one diff; clean only your own orphans |
 | 4 | Goal-Driven Execution | Done = visible success criteria met on the live target, not "compiles" |
+| 5 | Deletion Before Addition | Try removing/inlining before writing new code |
+| 6 | Question the Requirement | Ship the minimum, challenge the rest in the same response |
+| 7 | Mark Deliberate Shortcuts | `// defer: <ceiling>, <trigger>` for design shortcuts |
+| 8 | One Self-Check Per Feature | One `print()` per non-trivial feature, gated behind `g_debug` |
