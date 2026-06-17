@@ -87,23 +87,71 @@ fi
 echo "[..] Install location: $PREFIX"
 echo ""
 
-# ── prerequisite: Node.js ─────────────────────────────────────────────────────
+# ── prerequisites ─────────────────────────────────────────────────────────────
 if ! command -v node >/dev/null 2>&1; then
     echo "[!!] Node.js is required. Install from https://nodejs.org/ then re-run."
     exit 1
 fi
 echo "[ok] node $(node --version)"
 
+if [ "$OS" = "linux" ] || [ "$OS" = "wsl" ]; then
+    if ! command -v xvfb-run >/dev/null 2>&1 && ! command -v Xvfb >/dev/null 2>&1; then
+        echo "[!!] Xvfb is required for headless installation on Linux."
+        echo "     Install it first:"
+        echo "       sudo apt-get install xvfb      # Debian / Ubuntu / WSL"
+        echo "       sudo dnf install xorg-x11-server-Xvfb  # Fedora / RHEL"
+        exit 1
+    fi
+    echo "[ok] Xvfb available"
+fi
+
 # ── step 1: run the installer ─────────────────────────────────────────────────
-echo "[..] Running installer (this takes a minute)..."
+# The InstallBuilder GUI installer requires an X display even in unattended mode.
+# On Linux/WSL we spin up a temporary Xvfb virtual display automatically.
+echo "[..] Running installer (takes ~10–30 seconds)..."
+
+_run_installer() {
+    local cmd="$*"
+    if [ "$OS" = "linux" ] || [ "$OS" = "wsl" ]; then
+        # Clear stale X lock files that would block Xvfb from starting
+        rm -f /tmp/.tX[0-9]*-lock /tmp/.tX1[0-9][0-9]-lock /tmp/.tX2[0-9][0-9]-lock 2>/dev/null || true
+
+        # Pick a free display number
+        local DISP=99
+        while [ -e "/tmp/.tX${DISP}-lock" ] || [ -S "/tmp/.X11-unix/X${DISP}" ]; do
+            DISP=$((DISP + 1))
+        done
+
+        if command -v xvfb-run >/dev/null 2>&1; then
+            xvfb-run --server-num "$DISP" --server-args="-screen 0 1024x768x24" \
+                bash -c "$cmd"
+        elif command -v Xvfb >/dev/null 2>&1; then
+            Xvfb ":${DISP}" -screen 0 1024x768x24 &
+            local XPID=$!
+            sleep 2
+            DISPLAY=":${DISP}" bash -c "$cmd"
+            local RC=$?
+            kill $XPID 2>/dev/null || true
+            return $RC
+        else
+            echo "[!!] Xvfb not found. Install it first:"
+            echo "     Debian/Ubuntu:  sudo apt-get install xvfb"
+            echo "     Fedora/RHEL:    sudo dnf install xorg-x11-server-Xvfb"
+            exit 1
+        fi
+    else
+        # macOS — no virtual display needed for the inner installer
+        bash -c "$cmd"
+    fi
+}
 
 case "$OS" in
     linux|wsl)
         chmod +x "$INSTALLER"
         if [ -w "$(dirname "$PREFIX")" ] || [ -w "$PREFIX" ] 2>/dev/null; then
-            "$INSTALLER" --mode unattended --prefix "$PREFIX"
+            _run_installer "'$INSTALLER' --mode unattended --prefix '$PREFIX'"
         else
-            sudo "$INSTALLER" --mode unattended --prefix "$PREFIX"
+            _run_installer "sudo '$INSTALLER' --mode unattended --prefix '$PREFIX'"
         fi
         INSTALL_DIR="$PREFIX"
         ;;
@@ -117,8 +165,9 @@ case "$OS" in
             rm -rf "$TMPDIR_MAC"; exit 1
         fi
         chmod +x "$INNER"
-        "$INNER" --mode unattended --prefix "$PREFIX"
+        _run_installer "'$INNER' --mode unattended --prefix '$PREFIX'"
         rm -rf "$TMPDIR_MAC"
+        # The .app bundle lands in PREFIX; idalib is inside Contents/MacOS
         APP="$(ls "$PREFIX" | grep -i "IDA" | head -1)"
         INSTALL_DIR="$PREFIX/$APP/Contents/MacOS"
         ;;
