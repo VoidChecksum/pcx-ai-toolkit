@@ -2,6 +2,25 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.13.0] — 2026-06-17
+
+### Added
+- **3 new validation / build tools** in `tools/`:
+  - `evidence-log-validator.py` — directly enforces `re-evidence-log` discipline. Cross-checks every offset / sig in an Enma module against per-binary evidence files (`evidence/<hash>.md`): catches offsets without `// E-NNN` citations, evidence entries no offset references (dead entries), and stale `last_verified` dates older than `--max-age-days` (default 180). Output categories `ERROR` / `WARN` / `INFO`; `--strict` promotes warnings to exit 1; `--evidence-dir` validates against all per-binary files at once.
+  - `pre-ship-check.sh` — pure-bash implementation of the `script-bundler` Section 4 pre-ship hygiene checklist. 12 checks: hardcoded paths, debug `println` of raw addresses, TODO/FIXME/HACK/XXX markers, `fs_write_file` calls, network calls, suspicious `.emb` string artifacts, offset evidence-citation ratio, placeholder module name in `ref_process`, long commented-out blocks, LICENSE/README/CHANGELOG existence. `--strict` / `--quiet` / `--json` flags; portable across bash 4+ on Linux/macOS/WSL/Git Bash.
+  - `script-linter.py` — light static check for the most-violated 12-guideline rules in `.em` files. Rule 1 (offsets cite evidence), Rule 7 (color/vec at file scope), Rule 11 (tunables without GUI widgets). Excludes offset/sig/stride constants from rule-11 firing via prefix list. Tight false-positive budget — rule 8 (f-suffix) intentionally narrowed by the implementing agent to avoid noise on legitimate `float64`-typed contexts. `--rules N,M` filter; `--severity error,warn,info`; `--json` machine output.
+- **2 new AI skills** under `.claude/skills/`:
+  - `ai-pair-programming` (291 lines) — the meta-workflow skill for working with Claude / Cursor / Cline / Aider / Copilot on PCX projects. 7 numbered techniques (read doc before code, cheatsheet first then per-API doc, plan before code on multi-file work, verify sigs with MCP not AI memory, in-prompt guideline reminder, diff-review every multi-file change, re-frame when stuck) plus per-tool quick recipes. Wraps all four IDE drop-ins (CLAUDE / CURSOR / CLINE / COPILOT).
+  - `multi-binary-targeting` (444 lines) — one script supporting N game versions / architectures / storefronts / channels. 7 sections: runtime binary identification via `.text` hash, per-binary `offsets-<label>.em` + common `dispatch.em` re-export, sig sets vs hardcoded RVAs, x86 vs x64 abstraction with `ptr_read` helper, storefront detection via DRM-DLL fingerprint, channel variation handling, graceful degradation when no offset set matches. "When NOT to multi-target" heuristic: fork at >30% per-version sig overrides.
+- **2 new knowledge references** under `knowledge/`:
+  - `gui-design-patterns.md` (453 lines) — PCX sidebar GUI layout discipline beyond rule #11. Section organization (one feature per section), widget order within section, label conventions, slider range discipline (useful vs possible), defaults that work for first-time users, hotkey conventions (safe vs game-conflicting), color discipline (small palette per feature), state visibility, conditional widgets, debug-panel-not-by-default policy. Worked ESP-section example + anti-pattern flat list.
+  - `pcx-cross-language-bridge.md` (183 lines) — Enma vs AngelScript vs Lua decision guide. At-a-glance comparison table (13 properties × 3 languages), per-use-case routing (render-path / stateful UI / quick prototyping / CPU math / network / cross-binary / coroutines), cross-language coordination patterns (files / host process / don't), performance notes (equivalent vs materially different), migration notes (Enma ↔ AS, Enma ↔ Lua, AS ↔ Lua), recommended defaults by project size.
+- **`rules/COPILOT.md`** (116 lines) — GitHub Copilot drop-in (`.github/copilot-instructions.md` or per-workspace custom-instructions field). Parallel structure to CURSOR.md / CLINE.md with Copilot-specific notes: what Copilot is good at (inline completions, doc-comments, single-file pattern-following) and bad at (multi-file refactors, less-common API names, unprompted guideline enforcement). Steering pattern via `// from: docs/...` comments above the cursor.
+
+### Changed
+- README.md — AI Skills badge `14` → `16`; tree, skills box, knowledge box, rules section, tools list refreshed.
+- `docs/INDEX.md` — 2 new knowledge entries (gui-design-patterns, pcx-cross-language-bridge).
+
 ## [1.12.0] — 2026-06-17
 
 ### Added

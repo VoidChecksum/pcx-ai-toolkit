@@ -13,7 +13,7 @@
 [![Lines](https://img.shields.io/badge/Doc%20Lines-34%2C000%2B-brightgreen.svg)](#documentation-coverage)
 [![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
 [![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
-[![Skills](https://img.shields.io/badge/AI%20Skills-14-yellow.svg)](#ai-skills)
+[![Skills](https://img.shields.io/badge/AI%20Skills-16-yellow.svg)](#ai-skills)
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
@@ -223,7 +223,7 @@ uv tool upgrade ida-pro-mcp
 <td width="50%" valign="top">
 
 ### AI Skills
-14 Claude Code / OMC skills
+16 Claude Code / OMC skills
 
 - **game-hacking-pcx** — doc index, API rules
 - **game-cheat-guidelines** — 12 behavioral rules (Enma)
@@ -231,8 +231,10 @@ uv tool upgrade ida-pro-mcp
 - **pcx-lua-discipline** — 10 Lua-specific rules (int subtype, `pcall`, hot-reload)
 - **pcx-coding-discipline** — Karpathy workflow: scripts
 - **pcx-re-discipline** — Karpathy workflow: RE
+- **ai-pair-programming** — workflow for driving Claude/Cursor/Cline/Aider/Copilot
 - **re-evidence-log** — every offset cites its proof (`E-NNN` cross-refs)
 - **pcx-patch-day-playbook** — ordered triage when the game updates
+- **multi-binary-targeting** — one script across N game versions / arches / storefronts
 - **script-bundler** — packaging, hot-reload boundaries, pre-ship hygiene
 - **pcx-perf-budget** — frame-time targets + `mono_us` profiler recipe
 - **pcx-streamproof** — capture-path taxonomy for OBS / Discord / capture cards
@@ -248,10 +250,12 @@ Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
 <td width="50%" valign="top">
 
 ### Knowledge Base
-17 reference files
+19 reference files
 
 - Enma + PCX API cheatsheets
 - Working code patterns (13 recipes)
+- GUI design patterns (section layout, slider discipline, hotkey conventions)
+- Cross-language bridge (Enma vs AngelScript vs Lua decision guide)
 - Offset-finding methodology, RE plugin reference
 - Aimbot math (atan2, FOV, prediction, smoothing)
 - Multi-file script organization patterns (extends `templates/full-project/`)
@@ -323,15 +327,17 @@ pcx-ai-toolkit/
 │       ├── angelscript/                  AngelScript APIs (23 files)
 │       └── lua/                          Lua APIs (17 files)
 │
-├── .claude/skills/                   ── AI Skills (14)
+├── .claude/skills/                   ── AI Skills (16)
 │   ├── game-hacking-pcx/                Doc index + coding rules
 │   ├── game-cheat-guidelines/           12 behavioral guidelines (Enma)
 │   ├── pcx-angelscript-discipline/      10 AS-specific rules
 │   ├── pcx-lua-discipline/              10 Lua-specific rules
 │   ├── pcx-coding-discipline/           Karpathy workflow — writing scripts
 │   ├── pcx-re-discipline/               Karpathy workflow — reverse engineering
+│   ├── ai-pair-programming/             Driving Claude/Cursor/Cline/Aider/Copilot well
 │   ├── re-evidence-log/                 Evidence-citation discipline (E-NNN cross-refs)
 │   ├── pcx-patch-day-playbook/          Patch-day triage workflow (7 steps)
+│   ├── multi-binary-targeting/          One script, N versions/arches/storefronts/channels
 │   ├── script-bundler/                  Packaging + ship-day hygiene + .emb workflow
 │   ├── pcx-perf-budget/                 Frame-time targets + profiler recipe
 │   ├── pcx-streamproof/                 Capture-path taxonomy for OBS / Discord / cards
@@ -343,6 +349,8 @@ pcx-ai-toolkit/
 │   ├── enma-cheatsheet.md                Language quick-ref card
 │   ├── pcx-api-cheatsheet.md             All APIs at a glance
 │   ├── pcx-version-matrix.md             Since-version API matrix (sourced from changelogs.md)
+│   ├── pcx-cross-language-bridge.md      Enma vs AngelScript vs Lua decision guide
+│   ├── gui-design-patterns.md            PCX sidebar layout + slider/hotkey/color discipline
 │   ├── script-organization-patterns.md   Multi-file project organization beyond full-project/
 │   ├── anti-cheat-architecture.md        EAC/BE/Vanguard/GG architecture + detection matrix
 │   ├── kernel-re-tools.md                Kernel RE tool reference (WinDbg, HyperDbg, Volatility, etc.)
@@ -371,6 +379,7 @@ pcx-ai-toolkit/
 │   ├── CLAUDE.md                         Drop-in for Claude Code
 │   ├── CURSOR.md                         Drop-in `.cursorrules` for Cursor
 │   ├── CLINE.md                          Drop-in custom instructions for Cline (VS Code agent)
+│   ├── COPILOT.md                        Drop-in `.github/copilot-instructions.md` for GitHub Copilot
 │   ├── AGENTS.md                         6 agent role definitions
 │   └── KARPATHY.md                       Work-discipline drop-in (4 principles)
 │
@@ -416,6 +425,9 @@ pcx-ai-toolkit/
 │   ├── sig-uniqueness-checker.py        Verdict per sig: UNIQUE / AMBIGUOUS / STALE / BRITTLE
 │   ├── pattern-format-converter.py      Round-trip patterns: IDA / Ghidra / x64dbg / CE / Enma / C
 │   ├── dumper-to-enma.py                Dumper-7 / IL2CPPDumper / hazedumper → offsets.em
+│   ├── evidence-log-validator.py        Cross-check offsets.em vs evidence/<hash>.md citations
+│   ├── script-linter.py                 Light 12-guidelines static check on .em files
+│   ├── pre-ship-check.sh                Pre-release hygiene checklist (12 checks, --json output)
 │   └── install-re-tools.sh              One-command installer: IDA/Ghidra plugins + Python packages
 ├── setup.sh                          One-command LSP + skills install
 ├── CONTRIBUTING.md                   Contribution guide

@@ -126,6 +126,8 @@ Covers: Overview, Life Cycle, Engine, Proc API, Render API, GUI API, Input API, 
 | [`../knowledge/aimbot-math.md`](../knowledge/aimbot-math.md) | Aimbot math: angles, FOV cone, prediction (linear + gravity), recoil compensation, smoothing |
 | [`../knowledge/pcx-version-matrix.md`](../knowledge/pcx-version-matrix.md) | API availability matrix by PCX version (since-version, sourced from `docs/perception/changelogs.md`) |
 | [`../knowledge/script-organization-patterns.md`](../knowledge/script-organization-patterns.md) | Multi-file Enma project organization patterns (shared state, JSON persistence, utility extraction, dead-code policy) |
+| [`../knowledge/gui-design-patterns.md`](../knowledge/gui-design-patterns.md) | PCX sidebar GUI layout: section organization, widget order, slider ranges, hotkey conventions, color discipline, status visibility |
+| [`../knowledge/pcx-cross-language-bridge.md`](../knowledge/pcx-cross-language-bridge.md) | Enma vs AngelScript vs Lua decision guide (at-a-glance comparison, per-use-case routing, migration notes) |
 
 ### Engine RE References
 
