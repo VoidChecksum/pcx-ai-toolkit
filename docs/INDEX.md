@@ -121,6 +121,8 @@ Covers: Overview, Life Cycle, Engine, Proc API, Render API, GUI API, Input API, 
 | [`../knowledge/anti-cheat-architecture.md`](../knowledge/anti-cheat-architecture.md) | EAC/BattlEye/Vanguard/GameGuard/XIGNCODE3 architecture + detection matrix |
 | [`../knowledge/kernel-re-tools.md`](../knowledge/kernel-re-tools.md) | Kernel RE tool reference (WinDbg, HyperDbg, Volatility, PCILeech, etc.) |
 | [`../knowledge/re-plugins-and-tools.md`](../knowledge/re-plugins-and-tools.md) | IDA/Ghidra plugins, FLIRT sigs, binary diffing, ret-sync |
+| [`../knowledge/obfuscation-taxonomy.md`](../knowledge/obfuscation-taxonomy.md) | Protector architecture: Themida, VMProtect, OLLVM, runtime techniques |
+| [`../knowledge/deobfuscation-tools.md`](../knowledge/deobfuscation-tools.md) | Deobfuscation tool reference (NoVmp, Triton, Miasm, D-810, ScyllaHide) |
 
 ## Signatures & Reversal Guides
 
@@ -131,3 +133,4 @@ Covers: Overview, Life Cycle, Engine, Proc API, Render API, GUI API, Input API, 
 | [`../signatures/anti-cheat/common-ac-patterns.md`](../signatures/anti-cheat/common-ac-patterns.md) | Anti-cheat driver identification and callback patterns |
 | [`../signatures/unity-il2cpp/il2cpp-patterns.md`](../signatures/unity-il2cpp/il2cpp-patterns.md) | Unity IL2CPP reversal (metadata dumping, static fields, GC handles) |
 | [`../signatures/source2-engine/source2-patterns.md`](../signatures/source2-engine/source2-patterns.md) | Source 2 reversal (schema system, entity system, view matrix) |
+| [`../signatures/obfuscation/protector-patterns.md`](../signatures/obfuscation/protector-patterns.md) | Protector identification (VMP sections, Themida dispatch, OLLVM CFF, anti-debug) |

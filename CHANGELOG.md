@@ -2,6 +2,19 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.9.0] — 2026-06-17
+
+### Added
+- **Deobfuscation skill** (`deobfuscation`) — six-step methodology for reversing protected binaries: identify protector (section names, DIE, behavioral signals), strip outer layers (anti-debug → unpack → IAT fix), classify obfuscation type (mutation vs. CFF vs. VM), devirtualize VM-protected code (dispatcher → components → trace → lift → verify), handle protector-specific tricks (Themida FISH–SHARK VMs, VMP handler mutation + bytecode encryption + Ultra mode, OLLVM CFF + MBA), and know when to skip (black-box, hook boundaries, patch around)
+- **`knowledge/obfuscation-taxonomy.md`** — per-protector architecture reference: Themida/WinLicense (5 VM tiers, macro VM mode), VMProtect (stack-based VM, handler mutation, rolling-key bytecode encryption, Ultra nested VMs), Code Virtualizer, Enigma, Obsidium, LLVM-obfuscator (CFF, BCF, MBA, SUB, indirect branching passes), Hikari, Pluto. Runtime techniques: metamorphic code, self-modifying code, API hashing, stack strings, nanomites. Kernel-level: PatchGuard, DSE, hypervisor-based protection
+- **`knowledge/deobfuscation-tools.md`** — tool reference by obfuscation layer: devirtualizers (NoVmp, VMHunt, vtil), symbolic execution (Triton, Miasm, angr), IDA plugins (D-810, hrtng, HashDB), Binary Ninja (deflat), unpacking (ScyllaHide, Scylla, pe-sieve), strings (FLOSS), tracing (PIN, Frida, DynamoRIO). Per-protector tool chain recommendations
+- **`signatures/obfuscation/protector-patterns.md`** — identification patterns: section names for 12 protectors, VMP entry stubs + dispatcher fetch loop, Themida computed-goto dispatch, OLLVM CFF dispatcher structure + opaque predicates + MBA patterns, generic packer OEP detection, IAT redirection stubs, anti-debug API byte patterns
+
+### Changed
+- README — AI Skills count 6 → 7, directory tree + detail sections for deobfuscation
+- `docs/INDEX.md` — added obfuscation-taxonomy, deobfuscation-tools, and protector-patterns entries
+- `game-hacking-pcx` skill — added deobfuscation cross-references to RE Tools section
+
 ## [1.8.0] — 2026-06-17
 
 ### Fixed
