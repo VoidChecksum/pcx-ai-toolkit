@@ -2,6 +2,37 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.15.0] — 2026-06-17
+
+### Added — Indexed Knowledge Surfaces
+
+Three complementary surfaces let any AI tool reach the toolkit's corpus efficiently. Use one, two, or all three depending on the tool's integration model. See `.claude/skills/pcx-knowledge-index/SKILL.md` for the decision tree.
+
+**Static surface (auto-fetch convention):**
+- `docs/llms.txt` (45 KB) — Anthropic / Mintlify `llms.txt` convention. Structured index of every doc / skill / knowledge file / IDE drop-in / template / signature guide / tool, grouped by category, with title + URL + 1-line description per entry. Tools that auto-fetch this convention (Claude, Cursor, others) discover the entire toolkit's surface from one file.
+
+**Static surface (concatenated context packs):**
+- `docs/llms-full.txt` (~2 MB) — entire toolkit content concatenated with stable separators and source paths preserved.
+- `docs/llms-perception-enma.md` (~950 KB) — Enma language + APIs + Enma-discipline skills + cheatsheet. Single-file `@`-reference for tools working in Enma.
+- `docs/llms-perception-angelscript.md` (~400 KB) — AngelScript APIs + AS discipline + cheatsheet.
+- `docs/llms-perception-lua.md` (~215 KB) — Lua APIs + Lua discipline + cheatsheet.
+- `docs/llms-skills.md` (~300 KB) — all 17 skills concatenated.
+- `docs/llms-knowledge.md` (~350 KB) — all 20 knowledge references concatenated.
+
+**Dynamic surface (MCP server):**
+- `mcp/pcx-knowledge-mcp/` — Python MCP server exposing the corpus as searchable resources. Tools: `search(query, limit)` (keyword search with light TF-IDF scoring), `get_file(path)` (fetch by repo-relative path), `list_files(category)` (enumerate by category), `overview()` (top-level summary). Resources: every file as `file://<repo-path>`. 211 documents indexed; <100 ms cold load, <5 ms warm queries. Pure Python + the official `mcp` SDK (no vector DB, no embedding model, no external service). Install: `pip install -e mcp/pcx-knowledge-mcp/`. Config snippets for Claude Desktop, Cline, Cursor, Continue, Zed in the README.
+
+**Generator tool:**
+- `tools/build-llms-index.py` — stdlib-only Python; generates all 7 static bundles from the live source tree. Idempotent (re-running produces byte-identical output). `--check` flag detects drift between committed bundles and current source for CI gating.
+
+**Decision-tree skill:**
+- `.claude/skills/pcx-knowledge-index/SKILL.md` (220 lines) — names the three surfaces and the decision tree for which to reach for under which circumstances. Per-tool recipes (Claude Code / Claude Desktop / Cursor / Cline / Aider / Copilot / Continue / Zed). The "combine #2 + #5" recommendation: small upfront language-bundle + MCP search for everything else, the best of both for long sessions.
+
+### Changed
+- `.github/workflows/ci.yml` — new step `build-llms-index.py --check` enforces bundles stay in sync with source on every push. Doc-count check tightened to exclude generated bundles from the source-doc tally. Link checker now skips `docs/llms-*` bundles (they concatenate cross-directory content; relative links inside no longer resolve relative to `docs/`; source files are checked individually).
+- README.md — AI Skills `17` → `18`; new "Indexed Knowledge Surfaces" subsection introduces the three surfaces; tree refreshed.
+- `docs/INDEX.md` — new "Indexed Knowledge Surfaces" subsection at the top linking to all 7 bundles and the MCP server README.
+
 ## [1.14.0] — 2026-06-17
 
 ### Added

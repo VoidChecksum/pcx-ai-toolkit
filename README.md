@@ -13,7 +13,7 @@
 [![Lines](https://img.shields.io/badge/Doc%20Lines-34%2C000%2B-brightgreen.svg)](#documentation-coverage)
 [![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
 [![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
-[![Skills](https://img.shields.io/badge/AI%20Skills-17-yellow.svg)](#ai-skills)
+[![Skills](https://img.shields.io/badge/AI%20Skills-18-yellow.svg)](#ai-skills)
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
@@ -223,7 +223,7 @@ uv tool upgrade ida-pro-mcp
 <td width="50%" valign="top">
 
 ### AI Skills
-17 Claude Code / OMC skills
+18 Claude Code / OMC skills
 
 - **game-hacking-pcx** — doc index, API rules
 - **game-cheat-guidelines** — 12 behavioral rules (Enma)
@@ -232,6 +232,7 @@ uv tool upgrade ida-pro-mcp
 - **pcx-coding-discipline** — Karpathy workflow: scripts
 - **pcx-re-discipline** — Karpathy workflow: RE
 - **pcx-debug-overlay** — diagnostic surfaces separate from production overlay
+- **pcx-knowledge-index** — the three surfaces (llms.txt + bundles + MCP) and when to use each
 - **ai-pair-programming** — workflow for driving Claude/Cursor/Cline/Aider/Copilot
 - **re-evidence-log** — every offset cites its proof (`E-NNN` cross-refs)
 - **pcx-patch-day-playbook** — ordered triage when the game updates
@@ -328,7 +329,7 @@ pcx-ai-toolkit/
 │       ├── angelscript/                  AngelScript APIs (23 files)
 │       └── lua/                          Lua APIs (17 files)
 │
-├── .claude/skills/                   ── AI Skills (17)
+├── .claude/skills/                   ── AI Skills (18)
 │   ├── game-hacking-pcx/                Doc index + coding rules
 │   ├── game-cheat-guidelines/           12 behavioral guidelines (Enma)
 │   ├── pcx-angelscript-discipline/      10 AS-specific rules
@@ -343,6 +344,7 @@ pcx-ai-toolkit/
 │   ├── pcx-perf-budget/                 Frame-time targets + profiler recipe
 │   ├── pcx-streamproof/                 Capture-path taxonomy for OBS / Discord / cards
 │   ├── pcx-debug-overlay/               Diagnostic / profiler / status overlay (gated, read-only)
+│   ├── pcx-knowledge-index/             How AI tools reach the corpus: llms.txt + bundles + MCP
 │   ├── mcp-tool-routing/                Decision guide across the 37 Perception MCP tools
 │   ├── anti-cheat-re/                   Kernel AC RE methodology (6 steps)
 │   └── kernel-analysis/                 Driver analysis patterns (WDM/KMDF)
@@ -395,7 +397,8 @@ pcx-ai-toolkit/
 │   ├── zed-setup.md                      Zed editor MCP + agent panel setup
 │   ├── binary-analysis-setup.md          Binary analysis MCP reference
 │   ├── setup-binary-analysis.sh          MCP-only setup (if already installed)
-│   └── setup-binary-analysis.ps1         MCP-only setup — Windows
+│   ├── setup-binary-analysis.ps1         MCP-only setup — Windows
+│   └── pcx-knowledge-mcp/                MCP server: search + fetch over the toolkit corpus
 │
 ├── lsp/                              ── Language Servers (submodules)
 │   ├── enma-lsp/                         Enma: completion + diagnostics
@@ -435,7 +438,8 @@ pcx-ai-toolkit/
 │   ├── evidence-log-validator.py        Cross-check offsets.em vs evidence/<hash>.md citations
 │   ├── script-linter.py                 Light 12-guidelines static check on .em files
 │   ├── pre-ship-check.sh                Pre-release hygiene checklist (12 checks, --json output)
-│   └── install-re-tools.sh              One-command installer: IDA/Ghidra plugins + Python packages
+│   ├── install-re-tools.sh              One-command installer: IDA/Ghidra plugins + Python packages
+│   └── build-llms-index.py              Generate docs/llms.txt + bundles (--check for CI drift)
 ├── setup.sh                          One-command LSP + skills install
 ├── CONTRIBUTING.md                   Contribution guide
 └── LICENSE                           MIT
