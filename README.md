@@ -46,19 +46,32 @@ Result:  Compiles. Runs. Correct API calls.
 
 ## Quick Start
 
+**Linux / macOS / WSL / Git Bash:**
+
 ```bash
-# 1. Clone
 git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
 cd pcx-ai-toolkit
-
-# 2. Install (builds LSPs, installs Claude Code skills)
 ./setup.sh
+```
 
-# 3. Add to your project
-cp rules/CLAUDE.md /path/to/your/pcx-project/
+**Windows 10 / 11 (PowerShell):**
+
+```powershell
+git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
+cd pcx-ai-toolkit
+powershell -ExecutionPolicy Bypass -File setup.ps1
+```
+
+Both installers clone and build the LSP servers and install the AI skills to Claude Code if it's detected. Then drop the rules into your project:
+
+```
+# Linux/macOS:  cp rules/CLAUDE.md /path/to/your/pcx-project/
+# Windows:      copy rules\CLAUDE.md C:\path\to\your\pcx-project\
 ```
 
 That's it. The AI now reads docs before writing code.
+
+> **Requirements:** [Node.js 18+](https://nodejs.org/) and [Git](https://git-scm.com/) on PATH. Everything else (docs, skills, rules, templates) is plain text and needs no build.
 
 ---
 
@@ -462,11 +475,16 @@ Each is a correct skeleton: the structure and API calls are real, the offsets an
 | [enma-lsp](https://github.com/sinnafuls/enma-lsp) | Enma (`.em`) | Syntax highlighting, completion, hover docs, diagnostics, Perception API surface |
 | [angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx) | AngelScript (`.as`) | Syntax highlighting, completion, hover docs, diagnostics, Perception API surface |
 
-Built automatically by `setup.sh`. Editor config:
+Built automatically by `setup.sh` / `setup.ps1`. Editor config:
 
 ```
+# Linux / macOS
 Enma:        node lsp/enma-lsp/server/dist/server.js --stdio
 AngelScript: node lsp/angel-lsp-pcx/server/out/server.js --stdio
+
+# Windows
+Enma:        node lsp\enma-lsp\server\dist\server.js --stdio
+AngelScript: node lsp\angel-lsp-pcx\server\out\server.js --stdio
 ```
 
 ---

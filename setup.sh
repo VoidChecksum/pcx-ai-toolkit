@@ -1,70 +1,91 @@
 #!/usr/bin/env bash
+# pcx-ai-toolkit setup for Linux, macOS, WSL, Git Bash, and Cygwin.
+# Windows users without a bash shell: use setup.ps1 instead.
 set -euo pipefail
 
 TOOLKIT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Detect platform (informational)
+case "$(uname -s)" in
+    Linux*)   PLATFORM="Linux" ;;
+    Darwin*)  PLATFORM="macOS" ;;
+    CYGWIN*)  PLATFORM="Cygwin" ;;
+    MINGW*|MSYS*) PLATFORM="Git Bash / MSYS" ;;
+    *)        PLATFORM="$(uname -s)" ;;
+esac
+# WSL reports Linux but has Microsoft in the kernel string
+if [ "$PLATFORM" = "Linux" ] && grep -qiE "microsoft|wsl" /proc/version 2>/dev/null; then
+    PLATFORM="WSL"
+fi
+
 echo "pcx-ai-toolkit setup"
+echo "Platform: $PLATFORM"
 echo "Location: $TOOLKIT_DIR"
 echo ""
 
-# Check node/npm
-if ! command -v node &>/dev/null || ! command -v npm &>/dev/null; then
-    echo "ERROR: node and npm are required for LSP servers."
-    echo "Install Node.js 18+ from https://nodejs.org/"
-    exit 1
-fi
-echo "[ok] node $(node --version), npm $(npm --version)"
+# --- Check prerequisites ---
+for cmd in git node npm; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "ERROR: '$cmd' is required but not found."
+        case "$cmd" in
+            node|npm) echo "Install Node.js 18+ from https://nodejs.org/" ;;
+            git)      echo "Install Git from https://git-scm.com/" ;;
+        esac
+        exit 1
+    fi
+done
+echo "[ok] git $(git --version | awk '{print $3}'), node $(node --version), npm $(npm --version)"
 
-# Clone LSP submodules if not present
-if [ ! -d "$TOOLKIT_DIR/lsp/enma-lsp/.git" ]; then
-    echo "[..] Cloning enma-lsp..."
-    git clone --depth 1 https://github.com/sinnafuls/enma-lsp.git "$TOOLKIT_DIR/lsp/enma-lsp"
-else
-    echo "[ok] enma-lsp already present"
-fi
+# --- Clone + build an LSP server, verifying the output file exists ---
+install_lsp() {
+    local name="$1" url="$2" out_file="$3"
+    local dir="$TOOLKIT_DIR/lsp/$name"
 
-if [ ! -d "$TOOLKIT_DIR/lsp/angel-lsp-pcx/.git" ]; then
-    echo "[..] Cloning angel-lsp-pcx..."
-    git clone --depth 1 https://github.com/sinnafuls/angel-lsp-pcx.git "$TOOLKIT_DIR/lsp/angel-lsp-pcx"
-else
-    echo "[ok] angel-lsp-pcx already present"
-fi
+    if [ ! -d "$dir/.git" ]; then
+        echo "[..] Cloning $name..."
+        git clone --depth 1 "$url" "$dir"
+    else
+        echo "[ok] $name already present"
+    fi
 
-# Build enma-lsp
-echo "[..] Building enma-lsp..."
-cd "$TOOLKIT_DIR/lsp/enma-lsp"
-npm install --silent 2>/dev/null
-npm run compile --silent 2>/dev/null
-echo "[ok] enma-lsp built: server/dist/server.js"
+    echo "[..] Building $name..."
+    ( cd "$dir" && npm install && npm run compile ) >/dev/null 2>&1 || true
 
-# Build angel-lsp-pcx
-echo "[..] Building angel-lsp-pcx..."
-cd "$TOOLKIT_DIR/lsp/angel-lsp-pcx"
-npm install --silent 2>/dev/null
-npm run compile --silent 2>/dev/null
-echo "[ok] angel-lsp-pcx built: server/out/server.js"
+    if [ -f "$dir/$out_file" ]; then
+        echo "[ok] $name built: $out_file"
+    else
+        echo "[!!] $name build did not produce $out_file"
+        echo "     Run manually:  cd lsp/$name && npm install && npm run compile"
+    fi
+}
 
-cd "$TOOLKIT_DIR"
+install_lsp "enma-lsp"      "https://github.com/sinnafuls/enma-lsp.git"      "server/dist/server.js"
+install_lsp "angel-lsp-pcx" "https://github.com/sinnafuls/angel-lsp-pcx.git" "server/out/server.js"
 
-# Install skills to Claude Code if present
+# --- Install skills to Claude Code if present ---
+# On Git Bash/WSL, $HOME maps to the Windows user profile, so this works there too.
 if [ -d "$HOME/.claude" ]; then
     echo ""
     echo "[..] Claude Code detected — installing skills..."
-    mkdir -p "$HOME/.claude/skills/game-hacking-pcx"
-    mkdir -p "$HOME/.claude/skills/game-cheat-guidelines"
-    cp "$TOOLKIT_DIR/.claude/skills/game-hacking-pcx/SKILL.md" "$HOME/.claude/skills/game-hacking-pcx/"
-    cp "$TOOLKIT_DIR/.claude/skills/game-cheat-guidelines/SKILL.md" "$HOME/.claude/skills/game-cheat-guidelines/"
+    for skill in game-hacking-pcx game-cheat-guidelines; do
+        mkdir -p "$HOME/.claude/skills/$skill"
+        cp "$TOOLKIT_DIR/.claude/skills/$skill/SKILL.md" "$HOME/.claude/skills/$skill/"
+    done
     echo "[ok] Skills installed to ~/.claude/skills/"
 else
     echo ""
     echo "[--] Claude Code not detected — skip skill install."
-    echo "     To install manually: cp -r .claude/skills/* ~/.claude/skills/"
+    echo "     Manual: cp -r .claude/skills/* ~/.claude/skills/"
 fi
 
-# Optional: copy CLAUDE.md to project
+# --- Optional: copy CLAUDE.md to a project ---
 if [ "${1:-}" = "--project" ] && [ -n "${2:-}" ]; then
-    echo "[..] Copying CLAUDE.md to $2"
-    cp "$TOOLKIT_DIR/rules/CLAUDE.md" "$2/CLAUDE.md"
-    echo "[ok] Project rules installed"
+    if [ -d "$2" ]; then
+        cp "$TOOLKIT_DIR/rules/CLAUDE.md" "$2/CLAUDE.md"
+        echo "[ok] Project rules copied to $2/CLAUDE.md"
+    else
+        echo "[!!] Project path not found: $2"
+    fi
 fi
 
 echo ""

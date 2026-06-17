@@ -5,8 +5,15 @@
 Copy the skill directories to your Claude Code skills folder:
 
 ```bash
+# Linux / macOS / WSL / Git Bash
 cp -r .claude/skills/game-hacking-pcx ~/.claude/skills/
 cp -r .claude/skills/game-cheat-guidelines ~/.claude/skills/
+```
+
+```powershell
+# Windows (PowerShell)
+Copy-Item -Recurse .claude\skills\game-hacking-pcx     $env:USERPROFILE\.claude\skills\
+Copy-Item -Recurse .claude\skills\game-cheat-guidelines $env:USERPROFILE\.claude\skills\
 ```
 
 The skills auto-trigger when you work with `.em`/`.as` files or ask about Perception.cx scripting.
@@ -16,7 +23,13 @@ The skills auto-trigger when you work with `.em`/`.as` files or ask about Percep
 Copy the drop-in project rules to your scripting project:
 
 ```bash
+# Linux / macOS
 cp rules/CLAUDE.md /path/to/your/pcx-project/CLAUDE.md
+```
+
+```powershell
+# Windows
+Copy-Item rules\CLAUDE.md C:\path\to\your\pcx-project\CLAUDE.md
 ```
 
 Claude Code reads this automatically when working in that directory.

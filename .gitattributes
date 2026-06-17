@@ -1,0 +1,31 @@
+# Normalize line endings across Linux / macOS / Windows checkouts.
+# Without this, Windows (core.autocrlf=true) corrupts setup.sh into CRLF,
+# producing "bad interpreter: /usr/bin/env bash^M" under WSL/Git Bash.
+
+# Default: let git normalize text, check out with the platform's native EOL
+* text=auto
+
+# Shell scripts MUST be LF on every platform (bash chokes on CRLF)
+*.sh    text eol=lf
+
+# PowerShell / batch are happiest with CRLF on Windows
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+# Source, docs, and config — normalized LF everywhere (editors handle it)
+*.em    text eol=lf
+*.as    text eol=lf
+*.lua   text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+
+# Binary assets — never touch
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
