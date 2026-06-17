@@ -90,15 +90,36 @@
 | [`perception/ide.md`](perception/ide.md) | 585 | Perception IDE: editor, AI chat, tools, extensions |
 | [`perception/extensions-api.md`](perception/extensions-api.md) | 371 | Extension development API |
 | [`perception/analyzer.md`](perception/analyzer.md) | 370 | Perception Analyzer |
+| [`perception/custom-draw-api.md`](perception/custom-draw-api.md) | ~500 | D3D11 GPU pipeline: shaders, buffers, textures, compute, depth testing |
+| [`perception/changelogs.md`](perception/changelogs.md) | ~500 | Complete changelog archive (Feb–June 2026) |
 
 ## Perception.cx Platform APIs — AngelScript
 
-23 files, 10,820 lines total. Located in [`perception/angelscript/`](perception/angelscript/).
+24 files, 11,000+ lines total. Located in [`perception/angelscript/`](perception/angelscript/).
 
-Covers: Overview, Life Cycle, Engine, Atomic Types, Proc API, Render API, GUI API, Input API, System/CPU/Disassembly, Net API, File System, Extended Math, Win API, JSON API, Unicorn, Zydis Encoder, Intrinsics, Mutex, Utilities, Sound, Bit Reinterpret, Engine Specific, CS2 Extended.
+Covers: Overview, Life Cycle, Engine, Atomic Types, Proc API, Render API, **Custom Draw API**, GUI API, Input API, System/CPU/Disassembly, Net API, File System, Extended Math, Win API, JSON API, Unicorn, Zydis Encoder, Intrinsics, Mutex, Utilities, Sound, Bit Reinterpret, Engine Specific, CS2 Extended.
 
 ## Perception.cx Platform APIs — Lua
 
 17 files, 5,779 lines total. Located in [`perception/lua/`](perception/lua/).
 
 Covers: Overview, Life Cycle, Engine, Proc API, Render API, GUI API, Input API, System/CPU/Disassembly, Net API, File System, Extended Math, Win API, JSON API, Utilities, Sound, Engine Specific, CS2 Extended.
+
+## Knowledge Base
+
+| File | Description |
+|------|-------------|
+| [`../knowledge/enma-cheatsheet.md`](../knowledge/enma-cheatsheet.md) | Enma language quick reference |
+| [`../knowledge/pcx-api-cheatsheet.md`](../knowledge/pcx-api-cheatsheet.md) | Perception API quick reference (updated with 2026 additions) |
+| [`../knowledge/common-patterns.md`](../knowledge/common-patterns.md) | 13 working code patterns |
+| [`../knowledge/custom-draw-patterns.md`](../knowledge/custom-draw-patterns.md) | 8 Custom Draw API GPU rendering patterns |
+| [`../knowledge/offset-methodology.md`](../knowledge/offset-methodology.md) | Signature construction and pointer chain walking |
+| [`../knowledge/community-tools.md`](../knowledge/community-tools.md) | Community MCP servers, VS Code extensions, and utilities |
+| [`../knowledge/game-targets.md`](../knowledge/game-targets.md) | Complete game support reference (25+ games) |
+
+## Signatures & Reversal Guides
+
+| File | Description |
+|------|-------------|
+| [`../signatures/source-engine/common-sigs.md`](../signatures/source-engine/common-sigs.md) | Source Engine example patterns (entity list, local player, view matrix) |
+| [`../signatures/unreal-engine/ue-reversal-guide.md`](../signatures/unreal-engine/ue-reversal-guide.md) | Unreal Engine reversal (GWorld/GObjects/GNames, Dumper-7, key structures) |

@@ -2,6 +2,25 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.4.0] — 2026-06-17
+
+### Added
+- **Custom Draw API documentation** — full D3D11 GPU pipeline docs for both Enma (`docs/perception/custom-draw-api.md`) and AngelScript (`docs/perception/angelscript/custom-draw-api.md`): shaders, vertex/index buffers, depth testing, compute shaders, textures, render targets, mesh loading, backbuffer capture
+- **Custom Draw API patterns** — 8 working GPU rendering patterns (`knowledge/custom-draw-patterns.md`): colored shapes, textured quads, 3D cubes, wireframe, glow/blur post-processing, compute shaders, multi-pass rendering, dynamic textures
+- **Changelogs archive** — complete Perception.cx changelog (Feb–June 2026) in `docs/perception/changelogs.md` covering all Universal API and CS2 API updates
+- **Community tools reference** — `knowledge/community-tools.md` documenting 5 MCP servers (perception-mcp, claude-ception, reclass-mcp, UE Docs MCP, Context7), VS Code extensions (Enma LSP, AngelScript LSP), and utilities (Claude Proxy, Custom GUI base)
+- **Game targets reference** — `knowledge/game-targets.md` listing 29 supported games across 5 categories with engine info and considerations
+- **Unreal Engine reversal guide** — `signatures/unreal-engine/ue-reversal-guide.md` covering GWorld/GObjects/GNames, Dumper-7 methodology, key UE structures, manual RE approach, and encryption considerations
+
+### Changed
+- **PCX API cheatsheet** — added all new API functions from Feb–June 2026 changelogs: Custom Draw API (largest section), world_to_screen variants, matrix double-precision, thread priority, atomics, GUI additions, Unicorn updates, Sound API, scan API fixes, XINPUT support, font glyph ranges
+- **Documentation INDEX** — updated with all new files, Knowledge Base section, and Signatures section
+
+### Deprecated (upstream)
+- `source2_world_to_screen` → use `world_to_screen_rowmajor` or `world_to_screen_transposed`
+- Default matrix4x4 read/write → use precision-specific variants (`readas_float`/`readas_double`)
+- Perception IDE & Analyzer — being retired in favor of Perception MCP (60-70+ tools)
+
 ## [1.3.0] — 2025-06-17
 
 ### Added

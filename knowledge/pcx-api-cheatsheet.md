@@ -230,3 +230,266 @@ int64 main() {
 void my_fn(int64 data) { /* called every frame */ }
 unregister_routine(handle);
 ```
+
+---
+
+# New API Additions (Feb–June 2026 Changelogs)
+
+## Custom Draw API — Direct GPU Access (D3D11)
+
+Full custom shader pipeline on the Universal API. Write HLSL, create vertex
+buffers, textures, render targets, depth buffers, and draw any primitive
+topology directly from AngelScript/Enma. Custom draw commands respect draw
+order with every existing render function. All resources are tracked
+per-script and auto-cleaned on unload.
+
+### Resource Creation (all return `uint64` handle, `0` on failure)
+```cpp
+uint64 create_shader(string vs_source, string ps_source, string layout);
+uint64 create_vertex_buffer(uint32 stride, uint32 max_vertices, bool dynamic);
+uint64 create_index_buffer(uint32 max_indices, bool is_32bit, bool dynamic);
+uint64 create_constant_buffer(uint32 size);
+uint64 create_blend_state(src, dst, op, src_alpha, dst_alpha, op_alpha);
+uint64 create_sampler(filter, address_u, address_v);
+uint64 create_texture(uint32 width, uint32 height, array<uint8> rgba_data);
+uint64 create_render_target(uint32 width, uint32 height);
+uint64 create_depth_buffer(uint32 width, uint32 height);
+uint64 create_depth_stencil_state(bool depth_enable, bool depth_write, int compare_func);
+uint64 create_rasterizer_state(int fill_mode, int cull_mode);
+```
+
+### Drawing
+```cpp
+custom_draw(shader, vb, data, vertex_count, topology,
+            blend, sampler, texture, rt, cb, cb_data, cb_slot);
+custom_draw_indexed(shader, vb, vert_data, vert_stride,
+                    ib, index_data, index_count, topology,
+                    blend, sampler, texture, rt, cb, cb_data, cb_slot);
+```
+
+### Render Target Operations
+```cpp
+custom_set_render_target(rt);
+custom_set_render_target_ext(rt, depth_buffer);
+custom_clear_render_target(rt, r, g, b, a);
+custom_clear_depth_buffer(db);
+custom_resolve_render_target(rt);     // copy RT -> backbuffer
+```
+
+### State Management
+```cpp
+custom_set_depth_stencil_state(ds);
+custom_set_rasterizer_state(rs);
+custom_set_viewport(x, y, w, h);                          // split-screen / PiP
+custom_bind_textures(shader, slot0_tex, slot1_tex, ...);  // multi-texture
+custom_bind_constant_buffers(shader, slot, cb, cb_data, cb_size);
+```
+
+### Mesh & Texture Loading
+```cpp
+load_obj_mesh(path);                  // returns vb + ib handles
+create_texture_from_file(path);
+create_dynamic_texture(width, height);
+update_dynamic_texture(tex, rgba_data);
+```
+
+### Compute Shaders
+```cpp
+uint64 cs  = create_compute_shader(cs_source);
+uint64 buf = create_structured_buffer(element_size, element_count, data);
+dispatch_compute(cs, groups_x, groups_y, groups_z);
+read_structured_buffer(buf);
+```
+
+### Backbuffer Capture
+```cpp
+uint64 tex = capture_backbuffer();    // texture handle of current frame
+```
+
+### Constants
+```cpp
+// Topology
+TOPO_POINT_LIST, TOPO_LINE_LIST, TOPO_LINE_STRIP,
+TOPO_TRIANGLE_LIST, TOPO_TRIANGLE_STRIP
+
+// Compare funcs (depth stencil)
+CMP_NEVER, CMP_LESS, CMP_EQUAL, CMP_LESS_EQUAL,
+CMP_GREATER, CMP_NOT_EQUAL, CMP_GREATER_EQUAL, CMP_ALWAYS
+
+// Fill modes
+FILL_WIREFRAME, FILL_SOLID
+
+// Cull modes
+CULL_NONE, CULL_FRONT, CULL_BACK
+```
+
+### Layout String Format
+Comma-separated `SEMANTIC:slot:TYPE` entries, e.g.
+`"POSITION:0:FLOAT2, COLOR:0:FLOAT4"`.
+
+### Key Features
+- Indexed rendering with 16-bit and 32-bit index formats
+- True 3D depth testing with configurable depth-stencil state
+- Rasterizer state control (culling, wireframe)
+- Custom viewports for split-screen / picture-in-picture
+- Multi-texture and multi-constant-buffer binding
+- Compute shaders with structured buffers
+- OBJ mesh loading + dynamic texture updates
+- Depth-enabled render targets, backbuffer capture for post-processing
+
+### Example: Basic Colored Triangle
+```angelscript
+string vs = """
+cbuffer cb : register(b0) { float4x4 proj; };
+struct VS_IN  { float2 pos : POSITION; float4 col : COLOR; };
+struct VS_OUT { float4 pos : SV_Position; float4 col : COLOR; };
+VS_OUT main(VS_IN i) {
+    VS_OUT o;
+    o.pos = mul(float4(i.pos, 0, 1), proj);
+    o.col = i.col;
+    return o;
+}
+""";
+
+string ps = """
+struct PS_IN { float4 pos : SV_Position; float4 col : COLOR; };
+float4 main(PS_IN i) : SV_Target { return i.col; }
+""";
+
+uint64 shader = create_shader(vs, ps, "POSITION:0:FLOAT2, COLOR:0:FLOAT4");
+uint64 vb = create_vertex_buffer(24, 3, true);
+uint64 blend = create_blend_state(BLEND_SRC_ALPHA, BLEND_INV_SRC_ALPHA, BLEND_OP_ADD,
+                                  BLEND_ONE, BLEND_INV_SRC_ALPHA, BLEND_OP_ADD);
+```
+
+### Example: Depth-Tested 3D Scene
+```angelscript
+uint64 db = create_depth_buffer(400, 300);
+uint64 ds = create_depth_stencil_state(true, true, CMP_LESS);
+
+custom_set_render_target_ext(rt, db);
+custom_clear_depth_buffer(db);
+custom_set_depth_stencil_state(ds);
+```
+
+## World-to-Screen (updated Feb 2026)
+
+```cpp
+bool world_to_screen_rowmajor(vec3 world_pos, mat4 view_matrix, vec2 &out screen_pos);
+bool world_to_screen_transposed(vec3 world_pos, mat4 view_matrix, vec2 &out screen_pos);
+```
+- Use `world_to_screen_rowmajor` for row-major view matrices.
+- Use `world_to_screen_transposed` for transposed (column-major) matrices.
+- ⚠️ **DEPRECATED:** `source2_world_to_screen` — replace with the variants above.
+
+## Matrix4x4 Double Precision (Feb 2026)
+
+```cpp
+mat4 m.readas_float(uint64 addr);      // float-precision read
+mat4 m.readas_double(uint64 addr);     // double-precision read
+bool m.writeas_float(uint64 addr, mat4 v);
+bool m.writeas_double(uint64 addr, mat4 v);
+```
+- ⚠️ **DEPRECATED:** default `matrix4x4` read/write — use a precision-specific variant.
+
+## Thread Priority Helpers (Feb 2026)
+
+```cpp
+set_thread_to_highest_priority();
+set_thread_to_lowest_priority();
+set_thread_to_normal_priority();
+```
+
+## Atomics (Feb 2026)
+
+```cpp
+atomic_int32 a;    // lock-free thread-safe 32-bit integer
+atomic_int64 b;    // lock-free thread-safe 64-bit integer
+```
+
+## GUI Additions (Feb–Mar 2026)
+
+```cpp
+get_gui_position(float &out x, float &out y);   // GUI window position
+get_gui_size(float &out w, float &out h);       // GUI window size
+
+// List widget ops
+list:get(...);              list:remove(...);
+list:highlight(...);        list:remove_highlight(...);
+list:hide(...);             list:show(...);
+```
+
+## Callbacks (Mar 2026)
+
+```cpp
+register_callback(string name, func, bool render_on_top = false);
+// render_on_top=true renders on top of everything else
+```
+
+## Window Additions (Feb 2026)
+
+```cpp
+array<uint64> hwnds = get_all_hwnds();   // all window handles
+```
+
+## Fonts (Feb 2026)
+
+```cpp
+int64 create_font(string name, float64 size, array glyph_ranges);       // glyph_ranges optional
+int64 create_font_mem(array<uint8> data, float64 size, array glyph_ranges); // glyph_ranges optional
+```
+
+## Input Additions (Feb 2026)
+
+- Controller keybinds via **XINPUT** now supported.
+- `get_mouse_delta()` now returns proper movement delta (fixed).
+
+## Unicorn Emulator Updates (Mar 2026)
+
+```cpp
+// New hook types
+UC_HOOK_INSN_INVALID    // invalid instructions
+UC_HOOK_INTR            // software interrupts (INT3, syscalls)
+
+uint64 status = uc_get_last_exception(uc);     // NTSTATUS, e.g. 0xC0000005
+uint64 rip    = uc_get_exception_address(uc);  // RIP where exception occurred
+```
+- Null pointer access is now caught gracefully instead of crashing.
+
+## Sound API — Full Audio Engine (Mar 2026)
+
+44100Hz stereo, up to 64 simultaneous instances. WAV (PCM 8/16-bit) parsed
+directly; MP3/AAC/WMA/FLAC decoded via Media Foundation. Auto-cleanup on
+script unload.
+
+```cpp
+int64 snd = load_sound(path);
+free_sound(snd);
+play_sound(snd, bool loop);
+stop_sound(snd);
+stop_all_sounds();
+set_sound_volume(snd, float vol);   // 0.0 – 1.0
+set_sound_pan(snd, float pan);      // -1.0 (L) – +1.0 (R)
+```
+
+## Scan API Updates (Mar 2026)
+
+Scan functions now return `array<uint64>@` directly (no `&out` params).
+The `get_vad_snapshot` regression is fixed and returns proper values.
+
+```cpp
+array<uint64> p.scan_float(value, heap_only);
+array<uint64> p.scan_double(value, heap_only);
+array<uint64> p.scan_string("text", heap_only);
+array<uint64> p.scan_wstring("text", heap_only);
+array<uint64> p.scan_pointer(target_addr, heap_only);
+```
+- ⚠️ **REMOVED (never existed):** `scan_bytes`, `scan_all_bytes`, `scan_all_u32`, `scan_all_u64`.
+
+## Deprecated Functions Summary
+
+| Deprecated | Replacement |
+|---|---|
+| `source2_world_to_screen` | `world_to_screen_rowmajor` / `world_to_screen_transposed` |
+| default `matrix4x4` read/write | `readas_float` / `readas_double` / `writeas_float` / `writeas_double` |
+| `scan_bytes`, `scan_all_bytes`, `scan_all_u32`, `scan_all_u64` | removed — use `scan_float` / `scan_double` / `scan_string` / `scan_wstring` / `scan_pointer` |
