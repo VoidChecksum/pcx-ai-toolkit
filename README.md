@@ -1,5 +1,9 @@
 <div align="center">
 
+<img src="assets/perception-banner.png" alt="Perception.cx" width="600">
+
+<br><br>
+
 # pcx-ai-toolkit
 
 ### The Complete AI-Powered Scripting Toolkit for Perception.cx
@@ -111,6 +115,35 @@ MCP + LSP + Rules
 </td>
 </tr>
 </table>
+
+---
+
+## Perception IDE — Built-In Script Editor and AI Assistant
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center">
+<strong>Script Editor + Settings</strong><br>
+<img src="assets/pcx-ide-screenshot.png" alt="Perception IDE - Script Editor" width="380">
+</td>
+<td align="center">
+<strong>AI Chat + Tool Calls</strong><br>
+<img src="assets/pcx-ide-ai-chat.png" alt="Perception IDE - AI Chat" width="380">
+</td>
+</tr>
+<tr>
+<td align="center" colspan="2">
+<strong>42+ RE Tools available via MCP</strong><br>
+<img src="assets/pcx-ide-tools.png" alt="Perception IDE - RE Tools" width="500">
+</td>
+</tr>
+</table>
+
+<sub>Screenshots from the <a href="https://docs.perception.cx/perception/perception-ide">Perception IDE documentation</a></sub>
+
+</div>
 
 ---
 
