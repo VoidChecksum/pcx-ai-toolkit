@@ -2,6 +2,29 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.12.0] — 2026-06-17
+
+### Added
+- **2 new RE tools** in `tools/` (stdlib-only Python, matches the round-1 contract):
+  - `anti-debug-scanner.py` — flags anti-debug surfaces in a PE: direct-check imports (`IsDebuggerPresent` / `NtQueryInformationProcess` / `CheckRemoteDebuggerPresent`), PEB-walk byte patterns (`fs:[30h]` 32-bit, `gs:[60h]` 64-bit), `NtGlobalFlag` heap-flag CMP heuristic, RDTSC timing-loop pair detection, INT 2D + long INT 3 fill patterns, debug-register CONTEXT manipulation (Get/SetThreadContext + `CONTEXT_DEBUG_REGISTERS` literal), VEH chain manipulation, debugger process/window-class string scans (ASCII + UTF-16LE). Categorized output with `STRONG`/`SUSPICIOUS`/`INFO` severity, `--category` filter, `--json` mode.
+  - `module-export-mapper.py` — list a PE's exports (ordinal | name | RVA, with mangled-name short hint) and optionally cross-reference which other PE files in a target directory import each export (`--consumers /game/dir/`). Detects PE forward exports (`FORWARD -> module.func`). `--filter`, `--ordinal-only`, `--json`. Exit 0 with a friendly message when the binary has no export directory (most EXEs).
+- **3 new AI skills** under `.claude/skills/`:
+  - `re-evidence-log` (313 lines) — every claimed offset / sig / struct layout cites its proof. 6 numbered rules (one file per binary, stable `E-NNN` entry IDs, required citation fields, sigs cite their disassembly context, structs cite SDK source + per-field confidence tier, `last_verified` dates, negative-result tracking) + paste-ready templates. Sits between `pcx-re-discipline` (the discipline) and `pcx-patch-day-playbook` (which writes per-patch entries into the log).
+  - `script-bundler` (374 lines) — packaging and shipping workflow. When to ship `.em` vs `.emb` (with `serialize keep_debug=false` for path stripping), canonical bundle order (`globals → offsets → feature → menu → main`), hot-reload-safe boundaries (what survives a reload, what doesn't), greppable pre-ship hygiene checklist, runtime-version pinning via `#define PCX_REQUIRED_*`, distribution metadata (recipient `README` / `LICENSE` / `CHANGELOG` templates). The outbound counterpart to `pcx-patch-day-playbook`.
+  - `mcp-tool-routing` (287 lines) — decision guide across the 37 Perception MCP tools. Organized by user goal (read N bytes / find something in memory / understand a function / understand a class / generate a sig / process+module info / file+script ops), with explicit cost tiers (cheap / medium / expensive / side-effecting) and named composition workflows (sig→validate, scan-string→find-refs→analyze, snapshot→action→diff). Closes the "which of the 37 tools for this task" gap.
+- **3 new knowledge references** under `knowledge/`:
+  - `engine-godot.md` (129 lines) — Godot 3.x / 4.x engine RE reference. Open-source advantage (pull matching headers from GitHub by version), node-tree + `ObjectDB` architecture, `.pck` payload + `GDPC` magic footer, per-game table (Brotato / Cassette Beasts / Halls of Torment / Slay the Princess / Cruelty Squad), reversal-workflow first-60-minutes, community tools (gdsdecomp, godot-pck-explorer, godot-cpp). Fills the 6th engine gap.
+  - `pcx-version-matrix.md` (383 lines) — API availability matrix by PCX version, drawn from `docs/perception/changelogs.md`. Per-category since-version tables (Render 2D / Custom-Draw / Proc / Input / GUI / Sound / Net / Win / Filesystem / CPU / Zydis / Unicorn), removed/deprecated section with replacements (`source2_world_to_screen` → `world_to_screen_rowmajor`), language-version quirks (Enma / AngelScript / Lua), reverse-chronological release timeline. Every claim cites a changelog row or is marked `unknown` — no invented versions.
+  - `script-organization-patterns.md` (549 lines) — multi-file Enma project organization beyond `templates/full-project/`. Shared state placement rules, per-binary offset modules, JSON config persistence (using real `json_*` / `fs_*` APIs), multi-script coordination, utility module extraction heuristic ("3 uses → extract; 2 → leave duplicated"), feature toggles, module-version pinning, dead-code policy, the 20-feature project shape. Companion to the 5-file scaffold.
+- **2 new infrastructure drop-ins**:
+  - `rules/CLINE.md` (115 lines) — Cline (VS Code AI agent) custom-instructions drop-in, parallel to `rules/CURSOR.md`. Cline-specific notes on auto-approval gating (read-only MCP tools safe, write/execute tools gated), Plan/Act mode workflow, token-budget guidance (`@`-reference specific docs vs preloading), checkpoint discipline before side-effecting operations.
+  - `mcp/aider-setup.md` (227 lines) — Aider CLI integration guide. Setup via `pipx install aider-chat`, project config in `.aider.conf.yml` (model, always-loaded `read:` doc list, `auto-commits`), `CONVENTIONS.md` wiring (copy or symlink `rules/CLAUDE.md`), typical workflow walkthrough, MCP-handoff strategy (Aider for script edits + Perception IDE for live MCP), `--map-tokens` guidance for the 35k-line doc corpus.
+
+### Changed
+- README — AI Skills count `11` → `14`; tree, skills box, knowledge box, templates list, tools list, and MCP-supported-tools section refreshed.
+- `docs/INDEX.md` — 3 new knowledge entries (engine-godot, pcx-version-matrix, script-organization-patterns) added under their respective subsections.
+- `mcp/perception-mcp-config.json` — unchanged; `mcp-tool-routing` skill cross-references its 37-tool list authoritatively.
+
 ## [1.11.0] — 2026-06-17
 
 ### Added

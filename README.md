@@ -13,7 +13,7 @@
 [![Lines](https://img.shields.io/badge/Doc%20Lines-34%2C000%2B-brightgreen.svg)](#documentation-coverage)
 [![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
 [![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
-[![Skills](https://img.shields.io/badge/AI%20Skills-11-yellow.svg)](#ai-skills)
+[![Skills](https://img.shields.io/badge/AI%20Skills-14-yellow.svg)](#ai-skills)
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
@@ -223,7 +223,7 @@ uv tool upgrade ida-pro-mcp
 <td width="50%" valign="top">
 
 ### AI Skills
-11 Claude Code / OMC skills
+14 Claude Code / OMC skills
 
 - **game-hacking-pcx** — doc index, API rules
 - **game-cheat-guidelines** — 12 behavioral rules (Enma)
@@ -231,9 +231,12 @@ uv tool upgrade ida-pro-mcp
 - **pcx-lua-discipline** — 10 Lua-specific rules (int subtype, `pcall`, hot-reload)
 - **pcx-coding-discipline** — Karpathy workflow: scripts
 - **pcx-re-discipline** — Karpathy workflow: RE
+- **re-evidence-log** — every offset cites its proof (`E-NNN` cross-refs)
 - **pcx-patch-day-playbook** — ordered triage when the game updates
+- **script-bundler** — packaging, hot-reload boundaries, pre-ship hygiene
 - **pcx-perf-budget** — frame-time targets + `mono_us` profiler recipe
 - **pcx-streamproof** — capture-path taxonomy for OBS / Discord / capture cards
+- **mcp-tool-routing** — which of the 37 Perception MCP tools for which task
 - **anti-cheat-re** — kernel AC methodology
 - **kernel-analysis** — driver analysis patterns
 
@@ -245,14 +248,16 @@ Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
 <td width="50%" valign="top">
 
 ### Knowledge Base
-13 reference files
+17 reference files
 
 - Enma + PCX API cheatsheets
 - Working code patterns (13 recipes)
 - Offset-finding methodology, RE plugin reference
 - Aimbot math (atan2, FOV, prediction, smoothing)
+- Multi-file script organization patterns (extends `templates/full-project/`)
+- PCX API version matrix (since-version table sourced from changelogs)
 - Anti-cheat architecture (EAC/BE/Vanguard/...) + kernel-RE tools
-- 4 engine RE references: CryEngine, Frostbite, RE Engine, REDengine
+- 5 engine RE references: CryEngine, Frostbite, RE Engine, REDengine, Godot
 
 </td>
 <td width="50%" valign="top">
@@ -318,22 +323,27 @@ pcx-ai-toolkit/
 │       ├── angelscript/                  AngelScript APIs (23 files)
 │       └── lua/                          Lua APIs (17 files)
 │
-├── .claude/skills/                   ── AI Skills (11)
+├── .claude/skills/                   ── AI Skills (14)
 │   ├── game-hacking-pcx/                Doc index + coding rules
 │   ├── game-cheat-guidelines/           12 behavioral guidelines (Enma)
 │   ├── pcx-angelscript-discipline/      10 AS-specific rules
 │   ├── pcx-lua-discipline/              10 Lua-specific rules
 │   ├── pcx-coding-discipline/           Karpathy workflow — writing scripts
 │   ├── pcx-re-discipline/               Karpathy workflow — reverse engineering
+│   ├── re-evidence-log/                 Evidence-citation discipline (E-NNN cross-refs)
 │   ├── pcx-patch-day-playbook/          Patch-day triage workflow (7 steps)
+│   ├── script-bundler/                  Packaging + ship-day hygiene + .emb workflow
 │   ├── pcx-perf-budget/                 Frame-time targets + profiler recipe
 │   ├── pcx-streamproof/                 Capture-path taxonomy for OBS / Discord / cards
+│   ├── mcp-tool-routing/                Decision guide across the 37 Perception MCP tools
 │   ├── anti-cheat-re/                   Kernel AC RE methodology (6 steps)
 │   └── kernel-analysis/                 Driver analysis patterns (WDM/KMDF)
 │
 ├── knowledge/                        ── Quick References
 │   ├── enma-cheatsheet.md                Language quick-ref card
 │   ├── pcx-api-cheatsheet.md             All APIs at a glance
+│   ├── pcx-version-matrix.md             Since-version API matrix (sourced from changelogs.md)
+│   ├── script-organization-patterns.md   Multi-file project organization beyond full-project/
 │   ├── anti-cheat-architecture.md        EAC/BE/Vanguard/GG architecture + detection matrix
 │   ├── kernel-re-tools.md                Kernel RE tool reference (WinDbg, HyperDbg, Volatility, etc.)
 │   ├── common-patterns.md                13 working code recipes
@@ -342,6 +352,7 @@ pcx-ai-toolkit/
 │   ├── aimbot-math.md                    angles, FOV, prediction, recoil comp, smoothing
 │   ├── engine-cryengine.md               CryEngine family (Hunt: Showdown, Star Citizen, KCD)
 │   ├── engine-frostbite.md               Frostbite (Battlefield, FIFA, Anthem, Andromeda)
+│   ├── engine-godot.md                   Godot 3.x / 4.x (Brotato, Cassette Beasts, Halls of Torment)
 │   ├── engine-re-engine.md               RE Engine (RE2/3/4, MH Rise/Wilds, SF6, DD2)
 │   └── engine-redengine.md               REDengine (Cyberpunk 2077, Witcher 3)
 │
@@ -359,6 +370,7 @@ pcx-ai-toolkit/
 ├── rules/                            ── Project Rules
 │   ├── CLAUDE.md                         Drop-in for Claude Code
 │   ├── CURSOR.md                         Drop-in `.cursorrules` for Cursor
+│   ├── CLINE.md                          Drop-in custom instructions for Cline (VS Code agent)
 │   ├── AGENTS.md                         6 agent role definitions
 │   └── KARPATHY.md                       Work-discipline drop-in (4 principles)
 │
@@ -366,6 +378,7 @@ pcx-ai-toolkit/
 │   ├── perception-mcp-config.json        42+ tool definitions
 │   ├── claude-code-setup.md              Claude Code guide
 │   ├── cursor-setup.md                   Cursor guide
+│   ├── aider-setup.md                    Aider CLI integration (.aider.conf.yml, CONVENTIONS.md)
 │   ├── binary-analysis-setup.md          Binary analysis MCP reference
 │   ├── setup-binary-analysis.sh          MCP-only setup (if already installed)
 │   └── setup-binary-analysis.ps1         MCP-only setup — Windows
@@ -397,6 +410,8 @@ pcx-ai-toolkit/
 │   ├── pe-section-analyzer.py           Entropy analysis, packing detection, anomaly flagging
 │   ├── resolve-api-hashes.py            Resolve API hashes (ROR13, CRC32, DJB2, FNV-1a, MurmurHash3, SDBM)
 │   ├── dump-strings-xor.py              Extract XOR-encrypted strings (brute-force single-byte keys)
+│   ├── anti-debug-scanner.py            Flag anti-debug surfaces in a PE (PEB / RDTSC / IsDebuggerPresent / window class)
+│   ├── module-export-mapper.py          List exports; cross-reference which consumers import each
 │   ├── offset-diff.py                   Diff named sigs between two binary versions (patch-day workflow)
 │   ├── sig-uniqueness-checker.py        Verdict per sig: UNIQUE / AMBIGUOUS / STALE / BRITTLE
 │   ├── pattern-format-converter.py      Round-trip patterns: IDA / Ghidra / x64dbg / CE / Enma / C
