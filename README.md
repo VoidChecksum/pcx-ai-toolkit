@@ -1,242 +1,416 @@
+<div align="center">
+
 # pcx-ai-toolkit
 
-**The complete AI-assisted scripting toolkit for [Perception.cx](https://perception.cx).**
+### The Complete AI-Powered Scripting Toolkit for Perception.cx
 
-Turn any LLM — Claude, GPT, Gemini, Copilot, or a local model — into an expert Perception.cx script developer. This toolkit gives the AI full knowledge of the Enma language, AngelScript, Lua, and every Perception.cx platform API, so it writes correct code on the first try instead of hallucinating APIs that don't exist.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/Docs-107%20pages-brightgreen.svg)](#documentation-coverage)
+[![Lines](https://img.shields.io/badge/Doc%20Lines-34%2C000%2B-brightgreen.svg)](#documentation-coverage)
+[![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
+[![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
+[![Skills](https://img.shields.io/badge/AI%20Skills-2-yellow.svg)](#ai-skills)
 
----
+**Turn any LLM into an expert Perception.cx developer.**<br>
+Complete Enma language docs, every PCX API, coding guidelines, MCP configs, and LSP servers — in one package.
 
-## Why This Exists
+[Quick Start](#quick-start) · [Documentation](#documentation-coverage) · [AI Skills](#ai-skills) · [MCP Integration](#mcp-integration) · [Contributing](#contributing)
 
-LLMs don't know Enma. They don't know the Perception.cx API. When you ask them to write a PCX script, they guess — and they guess wrong.
-
-This toolkit fixes that by giving the AI:
-- **33,580 lines of real documentation** — every type, function, and parameter
-- **Coding rules** that prevent the 12 most common mistakes in PCX scripting
-- **Working code patterns** it can reference instead of inventing syntax
-- **MCP server configs** so the AI can connect directly to Perception's live tooling
-
-The result: the AI reads the actual docs before writing code, follows the platform's real API signatures, and produces scripts that compile and run.
+</div>
 
 ---
 
-## What's Inside
+## The Problem
+
+LLMs don't know Enma. They don't know the Perception.cx API. Ask them to write a PCX script and they hallucinate function names, invent parameters, and produce code that doesn't compile.
+
+## The Solution
+
+Give the AI **34,000+ lines of real documentation** and **12 coding rules** that prevent the most common mistakes. The AI reads the actual docs before writing code, follows real API signatures, and produces scripts that work.
 
 ```
-pcx-ai-toolkit/
-│
-├── docs/                            33,580 lines of documentation
-│   ├── enma/                        Enma language, standard library, SDK
-│   │   ├── llms-language.md         Complete language reference (single file, 2,861 lines)
-│   │   ├── llms-sdk.md              Complete SDK embedding reference (832 lines)
-│   │   ├── lang-*.md                Language guide (10 files: basics → semantics)
-│   │   ├── addon-*.md               All 18 standard library addons
-│   │   └── sdk-*.md                 SDK guide (17 files: quick-start → API reference)
-│   └── perception/                  Perception.cx platform APIs
-│       ├── *.md                     Enma APIs: proc, render, gui, input, cpu, zydis,
-│       │                            unicorn, net, win, filesystem, sound, lifecycle, mcp
-│       ├── angelscript/             AngelScript APIs (23 files, 10,820 lines)
-│       └── lua/                     Lua APIs (17 files, 5,779 lines)
-│
-├── .claude/skills/                  AI skills for Claude Code / oh-my-claudecode
-│   ├── game-hacking-pcx/            API doc index — tells the AI which file to read
-│   └── game-cheat-guidelines/       12 behavioral rules (Karpathy-style)
-│
-├── knowledge/                       Quick references and working examples
-│   ├── enma-cheatsheet.md           Language quick reference card
-│   ├── pcx-api-cheatsheet.md        Every PCX API at a glance
-│   ├── common-patterns.md           Working code for overlays, menus, angle math, radar
-│   └── offset-methodology.md        Pattern scanning, RIP resolution, pointer chains
-│
-├── rules/                           Drop-in project rules
-│   ├── CLAUDE.md                    For Claude Code projects
-│   └── AGENTS.md                    Agent role definitions
-│
-├── mcp/                             MCP server configurations
-│   ├── perception-mcp-config.json   Perception.cx MCP (42 tools)
-│   ├── claude-code-setup.md         Integration guide for Claude Code
-│   └── cursor-setup.md             Integration guide for Cursor
-│
-├── lsp/                             Language servers (git submodules)
-│   ├── enma-lsp/                    Enma: syntax, completion, hover, diagnostics
-│   └── angel-lsp-pcx/              AngelScript+PCX: completion, hover, diagnostics
-│
-├── signatures/                      Byte signature methodology and examples
-│   └── source-engine/
-│       └── common-sigs.md
-│
-├── setup.sh                         One-command install
-├── LICENSE                          MIT
-└── README.md
+Before:  "Write me an ESP overlay"
+AI:      *invents draw_esp(), uses int for addresses, forgets null checks*
+Result:  Doesn't compile. Wrong types. Silent crashes.
+
+After:   "Write me an ESP overlay"  (with pcx-ai-toolkit loaded)
+AI:      *reads render-api.md, uses draw_rect + draw_text, uint64 addresses, validates pointers*
+Result:  Compiles. Runs. Correct API calls.
 ```
 
 ---
 
 ## Quick Start
 
-### 1. Clone
-
 ```bash
+# 1. Clone
 git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
 cd pcx-ai-toolkit
-```
 
-### 2. Install
-
-```bash
+# 2. Install (builds LSPs, installs Claude Code skills)
 ./setup.sh
+
+# 3. Add to your project
+cp rules/CLAUDE.md /path/to/your/pcx-project/
 ```
 
-This clones and builds the LSP servers, and installs AI skills to `~/.claude/skills/` if Claude Code is detected.
+That's it. The AI now reads docs before writing code.
 
-### 3. Use
+---
 
-Copy `rules/CLAUDE.md` into your scripting project directory. The AI now reads docs before writing code.
+## What's Inside
 
-```bash
-cp rules/CLAUDE.md /path/to/your/pcx-project/
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### Documentation
+107 pages, 34,000+ lines
+
+- Complete Enma language spec
+- All 18 standard library addons
+- Full C++ SDK embedding guide
+- Every PCX API (Enma, AngelScript, Lua)
+- IDE, Extensions, Analyzer docs
+
+</td>
+<td width="50%" valign="top">
+
+### AI Skills
+2 Claude Code / OMC skills
+
+- **game-hacking-pcx** — doc index, API rules
+- **game-cheat-guidelines** — 12 behavioral rules
+
+Auto-trigger on `.em`/`.as` work and PCX topics
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### Knowledge Base
+4 reference files, 865 lines
+
+- Enma language cheatsheet
+- PCX API cheatsheet
+- Working code patterns (13 recipes)
+- Offset-finding methodology
+
+</td>
+<td width="50%" valign="top">
+
+### Tooling
+MCP + LSP + Rules
+
+- Perception MCP config (42+ tools)
+- Enma LSP (syntax, completion, hover)
+- AngelScript+PCX LSP
+- Drop-in CLAUDE.md / AGENTS.md
+
+</td>
+</tr>
+</table>
+
+---
+
+## Directory Structure
+
+```
+pcx-ai-toolkit/
+│
+├── docs/                             107 pages of documentation
+│   ├── enma/                         ── Enma language, addons, SDK (50 files)
+│   │   ├── llms-language.md              Complete language reference (2,861 lines)
+│   │   ├── llms-sdk.md                   Complete SDK reference (832 lines)
+│   │   ├── lang-*.md                     Language guide (10 files)
+│   │   ├── addon-*.md                    18 standard library addons
+│   │   └── sdk-*.md                      SDK embedding guide (17 files)
+│   │
+│   └── perception/                   ── Perception.cx platform APIs
+│       ├── *.md                          Enma APIs (17 files)
+│       ├── angelscript/                  AngelScript APIs (23 files)
+│       └── lua/                          Lua APIs (17 files)
+│
+├── .claude/skills/                   ── AI Skills
+│   ├── game-hacking-pcx/                Doc index + coding rules
+│   └── game-cheat-guidelines/           12 behavioral guidelines
+│
+├── knowledge/                        ── Quick References
+│   ├── enma-cheatsheet.md                Language quick-ref card
+│   ├── pcx-api-cheatsheet.md             All APIs at a glance
+│   ├── common-patterns.md                13 working code recipes
+│   └── offset-methodology.md             Sig scanning methodology
+│
+├── rules/                            ── Project Rules
+│   ├── CLAUDE.md                         Drop-in for Claude Code
+│   └── AGENTS.md                         5 agent role definitions
+│
+├── mcp/                              ── MCP Configs
+│   ├── perception-mcp-config.json        42+ tool definitions
+│   ├── claude-code-setup.md              Claude Code guide
+│   └── cursor-setup.md                   Cursor guide
+│
+├── lsp/                              ── Language Servers (submodules)
+│   ├── enma-lsp/                         Enma: completion + diagnostics
+│   └── angel-lsp-pcx/                   AngelScript: completion + diagnostics
+│
+├── signatures/source-engine/         ── Signature Examples
+│
+├── setup.sh                          One-command install
+├── CONTRIBUTING.md                   Contribution guide
+└── LICENSE                           MIT
 ```
 
 ---
 
 ## Documentation Coverage
 
-Every API function, every type, every parameter — documented and offline.
+> **107 out of 107 gitbook pages — 100% coverage of both the Enma and Perception.cx documentation.**
 
-### Enma Language (48 files, 13,166 lines)
+<table>
+<tr>
+<th>Corpus</th>
+<th>Files</th>
+<th>Lines</th>
+<th>Coverage</th>
+</tr>
+<tr>
+<td><strong>Enma Language</strong></td>
+<td align="center">50</td>
+<td align="center">13,518</td>
+<td>Every type, operator, control flow, function, pointer, struct, class, template, coroutine, exception, FFI, annotation, module, preprocessor + all 18 addons + full SDK</td>
+</tr>
+<tr>
+<td><strong>PCX Enma APIs</strong></td>
+<td align="center">17</td>
+<td align="center">3,915</td>
+<td>Proc, Render, GUI, Input, CPU, Zydis, Unicorn, Net, Win, Filesystem, Sound, Lifecycle, MCP, IDE, Extensions, Analyzer</td>
+</tr>
+<tr>
+<td><strong>PCX AngelScript APIs</strong></td>
+<td align="center">23</td>
+<td align="center">10,820</td>
+<td>All of the above + Intrinsics, Zydis Encoder, Bit Reinterpret, Mutex, Atomic Types, CS2 Extended</td>
+</tr>
+<tr>
+<td><strong>PCX Lua APIs</strong></td>
+<td align="center">17</td>
+<td align="center">5,779</td>
+<td>All core APIs in Lua syntax</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td align="center"><strong>107</strong></td>
+<td align="center"><strong>34,032</strong></td>
+<td></td>
+</tr>
+</table>
 
-| Category | Files | Lines | Coverage |
-|----------|-------|-------|----------|
-| Complete Language Reference | 1 | 2,861 | Every type, operator, control flow, struct, class, template, coroutine, exception, heap, FFI, annotation, module — single file |
-| Complete SDK Reference | 1 | 832 | Full C++ embedding API — single file |
-| Language Guide | 10 | 3,150 | Basics, functions, pointers, structs/classes, templates, advanced, annotations, modules, preprocessor, semantics |
-| Standard Library Addons | 18 | 2,528 | core, strings, arrays, maps, math, SIMD, vectors, 3D math, variant, atomic, bits, time, regex, file, thread, hash_set, sorted_map, list, JSON |
-| SDK Guide | 17 | 3,795 | Engine lifecycle, compilation, execution, type registration, native functions, hot reload, serialization, introspection, RAII, debug, safety, custom addons, API reference |
+### Enma Language Docs Breakdown
 
-### Perception.cx Platform APIs
+<details>
+<summary><strong>Language Guide</strong> — 10 files, 3,150 lines (click to expand)</summary>
 
-| Language | Files | Lines | APIs Covered |
-|----------|-------|-------|-------------|
-| **Enma** | 16 | 3,815 | Proc, Render, GUI, Input, CPU, Zydis, Unicorn, Net, Win, Filesystem, Sound, Lifecycle, MCP, IDE, Extensions, Analyzer |
-| **AngelScript** | 23 | 10,820 | All of the above + Intrinsics, Zydis Encoder, Bit Reinterpret, Mutex, Atomic Types, CS2 Extended |
-| **Lua** | 17 | 5,779 | All core APIs in Lua syntax |
-| **Total** | **104** | **33,580** | |
+| File | Lines | Topics |
+|------|------:|--------|
+| `lang-basics.md` | 267 | Types, variables, constants, operators, control flow |
+| `lang-functions.md` | 247 | Parameters, defaults, refs, out, variadic, lambdas, closures |
+| `lang-pointers.md` | 357 | Heap pointers, address-of, member access, null, return-by-ref |
+| `lang-structs-and-classes.md` | 912 | Value/ref types, inheritance, vtable, interfaces, mixins, operators |
+| `lang-templates.md` | 173 | Generic structs and functions, monomorphization |
+| `lang-advanced.md` | 562 | Delegates, namespaces, coroutines, exceptions, smart ptrs, FFI |
+| `lang-annotations.md` | 209 | packed, align, reflect, serialize, export, dll, custom |
+| `lang-modules.md` | 100 | Import system, aliased imports, .emb, multi-module linking |
+| `lang-pre-processor.md` | 77 | #define, #ifdef, #include, #pragma |
+| `lang-semantics-and-limits.md` | 181 | Guarantees, compile-time rejects, what doesn't exist |
+
+</details>
+
+<details>
+<summary><strong>Standard Library Addons</strong> — 18 files, 2,528 lines (click to expand)</summary>
+
+| Addon | Lines | Key Types / Functions |
+|-------|------:|----------------------|
+| Core | 42 | `print`, `println` |
+| Strings | 165 | `format`, `to_int`, `split`, `replace`, `substr`, interpolation |
+| Arrays | 119 | `T[]`, `push`, `pop`, `sort`, `contains`, `slice` |
+| Maps | 200 | `map<K,V>`, `imap<V>`, `get`, `set`, iteration |
+| Math | 137 | `sin`, `cos`, `atan2`, `sqrt`, `clamp`, `lerp`, `random` |
+| SIMD | 128 | SSE2: `f32x4`, `i32x4` vector ops |
+| Vectors | 135 | `vec2`, `vec3`, `vec4` |
+| 3D Math | 182 | `quat`, `mat4` |
+| Variant | 130 | Type-erased value container |
+| Atomic | 94 | `aint32`, `aint64` atomic ops |
+| Bits | 117 | `popcount`, `clz`, `ctz`, `bswap`, `rotl` |
+| Time | 95 | `time_ms`, `time_us`, ISO 8601, `sleep` |
+| Regex | 61 | `match`, `find`, `replace`, `split`, captures |
+| File | 125 | Sandboxed file I/O (permission-gated) |
+| Thread | 120 | `mutex`, `lock_guard`, `condition_variable` |
+| Hash Set | 89 | `hash_set<T>` |
+| Sorted Map | 89 | `sorted_map<K,V>` ordered iteration |
+| List | 192 | Double-ended O(1) push/pop |
+| JSON | 108 | `json_parse`, `json_stringify`, `json_value` |
+
+</details>
+
+<details>
+<summary><strong>SDK Embedding Guide</strong> — 17 files, 3,795 lines (click to expand)</summary>
+
+| File | Lines | Topic |
+|------|------:|-------|
+| `sdk-quick-start.md` | 126 | Minimal embedding example |
+| `sdk-engine-lifecycle.md` | 166 | Create, configure, destroy |
+| `sdk-compilation.md` | 65 | Compile from source/files |
+| `sdk-execution.md` | 103 | Contexts, execute, read returns |
+| `sdk-calling-functions.md` | 82 | Pass arguments from host |
+| `sdk-globals.md` | 79 | Read/write script globals |
+| `sdk-type-registration.md` | 862 | type_builder — expose native types |
+| `sdk-native-functions.md` | 446 | Register host-callable functions |
+| `sdk-hot-reload.md` | 64 | Replace code at runtime |
+| `sdk-serialization-and-linking.md` | 97 | .emb binaries, multi-module |
+| `sdk-introspection.md` | 317 | List functions, annotations, IR dump |
+| `sdk-lifecycle.md` | 227 | Deterministic RAII, no GC |
+| `sdk-debug-and-gc.md` | 202 | Debug hooks, budgets, heap stats |
+| `sdk-error-handling.md` | 116 | Compile/runtime error reporting |
+| `sdk-safety.md` | 121 | Fault trapping, sandboxing, permissions |
+| `sdk-custom-addons.md` | 576 | Build your own addon |
+| `sdk-api-reference.md` | 411 | Complete function listing |
+
+</details>
 
 ---
 
 ## AI Skills
 
-### `game-hacking-pcx` — Documentation Index
+### `game-hacking-pcx` — Documentation Router
 
-Tells the AI exactly which file to read before writing any code. Contains:
-- File-by-file index of all 104 docs with paths and line counts
-- Critical Enma rules (type system, conversions, RAII, address types)
-- API-specific notes (Proc, Render, GUI, Input, etc.)
-- LSP server locations
+Forces the AI to read the correct doc file before writing any PCX API call.
 
-**Triggers on:** Enma scripting, AngelScript scripting, Perception.cx, PCX, `.em` files, `.as` files, overlay rendering, process memory operations
+```
+User:  "Write me a render overlay"
+AI:    → reads docs/perception/render-api.md (264 lines)
+       → reads docs/perception/lifecycle-and-routines.md (134 lines)
+       → writes code using real function signatures
+```
+
+Contains: file-by-file index of all 107 docs, critical Enma type rules, address type requirements, RAII notes.
 
 ### `game-cheat-guidelines` — 12 Behavioral Rules
 
-Karpathy-style coding guidelines written specifically for PCX scripting. Every rule includes a wrong/right code example grounded in real Perception.cx APIs.
+<table>
+<tr><td width="5%" align="center"><strong>#</strong></td><td width="30%"><strong>Rule</strong></td><td><strong>What It Prevents</strong></td></tr>
+<tr><td align="center">1</td><td>Ground every offset</td><td>Hours wasted on stale offsets from an old SDK version</td></tr>
+<tr><td align="center">2</td><td><code>uint64</code> for all addresses</td><td>Sign-extension corruption on high usermode addresses</td></tr>
+<tr><td align="center">3</td><td>Validate every pointer</td><td>Silent null reads returning plausible-looking garbage</td></tr>
+<tr><td align="center">4</td><td>Separate update from render</td><td>Overlay stutter when memory reads block the draw path</td></tr>
+<tr><td align="center">5</td><td>Sigs over hardcodes</td><td>Script breaking on every game patch</td></tr>
+<tr><td align="center">6</td><td>One feature, one file</td><td>2000-line monoliths that can't be hot-reloaded</td></tr>
+<tr><td align="center">7</td><td>Construct colors/vecs per frame</td><td>Pointless globals for 4-byte stack-allocated structs</td></tr>
+<tr><td align="center">8</td><td><code>f</code> suffix on float32</td><td>Silent float64→float32 truncation in vertex buffers</td></tr>
+<tr><td align="center">9</td><td>Minimize memory writes</td><td>Unnecessary detection surface area</td></tr>
+<tr><td align="center">10</td><td>W2S once, correctly</td><td>Behind-camera coordinate mirroring, wrong matrix layout</td></tr>
+<tr><td align="center">11</td><td>GUI for all tunables</td><td>Recompiling just to change a distance threshold</td></tr>
+<tr><td align="center">12</td><td>Verify with the binary</td><td>Trusting stale cached offsets over live reality</td></tr>
+</table>
 
-| # | Rule | What It Prevents |
-|---|------|-----------------|
-| 1 | **Ground every offset** | Wasting hours on stale offsets from an old SDK |
-| 2 | **`uint64` for all addresses** | Sign-extension on high usermode addresses |
-| 3 | **Validate every pointer** | Silent null reads returning garbage |
-| 4 | **Separate update from render** | Overlay stutter from blocking reads |
-| 5 | **Sigs over hardcodes** | Script breaking on every game patch |
-| 6 | **One feature, one file** | Monolith scripts that can't be hot-reloaded |
-| 7 | **Construct colors/vecs every frame** | Pointless globals for 4-byte stack structs |
-| 8 | **`f` suffix on float32** | Truncation bugs in vertex buffers |
-| 9 | **Minimize memory writes** | Unnecessary detection surface |
-| 10 | **W2S once, correctly** | Behind-camera mirroring, wrong matrix layout |
-| 11 | **GUI for all tunables** | Recompiling to change a threshold |
-| 12 | **Verify with the binary** | Trusting stale offsets over live reality |
+Each rule includes wrong/right code examples using real Perception.cx APIs.
 
 ---
 
 ## Knowledge Base
 
-### `enma-cheatsheet.md` — Language Quick Reference (164 lines)
+<table>
+<tr>
+<td width="50%" valign="top">
 
-Every primitive type, conversion rule, control flow construct, function signature pattern, struct/class syntax, template syntax, and annotation — condensed into a single scannable reference card.
+### Enma Cheatsheet
+> `knowledge/enma-cheatsheet.md` — 164 lines
 
-### `pcx-api-cheatsheet.md` — Platform API Quick Reference (232 lines)
+Every primitive type with size, all conversion rules, control flow, functions, structs vs classes, templates, arrays, maps, strings, pointers, coroutines, exceptions, modules, preprocessor, annotations.
 
-Every PCX API function with its signature and return type. One section per API: Proc, Render, GUI, Input, CPU, Zydis, Unicorn, Net, Win, Filesystem, Sound, Lifecycle.
+### PCX API Cheatsheet
+> `knowledge/pcx-api-cheatsheet.md` — 232 lines
 
-### `common-patterns.md` — Working Code Examples (339 lines)
+Every function signature across all 13 Perception.cx APIs: Proc, Render, GUI, Input, CPU, Zydis, Unicorn, Net, Win, Filesystem, Sound, Lifecycle, MCP.
 
-Complete, copy-paste-ready code for:
-- Process attachment and module resolution
-- Pattern scanning with RIP-relative address resolution
-- Entity list iteration with null guards
-- World-to-screen projection (Source Engine 4x4 matrix)
-- 2D box overlay with health bars
-- Snapline drawing
-- Distance calculation and display
-- Angle calculation (atan2-based)
-- Smooth angle interpolation
-- GUI menu with all widget types
-- Config file save/load
+</td>
+<td width="50%" valign="top">
+
+### Common Patterns
+> `knowledge/common-patterns.md` — 339 lines
+
+13 complete working examples:
+- Process attach + module resolve
+- Pattern scan + RIP resolution
+- Entity list with null guards
+- World-to-screen (4x4 matrix)
+- Box overlay + health bars
+- Snaplines, distance text
+- Angle calc, smooth interp
+- GUI menu, config save/load
 - Minimap / radar with rotation
-- Complete script skeleton (main + update + render)
+- Full script skeleton
 
-### `offset-methodology.md` — Finding and Maintaining Offsets (130 lines)
+### Offset Methodology
+> `knowledge/offset-methodology.md` — 130 lines
 
-- When to pattern scan vs hardcode
-- Signature construction methodology (what to wildcard, how to verify uniqueness)
-- RIP-relative address resolution (table of common instruction shapes)
-- Pointer chain walking strategy
-- Using `struct_dump` for field discovery
-- Cross-referencing with IDA/Ghidra
-- Offset table maintenance format
-- What breaks on game updates (stability table)
+Pattern scanning, wildcard strategy, RIP-relative resolution table, pointer chain walking, struct_dump discovery, IDA/Ghidra cross-referencing, offset table format, patch stability analysis.
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## MCP Integration
 
-### Perception.cx MCP Server
+### Perception MCP Server
 
-The Perception IDE exposes 42+ tools via JSON-RPC that any MCP-compatible AI can call:
+> 42+ tools exposed via JSON-RPC — connect any MCP-compatible AI to Perception's live tooling.
 
-**Process Memory:** `read_memory`, `read_typed_value`, `find_pattern`, `read_pointer_chain`, `read_string`, `memory_write`
+<details>
+<summary><strong>Full tool list</strong> (click to expand)</summary>
 
-**Analysis:** `disassemble`, `struct_dump`, `find_xrefs`, `find_string_refs`, `find_function_bounds`, `analyze_function`, `trace_register`, `analyze_vtable`, `read_rtti`, `generate_signature`, `build_call_graph`
+**Process Memory**
+`read_memory` · `read_typed_value` · `find_pattern` · `read_pointer_chain` · `read_string` · `memory_write`
 
-**Scanning:** `scan_string`, `scan_wstring`, `scan_pointer_to`, `scan_value`, `scan_changed`, `diff_memory`
+**Analysis**
+`disassemble` · `struct_dump` · `find_xrefs` · `find_string_refs` · `find_function_bounds` · `analyze_function` · `trace_register` · `analyze_vtable` · `read_rtti` · `generate_signature` · `build_call_graph`
 
-**Process Info:** `list_processes`, `get_process_info`, `get_module_exports`, `get_module_imports`
+**Scanning**
+`scan_string` · `scan_wstring` · `scan_pointer_to` · `scan_value` · `scan_changed` · `diff_memory`
 
-**Files & Scripts:** `read_file`, `write_file`, `edit_file`, `search_text`, `find_references`, `check_script`, `validate_script`, `execute_script`, `get_script_api`
+**Process Info**
+`list_processes` · `get_process_info` · `get_module_exports` · `get_module_imports`
+
+**Files & Scripts**
+`read_file` · `write_file` · `edit_file` · `search_text` · `find_references` · `check_script` · `validate_script` · `execute_script` · `get_script_api` · `web_search`
+
+</details>
 
 Config: [`mcp/perception-mcp-config.json`](mcp/perception-mcp-config.json)
 
 ### Supported AI Tools
 
-| Tool | Integration Method | Setup Guide |
-|------|-------------------|-------------|
-| **Claude Code** | Skills + CLAUDE.md + MCP | [`mcp/claude-code-setup.md`](mcp/claude-code-setup.md) |
-| **Cursor** | .cursorrules + MCP + docs | [`mcp/cursor-setup.md`](mcp/cursor-setup.md) |
-| **Cline** | MCP + system prompt | Use MCP config, paste CLAUDE.md as system prompt |
-| **Perception IDE** | Native AI chat | Built-in — add `docs/` as workspace folder for extra context |
-| **Any OpenAI-compatible** | System prompt + docs | Paste `rules/CLAUDE.md` + relevant docs into system prompt |
+| Tool | How | Guide |
+|:-----|:----|:------|
+| **Claude Code** | Skills + CLAUDE.md + MCP | [`claude-code-setup.md`](mcp/claude-code-setup.md) |
+| **Cursor** | .cursorrules + MCP + docs | [`cursor-setup.md`](mcp/cursor-setup.md) |
+| **Cline** | MCP config + system prompt | Use MCP config, paste CLAUDE.md |
+| **Perception IDE** | Native — built-in AI chat | Add `docs/` as workspace folder |
+| **Any OpenAI-compatible** | System prompt + docs | Paste `rules/CLAUDE.md` into prompt |
 
 ---
 
 ## LSP Language Servers
 
-Both servers provide syntax highlighting, autocompletion, hover documentation, and diagnostics.
+| Server | Language | Features |
+|:-------|:---------|:---------|
+| [enma-lsp](https://github.com/sinnafuls/enma-lsp) | Enma (`.em`) | Syntax highlighting, completion, hover docs, diagnostics, Perception API surface |
+| [angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx) | AngelScript (`.as`) | Syntax highlighting, completion, hover docs, diagnostics, Perception API surface |
 
-| Server | Language | Source |
-|--------|----------|--------|
-| [enma-lsp](https://github.com/sinnafuls/enma-lsp) | Enma (.em) | Includes predefined Enma stdlib + Perception API surface |
-| [angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx) | AngelScript (.as) | Includes predefined Perception API surface |
-
-Built automatically by `setup.sh`. To use in your editor:
+Built automatically by `setup.sh`. Editor config:
 
 ```
 Enma:        node lsp/enma-lsp/server/dist/server.js --stdio
@@ -247,36 +421,43 @@ AngelScript: node lsp/angel-lsp-pcx/server/out/server.js --stdio
 
 ## Project Rules
 
-### `rules/CLAUDE.md`
+### `rules/CLAUDE.md` — Drop-In Project Config
 
-Drop this into any PCX scripting project. It tells the AI:
-- What languages and APIs are in play
-- Where to find documentation
-- Coding standards (address types, float literals, conversions, RAII)
-- The 12 guidelines in condensed form
-- Recommended project structure
+Copy into any PCX scripting project. Covers:
+- Language and API declarations
+- Documentation paths
+- Coding standards (address types, float suffixes, RAII, conversions)
+- The 12 guidelines in one-line form
+- Recommended file structure
 
-### `rules/AGENTS.md`
+### `rules/AGENTS.md` — Multi-Agent Role Definitions
 
-Defines five specialist agent roles for multi-agent workflows:
-- **reverse-engineer** — binary analysis, sig generation, offset discovery
-- **script-writer** — Enma/AngelScript implementation following all rules
-- **offset-maintainer** — post-patch offset table updates
-- **feature-builder** — feature implementation using common patterns
-- **reviewer** — correctness, style, and detection surface review with checklist
+Five specialist roles for orchestrated workflows:
+
+| Agent | Responsibility |
+|:------|:---------------|
+| **reverse-engineer** | Binary analysis, sig generation, offset discovery |
+| **script-writer** | Enma/AngelScript implementation following all rules |
+| **offset-maintainer** | Post-patch offset table updates and verification |
+| **feature-builder** | Feature implementation using common patterns |
+| **reviewer** | Correctness, style, and detection surface review |
 
 ---
 
 ## Contributing
 
-1. Fork and clone with `--recursive` (pulls LSP submodules)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full details.
+
+1. Fork and clone with `--recursive`
 2. Add or improve: docs, patterns, templates, sigs, knowledge files
 3. Test with `./setup.sh` on a clean clone
 4. Open a PR
 
-Documentation improvements and new working patterns are especially welcome. If you've mapped a new API, reversed a struct, or found a better pattern — add it.
+New working patterns and documentation improvements are especially welcome.
 
 ---
+
+<div align="center">
 
 ## License
 
@@ -284,9 +465,8 @@ Documentation improvements and new working patterns are especially welcome. If y
 
 ---
 
-## Credits
+**Credits**
 
-- [Perception.cx](https://perception.cx) — platform and Enma language
-- [Enma Documentation](https://enma-1.gitbook.io/enma) — official language specification
-- [sinnafuls/enma-lsp](https://github.com/sinnafuls/enma-lsp) — Enma language server
-- [sinnafuls/angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx) — AngelScript+PCX language server
+[Perception.cx](https://perception.cx) · [Enma Language](https://enma-1.gitbook.io/enma) · [enma-lsp](https://github.com/sinnafuls/enma-lsp) · [angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx)
+
+</div>
