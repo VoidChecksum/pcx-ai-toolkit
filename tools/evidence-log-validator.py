@@ -15,7 +15,10 @@ Usage:
 
 Exit: 0 = clean, 1 = errors (or warnings under --strict), 2 = bad usage.
 """
-import sys, re, json, argparse
+import sys
+import re
+import json
+import argparse
 from pathlib import Path
 from datetime import date, datetime
 
@@ -233,10 +236,12 @@ def main():
     args = p.parse_args()
 
     if not Path(args.offsets).is_file():
-        print('error: not a file: %s' % args.offsets, file=sys.stderr); sys.exit(2)
+        print('error: not a file: %s' % args.offsets, file=sys.stderr)
+        sys.exit(2)
     files, err = resolve_evidence(args)
     if err:
-        print('error: %s' % err, file=sys.stderr); sys.exit(2)
+        print('error: %s' % err, file=sys.stderr)
+        sys.exit(2)
 
     offsets = parse_offsets(args.offsets)
     entries = collect_evidence(files)

@@ -21,7 +21,11 @@ kind="direct" reports the match RVA; kind="rip" resolves the RIP-relative
 displacement to its target RVA. Addresses are version-independent RVAs, never
 hardcoded offsets.
 """
-import sys, struct, os, json, argparse
+import sys
+import struct
+import os
+import json
+import argparse
 
 IMAGE_SCN_MEM_EXECUTE = 0x20000000
 

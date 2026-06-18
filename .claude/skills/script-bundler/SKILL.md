@@ -1,3 +1,13 @@
+---
+name: script-bundler
+description: >
+  Build and deployment workflow for PCX scripts: .em vs .emb, bundle order
+  respecting the module-import graph, hot-reload survival, pre-ship hygiene
+  checklist, runtime-version pinning, and distribution metadata. Triggers
+  when packaging, distributing, or releasing scripts to other users.
+license: MIT
+---
+
 # Script Bundler — Packaging and Shipping PCX Scripts
 
 The build and deployment workflow for PCX scripts: when to distribute raw `.em` source vs precompiled `.emb`, the bundle order that respects the module-import graph, what survives hot-reload, the pre-ship hygiene checklist, runtime-version pinning, and the distribution metadata that goes alongside the script. Closes the "how do I package this for someone else to use" gap; sits beside `pcx-patch-day-playbook` (the inbound workflow for receiving updates) as the outbound workflow for sending them.

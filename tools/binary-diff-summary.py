@@ -22,7 +22,12 @@ Block comparison is content-based, not positional: a recompile shifts every
 block's file offset but leaves the block bytes intact, so positional diffing
 would falsely report 100% changed. Matching by hash reveals the survivors.
 """
-import sys, struct, os, json, argparse, hashlib
+import sys
+import struct
+import os
+import json
+import argparse
+import hashlib
 from collections import Counter
 
 # .text classifier thresholds (block-level identical %, raw-size delta %).

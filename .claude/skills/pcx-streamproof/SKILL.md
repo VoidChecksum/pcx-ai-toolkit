@@ -1,3 +1,14 @@
+---
+name: pcx-streamproof
+description: >
+  Explains when PCX overlay output appears in screen captures per capture
+  method (OBS, Discord, ShadowPlay, NVIDIA Highlights, capture cards,
+  PrintScreen). Triggers on streaming, OBS, Discord screenshare, "my overlay
+  shows on stream," "my friend can see my menu," and related capture or
+  recording questions.
+license: MIT
+---
+
 # Streamproof Overlay — Capture Compatibility for PCX Renders
 
 When PCX overlay output shows up in screen captures and when it doesn't, mapped per capture method (OBS, Discord, GeForce ShadowPlay, NVIDIA Highlights, PrintScreen, Steam screenshot, capture cards). The user-recurring questions "why does my friend on Discord see my menu" and "I want my overlay invisible on stream" both reduce to which capture path each viewer is using and which PCX render surface they're seeing — this skill makes that mapping explicit.

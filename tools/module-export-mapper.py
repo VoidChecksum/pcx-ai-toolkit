@@ -13,7 +13,11 @@ Usage:
     python3 module-export-mapper.py engine.dll --ordinal-only
     python3 module-export-mapper.py engine.dll --filter Entity --json
 """
-import sys, struct, os, json, argparse
+import sys
+import struct
+import os
+import json
+import argparse
 
 
 def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]

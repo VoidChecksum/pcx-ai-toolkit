@@ -1,3 +1,14 @@
+---
+name: multi-binary-targeting
+description: >
+  Pattern for supporting multiple game binaries (versions, architectures,
+  storefronts, beta channels) from one Enma codebase without forking.
+  Triggers when the user mentions multiple game versions, cross-build support,
+  32-bit vs 64-bit, multi-store builds, or maintaining stable and
+  experimental branches in parallel.
+license: MIT
+---
+
 # Multi-Binary Targeting — One Script, N Game Versions
 
 The pattern for supporting multiple binaries (game versions, architectures, storefront builds, beta channels) from one Enma codebase. A well-organized script can target v1.42.3 and v1.42.4, 32-bit and 64-bit, Steam and Epic, release and beta — without forking. The mechanics are simple but get reinvented in every project; this skill names them.

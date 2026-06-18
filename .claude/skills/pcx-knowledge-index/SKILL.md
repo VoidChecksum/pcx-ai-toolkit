@@ -1,3 +1,14 @@
+---
+name: pcx-knowledge-index
+description: >
+  Guide to the three surfaces (llms.txt static index, bundle files, MCP
+  server) through which AI tools reach the toolkit corpus, and which to pick
+  under which integration model. Always active when working with the
+  pcx-ai-toolkit knowledge base from any AI tool (Claude Code, Cursor, Cline,
+  Aider, Copilot, Continue, Zed).
+license: MIT
+---
+
 # PCX Knowledge Index — The Three Ways AI Tools Reach the Toolkit's Corpus
 
 The toolkit publishes its docs / skills / knowledge / templates / tools via three complementary surfaces, each optimized for a different AI-tool integration model. This skill names which surface to reach for under which circumstances, so a session doesn't waste tokens preloading a 4 MB bundle when MCP search would do, and doesn't fail mid-task because the tool only supports `@`-file references and you reached for a search call instead.

@@ -18485,6 +18485,17 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 ## Source: `.claude/skills/game-cheat-guidelines/SKILL.md`
 
+---
+name: game-cheat-guidelines
+description: >
+  Behavioral rules for writing game cheats in Enma, AngelScript, and C++ on
+  Perception.cx. Derived from Karpathy principles, rewritten for cheat
+  development: memory hacking, ESP, aimbot, hooking, overlay rendering, and
+  RE workflows. Always active — these rules apply every time you write or
+  edit cheat code.
+license: MIT
+---
+
 # Game Cheat Development Guidelines
 
 Behavioral rules for writing game cheats in Enma, AngelScript, and C++. Derived from the Karpathy principles but rewritten for the domain: memory hacking, ESP, aimbot, hooking, overlay rendering, and reverse engineering workflows on the Perception.cx platform.
@@ -18837,6 +18848,17 @@ Debugging checklist:
 
 ## Source: `.claude/skills/game-hacking-pcx/SKILL.md`
 
+---
+name: game-hacking-pcx
+description: >
+  Mandatory doc router for all PCX scripting sessions. Triggers on any game
+  hacking, Enma, AngelScript, or Perception.cx work. Provides the full doc
+  index (34,000+ lines across 110 files) and enforces reading the relevant
+  documentation before writing any API call. Load alongside
+  game-cheat-guidelines on every PCX session.
+license: MIT
+---
+
 # Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
 
 ## Trigger
@@ -19024,6 +19046,17 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 ---
 
 ## Source: `.claude/skills/pcx-coding-discipline/SKILL.md`
+
+---
+name: pcx-coding-discipline
+description: >
+  Workflow discipline for developing Enma (.em) and AngelScript (.as) scripts
+  on Perception.cx. Derived from Karpathy principles — think before coding,
+  simplicity first, surgical changes, goal-driven execution — rewritten for
+  cheat development realities: stale offsets, silent failed reads, detection
+  surface. Always active when writing or editing PCX scripts.
+license: MIT
+---
 
 # PCX Coding Discipline — How to Write Scripts, Not What They Look Like
 
@@ -19243,6 +19276,17 @@ if (g_debug) print("[esp] ents=" + ents.length() + " visible=" + drawn);
 
 ## Source: `.claude/skills/pcx-re-discipline/SKILL.md`
 
+---
+name: pcx-re-discipline
+description: >
+  Workflow discipline for reverse engineering and offset maintenance: locating
+  structs, generating signatures, resolving RIP-relative addresses, and
+  keeping an offset table alive across patches. Derived from Karpathy
+  principles, rewritten for RE where the failure mode is a confident wrong
+  answer. Always active when doing RE or offset work.
+license: MIT
+---
+
 # PCX Reverse-Engineering Discipline — Finding Offsets Without Fooling Yourself
 
 Workflow discipline for reverse engineering and offset maintenance: locating structs, generating signatures, resolving RIP-relative addresses, and keeping an offset table alive across game patches. Derived from the four Karpathy principles — *think before coding, simplicity first, surgical changes, goal-driven execution* — rewritten for RE work, where the failure mode isn't a crash but a confident wrong answer.
@@ -19362,6 +19406,17 @@ println(format("entity_list global @ 0x{x} -> 0x{x}", target, list));
 ---
 
 ## Source: `.claude/skills/pcx-perf-budget/SKILL.md`
+
+---
+name: pcx-perf-budget
+description: >
+  Turns the update/render separation rule into enforceable numeric budgets
+  using mono_us() measurements. Covers per-frame targets at common refresh
+  rates, per-call cost rules of thumb, a drop-in profiler recipe, and
+  read-coalescing patterns. Always active when writing or reviewing
+  performance-sensitive render or update routines.
+license: MIT
+---
 
 # Performance Budget — Frame-Time Targets for PCX Scripts
 
@@ -19691,6 +19746,16 @@ The test: if the user could feel the cost as a one-frame stutter, is it acceptab
 
 ## Source: `.claude/skills/pcx-patch-day-playbook/SKILL.md`
 
+---
+name: pcx-patch-day-playbook
+description: >
+  Ordered triage workflow for recovering a PCX script after a game update.
+  Triggers when sigs return 0, reads return garbage after a patch, or the
+  user says "broken", "updated", "patch day", "hotfix", "season drop", or
+  "DLC dropped". Keeps diagnosis short and fixes targeted.
+license: MIT
+---
+
 # Patch Day Playbook — Recovering After a Game Update
 
 The ordered triage workflow for when a game update lands and your Perception.cx script stops working. This is the single most painful recurring scenario in scripting work; the cost is dominated by *not knowing what changed*, not by the re-RE itself. This playbook keeps the diagnosis short and the fix targeted.
@@ -19984,6 +20049,16 @@ Not every patch is a patch — sometimes the game shipped a real engine change a
 ---
 
 ## Source: `.claude/skills/re-evidence-log/SKILL.md`
+
+---
+name: re-evidence-log
+description: >
+  Discipline for recording why each offset and sig is trusted — the proof
+  behind the offset table. Every offset added, every sig derived, every
+  struct layout committed comes with a citable evidence entry. Always active
+  during RE work; pairs with pcx-re-discipline and pcx-patch-day-playbook.
+license: MIT
+---
 
 # RE Evidence Log — Every Claim Cites Its Proof
 

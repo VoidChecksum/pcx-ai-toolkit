@@ -1,3 +1,14 @@
+---
+name: game-hacking-pcx
+description: >
+  Mandatory doc router for all PCX scripting sessions. Triggers on any game
+  hacking, Enma, AngelScript, or Perception.cx work. Provides the full doc
+  index (34,000+ lines across 110 files) and enforces reading the relevant
+  documentation before writing any API call. Load alongside
+  game-cheat-guidelines on every PCX session.
+license: MIT
+---
+
 # Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
 
 ## Trigger

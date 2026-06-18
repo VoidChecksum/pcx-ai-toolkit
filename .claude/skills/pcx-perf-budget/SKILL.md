@@ -1,3 +1,14 @@
+---
+name: pcx-perf-budget
+description: >
+  Turns the update/render separation rule into enforceable numeric budgets
+  using mono_us() measurements. Covers per-frame targets at common refresh
+  rates, per-call cost rules of thumb, a drop-in profiler recipe, and
+  read-coalescing patterns. Always active when writing or reviewing
+  performance-sensitive render or update routines.
+license: MIT
+---
+
 # Performance Budget — Frame-Time Targets for PCX Scripts
 
 Turns `game-cheat-guidelines` rule #4 (separate update from render) into enforceable numeric budgets, so the question "is my script too slow?" gets answered with `mono_us()` measurements instead of vibes. Covers per-frame targets at common refresh rates, per-call cost rules of thumb, the drop-in `profile_begin/end` recipe, and the read-coalescing patterns that produce the biggest wins.

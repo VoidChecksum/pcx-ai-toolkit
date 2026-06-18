@@ -27,7 +27,10 @@ Usage:
 
 Exit: 0 = clean, 1 = ERROR (or WARN under --strict), 2 = bad usage.
 """
-import sys, re, json, argparse
+import sys
+import re
+import json
+import argparse
 from pathlib import Path
 
 
@@ -92,11 +95,14 @@ def strip_comment(line):
         if instr:
             out.append(c)
             if c == '\\' and i + 1 < len(line):
-                out.append(line[i + 1]); i += 2; continue
+                out.append(line[i + 1])
+                i += 2
+                continue
             if c == '"':
                 instr = False
         elif c == '"':
-            instr = True; out.append(c)
+            instr = True
+            out.append(c)
         elif c == '/' and i + 1 < len(line) and line[i + 1] == '/':
             break
         else:
@@ -120,7 +126,7 @@ def build_model(path):
     bound - identifiers passed to any config-widget call anywhere in the file
     """
     raw = Path(path).read_text(encoding='utf-8', errors='replace').splitlines()
-    code = [strip_comment(l) for l in raw]
+    code = [strip_comment(ln) for ln in raw]
     nostr = [strip_strings(c) for c in code]
     depth, d = [], 0
     for c in nostr:
@@ -313,11 +319,13 @@ def main():
             sys.exit(2)
     sev_filter = {s.strip().lower() for s in args.severity.split(',') if s.strip()}
     if sev_filter - {'error', 'warn', 'info'}:
-        print("error: --severity takes error,warn,info", file=sys.stderr); sys.exit(2)
+        print("error: --severity takes error,warn,info", file=sys.stderr)
+        sys.exit(2)
 
     files = collect_em_files(args.path)
     if not files:
-        print(f"error: no .em files at {args.path}", file=sys.stderr); sys.exit(2)
+        print(f"error: no .em files at {args.path}", file=sys.stderr)
+        sys.exit(2)
 
     results = []
     for f in files:

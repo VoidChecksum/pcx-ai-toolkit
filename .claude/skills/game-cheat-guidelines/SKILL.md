@@ -1,3 +1,14 @@
+---
+name: game-cheat-guidelines
+description: >
+  Behavioral rules for writing game cheats in Enma, AngelScript, and C++ on
+  Perception.cx. Derived from Karpathy principles, rewritten for cheat
+  development: memory hacking, ESP, aimbot, hooking, overlay rendering, and
+  RE workflows. Always active — these rules apply every time you write or
+  edit cheat code.
+license: MIT
+---
+
 # Game Cheat Development Guidelines
 
 Behavioral rules for writing game cheats in Enma, AngelScript, and C++. Derived from the Karpathy principles but rewritten for the domain: memory hacking, ESP, aimbot, hooking, overlay rendering, and reverse engineering workflows on the Perception.cx platform.

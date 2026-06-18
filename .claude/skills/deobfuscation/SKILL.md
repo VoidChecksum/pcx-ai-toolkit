@@ -1,3 +1,14 @@
+---
+name: deobfuscation
+description: >
+  Methodology for reversing binaries protected by commercial obfuscators
+  (Themida, VMProtect), compiler-level obfuscation (OLLVM, Hikari), and
+  custom protection schemes. Covers identification, classification, layer
+  stripping, devirtualization, and verification. Active when analyzing
+  obfuscated or packed binaries.
+license: MIT
+---
+
 # Deobfuscation — Reversing Protected Binaries
 
 Methodology for reversing binaries protected by commercial obfuscators (Themida/WinLicense, VMProtect, Code Virtualizer), compiler-level obfuscation (LLVM-obfuscator, Hikari, OLLVM), and custom protection schemes (anti-cheat VMs, game-specific packers). Covers the full workflow: identification → classification → layer stripping → devirtualization → verification.
