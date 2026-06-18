@@ -69,6 +69,36 @@ function Install-Lsp($name, $url, $outFile) {
 Install-Lsp "enma-lsp"      "https://github.com/sinnafuls/enma-lsp.git"      "server\dist\server.js"
 Install-Lsp "angel-lsp-pcx" "https://github.com/sinnafuls/angel-lsp-pcx.git" "server\out\server.js"
 
+# --- Build Rust tools if cargo is available ---
+$cargo = Get-Command cargo -ErrorAction SilentlyContinue
+if ($cargo) {
+    Write-Host ""
+    Write-Host "[..] Building Rust tools (pe-parser, sig-uniqueness-checker, binary-diff-summary, offset-diff)..."
+    $parserDir = Join-Path $ToolkitDir "tools\pe-parser"
+    $binDir = Join-Path $ToolkitDir "tools\bin"
+    Push-Location $parserDir
+    try {
+        & cargo build --release 2>&1 | Out-Null
+        New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+        Copy-Item (Join-Path $parserDir "target\release\pe-parser.exe") (Join-Path $binDir "pe-parser.exe") -Force -ErrorAction SilentlyContinue
+        Copy-Item (Join-Path $parserDir "target\release\sig-uniqueness-checker.exe") (Join-Path $binDir "sig-uniqueness-checker.exe") -Force -ErrorAction SilentlyContinue
+        Copy-Item (Join-Path $parserDir "target\release\binary-diff-summary.exe") (Join-Path $binDir "binary-diff-summary.exe") -Force -ErrorAction SilentlyContinue
+        Copy-Item (Join-Path $parserDir "target\release\offset-diff.exe") (Join-Path $binDir "offset-diff.exe") -Force -ErrorAction SilentlyContinue
+        if (Test-Path (Join-Path $binDir "pe-parser.exe")) {
+            Write-Host "[ok] Rust tools built: tools\bin\pe-parser.exe, tools\bin\sig-uniqueness-checker.exe, tools\bin\binary-diff-summary.exe, tools\bin\offset-diff.exe"
+        } else {
+            Write-Host "[!!] Rust tools build failed — falling back to Python implementations" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "[!!] Rust tools build failed — falling back to Python implementations" -ForegroundColor Yellow
+    } finally {
+        Pop-Location
+    }
+} else {
+    Write-Host ""
+    Write-Host "[--] Cargo not found — using Python implementations"
+}
+
 # --- Install skills to Claude Code if present ---
 $claudeDir = Join-Path $env:USERPROFILE ".claude"
 if (Test-Path $claudeDir) {
@@ -98,6 +128,10 @@ if ($Project -ne "") {
     }
 }
 
+# --- Record installed version ---
+$versionFile = Join-Path $ToolkitDir "VERSION"
+$toolkitVersion = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { "unknown" }
+Write-Host "Version: $toolkitVersion"
 $docCount = (Get-ChildItem -Path (Join-Path $ToolkitDir "docs") -Recurse -Filter *.md).Count
 Write-Host ""
 Write-Host "Setup complete."

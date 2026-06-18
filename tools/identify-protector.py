@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """Identify binary protectors by PE section names, imports, and byte signatures.
 
 Usage:
@@ -56,86 +57,55 @@ ANTI_DEBUG_IMPORTS = [
 ]
 
 
-def read_u16(data, off):
-    return struct.unpack_from('<H', data, off)[0]
+# ── PE parser imports ─────────────────────────────────────────────────────────
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lib.pe_parse import (
+    parse_pe as _parse_pe, rva_to_off, read_u32, read_u16, read_u64
+)
 
-def read_u32(data, off):
-    return struct.unpack_from('<I', data, off)[0]
-
-def read_u64(data, off):
-    return struct.unpack_from('<Q', data, off)[0]
-
-
-def parse_pe(data):
-    """Minimal PE parser — extract sections, imports, entry point info."""
-    if data[:2] != b'MZ':
+def parse_pe(data: bytes) -> dict | None:
+    try:
+        pe = _parse_pe(data)
+    except SystemExit:
         return None
 
     pe_off = read_u32(data, 0x3C)
-    if data[pe_off:pe_off+4] != b'PE\x00\x00':
-        return None
-
-    coff_off = pe_off + 4
-    machine = read_u16(data, coff_off)
-    num_sections = read_u16(data, coff_off + 2)
-    opt_hdr_size = read_u16(data, coff_off + 16)
-    opt_off = coff_off + 20
-
-    is_64 = read_u16(data, opt_off) == 0x20B
+    opt_off = pe_off + 24
     entry_rva = read_u32(data, opt_off + 16)
 
-    # Section headers start after optional header
-    sec_off = opt_off + opt_hdr_size
     sections = []
-    for i in range(num_sections):
-        s = sec_off + i * 40
-        name = data[s:s+8]
-        vsize = read_u32(data, s + 8)
-        vaddr = read_u32(data, s + 12)
-        rsize = read_u32(data, s + 16)
-        raddr = read_u32(data, s + 20)
-        chars = read_u32(data, s + 36)
+    for s in pe['sections']:
         sections.append({
-            'name': name,
-            'name_str': name.rstrip(b'\x00').decode('ascii', errors='replace'),
-            'virtual_size': vsize,
-            'virtual_addr': vaddr,
-            'raw_size': rsize,
-            'raw_addr': raddr,
-            'characteristics': chars,
+            'name': s['name'].encode('ascii', errors='replace'),
+            'name_str': s['name'],
+            'virtual_size': s['vsize'],
+            'virtual_addr': s['vaddr'],
+            'raw_size': s['rsize'],
+            'raw_addr': s['raddr'],
+            'characteristics': s['chars'],
         })
 
-    # Extract import names (quick scan — look for import directory)
     imports = []
-    if is_64:
-        import_rva = read_u32(data, opt_off + 120)  # import table RVA
-    else:
-        import_rva = read_u32(data, opt_off + 104)
-
+    import_rva, _ = pe['import_dir']
     if import_rva:
-        # Convert RVA to file offset
-        for sec in sections:
-            if sec['virtual_addr'] <= import_rva < sec['virtual_addr'] + sec['virtual_size']:
-                import_foff = import_rva - sec['virtual_addr'] + sec['raw_addr']
-                # Walk import descriptors
-                off = import_foff
-                while off + 20 <= len(data):
-                    name_rva = read_u32(data, off + 12)
-                    if name_rva == 0:
-                        break
-                    # Resolve name RVA
-                    for s2 in sections:
-                        if s2['virtual_addr'] <= name_rva < s2['virtual_addr'] + s2['virtual_size']:
-                            name_foff = name_rva - s2['virtual_addr'] + s2['raw_addr']
-                            end = data.find(b'\x00', name_foff, name_foff + 256)
-                            if end > name_foff:
-                                imports.append(data[name_foff:end].decode('ascii', errors='replace'))
-                            break
-                    off += 20
+        import_foff = rva_to_off(import_rva, pe['sections'])
+        if import_foff is not None:
+            off = import_foff
+            while off + 20 <= len(data):
+                name_rva = read_u32(data, off + 12)
+                if name_rva == 0:
+                    break
+                name_foff = rva_to_off(name_rva, pe['sections'])
+                if name_foff is not None:
+                    end = data.find(b'\x00', name_foff, name_foff + 256)
+                    if end > name_foff:
+                        imports.append(data[name_foff:end].decode('ascii', errors='replace'))
+                off += 20
 
     return {
-        'is_64': is_64,
-        'machine': machine,
+        'is_64': pe['pe64'],
+        'machine': pe['machine'],
         'entry_rva': entry_rva,
         'sections': sections,
         'imports': imports,

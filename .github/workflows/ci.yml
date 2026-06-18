@@ -17,6 +17,55 @@ jobs:
 
       - name: Validate setup.sh syntax
         run: bash -n setup.sh
+      - name: Validate update-toolkit.sh syntax
+        run: bash -n tools/update-toolkit.sh
+
+      - name: Validate update-toolkit.ps1 (PowerShell parser)
+        shell: pwsh
+        run: |
+          $errs = $null
+          $null = [System.Management.Automation.Language.Parser]::ParseFile(
+            "$PWD/tools/update-toolkit.ps1", [ref]$null, [ref]$errs)
+          if ($errs.Count -gt 0) { $errs | ForEach-Object { Write-Error $_.Message }; exit 1 }
+          Write-Host "update-toolkit.ps1 OK"
+
+      - name: Validate shell tools syntax
+        run: |
+          for f in tools/*.sh; do bash -n "$f" || { echo "Syntax error: $f"; exit 1; }; done
+          echo "All shell tools valid"
+
+      - name: Validate Python tools syntax
+        run: |
+          for f in tools/*.py tools/lib/*.py; do
+            python3 -m py_compile "$f" || { echo "Syntax error: $f"; exit 1; }
+          done
+          echo "All Python tools valid"
+
+      - name: Install mypy and pyright
+        run: pip install mypy pyright
+
+      - name: Static type check (mypy)
+        run: mypy tools/
+
+      - name: Static type check (pyright)
+        run: pyright
+
+      - name: Build Rust tools
+        working-directory: tools/pe-parser
+        run: |
+          cargo build --release
+          mkdir -p ../bin
+          cp target/release/pe-parser ../bin/pe-parser
+          cp target/release/sig-uniqueness-checker ../bin/sig-uniqueness-checker
+          cp target/release/binary-diff-summary ../bin/binary-diff-summary
+          cp target/release/offset-diff ../bin/offset-diff
+
+      - name: Run smoke tests
+        run: ./tools/test-runner.sh
+
+      - name: Check VERSION file exists
+        run: |
+          test -f VERSION && echo "VERSION: $(cat VERSION)"
 
       - name: Validate setup.ps1 (PowerShell parser)
         shell: pwsh

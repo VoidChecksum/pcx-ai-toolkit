@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """Diff named offsets between two PE binary versions (patch-day triage).
 
 Scans both an old and a new binary for a list of named byte signatures,
@@ -26,35 +27,30 @@ import struct
 import os
 import json
 import argparse
+import subprocess
+
 
 IMAGE_SCN_MEM_EXECUTE = 0x20000000
 
 
-def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]
-def read_u32(d, o): return struct.unpack_from('<I', d, o)[0]
+# ── PE parser imports ─────────────────────────────────────────────────────────
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lib.pe_parse import parse_pe
 
-
-def get_sections(data):
-    """Minimal PE parser — returns list of section dicts, or None if not PE."""
-    if data[:2] != b'MZ':
+def get_sections(data: bytes) -> list[dict] | None:
+    try:
+        pe = parse_pe(data)
+    except SystemExit:
         return None
-    pe_off = read_u32(data, 0x3C)
-    if data[pe_off:pe_off+4] != b'PE\x00\x00':
-        return None
-    coff = pe_off + 4
-    num = read_u16(data, coff + 2)
-    opt_size = read_u16(data, coff + 16)
-    sec_off = coff + 20 + opt_size
     sections = []
-    for i in range(num):
-        s = sec_off + i * 40
-        name = data[s:s+8].rstrip(b'\x00').decode('ascii', errors='replace')
+    for s in pe['sections']:
         sections.append({
-            'name': name,
-            'vaddr': read_u32(data, s + 12),       # RVA
-            'rsize': read_u32(data, s + 16),       # raw size
-            'raddr': read_u32(data, s + 20),       # raw file offset
-            'chars': read_u32(data, s + 36),       # +0x24 characteristics
+            'name': s['name'],
+            'vaddr': s['vaddr'],
+            'rsize': s['rsize'],
+            'raddr': s['raddr'],
+            'chars': s['chars'],
         })
     return sections
 
@@ -183,7 +179,20 @@ def load_binary(path):
 
 
 def main():
+    # Attempt to proxy to Rust binary if compiled
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'offset-diff.exe' if os.name == 'nt' else 'offset-diff'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            sys.exit(res.returncode)
+        except Exception:
+            pass
+
     ap = argparse.ArgumentParser(description='Diff named offsets between two PE versions')
+
     ap.add_argument('--old', required=True, help='old PE binary')
     ap.add_argument('--new', required=True, help='new PE binary')
     ap.add_argument('--sigs', required=True, help='JSON list of named signatures')

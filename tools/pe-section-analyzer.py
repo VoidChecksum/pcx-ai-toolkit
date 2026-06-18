@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """Analyze PE sections for packing, encryption, and anomalies.
 
 Usage:
@@ -33,41 +34,26 @@ def entropy(data: bytes) -> float:
     return ent
 
 
-def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]
-def read_u32(d, o): return struct.unpack_from('<I', d, o)[0]
-
+# ── PE parser imports ─────────────────────────────────────────────────────────
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lib.pe_parse import parse_pe
 
 def analyze(filepath):
     with open(filepath, 'rb') as f:
         data = f.read()
 
-    if data[:2] != b'MZ':
-        return {'error': 'Not a PE file'}
-
-    pe_off = read_u32(data, 0x3C)
-    if data[pe_off:pe_off+4] != b'PE\x00\x00':
-        return {'error': 'Invalid PE signature'}
-
-    coff = pe_off + 4
-    num_sections = read_u16(data, coff + 2)
-    opt_size = read_u16(data, coff + 16)
-    opt_off = coff + 20
-    is_64 = read_u16(data, opt_off) == 0x20B
-    sec_off = opt_off + opt_size
+    try:
+        pe = parse_pe(data)
+    except SystemExit as e:
+        return {'error': str(e)}
 
     sections = []
-    for i in range(num_sections):
-        s = sec_off + i * 40
-        name = data[s:s+8].rstrip(b'\x00').decode('ascii', errors='replace')
-        vsize = read_u32(data, s + 8)
-        vaddr = read_u32(data, s + 12)
-        rsize = read_u32(data, s + 16)
-        raddr = read_u32(data, s + 20)
-        chars = read_u32(data, s + 36)
-
-        sec_data = data[raddr:raddr + rsize] if rsize > 0 else b''
+    for s in pe['sections']:
+        sec_data = data[s['raddr']:s['raddr'] + s['rsize']] if s['rsize'] > 0 else b''
         ent = entropy(sec_data)
 
+        chars = s['chars']
         flags = []
         if chars & 0x00000020:
             flags.append('CODE')
@@ -83,25 +69,26 @@ def analyze(filepath):
             flags.append('WRITE')
 
         anomalies = []
-        if ent > 7.0 and rsize > 1024:
+        if ent > 7.0 and s['rsize'] > 1024:
             anomalies.append('HIGH ENTROPY (encrypted/compressed)')
-        if ent < 1.0 and rsize > 1024:
+        if ent < 1.0 and s['rsize'] > 1024:
             anomalies.append('VERY LOW ENTROPY (padding/zeros)')
-        if rsize == 0 and vsize > 0:
+        if s['rsize'] == 0 and s['vsize'] > 0:
             anomalies.append('EMPTY ON DISK (runtime-unpacked)')
-        if vsize > 0 and rsize > 0 and vsize > rsize * 5:
-            anomalies.append(f'PACKED (VS/RS ratio: {vsize/rsize:.1f}x)')
+        if s['vsize'] > 0 and s['rsize'] > 0 and s['vsize'] > s['rsize'] * 5:
+            anomalies.append(f'PACKED (VS/RS ratio: {s["vsize"]/s["rsize"]:.1f}x)')
         if 'EXEC' in flags and 'WRITE' in flags:
             anomalies.append('WRITABLE+EXECUTABLE (SMC / packer)')
+        name = s['name']
         if name.startswith('.') and name[1:].isdigit():
             anomalies.append('NUMERIC SECTION NAME (obfuscator)')
 
         sections.append({
             'name': name,
-            'virtual_addr': vaddr,
-            'virtual_size': vsize,
-            'raw_addr': raddr,
-            'raw_size': rsize,
+            'virtual_addr': s['vaddr'],
+            'virtual_size': s['vsize'],
+            'raw_addr': s['raddr'],
+            'raw_size': s['rsize'],
             'entropy': round(ent, 3),
             'flags': flags,
             'anomalies': anomalies,
@@ -117,7 +104,7 @@ def analyze(filepath):
     return {
         'file': os.path.basename(filepath),
         'size': len(data),
-        'arch': 'x64' if is_64 else 'x86',
+        'arch': 'x64' if pe['pe64'] else 'x86',
         'sections': sections,
         'overlay_size': overlay_size,
     }

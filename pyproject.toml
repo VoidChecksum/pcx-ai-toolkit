@@ -1,0 +1,37 @@
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+explicit_package_bases = true
+mypy_path = "."
+
+[[tool.mypy.overrides]]
+module = "tools.lib.*"
+strict = true
+
+[[tool.mypy.overrides]]
+module = [
+    "tools.anti-debug-scanner",
+    "tools.binary-diff-summary",
+    "tools.build-llms-index",
+    "tools.dump-strings-xor",
+    "tools.dumper-to-enma",
+    "tools.evidence-log-validator",
+    "tools.identify-protector",
+    "tools.module-export-mapper",
+    "tools.offset-diff",
+    "tools.pattern-format-converter",
+    "tools.pe-section-analyzer",
+    "tools.resolve-api-hashes",
+    "tools.script-linter",
+    "tools.sig-uniqueness-checker"
+]
+ignore_errors = true
+
+[tool.pyright]
+include = ["tools/lib"]
+exclude = ["**/node_modules", "**/__pycache__", "lsp", "visualstudio", "tools/*.py"]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+useLibraryCodeForTypes = true
+reportMissingImports = "warning"
+reportMissingTypeStubs = false

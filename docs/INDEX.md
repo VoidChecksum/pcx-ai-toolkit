@@ -9,7 +9,7 @@ Three surfaces let AI tools reach the toolkit's corpus efficiently. Pick by inte
 | Enma context pack | [`../docs/llms-perception-enma.md`](../docs/llms-perception-enma.md) | ~950 KB | One-language session in Enma |
 | AngelScript context pack | [`../docs/llms-perception-angelscript.md`](../docs/llms-perception-angelscript.md) | ~400 KB | One-language session in AS |
 | Lua context pack | [`../docs/llms-perception-lua.md`](../docs/llms-perception-lua.md) | ~215 KB | One-language session in Lua |
-| Skills bundle | [`../docs/llms-skills.md`](../docs/llms-skills.md) | ~300 KB | All 17 skills in one file |
+| Skills bundle | [`../docs/llms-skills.md`](../docs/llms-skills.md) | ~323 KB | All 23 skills in one file |
 | Knowledge bundle | [`../docs/llms-knowledge.md`](../docs/llms-knowledge.md) | ~350 KB | All 20 knowledge references in one file |
 | Dynamic search MCP | [`../mcp/pcx-knowledge-mcp/`](../mcp/pcx-knowledge-mcp/) | one process | MCP-aware tool, long session, lazy loading |
 

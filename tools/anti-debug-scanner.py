@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """Scan a PE binary for anti-debug surfaces and report findings.
 
 Defensive RE tool — flags techniques the binary uses to detect debuggers,
@@ -99,68 +100,20 @@ PEB_PATTERNS = [
 ]
 
 
-# ── Tiny PE parser (mirrors the existing tools/ pattern) ──────────────────────
+# ── PE parser imports ─────────────────────────────────────────────────────────
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lib.pe_parse import (
+    parse_pe as _parse_pe, rva_to_off, read_cstr, read_u16, read_u32, read_u64
+)
 
-def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]
-def read_u32(d, o): return struct.unpack_from('<I', d, o)[0]
+def parse_pe(data: bytes) -> dict:
+    pe = _parse_pe(data)
+    pe['import_dir_rva'] = pe['import_dir'][0]
+    return pe
 
-
-def parse_pe(data):
-    if data[:2] != b'MZ':
-        raise SystemExit('not a PE: missing MZ header')
-    pe_off = read_u32(data, 0x3C)
-    if data[pe_off:pe_off+4] != b'PE\x00\x00':
-        raise SystemExit('not a PE: missing PE signature')
-    coff = pe_off + 4
-    machine = read_u16(data, coff)
-    num_sections = read_u16(data, coff + 2)
-    opt_size = read_u16(data, coff + 16)
-    opt_off = coff + 20
-    pe64 = read_u16(data, opt_off) == 0x20B
-
-    image_base = struct.unpack_from('<Q' if pe64 else '<I',
-                                    data, opt_off + (24 if pe64 else 28))[0]
-    # Data Directory[1] = Import Directory (RVA, Size)
-    dd_off = opt_off + (112 if pe64 else 96)
-    import_dir_rva = read_u32(data, dd_off + 1 * 8)
-
-    sec_off = opt_off + opt_size
-    sections = []
-    for i in range(num_sections):
-        s = sec_off + i * 40
-        name = data[s:s+8].rstrip(b'\x00').decode('ascii', 'replace')
-        vsize = read_u32(data, s + 8)
-        vaddr = read_u32(data, s + 12)
-        rsize = read_u32(data, s + 16)
-        raddr = read_u32(data, s + 20)
-        chars = read_u32(data, s + 36)
-        sections.append({
-            'name': name, 'vaddr': vaddr, 'vsize': vsize,
-            'raddr': raddr, 'rsize': rsize, 'chars': chars,
-            'exec': bool(chars & 0x20000000),
-        })
-    return {
-        'pe64': pe64, 'machine': machine, 'image_base': image_base,
-        'sections': sections, 'import_dir_rva': import_dir_rva,
-    }
-
-
-def rva_to_off(rva, sections):
-    for s in sections:
-        if s['vaddr'] <= rva < s['vaddr'] + max(s['vsize'], s['rsize']):
-            return s['raddr'] + (rva - s['vaddr'])
-    return None
-
-
-def text_sections(pe):
+def text_sections(pe: dict) -> list[dict]:
     return [s for s in pe['sections'] if s['exec'] and s['rsize']]
-
-
-def read_cstr(data, off, maxlen=256):
-    end = data.find(b'\x00', off, off + maxlen)
-    if end == -1:
-        return ''
-    return data[off:end].decode('ascii', 'replace')
 
 
 # ── Import table walk ────────────────────────────────────────────────────────

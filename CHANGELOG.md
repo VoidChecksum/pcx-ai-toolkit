@@ -2,6 +2,39 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.16.0] — 2026-06-18
+
+### Added
+- **Auto-update feature**:
+  - `tools/update-toolkit.sh` (bash) and `tools/update-toolkit.ps1` (PowerShell) for cross-platform self-updating of the toolkit.
+  - Automatically pulls from git remote, updates submodules, rebuilds LSP servers (`enma-lsp`, `angel-lsp-pcx`), refreshes AI skills, and checks/regenerates knowledge bundles.
+  - Supports `--check` (no-op drift detection), `--force` (run hooks even if up to date), and `--skip-lsp`/`--skip-skills`/`--skip-bundles` flags.
+- **Rust Tools Integration**:
+  - Reimplemented the PE parsing core in Rust (`tools/pe-parser`) which compiles to `tools/bin/pe-parser`. It is used by `tools/lib/pe_parse.py` for incredibly fast, memory-safe, out-of-bounds protected PE parsing.
+  - Reimplemented `sig-uniqueness-checker` in Rust (`tools/bin/sig-uniqueness-checker`), moving the performance-critical byte pattern scanning and near-miss calculations to compiled native code.
+  - Provided seamless Python fallbacks for all ported tools, ensuring the toolkit remains 100% functional on platforms where Rust/Cargo is not installed.
+- **Smoke test suite**:
+  - `tools/test-runner.sh` — automates end-to-end smoke testing. Generates a valid mock 16KB x64 PE binary with import/export directories, walks sections, and runs all 13 tools to verify correct functionality and zero crashes.
+- **Version tracking**:
+  - Added `VERSION` file containing `"1.16.0"` to the repository root.
+
+### Changed
+- Refactored 8 PE-consuming python tools to import from the shared `tools.lib.pe_parse` library:
+  - `anti-debug-scanner.py`
+  - `binary-diff-summary.py`
+  - `dump-strings-xor.py`
+  - `identify-protector.py`
+  - `module-export-mapper.py`
+  - `offset-diff.py`
+  - `pe-section-analyzer.py`
+  - `sig-uniqueness-checker.py`
+- `.github/workflows/ci.yml`:
+  - Added syntax validation steps for `update-toolkit.sh` and `update-toolkit.ps1`.
+  - Added compile checks for all python scripts under `tools/` and `tools/lib/`.
+  - Added verification that `VERSION` file exists.
+- `setup.sh` & `setup.ps1`:
+  - Updated to print the currently installed toolkit version on setup complete.
+
 ## [1.15.0] — 2026-06-17
 
 ### Added — Indexed Knowledge Surfaces

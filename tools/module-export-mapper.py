@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """Map PE module exports and cross-reference which neighbours import them.
 
 Lists the export table of a PE module (ordinal | name | RVA), decodes a short
@@ -20,59 +21,34 @@ import json
 import argparse
 
 
-def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]
-def read_u32(d, o): return struct.unpack_from('<I', d, o)[0]
-def read_u64(d, o): return struct.unpack_from('<Q', d, o)[0]
+# ── PE parser imports ─────────────────────────────────────────────────────────
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lib.pe_parse import (
+    parse_pe, rva_to_off, read_cstr, read_u32, read_u16, read_u64
+)
 
+def parse_headers(data: bytes) -> dict | None:
+    try:
+        pe = parse_pe(data)
+    except SystemExit:
+        return None
 
-def parse_headers(data):
-    """Minimal PE parser — sections + export/import data directories."""
-    if data[:2] != b'MZ':
-        return None
-    pe_off = read_u32(data, 0x3C)
-    if data[pe_off:pe_off+4] != b'PE\x00\x00':
-        return None
-    coff = pe_off + 4
-    num_sec = read_u16(data, coff + 2)
-    opt_size = read_u16(data, coff + 16)
-    opt = coff + 20
-    is_64 = read_u16(data, opt) == 0x20B
-    dd_off = opt + (112 if is_64 else 96)
-    sec_off = opt + opt_size
     sections = []
-    for i in range(num_sec):
-        s = sec_off + i * 40
-        if s + 40 > len(data):
-            break
+    for s in pe['sections']:
         sections.append({
-            'vaddr': read_u32(data, s + 12),
-            'vsize': read_u32(data, s + 8),
-            'raddr': read_u32(data, s + 20),
-            'rsize': read_u32(data, s + 16),
+            'vaddr': s['vaddr'],
+            'vsize': s['vsize'],
+            'raddr': s['raddr'],
+            'rsize': s['rsize'],
         })
+
     return {
-        'is_64': is_64,
+        'is_64': pe['pe64'],
         'sections': sections,
-        'export_dir': (read_u32(data, dd_off), read_u32(data, dd_off + 4)),
-        'import_dir': (read_u32(data, dd_off + 8), read_u32(data, dd_off + 12)),
+        'export_dir': pe['export_dir'],
+        'import_dir': pe['import_dir'],
     }
-
-
-def rva_to_off(rva, sections):
-    """Translate an RVA to a file offset, or None when it lands in no section."""
-    for s in sections:
-        if s['vaddr'] <= rva < s['vaddr'] + max(s['vsize'], s['rsize']):
-            return rva - s['vaddr'] + s['raddr']
-    return None
-
-
-def read_cstr(data, off, maxlen=512):
-    if off is None or off >= len(data):
-        return ''
-    end = data.find(b'\x00', off, off + maxlen)
-    if end < 0:
-        end = min(off + maxlen, len(data))
-    return data[off:end].decode('ascii', errors='replace')
 
 
 def mangle_hint(name):

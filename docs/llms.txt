@@ -173,6 +173,7 @@ Behavioral / discipline skills loaded automatically by AI tools (Claude Code / O
 - [PCX Reverse-Engineering Discipline — Finding Offsets Without Fooling Yourself](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-re-discipline/SKILL.md): Workflow discipline for reverse engineering and offset maintenance: locating structs, generating signatures, resolving RIP-relative addresses, and keeping an offset table alive across game patches. De
 - [Streamproof Overlay — Capture Compatibility for PCX Renders](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-streamproof/SKILL.md): When PCX overlay output shows up in screen captures and when it doesn't, mapped per capture method (OBS, Discord, GeForce ShadowPlay, NVIDIA Highlights, PrintScreen, Steam screenshot, capture cards). 
 - [RE Evidence Log — Every Claim Cites Its Proof](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/re-evidence-log/SKILL.md): The discipline of recording why you trust each offset and sig in your project. The offset table is data; the evidence log is the proof behind it. Without the log, every patch day starts from zero on t
+- [Rust-Python Integration & Native Proxying Discipline](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/rust-python-integration/SKILL.md): Guidelines for designing, developing, and extending hybrid Rust-Python tools in the pcx-ai-toolkit environment.
 - [Script Bundler — Packaging and Shipping PCX Scripts](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/script-bundler/SKILL.md): The build and deployment workflow for PCX scripts: when to distribute raw .em source vs precompiled .emb, the bundle order that respects the module-import graph, what survives hot-reload, the pre-ship
 
 ## Knowledge References
@@ -254,17 +255,17 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [── Detection tables ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/anti-debug-scanner.py): DIRECTCHECKIMPORTS = {
 - [.text classifier thresholds (block-level identical %, raw-size delta %).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/binary-diff-summary.py): RECOMPILEMINSAME = 70.0
 - [── Repo layout ──────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-llms-index.py): REPOROOT = Path(file).resolve().parent.parent
-- [Scan for runs of printable ASCII](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dump-strings-xor.py): i = 0
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dump-strings-xor.py): import os
 - [Internal representation: the parsed table is a list of (category, entries)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dumper-to-enma.py): # groups. category is None when the source has no natural grouping; otherwise
 - [── Parse rules (tolerant of formatting variation) ────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/evidence-log-validator.py): # const <type> OFFNAME ...   |   const string SIGNAME ...
-- [Section headers start after optional header](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/identify-protector.py): secoff = optoff + opthdrsize
-- [Build ordinal-index -> exported-name map from the name pointer tables.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/module-export-mapper.py): names = {}
-- [offset-diff](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/offset-diff.py)
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/identify-protector.py): import os
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/module-export-mapper.py): import os
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/offset-diff.py): import os
 - [A normalized pattern is a list where each element is an int byte (0-255)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pattern-format-converter.py): # or None for a wildcard. All parsing converts to this; all emitting reads it.
-- [Overlay](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pe-section-analyzer.py): overlaysize = 0
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pe-section-analyzer.py): import os
 - [── Hash algorithms ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/resolve-api-hashes.py): def ror13add(name: bytes) -> int:
 - [── Rule registry ─────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/script-linter.py): # rule number -> (severity, one-liner). Severity is fixed per rule, not per hit.
-- [Anchor on the first fixed byte and skip with bytes.find — avoids scanning](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/sig-uniqueness-checker.py): # every offset when the leading byte is rare.
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/sig-uniqueness-checker.py): import os
 
 ## Build Scripts
 
@@ -272,3 +273,5 @@ Bash scripts for pre-ship hygiene checks and one-shot installers.
 
 - [Install reverse engineering plugins, deobfuscation tools, and Python packages.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/install-re-tools.sh): #
 - [pre-ship-check.sh — pre-release hygiene checklist for PCX scripting projects.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pre-ship-check.sh): #
+- [test-runner.sh — Smoke test all python tools against a mock PE binary.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/test-runner.sh): #
+- [update-toolkit.sh — Self-update pcx-ai-toolkit from its git remote.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/update-toolkit.sh): #

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """High-level change summary between two PE binary versions (patch-day prep).
 
 Answers one question before you commit an afternoon to a game update: *how
@@ -27,6 +28,8 @@ import struct
 import os
 import json
 import argparse
+import subprocess
+
 import hashlib
 from collections import Counter
 
@@ -37,29 +40,17 @@ REFACTOR_MIN_SAME = 30.0
 MAJOR_MAX_DELTA = 10.0
 
 
-def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]
-def read_u32(d, o): return struct.unpack_from('<I', d, o)[0]
+# ── PE parser imports ─────────────────────────────────────────────────────────
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lib.pe_parse import parse_pe
 
-
-def get_sections(data):
-    """Minimal PE parser — returns list of (name, offset, size) tuples."""
-    if data[:2] != b'MZ':
+def get_sections(data: bytes) -> list[tuple[str, int, int]] | None:
+    try:
+        pe = parse_pe(data)
+        return [(s['name'], s['raddr'], s['rsize']) for s in pe['sections']]
+    except SystemExit:
         return None
-    pe_off = read_u32(data, 0x3C)
-    if data[pe_off:pe_off+4] != b'PE\x00\x00':
-        return None
-    coff = pe_off + 4
-    num = read_u16(data, coff + 2)
-    opt_size = read_u16(data, coff + 16)
-    sec_off = coff + 20 + opt_size
-    sections = []
-    for i in range(num):
-        s = sec_off + i * 40
-        name = data[s:s+8].rstrip(b'\x00').decode('ascii', errors='replace')
-        rsize = read_u32(data, s + 16)
-        raddr = read_u32(data, s + 20)
-        sections.append((name, raddr, rsize))
-    return sections
 
 
 def block_hashes(blob, block_size):
@@ -201,7 +192,20 @@ def load_binary(path):
 
 
 def main():
+    # Attempt to proxy to Rust binary if compiled
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'binary-diff-summary.exe' if os.name == 'nt' else 'binary-diff-summary'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            sys.exit(res.returncode)
+        except Exception:
+            pass
+
     ap = argparse.ArgumentParser(description='High-level diff summary between two PE versions')
+
     ap.add_argument('--old', required=True, help='old PE binary')
     ap.add_argument('--new', required=True, help='new PE binary')
     ap.add_argument('--sections', help='comma-separated section names (default: all)')

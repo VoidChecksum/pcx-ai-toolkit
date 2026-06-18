@@ -73,6 +73,8 @@ SKIP_PATTERNS = [
     re.compile(r'docs/INDEX\.md$'),
     re.compile(r'lsp/'),
     re.compile(r'visualstudio/.*\.(vsix|dll|exe)$'),
+    re.compile(r'tools/pe-parser/'),
+    re.compile(r'tools/bin/'),
 ]
 
 # ── Per-language bundle scoping ──────────────────────────────────────────────

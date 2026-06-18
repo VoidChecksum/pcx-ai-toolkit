@@ -13,7 +13,7 @@
 [![Lines](https://img.shields.io/badge/Doc%20Lines-35%2C000%2B-brightgreen.svg)](#documentation-coverage)
 [![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
 [![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
-[![Skills](https://img.shields.io/badge/AI%20Skills-18-yellow.svg)](#ai-skills)
+[![Skills](https://img.shields.io/badge/AI%20Skills-23-yellow.svg)](#ai-skills)
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
@@ -94,6 +94,27 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 - AI skills registered with Claude Code (if detected)
 - Skill docs copied to `~/.claude/skills/`
 
+
+### Part 1.5 — Auto-Update
+
+To update the toolkit, pull the latest documentation/skills, rebuild LSP servers, and regenerate the llms-index corpus automatically:
+
+**Linux / macOS / WSL / Git Bash:**
+```bash
+./tools/update-toolkit.sh
+```
+
+**Windows 10 / 11 (PowerShell):**
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/update-toolkit.ps1
+```
+
+**Supported flags:**
+- `--check` / `-Check`: Check only — prints whether an update is available (exits `1` if update is available, `0` if up to date).
+- `--force` / `-Force`: Force run all post-update hooks (LSP rebuild, skill refresh, index regeneration) even if already up-to-date.
+- `--skip-lsp` / `-SkipLsp`: Skip rebuilding the LSP servers.
+- `--skip-skills` / `-SkipSkills`: Skip copying AI skills to `~/.claude/skills/`.
+- `--skip-bundles` / `-SkipBundles`: Skip checking/regenerating the `llms-index` bundles under `docs/`.
 ---
 
 ### Part 2 — Analysis Suite (headless, fully automatic)
@@ -223,7 +244,7 @@ uv tool upgrade ida-pro-mcp
 <td width="50%" valign="top">
 
 ### AI Skills
-18 Claude Code / OMC skills
+23 Claude Code / OMC skills
 
 - **game-hacking-pcx** — doc index, API rules
 - **game-cheat-guidelines** — 12 behavioral rules (Enma)
@@ -243,6 +264,11 @@ uv tool upgrade ida-pro-mcp
 - **mcp-tool-routing** — which of the 37 Perception MCP tools for which task
 - **anti-cheat-re** — kernel AC methodology
 - **kernel-analysis** — driver analysis patterns
+- **deobfuscation** — unpacking and string deobfuscation
+- **pcx-bloat-audit** — scan code for unnecessary/redundant imports & helpers
+- **pcx-bloat-review** — manual code complexity review guidelines
+- **pcx-defer-ledger** — cleanup/RAII validation for temporary resources
+- **rust-python-integration** — multi-binary Cargo architecture + Python proxies & fallbacks
 
 Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
 
@@ -292,7 +318,7 @@ Three complementary surfaces let any AI tool reach the toolkit's corpus efficien
 |---|---------|------------|-------------|------|
 | 1 | [`docs/llms.txt`](docs/llms.txt) | 45 KB structured index (Anthropic / Mintlify convention) | Tools that auto-fetch the convention (Claude, Cursor, ...) | 45 KB context |
 | 2 | `docs/llms-perception-{enma,angelscript,lua}.md` | Per-language concatenated context packs (215 KB - 950 KB) | Aider `/read`, Cursor / Continue `@file`, Copilot paste | bundle size |
-| 2 | [`docs/llms-skills.md`](docs/llms-skills.md) / [`llms-knowledge.md`](docs/llms-knowledge.md) | All 18 skills / all 23 knowledge refs concatenated | Same as above, category-focused | 300-350 KB |
+| 2 | [`docs/llms-skills.md`](docs/llms-skills.md) / [`llms-knowledge.md`](docs/llms-knowledge.md) | All 23 skills / all 23 knowledge refs concatenated | Same as above, category-focused | 323-350 KB |
 | 2 | [`docs/llms-full.txt`](docs/llms-full.txt) | Full corpus concatenation (~2 MB) | All-language sessions in non-MCP tools | 2 MB context |
 | 3 | [`mcp/pcx-knowledge-mcp/`](mcp/pcx-knowledge-mcp/) | Python MCP server with `search` / `get_file` / `list_files` / `overview` | Claude Desktop, Cline, Continue, Zed, any MCP-aware tool | one process, <100 ms cold |
 
@@ -347,7 +373,7 @@ pcx-ai-toolkit/
 │       ├── angelscript/                  AngelScript APIs (23 files)
 │       └── lua/                          Lua APIs (17 files)
 │
-├── .claude/skills/                   ── AI Skills (18)
+├── .claude/skills/                   ── AI Skills (23)
 │   ├── game-hacking-pcx/                Doc index + coding rules
 │   ├── game-cheat-guidelines/           12 behavioral guidelines (Enma)
 │   ├── pcx-angelscript-discipline/      10 AS-specific rules
@@ -364,6 +390,11 @@ pcx-ai-toolkit/
 │   ├── pcx-debug-overlay/               Diagnostic / profiler / status overlay (gated, read-only)
 │   ├── pcx-knowledge-index/             How AI tools reach the corpus: llms.txt + bundles + MCP
 │   ├── mcp-tool-routing/                Decision guide across the 37 Perception MCP tools
+│   ├── deobfuscation/                   Unpacking and string deobfuscation
+│   ├── pcx-bloat-audit/                 Scan code for unnecessary/redundant imports & helpers
+│   ├── pcx-bloat-review/                Manual code complexity review guidelines
+│   ├── pcx-defer-ledger/                Cleanup/RAII validation for temporary resources
+│   ├── rust-python-integration/         Multi-binary Cargo architecture + Python proxies & fallbacks
 │   ├── anti-cheat-re/                   Kernel AC RE methodology (6 steps)
 │   └── kernel-analysis/                 Driver analysis patterns (WDM/KMDF)
 │

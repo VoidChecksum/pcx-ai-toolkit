@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """Check whether a byte signature uniquely identifies one instruction in a PE.
 
 Scans the executable sections of a PE binary for a candidate pattern and reports
@@ -19,33 +20,29 @@ import struct
 import os
 import json
 import argparse
+import subprocess
 
 
-def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]
-def read_u32(d, o): return struct.unpack_from('<I', d, o)[0]
 
+# ── PE parser imports ─────────────────────────────────────────────────────────
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lib.pe_parse import parse_pe
 
-def get_sections(data):
-    """Minimal PE parser — returns list of section dicts (name/raw/rva/exec)."""
-    if data[:2] != b'MZ':
+def get_sections(data: bytes) -> list[dict]:
+    try:
+        pe = parse_pe(data)
+    except SystemExit:
         return []
-    pe_off = read_u32(data, 0x3C)
-    if data[pe_off:pe_off+4] != b'PE\x00\x00':
-        return []
-    coff = pe_off + 4
-    num = read_u16(data, coff + 2)
-    opt_size = read_u16(data, coff + 16)
-    sec_off = coff + 20 + opt_size
     sections = []
-    for i in range(num):
-        s = sec_off + i * 40
-        name = data[s:s+8].rstrip(b'\x00').decode('ascii', errors='replace')
-        rsize = read_u32(data, s + 16)
-        raddr = read_u32(data, s + 20)
-        vaddr = read_u32(data, s + 12)
-        chars = read_u32(data, s + 36)   # +0x24: IMAGE_SCN_MEM_EXECUTE = 0x20000000
-        sections.append({'name': name, 'raddr': raddr, 'rsize': rsize,
-                         'vaddr': vaddr, 'exec': bool(chars & 0x20000000)})
+    for s in pe['sections']:
+        sections.append({
+            'name': s['name'],
+            'raddr': s['raddr'],
+            'rsize': s['rsize'],
+            'vaddr': s['vaddr'],
+            'exec': s['exec'],
+        })
     return sections
 
 
@@ -232,6 +229,18 @@ def select(sections, names):
 
 
 def main():
+    # Attempt to proxy to Rust binary if compiled
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'sig-uniqueness-checker.exe' if os.name == 'nt' else 'sig-uniqueness-checker'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            sys.exit(res.returncode)
+        except Exception:
+            pass
+
     p = argparse.ArgumentParser(description='Check PE signature uniqueness')
     p.add_argument('binary', help='PE binary to scan')
     g = p.add_mutually_exclusive_group(required=True)

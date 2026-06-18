@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """Extract XOR-encrypted strings from PE binaries.
 
 Tries single-byte XOR keys (0x01–0xFF) and multi-byte keys up to 16 bytes,
@@ -20,29 +21,17 @@ import argparse
 import string
 
 
-def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]
-def read_u32(d, o): return struct.unpack_from('<I', d, o)[0]
+# ── PE parser imports ─────────────────────────────────────────────────────────
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from tools.lib.pe_parse import parse_pe
 
-
-def get_sections(data):
-    """Minimal PE parser — returns list of (name, offset, size) tuples."""
-    if data[:2] != b'MZ':
+def get_sections(data: bytes) -> list[tuple[str, int, int]]:
+    try:
+        pe = parse_pe(data)
+        return [(s['name'], s['raddr'], s['rsize']) for s in pe['sections']]
+    except SystemExit:
         return []
-    pe_off = read_u32(data, 0x3C)
-    if data[pe_off:pe_off+4] != b'PE\x00\x00':
-        return []
-    coff = pe_off + 4
-    num = read_u16(data, coff + 2)
-    opt_size = read_u16(data, coff + 16)
-    sec_off = coff + 20 + opt_size
-    sections = []
-    for i in range(num):
-        s = sec_off + i * 40
-        name = data[s:s+8].rstrip(b'\x00').decode('ascii', errors='replace')
-        rsize = read_u32(data, s + 16)
-        raddr = read_u32(data, s + 20)
-        sections.append((name, raddr, rsize))
-    return sections
 
 
 PRINTABLE = set(string.printable.encode('ascii'))

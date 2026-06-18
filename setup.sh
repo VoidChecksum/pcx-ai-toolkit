@@ -62,6 +62,21 @@ install_lsp() {
 install_lsp "enma-lsp"      "https://github.com/sinnafuls/enma-lsp.git"      "server/dist/server.js"
 install_lsp "angel-lsp-pcx" "https://github.com/sinnafuls/angel-lsp-pcx.git" "server/out/server.js"
 
+# --- Build Rust tools if cargo is available ---
+if command -v cargo &>/dev/null; then
+    echo ""
+    echo "[..] Building Rust tools (pe-parser, sig-uniqueness-checker, binary-diff-summary, offset-diff)..."
+    ( cd "$TOOLKIT_DIR/tools/pe-parser" && cargo build --release && mkdir -p ../bin && cp target/release/pe-parser ../bin/pe-parser && cp target/release/sig-uniqueness-checker ../bin/sig-uniqueness-checker && cp target/release/binary-diff-summary ../bin/binary-diff-summary && cp target/release/offset-diff ../bin/offset-diff ) >/dev/null 2>&1 || true
+    if [ -f "$TOOLKIT_DIR/tools/bin/pe-parser" ]; then
+        echo "[ok] Rust tools built: tools/bin/pe-parser, tools/bin/sig-uniqueness-checker, tools/bin/binary-diff-summary, tools/bin/offset-diff"
+    else
+        echo "[!!] Rust tools build failed — falling back to Python implementations"
+    fi
+else
+    echo ""
+    echo "[--] Cargo not found — using Python implementations"
+fi
+
 # --- Install skills to Claude Code if present ---
 # On Git Bash/WSL, $HOME maps to the Windows user profile, so this works there too.
 if [ -d "$HOME/.claude" ]; then
@@ -89,6 +104,10 @@ if [ "${1:-}" = "--project" ] && [ -n "${2:-}" ]; then
         echo "[!!] Project path not found: $2"
     fi
 fi
+
+# --- Record installed version ---
+TOOLKIT_VERSION="$(cat "$TOOLKIT_DIR/VERSION" 2>/dev/null || echo unknown)"
+echo "Version: $TOOLKIT_VERSION"
 
 echo ""
 echo "Setup complete."

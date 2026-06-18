@@ -17,3 +17,7 @@ bin/
 obj/
 visualstudio/*/Server/**
 !visualstudio/*/Server/.gitkeep
+
+# Rust build targets
+target/
+tools/bin/
