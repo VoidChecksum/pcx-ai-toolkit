@@ -1,3 +1,13 @@
+---
+name: pcx-patch-day-playbook
+description: >
+  Ordered triage workflow for recovering a PCX script after a game update.
+  Triggers when sigs return 0, reads return garbage after a patch, or the
+  user says "broken", "updated", "patch day", "hotfix", "season drop", or
+  "DLC dropped". Keeps diagnosis short and fixes targeted.
+license: MIT
+---
+
 # Patch Day Playbook — Recovering After a Game Update
 
 The ordered triage workflow for when a game update lands and your Perception.cx script stops working. This is the single most painful recurring scenario in scripting work; the cost is dominated by *not knowing what changed*, not by the re-RE itself. This playbook keeps the diagnosis short and the fix targeted.

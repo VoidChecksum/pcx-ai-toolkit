@@ -1,3 +1,13 @@
+---
+name: anti-cheat-re
+description: >
+  Methodology for reverse engineering kernel-level anti-cheat systems: EAC,
+  BattlEye, Vanguard, GameGuard, XIGNCODE3. Covers component enumeration,
+  detection-vector cataloging, and verified understanding of the AC
+  observation surface. Always active when analyzing anti-cheat systems.
+license: MIT
+---
+
 # Anti-Cheat Reverse Engineering — Kernel-Level Game Protection Analysis
 
 Methodology for reverse engineering kernel-level anti-cheat systems: EAC (Easy Anti-Cheat), BattlEye, Vanguard, GameGuard, XIGNCODE3, and similar kernel drivers that protect game processes. Covers the full workflow from component enumeration through detection-vector cataloging to verified understanding of the AC's observation surface.

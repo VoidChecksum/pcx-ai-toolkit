@@ -57,6 +57,38 @@ jobs:
         run: |
           python3 tools/build-llms-index.py --check
 
+      - name: Validate skill frontmatter (name + description + license in every SKILL.md)
+        run: |
+          python3 - <<'PY'
+          import glob, sys
+          errors = []
+          for path in sorted(glob.glob('.claude/skills/*/SKILL.md')):
+              txt = open(path, encoding='utf-8').read()
+              if not txt.startswith('---'):
+                  errors.append(f"{path}: missing YAML frontmatter")
+                  continue
+              end = txt.find('\n---', 3)
+              if end == -1:
+                  errors.append(f"{path}: frontmatter not closed")
+                  continue
+              block = txt[3:end]
+              for field in ('name:', 'description:', 'license:'):
+                  if field not in block:
+                      errors.append(f"{path}: missing field '{field}'")
+              skill_dir = path.split('/')[2]
+              for line in block.splitlines():
+                  if line.startswith('name:'):
+                      name_val = line.split(':', 1)[1].strip().strip('"\'')
+                      if name_val != skill_dir:
+                          errors.append(f"{path}: name '{name_val}' != dir '{skill_dir}'")
+          if errors:
+              print(f"Skill frontmatter errors ({len(errors)}):")
+              for e in errors: print(f"  {e}")
+              sys.exit(1)
+          count = len(glob.glob('.claude/skills/*/SKILL.md'))
+          print(f"All {count} skills have valid frontmatter")
+          PY
+
       - name: Check internal markdown links
         run: |
           python3 - <<'PY'

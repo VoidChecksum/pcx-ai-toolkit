@@ -1,3 +1,13 @@
+---
+name: pcx-lua-discipline
+description: >
+  Lua-specific rules for writing Perception.cx scripts in Lua 5.4.6.
+  Prevents Enma-reflex errors (typed addresses, C truthiness, struct value
+  types, register_routine) in the Lua scripting surface. Always active when
+  editing .lua PCX scripts — applies on top of game-cheat-guidelines.
+license: MIT
+---
+
 # PCX Lua Discipline — Lua Idioms for Perception.cx Scripts
 
 Lua-specific rules for writing Perception.cx scripts in **Lua 5.4.6** (confirmed in `docs/perception/lua/render-api.md`). PCX exposes a third scripting surface alongside Enma and AngelScript; the host APIs are nearly identical in shape but the *language* underneath is Lua, and the failure modes are different. Default to Lua semantics here, not Enma idioms — Enma reflexes (typed addresses, C truthiness, struct value types, `register_routine`) produce code that silently misreads memory or never runs.

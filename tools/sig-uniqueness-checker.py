@@ -14,7 +14,11 @@ Usage:
     python3 sig-uniqueness-checker.py <binary> --sig "..." --near-misses 1
     python3 sig-uniqueness-checker.py <binary> --sig "..." --json
 """
-import sys, struct, os, json, argparse
+import sys
+import struct
+import os
+import json
+import argparse
 
 
 def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]
@@ -240,23 +244,27 @@ def main():
     args = p.parse_args()
 
     if not os.path.isfile(args.binary):
-        print(f"Error: {args.binary} not found", file=sys.stderr); sys.exit(1)
+        print(f"Error: {args.binary} not found", file=sys.stderr)
+        sys.exit(1)
     with open(args.binary, 'rb') as f:
         data = f.read()
     sections = get_sections(data)
     if not sections:
-        print("Error: not a PE file", file=sys.stderr); sys.exit(1)
+        print("Error: not a PE file", file=sys.stderr)
+        sys.exit(1)
 
     names = [n.strip() for n in args.sections.split(',')] if args.sections else None
     selected = select(sections, names)
     if not selected:
-        print("Error: no matching sections to scan", file=sys.stderr); sys.exit(1)
+        print("Error: no matching sections to scan", file=sys.stderr)
+        sys.exit(1)
     regions = build_regions(data, selected)
 
     try:
         sigs = load_sigs(args)
     except (ValueError, OSError) as e:
-        print(f"Error: {e}", file=sys.stderr); sys.exit(1)
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
     results = [analyze(regions, name, pat, args.near_misses) for name, pat in sigs]
 

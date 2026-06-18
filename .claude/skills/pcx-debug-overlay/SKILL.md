@@ -1,3 +1,13 @@
+---
+name: pcx-debug-overlay
+description: >
+  Pattern for shipping diagnostic and profiler output as a separate, gated
+  overlay rather than mixing it into the production rendering. Triggers when
+  debugging a script, building a support-mode panel, profiling a slow path,
+  or creating a diagnostic vs release build of the same code.
+license: MIT
+---
+
 # Debug Overlay — Diagnostic Surfaces Separate from the Production Overlay
 
 The pattern for shipping diagnostic / profiler / address-dump information as a separate, gated overlay rather than mixed into the production rendering. Companion to `pcx-perf-budget` (which gives the timing primitives) and `gui-design-patterns` (which says "no debug section by default"). This skill names the structure that lets you ship a script that's diagnosable when you need it and clean when you don't.

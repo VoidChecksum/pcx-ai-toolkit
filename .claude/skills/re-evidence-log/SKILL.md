@@ -1,3 +1,13 @@
+---
+name: re-evidence-log
+description: >
+  Discipline for recording why each offset and sig is trusted — the proof
+  behind the offset table. Every offset added, every sig derived, every
+  struct layout committed comes with a citable evidence entry. Always active
+  during RE work; pairs with pcx-re-discipline and pcx-patch-day-playbook.
+license: MIT
+---
+
 # RE Evidence Log — Every Claim Cites Its Proof
 
 The discipline of recording *why* you trust each offset and sig in your project. The offset table is data; the evidence log is the proof behind it. Without the log, every patch day starts from zero on the same offsets you derived three months ago — you remember roughly what you did, not the citations that let you confirm it. This skill is the artifact half of `pcx-re-discipline` (which is the discipline itself) and the input to `pcx-patch-day-playbook` Step 7 (which writes a per-patch entry into the log).

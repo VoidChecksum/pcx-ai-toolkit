@@ -15,7 +15,12 @@ Usage:
     python3 anti-debug-scanner.py <binary> --json
     python3 anti-debug-scanner.py <binary> --category timing,peb
 """
-import sys, struct, os, json, argparse, re
+import sys
+import struct
+import os
+import json
+import argparse
+import re
 
 
 # ── Detection tables ──────────────────────────────────────────────────────────
@@ -153,7 +158,8 @@ def text_sections(pe):
 
 def read_cstr(data, off, maxlen=256):
     end = data.find(b'\x00', off, off + maxlen)
-    if end == -1: return ''
+    if end == -1:
+        return ''
     return data[off:end].decode('ascii', 'replace')
 
 
@@ -163,9 +169,11 @@ def collect_imports(data, pe):
     """Return set of (dll_name_lower, function_name) tuples."""
     out = set()
     rva = pe['import_dir_rva']
-    if not rva: return out
+    if not rva:
+        return out
     off = rva_to_off(rva, pe['sections'])
-    if off is None: return out
+    if off is None:
+        return out
     ptr_sz = 8 if pe['pe64'] else 4
     ord_bit = 0x8000000000000000 if pe['pe64'] else 0x80000000
     fmt = '<Q' if pe['pe64'] else '<I'
@@ -173,7 +181,8 @@ def collect_imports(data, pe):
     i = 0
     while True:
         desc_off = off + i * 20
-        if desc_off + 20 > len(data): break
+        if desc_off + 20 > len(data):
+            break
         oft = read_u32(data, desc_off + 0)        # OriginalFirstThunk
         name_rva = read_u32(data, desc_off + 12)
         ft = read_u32(data, desc_off + 16)        # FirstThunk
@@ -185,20 +194,25 @@ def collect_imports(data, pe):
 
         thunk_rva = oft if oft else ft
         thunk_off = rva_to_off(thunk_rva, pe['sections'])
-        if thunk_off is None: continue
+        if thunk_off is None:
+            continue
         j = 0
         while True:
             t_off = thunk_off + j * ptr_sz
-            if t_off + ptr_sz > len(data): break
+            if t_off + ptr_sz > len(data):
+                break
             t = struct.unpack_from(fmt, data, t_off)[0]
-            if t == 0: break
+            if t == 0:
+                break
             j += 1
             if t & ord_bit:                      # ordinal import — skip names
                 continue
             ibn_off = rva_to_off(t & 0xFFFFFFFF, pe['sections'])
-            if ibn_off is None: continue
+            if ibn_off is None:
+                continue
             fn = read_cstr(data, ibn_off + 2)
-            if fn: out.add((dll, fn))
+            if fn:
+                out.add((dll, fn))
     return out
 
 
@@ -222,7 +236,8 @@ def detect_imports(imports):
                 found[cat].append(f'{dll}!{fn}')
     out = []
     for cat, hits in found.items():
-        if not hits: continue
+        if not hits:
+            continue
         _label, sev = CATEGORIES[cat]
         out.append((cat, ', '.join(sorted(set(hits))), sev))
     return out
@@ -238,7 +253,8 @@ def detect_peb_patterns(data, pe):
             idx = 0
             while True:
                 idx = blob.find(pat, idx)
-                if idx == -1: break
+                if idx == -1:
+                    break
                 rva = s['vaddr'] + idx
                 peb_hits_off.append((s, idx, blob, label))
                 out.append(('peb',
@@ -280,7 +296,8 @@ def detect_int_abuse(data, pe):
         idx = 0
         while True:
             idx = blob.find(b'\xCD\x2D', idx)
-            if idx == -1: break
+            if idx == -1:
+                break
             out.append(('int2d',
                         f'INT 2D at {s["name"]}+0x{idx:X}',
                         CATEGORIES['int2d'][1]))
@@ -413,7 +430,8 @@ def main():
     args = p.parse_args()
     cats = set(c.strip() for c in args.category.split(',') if c.strip()) or None
     if not os.path.isfile(args.binary):
-        print(f'error: not a file: {args.binary}', file=sys.stderr); sys.exit(2)
+        print(f'error: not a file: {args.binary}', file=sys.stderr)
+        sys.exit(2)
     result = scan(args.binary, want_categories=cats)
     if args.json:
         print(json.dumps(result, indent=2))

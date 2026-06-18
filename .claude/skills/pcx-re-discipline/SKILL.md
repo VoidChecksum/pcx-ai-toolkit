@@ -1,3 +1,14 @@
+---
+name: pcx-re-discipline
+description: >
+  Workflow discipline for reverse engineering and offset maintenance: locating
+  structs, generating signatures, resolving RIP-relative addresses, and
+  keeping an offset table alive across patches. Derived from Karpathy
+  principles, rewritten for RE where the failure mode is a confident wrong
+  answer. Always active when doing RE or offset work.
+license: MIT
+---
+
 # PCX Reverse-Engineering Discipline — Finding Offsets Without Fooling Yourself
 
 Workflow discipline for reverse engineering and offset maintenance: locating structs, generating signatures, resolving RIP-relative addresses, and keeping an offset table alive across game patches. Derived from the four Karpathy principles — *think before coding, simplicity first, surgical changes, goal-driven execution* — rewritten for RE work, where the failure mode isn't a crash but a confident wrong answer.

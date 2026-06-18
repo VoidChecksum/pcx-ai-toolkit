@@ -244,15 +244,15 @@ def overview() -> str:
         f"Total indexed files: {total}\n\n"
         + ''.join(f"  {cat}: {n}\n" for cat, n in counts.items())
         + "\n"
-        f"High-leverage starting points:\n"
-        f"  - knowledge/pcx-api-cheatsheet.md  : all PCX APIs at a glance\n"
-        f"  - knowledge/common-patterns.md     : 13 worked code recipes\n"
-        f"  - .claude/skills/game-cheat-guidelines/SKILL.md : the 12 behavioral rules\n"
-        f"  - .claude/skills/pcx-patch-day-playbook/SKILL.md : when the game updates\n"
-        f"  - docs/llms.txt                    : structured index of the whole corpus\n"
-        f"  - docs/llms-perception-enma.md     : single-file Enma context pack\n\n"
-        f"Workflow: search(query) -> get_file(path) for the most relevant hits.\n"
-        f"Bulk: list_files(category) to enumerate; list_files() for everything.\n"
+        "High-leverage starting points:\n"
+        "  - knowledge/pcx-api-cheatsheet.md  : all PCX APIs at a glance\n"
+        "  - knowledge/common-patterns.md     : 13 worked code recipes\n"
+        "  - .claude/skills/game-cheat-guidelines/SKILL.md : the 12 behavioral rules\n"
+        "  - .claude/skills/pcx-patch-day-playbook/SKILL.md : when the game updates\n"
+        "  - docs/llms.txt                    : structured index of the whole corpus\n"
+        "  - docs/llms-perception-enma.md     : single-file Enma context pack\n\n"
+        "Workflow: search(query) -> get_file(path) for the most relevant hits.\n"
+        "Bulk: list_files(category) to enumerate; list_files() for everything.\n"
     )
 
 

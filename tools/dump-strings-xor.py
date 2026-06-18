@@ -12,7 +12,12 @@ Usage:
     python3 dump-strings-xor.py --section .data <binary>     # scan specific section
     python3 dump-strings-xor.py --json <binary>
 """
-import sys, struct, os, json, argparse, string
+import sys
+import struct
+import os
+import json
+import argparse
+import string
 
 
 def read_u16(d, o): return struct.unpack_from('<H', d, o)[0]

@@ -1,3 +1,14 @@
+---
+name: pcx-coding-discipline
+description: >
+  Workflow discipline for developing Enma (.em) and AngelScript (.as) scripts
+  on Perception.cx. Derived from Karpathy principles — think before coding,
+  simplicity first, surgical changes, goal-driven execution — rewritten for
+  cheat development realities: stale offsets, silent failed reads, detection
+  surface. Always active when writing or editing PCX scripts.
+license: MIT
+---
+
 # PCX Coding Discipline — How to Write Scripts, Not What They Look Like
 
 Workflow discipline for developing Enma (`.em`) and AngelScript (`.as`) scripts on Perception.cx. Derived from the four Karpathy principles — *think before coding, simplicity first, surgical changes, goal-driven execution* — and rewritten for the realities of cheat development: stale offsets, silent failed reads, detection surface, and overlays you debug by looking at them.

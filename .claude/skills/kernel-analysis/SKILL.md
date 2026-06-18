@@ -1,3 +1,14 @@
+---
+name: kernel-analysis
+description: >
+  Technical patterns for reversing Windows kernel drivers: WDM/KMDF
+  structure identification, IOCTL dispatch tables, kernel callback
+  enumeration, integrity checks, obfuscation layers, and driver
+  communication protocols. Focused on anti-cheat driver analysis. Always
+  active when analyzing kernel driver binaries.
+license: MIT
+---
+
 # Kernel Driver Analysis — Technical Patterns for AC Driver Reversing
 
 Technical patterns for reversing Windows kernel drivers: WDM/KMDF structure identification, IOCTL dispatch table extraction, kernel callback enumeration, integrity check routines, obfuscation layers, and driver communication protocols. Focused on anti-cheat driver analysis but applicable to any Windows kernel module.

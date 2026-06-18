@@ -25,7 +25,11 @@ Usage:
 Output uses 2-space indent, LF line endings, and a final newline (.editorconfig).
 Unclassifiable input is rejected to stderr with exit code 2.
 """
-import sys, os, re, json, argparse
+import sys
+import os
+import re
+import json
+import argparse
 import xml.etree.ElementTree as ET
 
 # Internal representation: the parsed table is a list of (category, entries)

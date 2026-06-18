@@ -26,7 +26,9 @@ Usage:
     python3 pattern-format-converter.py --from ida --to all --pat "48 8B ?? ?? ?? ??"
     python3 pattern-format-converter.py --from sig_mask --to enma --pat "48 8B 00 00" --mask "xx??" --json
 """
-import sys, json, argparse
+import sys
+import json
+import argparse
 
 FORMATS = ['ida', 'ghidra', 'x64dbg', 'ce', 'enma', 'cstyle', 'bytes', 'sig_mask']
 MASK_FORMATS = ('cstyle', 'bytes', 'sig_mask')  # need a separate mask to parse

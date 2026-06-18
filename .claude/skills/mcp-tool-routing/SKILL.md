@@ -1,3 +1,13 @@
+---
+name: mcp-tool-routing
+description: >
+  Routing guide for the 42+ Perception MCP tools — which to pick for memory
+  reads, scans, disassembly, and analysis to avoid slower or redundant calls.
+  Always active when calling Perception MCP tools. Answers "which tool for
+  this task" so the AI picks the cheapest tool with the required precision.
+license: MIT
+---
+
 # Perception MCP Tool Routing — The Decision Guide
 
 37 tools across memory / analysis / scanning / process / files. This skill answers "which one for this task" so the AI doesn't reach for the wrong tool. The Perception MCP server (`mcp/perception-mcp-config.json`) exposes a wide surface where several tools overlap in capability but differ wildly in cost or precision — using `read_memory` for what `read_typed_value` does costs you a parse step; using `find_pattern` for what `scan_string` does is an order of magnitude slower; using `analyze_function` for what `disassemble` does costs an unnecessary IDA-style pass. Routing matters.

@@ -9,7 +9,12 @@ Usage:
 Checks: section entropy (high = encrypted/compressed), virtual-vs-raw size ratio
 (packed sections), anomalous characteristics, empty sections, overlays.
 """
-import sys, struct, os, math, json, argparse
+import sys
+import struct
+import os
+import math
+import json
+import argparse
 
 
 def entropy(data: bytes) -> float:
@@ -64,12 +69,18 @@ def analyze(filepath):
         ent = entropy(sec_data)
 
         flags = []
-        if chars & 0x00000020: flags.append('CODE')
-        if chars & 0x00000040: flags.append('IDATA')
-        if chars & 0x00000080: flags.append('UDATA')
-        if chars & 0x20000000: flags.append('EXEC')
-        if chars & 0x40000000: flags.append('READ')
-        if chars & 0x80000000: flags.append('WRITE')
+        if chars & 0x00000020:
+            flags.append('CODE')
+        if chars & 0x00000040:
+            flags.append('IDATA')
+        if chars & 0x00000080:
+            flags.append('UDATA')
+        if chars & 0x20000000:
+            flags.append('EXEC')
+        if chars & 0x40000000:
+            flags.append('READ')
+        if chars & 0x80000000:
+            flags.append('WRITE')
 
         anomalies = []
         if ent > 7.0 and rsize > 1024:

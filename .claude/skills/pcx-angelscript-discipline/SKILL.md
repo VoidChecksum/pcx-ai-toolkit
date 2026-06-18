@@ -1,3 +1,13 @@
+---
+name: pcx-angelscript-discipline
+description: >
+  Behavioral and syntactic rules for writing .as scripts on Perception.cx.
+  Prevents Enma-reflex errors in the AngelScript API surface — method names,
+  parameter shapes, and constants differ between the two languages. Always
+  active when editing .as files.
+license: MIT
+---
+
 # AngelScript Discipline for Perception.cx
 
 Behavioral and syntactic rules for writing `.as` scripts on Perception.cx. The companion skill to `game-cheat-guidelines` (which is Enma-flavored): same domain, different language, different gotchas. AngelScript on PCX has its own type system, lifecycle conventions, and API surface; the AI defaults to Enma idioms when editing `.as` files and produces code that does not compile.

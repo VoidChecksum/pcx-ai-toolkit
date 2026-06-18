@@ -8,7 +8,11 @@ Usage:
 Detects: VMProtect, Themida/WinLicense, Code Virtualizer, Enigma, Obsidium,
 ASPack, UPX, NSPack, Petite, MPRESS, PECompact, .NET obfuscators.
 """
-import sys, struct, os, json, argparse
+import sys
+import struct
+import os
+import json
+import argparse
 
 SECTION_SIGS = {
     b'.vmp0':    'VMProtect',

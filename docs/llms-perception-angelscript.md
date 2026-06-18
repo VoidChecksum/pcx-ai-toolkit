@@ -11443,6 +11443,16 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 ## Source: `.claude/skills/pcx-angelscript-discipline/SKILL.md`
 
+---
+name: pcx-angelscript-discipline
+description: >
+  Behavioral and syntactic rules for writing .as scripts on Perception.cx.
+  Prevents Enma-reflex errors in the AngelScript API surface — method names,
+  parameter shapes, and constants differ between the two languages. Always
+  active when editing .as files.
+license: MIT
+---
+
 # AngelScript Discipline for Perception.cx
 
 Behavioral and syntactic rules for writing `.as` scripts on Perception.cx. The companion skill to `game-cheat-guidelines` (which is Enma-flavored): same domain, different language, different gotchas. AngelScript on PCX has its own type system, lifecycle conventions, and API surface; the AI defaults to Enma idioms when editing `.as` files and produces code that does not compile.
@@ -11854,6 +11864,17 @@ void on_unload() {
 
 ## Source: `.claude/skills/game-cheat-guidelines/SKILL.md`
 
+---
+name: game-cheat-guidelines
+description: >
+  Behavioral rules for writing game cheats in Enma, AngelScript, and C++ on
+  Perception.cx. Derived from Karpathy principles, rewritten for cheat
+  development: memory hacking, ESP, aimbot, hooking, overlay rendering, and
+  RE workflows. Always active — these rules apply every time you write or
+  edit cheat code.
+license: MIT
+---
+
 # Game Cheat Development Guidelines
 
 Behavioral rules for writing game cheats in Enma, AngelScript, and C++. Derived from the Karpathy principles but rewritten for the domain: memory hacking, ESP, aimbot, hooking, overlay rendering, and reverse engineering workflows on the Perception.cx platform.
@@ -12205,6 +12226,17 @@ Debugging checklist:
 ---
 
 ## Source: `.claude/skills/game-hacking-pcx/SKILL.md`
+
+---
+name: game-hacking-pcx
+description: >
+  Mandatory doc router for all PCX scripting sessions. Triggers on any game
+  hacking, Enma, AngelScript, or Perception.cx work. Provides the full doc
+  index (34,000+ lines across 110 files) and enforces reading the relevant
+  documentation before writing any API call. Load alongside
+  game-cheat-guidelines on every PCX session.
+license: MIT
+---
 
 # Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
 

@@ -1,3 +1,13 @@
+---
+name: ai-pair-programming
+description: >
+  Techniques for driving AI coding tools (Claude Code, Cursor, Cline, Aider,
+  Copilot) effectively on PCX projects. Covers context loading, prompt
+  discipline, and steering the AI to read docs before writing API calls.
+  Always active when working with an AI on a PCX scripting project.
+license: MIT
+---
+
 # AI Pair Programming — Driving Claude / Cursor / Cline / Aider Well on PCX Projects
 
 The other skills cover *what* to write; this one covers *how* to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it gave me a script that doesn't compile" / "it skipped the discipline rules." The 35,000-line documentation corpus, the 14 skills, and the rules drop-ins are not magic — they only work if you drive the AI to use them. This skill names the techniques that close the gap.

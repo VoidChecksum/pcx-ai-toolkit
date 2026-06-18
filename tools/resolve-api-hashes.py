@@ -13,7 +13,10 @@ The tool ships with a precomputed database of common Windows API hashes. If it
 doesn't exist yet, run --build-db first (needs a Windows SDK headers dir or a
 manually provided export list).
 """
-import sys, struct, os, json, argparse, zlib
+import struct
+import json
+import argparse
+import zlib
 
 # ── Hash algorithms ──────────────────────────────────────────────────────────
 
@@ -67,8 +70,10 @@ def murmur3_32(name: bytes, seed: int = 0) -> int:
 
     tail = name[nblocks * 4:]
     k = 0
-    if len(tail) >= 3: k ^= tail[2] << 16
-    if len(tail) >= 2: k ^= tail[1] << 8
+    if len(tail) >= 3:
+        k ^= tail[2] << 16
+    if len(tail) >= 2:
+        k ^= tail[1] << 8
     if len(tail) >= 1:
         k ^= tail[0]
         k = (k * c1) & 0xFFFFFFFF

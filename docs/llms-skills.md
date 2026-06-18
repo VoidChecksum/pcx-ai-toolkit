@@ -10,6 +10,16 @@
 
 ## Source: `.claude/skills/ai-pair-programming/SKILL.md`
 
+---
+name: ai-pair-programming
+description: >
+  Techniques for driving AI coding tools (Claude Code, Cursor, Cline, Aider,
+  Copilot) effectively on PCX projects. Covers context loading, prompt
+  discipline, and steering the AI to read docs before writing API calls.
+  Always active when working with an AI on a PCX scripting project.
+license: MIT
+---
+
 # AI Pair Programming — Driving Claude / Cursor / Cline / Aider Well on PCX Projects
 
 The other skills cover *what* to write; this one covers *how* to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it gave me a script that doesn't compile" / "it skipped the discipline rules." The 35,000-line documentation corpus, the 14 skills, and the rules drop-ins are not magic — they only work if you drive the AI to use them. This skill names the techniques that close the gap.
@@ -306,6 +316,16 @@ This is the highest-skill move in AI pair programming — recognizing when "more
 
 ## Source: `.claude/skills/anti-cheat-re/SKILL.md`
 
+---
+name: anti-cheat-re
+description: >
+  Methodology for reverse engineering kernel-level anti-cheat systems: EAC,
+  BattlEye, Vanguard, GameGuard, XIGNCODE3. Covers component enumeration,
+  detection-vector cataloging, and verified understanding of the AC
+  observation surface. Always active when analyzing anti-cheat systems.
+license: MIT
+---
+
 # Anti-Cheat Reverse Engineering — Kernel-Level Game Protection Analysis
 
 Methodology for reverse engineering kernel-level anti-cheat systems: EAC (Easy Anti-Cheat), BattlEye, Vanguard, GameGuard, XIGNCODE3, and similar kernel drivers that protect game processes. Covers the full workflow from component enumeration through detection-vector cataloging to verified understanding of the AC's observation surface.
@@ -565,6 +585,17 @@ kd> dt nt!_OBJECT_TYPE poi(<process_type_addr>) .CallbackList
 ---
 
 ## Source: `.claude/skills/deobfuscation/SKILL.md`
+
+---
+name: deobfuscation
+description: >
+  Methodology for reversing binaries protected by commercial obfuscators
+  (Themida, VMProtect), compiler-level obfuscation (OLLVM, Hikari), and
+  custom protection schemes. Covers identification, classification, layer
+  stripping, devirtualization, and verification. Active when analyzing
+  obfuscated or packed binaries.
+license: MIT
+---
 
 # Deobfuscation — Reversing Protected Binaries
 
@@ -900,6 +931,17 @@ Devirtualization is expensive (days to weeks for a single function). Before inve
 ---
 
 ## Source: `.claude/skills/game-cheat-guidelines/SKILL.md`
+
+---
+name: game-cheat-guidelines
+description: >
+  Behavioral rules for writing game cheats in Enma, AngelScript, and C++ on
+  Perception.cx. Derived from Karpathy principles, rewritten for cheat
+  development: memory hacking, ESP, aimbot, hooking, overlay rendering, and
+  RE workflows. Always active — these rules apply every time you write or
+  edit cheat code.
+license: MIT
+---
 
 # Game Cheat Development Guidelines
 
@@ -1253,6 +1295,17 @@ Debugging checklist:
 
 ## Source: `.claude/skills/game-hacking-pcx/SKILL.md`
 
+---
+name: game-hacking-pcx
+description: >
+  Mandatory doc router for all PCX scripting sessions. Triggers on any game
+  hacking, Enma, AngelScript, or Perception.cx work. Provides the full doc
+  index (34,000+ lines across 110 files) and enforces reading the relevant
+  documentation before writing any API call. Load alongside
+  game-cheat-guidelines on every PCX session.
+license: MIT
+---
+
 # Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
 
 ## Trigger
@@ -1440,6 +1493,17 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 ---
 
 ## Source: `.claude/skills/kernel-analysis/SKILL.md`
+
+---
+name: kernel-analysis
+description: >
+  Technical patterns for reversing Windows kernel drivers: WDM/KMDF
+  structure identification, IOCTL dispatch tables, kernel callback
+  enumeration, integrity checks, obfuscation layers, and driver
+  communication protocols. Focused on anti-cheat driver analysis. Always
+  active when analyzing kernel driver binaries.
+license: MIT
+---
 
 # Kernel Driver Analysis — Technical Patterns for AC Driver Reversing
 
@@ -1837,6 +1901,16 @@ Some ACs write scan results directly into the game process memory (via `KeStackA
 
 ## Source: `.claude/skills/mcp-tool-routing/SKILL.md`
 
+---
+name: mcp-tool-routing
+description: >
+  Routing guide for the 42+ Perception MCP tools — which to pick for memory
+  reads, scans, disassembly, and analysis to avoid slower or redundant calls.
+  Always active when calling Perception MCP tools. Answers "which tool for
+  this task" so the AI picks the cheapest tool with the required precision.
+license: MIT
+---
+
 # Perception MCP Tool Routing — The Decision Guide
 
 37 tools across memory / analysis / scanning / process / files. This skill answers "which one for this task" so the AI doesn't reach for the wrong tool. The Perception MCP server (`mcp/perception-mcp-config.json`) exposes a wide surface where several tools overlap in capability but differ wildly in cost or precision — using `read_memory` for what `read_typed_value` does costs you a parse step; using `find_pattern` for what `scan_string` does is an order of magnitude slower; using `analyze_function` for what `disassemble` does costs an unnecessary IDA-style pass. Routing matters.
@@ -2128,6 +2202,17 @@ These compose without ceremony — each call's output is the next call's input. 
 ---
 
 ## Source: `.claude/skills/multi-binary-targeting/SKILL.md`
+
+---
+name: multi-binary-targeting
+description: >
+  Pattern for supporting multiple game binaries (versions, architectures,
+  storefronts, beta channels) from one Enma codebase without forking.
+  Triggers when the user mentions multiple game versions, cross-build support,
+  32-bit vs 64-bit, multi-store builds, or maintaining stable and
+  experimental branches in parallel.
+license: MIT
+---
 
 # Multi-Binary Targeting — One Script, N Game Versions
 
@@ -2577,6 +2662,16 @@ The threshold is subjective; the rough rule is "if the dispatch table is more co
 ---
 
 ## Source: `.claude/skills/pcx-angelscript-discipline/SKILL.md`
+
+---
+name: pcx-angelscript-discipline
+description: >
+  Behavioral and syntactic rules for writing .as scripts on Perception.cx.
+  Prevents Enma-reflex errors in the AngelScript API surface — method names,
+  parameter shapes, and constants differ between the two languages. Always
+  active when editing .as files.
+license: MIT
+---
 
 # AngelScript Discipline for Perception.cx
 
@@ -3126,6 +3221,17 @@ Does not apply fixes, only lists them.
 
 ## Source: `.claude/skills/pcx-coding-discipline/SKILL.md`
 
+---
+name: pcx-coding-discipline
+description: >
+  Workflow discipline for developing Enma (.em) and AngelScript (.as) scripts
+  on Perception.cx. Derived from Karpathy principles — think before coding,
+  simplicity first, surgical changes, goal-driven execution — rewritten for
+  cheat development realities: stale offsets, silent failed reads, detection
+  surface. Always active when writing or editing PCX scripts.
+license: MIT
+---
+
 # PCX Coding Discipline — How to Write Scripts, Not What They Look Like
 
 Workflow discipline for developing Enma (`.em`) and AngelScript (`.as`) scripts on Perception.cx. Derived from the four Karpathy principles — *think before coding, simplicity first, surgical changes, goal-driven execution* — and rewritten for the realities of cheat development: stale offsets, silent failed reads, detection surface, and overlays you debug by looking at them.
@@ -3343,6 +3449,16 @@ if (g_debug) print("[esp] ents=" + ents.length() + " visible=" + drawn);
 ---
 
 ## Source: `.claude/skills/pcx-debug-overlay/SKILL.md`
+
+---
+name: pcx-debug-overlay
+description: >
+  Pattern for shipping diagnostic and profiler output as a separate, gated
+  overlay rather than mixing it into the production rendering. Triggers when
+  debugging a script, building a support-mode panel, profiling a slow path,
+  or creating a diagnostic vs release build of the same code.
+license: MIT
+---
 
 # Debug Overlay — Diagnostic Surfaces Separate from the Production Overlay
 
@@ -3751,6 +3867,17 @@ ledger to `DEFER-LEDGER.md` at the project root. One-shot.
 
 ## Source: `.claude/skills/pcx-knowledge-index/SKILL.md`
 
+---
+name: pcx-knowledge-index
+description: >
+  Guide to the three surfaces (llms.txt static index, bundle files, MCP
+  server) through which AI tools reach the toolkit corpus, and which to pick
+  under which integration model. Always active when working with the
+  pcx-ai-toolkit knowledge base from any AI tool (Claude Code, Cursor, Cline,
+  Aider, Copilot, Continue, Zed).
+license: MIT
+---
+
 # PCX Knowledge Index — The Three Ways AI Tools Reach the Toolkit's Corpus
 
 The toolkit publishes its docs / skills / knowledge / templates / tools via three complementary surfaces, each optimized for a different AI-tool integration model. This skill names which surface to reach for under which circumstances, so a session doesn't waste tokens preloading a 4 MB bundle when MCP search would do, and doesn't fail mid-task because the tool only supports `@`-file references and you reached for a search call instead.
@@ -3953,6 +4080,16 @@ The index also doesn't help with content the toolkit doesn't have — if you're 
 ---
 
 ## Source: `.claude/skills/pcx-lua-discipline/SKILL.md`
+
+---
+name: pcx-lua-discipline
+description: >
+  Lua-specific rules for writing Perception.cx scripts in Lua 5.4.6.
+  Prevents Enma-reflex errors (typed addresses, C truthiness, struct value
+  types, register_routine) in the Lua scripting surface. Always active when
+  editing .lua PCX scripts — applies on top of game-cheat-guidelines.
+license: MIT
+---
 
 # PCX Lua Discipline — Lua Idioms for Perception.cx Scripts
 
@@ -4328,6 +4465,16 @@ function on_unload() deref_process(g_proc) end           -- always release the h
 
 ## Source: `.claude/skills/pcx-patch-day-playbook/SKILL.md`
 
+---
+name: pcx-patch-day-playbook
+description: >
+  Ordered triage workflow for recovering a PCX script after a game update.
+  Triggers when sigs return 0, reads return garbage after a patch, or the
+  user says "broken", "updated", "patch day", "hotfix", "season drop", or
+  "DLC dropped". Keeps diagnosis short and fixes targeted.
+license: MIT
+---
+
 # Patch Day Playbook — Recovering After a Game Update
 
 The ordered triage workflow for when a game update lands and your Perception.cx script stops working. This is the single most painful recurring scenario in scripting work; the cost is dominated by *not knowing what changed*, not by the re-RE itself. This playbook keeps the diagnosis short and the fix targeted.
@@ -4621,6 +4768,17 @@ Not every patch is a patch — sometimes the game shipped a real engine change a
 ---
 
 ## Source: `.claude/skills/pcx-perf-budget/SKILL.md`
+
+---
+name: pcx-perf-budget
+description: >
+  Turns the update/render separation rule into enforceable numeric budgets
+  using mono_us() measurements. Covers per-frame targets at common refresh
+  rates, per-call cost rules of thumb, a drop-in profiler recipe, and
+  read-coalescing patterns. Always active when writing or reviewing
+  performance-sensitive render or update routines.
+license: MIT
+---
 
 # Performance Budget — Frame-Time Targets for PCX Scripts
 
@@ -4950,6 +5108,17 @@ The test: if the user could feel the cost as a one-frame stutter, is it acceptab
 
 ## Source: `.claude/skills/pcx-re-discipline/SKILL.md`
 
+---
+name: pcx-re-discipline
+description: >
+  Workflow discipline for reverse engineering and offset maintenance: locating
+  structs, generating signatures, resolving RIP-relative addresses, and
+  keeping an offset table alive across patches. Derived from Karpathy
+  principles, rewritten for RE where the failure mode is a confident wrong
+  answer. Always active when doing RE or offset work.
+license: MIT
+---
+
 # PCX Reverse-Engineering Discipline — Finding Offsets Without Fooling Yourself
 
 Workflow discipline for reverse engineering and offset maintenance: locating structs, generating signatures, resolving RIP-relative addresses, and keeping an offset table alive across game patches. Derived from the four Karpathy principles — *think before coding, simplicity first, surgical changes, goal-driven execution* — rewritten for RE work, where the failure mode isn't a crash but a confident wrong answer.
@@ -5069,6 +5238,17 @@ println(format("entity_list global @ 0x{x} -> 0x{x}", target, list));
 ---
 
 ## Source: `.claude/skills/pcx-streamproof/SKILL.md`
+
+---
+name: pcx-streamproof
+description: >
+  Explains when PCX overlay output appears in screen captures per capture
+  method (OBS, Discord, ShadowPlay, NVIDIA Highlights, capture cards,
+  PrintScreen). Triggers on streaming, OBS, Discord screenshare, "my overlay
+  shows on stream," "my friend can see my menu," and related capture or
+  recording questions.
+license: MIT
+---
 
 # Streamproof Overlay — Capture Compatibility for PCX Renders
 
@@ -5259,6 +5439,16 @@ The honest answer to many "how do I hide this from Discord" questions is "you ca
 ---
 
 ## Source: `.claude/skills/re-evidence-log/SKILL.md`
+
+---
+name: re-evidence-log
+description: >
+  Discipline for recording why each offset and sig is trusted — the proof
+  behind the offset table. Every offset added, every sig derived, every
+  struct layout committed comes with a citable evidence entry. Always active
+  during RE work; pairs with pcx-re-discipline and pcx-patch-day-playbook.
+license: MIT
+---
 
 # RE Evidence Log — Every Claim Cites Its Proof
 
@@ -5577,6 +5767,16 @@ in-memory verification: <date>, <how many instances walked>
 ---
 
 ## Source: `.claude/skills/script-bundler/SKILL.md`
+
+---
+name: script-bundler
+description: >
+  Build and deployment workflow for PCX scripts: .em vs .emb, bundle order
+  respecting the module-import graph, hot-reload survival, pre-ship hygiene
+  checklist, runtime-version pinning, and distribution metadata. Triggers
+  when packaging, distributing, or releasing scripts to other users.
+license: MIT
+---
 
 # Script Bundler — Packaging and Shipping PCX Scripts
 
