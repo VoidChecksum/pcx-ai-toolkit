@@ -2,6 +2,128 @@
 
 All notable changes to this toolkit are documented here.
 
+## [1.15.0] — 2026-06-17
+
+### Added — Indexed Knowledge Surfaces
+
+Three complementary surfaces let any AI tool reach the toolkit's corpus efficiently. Use one, two, or all three depending on the tool's integration model. See `.claude/skills/pcx-knowledge-index/SKILL.md` for the decision tree.
+
+**Static surface (auto-fetch convention):**
+- `docs/llms.txt` (45 KB) — Anthropic / Mintlify `llms.txt` convention. Structured index of every doc / skill / knowledge file / IDE drop-in / template / signature guide / tool, grouped by category, with title + URL + 1-line description per entry. Tools that auto-fetch this convention (Claude, Cursor, others) discover the entire toolkit's surface from one file.
+
+**Static surface (concatenated context packs):**
+- `docs/llms-full.txt` (~2 MB) — entire toolkit content concatenated with stable separators and source paths preserved.
+- `docs/llms-perception-enma.md` (~950 KB) — Enma language + APIs + Enma-discipline skills + cheatsheet. Single-file `@`-reference for tools working in Enma.
+- `docs/llms-perception-angelscript.md` (~400 KB) — AngelScript APIs + AS discipline + cheatsheet.
+- `docs/llms-perception-lua.md` (~215 KB) — Lua APIs + Lua discipline + cheatsheet.
+- `docs/llms-skills.md` (~300 KB) — all 17 skills concatenated.
+- `docs/llms-knowledge.md` (~350 KB) — all 20 knowledge references concatenated.
+
+**Dynamic surface (MCP server):**
+- `mcp/pcx-knowledge-mcp/` — Python MCP server exposing the corpus as searchable resources. Tools: `search(query, limit)` (keyword search with light TF-IDF scoring), `get_file(path)` (fetch by repo-relative path), `list_files(category)` (enumerate by category), `overview()` (top-level summary). Resources: every file as `file://<repo-path>`. 211 documents indexed; <100 ms cold load, <5 ms warm queries. Pure Python + the official `mcp` SDK (no vector DB, no embedding model, no external service). Install: `pip install -e mcp/pcx-knowledge-mcp/`. Config snippets for Claude Desktop, Cline, Cursor, Continue, Zed in the README.
+
+**Generator tool:**
+- `tools/build-llms-index.py` — stdlib-only Python; generates all 7 static bundles from the live source tree. Idempotent (re-running produces byte-identical output). `--check` flag detects drift between committed bundles and current source for CI gating.
+
+**Decision-tree skill:**
+- `.claude/skills/pcx-knowledge-index/SKILL.md` (220 lines) — names the three surfaces and the decision tree for which to reach for under which circumstances. Per-tool recipes (Claude Code / Claude Desktop / Cursor / Cline / Aider / Copilot / Continue / Zed). The "combine #2 + #5" recommendation: small upfront language-bundle + MCP search for everything else, the best of both for long sessions.
+
+### Changed
+- `.github/workflows/ci.yml` — new step `build-llms-index.py --check` enforces bundles stay in sync with source on every push. Doc-count check tightened to exclude generated bundles from the source-doc tally. Link checker now skips `docs/llms-*` bundles (they concatenate cross-directory content; relative links inside no longer resolve relative to `docs/`; source files are checked individually).
+- README.md — AI Skills `17` → `18`; new "Indexed Knowledge Surfaces" subsection introduces the three surfaces; tree refreshed.
+- `docs/INDEX.md` — new "Indexed Knowledge Surfaces" subsection at the top linking to all 7 bundles and the MCP server README.
+
+## [1.14.0] — 2026-06-17
+
+### Added
+- **1 new RE tool** in `tools/`:
+  - `binary-diff-summary.py` — high-level diff summary between two PE binaries (sister tool to `offset-diff.py`). Per-section table with `%SAME` / `%CHG` / `%NEW` / `%DEL` block counts (4 KB blocks, hash-based set comparison), `.text` classifier: `RECOMPILE` (>95% blocks identical → sigs likely survive, patch-day viable), `REFACTOR` (30-95% → many sigs break), `MAJOR_CHANGE` (<30% → full re-RE). Answers the patch-day prep question "how much did this binary actually change?" before you decide whether to patch or re-RE.
+- **1 new AI skill** under `.claude/skills/`:
+  - `pcx-debug-overlay` (330 lines) — the pattern for shipping diagnostic / profiler / address-dump info as a separate overlay routine gated behind a hotkey. 6 rules: two-overlays-always-separate, five-standard-sections (Process / Sigs / Runtime / Profile / Errors), hotkey-gated-off-by-default, read-only-diagnostics (lab features are separate), atomic counters for cross-routine state via `addon-atomic`, ship-two-builds (production + diagnostic via `#define BUILD_FLAVOR_DEBUG`). Cross-refs `pcx-perf-budget` (profiler recipe) and `gui-design-patterns` ("no debug panel by default").
+- **1 new knowledge reference** under `knowledge/`:
+  - `network-protocol-re.md` (296 lines) — packet-capture toolchain (Wireshark / tshark / mitmproxy / dumpcap / eBPF), message-boundary identification (length-prefixed / type-tagged / self-describing for TCP, sequence-numbered / type-prefixed / encrypted-blob for UDP), encoding scheme recognition (struct dump / length-prefixed strings / varint / protobuf-shaped / FlatBuffers / bit-packed / compressed), encryption recognition (TLS / DTLS / custom XOR / custom block cipher), wire-to-memory cross-referencing workflow, QUIC / HTTP3 capture options for modern AAA titles, Wireshark Lua dissector worked example. Authorized targets only — explicit scope callout to `skill://authorized-security-research`.
+- **1 new template scaffold** under `templates/`:
+  - `templates/full-project-as/` (4 files, 222 lines) — AngelScript parallel to the existing Enma `templates/full-project/`. `globals.as` (`proc_t@` handle, uint64 base/size, palette as 4 uint8s per AS draw API), `feature.as` (one tick callback combining update + read first / draws second), `main.as` (attach + resolve + `register_callback`, full `on_unload` deref cleanup per AS discipline rule #3), `README.md` documenting the differences from the Enma scaffold. Honors all 12 game-cheat-guidelines.
+- **2 new MCP setup guides** under `mcp/`:
+  - `zed-setup.md` (215 lines) — Zed editor integration (Rust-built AI-native editor, MCP via `context_servers` setting in `~/.config/zed/settings.json`, agent panel + `@file` references, Inline Assist, Edit Predictions, vim mode, multiplayer for pair-programming). Uses `mcp-remote` bridge to the authoritative HTTP MCP endpoint at `127.0.0.1:42069`.
+  - `continue-setup.md` (210 lines) — Continue extension integration (open-source AI for VS Code / JetBrains, model-agnostic, MCP servers via `config.yaml`'s `mcpServers` block, multi-model config — separate models for chat / autocomplete / inline edit, local-model support via Ollama / vLLM).
+
+### Changed
+- README.md — AI Skills badge `16` → `17`; tree, skills box, knowledge box, templates list, MCP setups list, tools list refreshed.
+- `docs/INDEX.md` — 1 new knowledge entry (`network-protocol-re.md`).
+
+## [1.13.0] — 2026-06-17
+
+### Added
+- **3 new validation / build tools** in `tools/`:
+  - `evidence-log-validator.py` — directly enforces `re-evidence-log` discipline. Cross-checks every offset / sig in an Enma module against per-binary evidence files (`evidence/<hash>.md`): catches offsets without `// E-NNN` citations, evidence entries no offset references (dead entries), and stale `last_verified` dates older than `--max-age-days` (default 180). Output categories `ERROR` / `WARN` / `INFO`; `--strict` promotes warnings to exit 1; `--evidence-dir` validates against all per-binary files at once.
+  - `pre-ship-check.sh` — pure-bash implementation of the `script-bundler` Section 4 pre-ship hygiene checklist. 12 checks: hardcoded paths, debug `println` of raw addresses, TODO/FIXME/HACK/XXX markers, `fs_write_file` calls, network calls, suspicious `.emb` string artifacts, offset evidence-citation ratio, placeholder module name in `ref_process`, long commented-out blocks, LICENSE/README/CHANGELOG existence. `--strict` / `--quiet` / `--json` flags; portable across bash 4+ on Linux/macOS/WSL/Git Bash.
+  - `script-linter.py` — light static check for the most-violated 12-guideline rules in `.em` files. Rule 1 (offsets cite evidence), Rule 7 (color/vec at file scope), Rule 11 (tunables without GUI widgets). Excludes offset/sig/stride constants from rule-11 firing via prefix list. Tight false-positive budget — rule 8 (f-suffix) intentionally narrowed by the implementing agent to avoid noise on legitimate `float64`-typed contexts. `--rules N,M` filter; `--severity error,warn,info`; `--json` machine output.
+- **2 new AI skills** under `.claude/skills/`:
+  - `ai-pair-programming` (291 lines) — the meta-workflow skill for working with Claude / Cursor / Cline / Aider / Copilot on PCX projects. 7 numbered techniques (read doc before code, cheatsheet first then per-API doc, plan before code on multi-file work, verify sigs with MCP not AI memory, in-prompt guideline reminder, diff-review every multi-file change, re-frame when stuck) plus per-tool quick recipes. Wraps all four IDE drop-ins (CLAUDE / CURSOR / CLINE / COPILOT).
+  - `multi-binary-targeting` (444 lines) — one script supporting N game versions / architectures / storefronts / channels. 7 sections: runtime binary identification via `.text` hash, per-binary `offsets-<label>.em` + common `dispatch.em` re-export, sig sets vs hardcoded RVAs, x86 vs x64 abstraction with `ptr_read` helper, storefront detection via DRM-DLL fingerprint, channel variation handling, graceful degradation when no offset set matches. "When NOT to multi-target" heuristic: fork at >30% per-version sig overrides.
+- **2 new knowledge references** under `knowledge/`:
+  - `gui-design-patterns.md` (453 lines) — PCX sidebar GUI layout discipline beyond rule #11. Section organization (one feature per section), widget order within section, label conventions, slider range discipline (useful vs possible), defaults that work for first-time users, hotkey conventions (safe vs game-conflicting), color discipline (small palette per feature), state visibility, conditional widgets, debug-panel-not-by-default policy. Worked ESP-section example + anti-pattern flat list.
+  - `pcx-cross-language-bridge.md` (183 lines) — Enma vs AngelScript vs Lua decision guide. At-a-glance comparison table (13 properties × 3 languages), per-use-case routing (render-path / stateful UI / quick prototyping / CPU math / network / cross-binary / coroutines), cross-language coordination patterns (files / host process / don't), performance notes (equivalent vs materially different), migration notes (Enma ↔ AS, Enma ↔ Lua, AS ↔ Lua), recommended defaults by project size.
+- **`rules/COPILOT.md`** (116 lines) — GitHub Copilot drop-in (`.github/copilot-instructions.md` or per-workspace custom-instructions field). Parallel structure to CURSOR.md / CLINE.md with Copilot-specific notes: what Copilot is good at (inline completions, doc-comments, single-file pattern-following) and bad at (multi-file refactors, less-common API names, unprompted guideline enforcement). Steering pattern via `// from: docs/...` comments above the cursor.
+
+### Changed
+- README.md — AI Skills badge `14` → `16`; tree, skills box, knowledge box, rules section, tools list refreshed.
+- `docs/INDEX.md` — 2 new knowledge entries (gui-design-patterns, pcx-cross-language-bridge).
+
+## [1.12.0] — 2026-06-17
+
+### Added
+- **2 new RE tools** in `tools/` (stdlib-only Python, matches the round-1 contract):
+  - `anti-debug-scanner.py` — flags anti-debug surfaces in a PE: direct-check imports (`IsDebuggerPresent` / `NtQueryInformationProcess` / `CheckRemoteDebuggerPresent`), PEB-walk byte patterns (`fs:[30h]` 32-bit, `gs:[60h]` 64-bit), `NtGlobalFlag` heap-flag CMP heuristic, RDTSC timing-loop pair detection, INT 2D + long INT 3 fill patterns, debug-register CONTEXT manipulation (Get/SetThreadContext + `CONTEXT_DEBUG_REGISTERS` literal), VEH chain manipulation, debugger process/window-class string scans (ASCII + UTF-16LE). Categorized output with `STRONG`/`SUSPICIOUS`/`INFO` severity, `--category` filter, `--json` mode.
+  - `module-export-mapper.py` — list a PE's exports (ordinal | name | RVA, with mangled-name short hint) and optionally cross-reference which other PE files in a target directory import each export (`--consumers /game/dir/`). Detects PE forward exports (`FORWARD -> module.func`). `--filter`, `--ordinal-only`, `--json`. Exit 0 with a friendly message when the binary has no export directory (most EXEs).
+- **3 new AI skills** under `.claude/skills/`:
+  - `re-evidence-log` (313 lines) — every claimed offset / sig / struct layout cites its proof. 6 numbered rules (one file per binary, stable `E-NNN` entry IDs, required citation fields, sigs cite their disassembly context, structs cite SDK source + per-field confidence tier, `last_verified` dates, negative-result tracking) + paste-ready templates. Sits between `pcx-re-discipline` (the discipline) and `pcx-patch-day-playbook` (which writes per-patch entries into the log).
+  - `script-bundler` (374 lines) — packaging and shipping workflow. When to ship `.em` vs `.emb` (with `serialize keep_debug=false` for path stripping), canonical bundle order (`globals → offsets → feature → menu → main`), hot-reload-safe boundaries (what survives a reload, what doesn't), greppable pre-ship hygiene checklist, runtime-version pinning via `#define PCX_REQUIRED_*`, distribution metadata (recipient `README` / `LICENSE` / `CHANGELOG` templates). The outbound counterpart to `pcx-patch-day-playbook`.
+  - `mcp-tool-routing` (287 lines) — decision guide across the 37 Perception MCP tools. Organized by user goal (read N bytes / find something in memory / understand a function / understand a class / generate a sig / process+module info / file+script ops), with explicit cost tiers (cheap / medium / expensive / side-effecting) and named composition workflows (sig→validate, scan-string→find-refs→analyze, snapshot→action→diff). Closes the "which of the 37 tools for this task" gap.
+- **3 new knowledge references** under `knowledge/`:
+  - `engine-godot.md` (129 lines) — Godot 3.x / 4.x engine RE reference. Open-source advantage (pull matching headers from GitHub by version), node-tree + `ObjectDB` architecture, `.pck` payload + `GDPC` magic footer, per-game table (Brotato / Cassette Beasts / Halls of Torment / Slay the Princess / Cruelty Squad), reversal-workflow first-60-minutes, community tools (gdsdecomp, godot-pck-explorer, godot-cpp). Fills the 6th engine gap.
+  - `pcx-version-matrix.md` (383 lines) — API availability matrix by PCX version, drawn from `docs/perception/changelogs.md`. Per-category since-version tables (Render 2D / Custom-Draw / Proc / Input / GUI / Sound / Net / Win / Filesystem / CPU / Zydis / Unicorn), removed/deprecated section with replacements (`source2_world_to_screen` → `world_to_screen_rowmajor`), language-version quirks (Enma / AngelScript / Lua), reverse-chronological release timeline. Every claim cites a changelog row or is marked `unknown` — no invented versions.
+  - `script-organization-patterns.md` (549 lines) — multi-file Enma project organization beyond `templates/full-project/`. Shared state placement rules, per-binary offset modules, JSON config persistence (using real `json_*` / `fs_*` APIs), multi-script coordination, utility module extraction heuristic ("3 uses → extract; 2 → leave duplicated"), feature toggles, module-version pinning, dead-code policy, the 20-feature project shape. Companion to the 5-file scaffold.
+- **2 new infrastructure drop-ins**:
+  - `rules/CLINE.md` (115 lines) — Cline (VS Code AI agent) custom-instructions drop-in, parallel to `rules/CURSOR.md`. Cline-specific notes on auto-approval gating (read-only MCP tools safe, write/execute tools gated), Plan/Act mode workflow, token-budget guidance (`@`-reference specific docs vs preloading), checkpoint discipline before side-effecting operations.
+  - `mcp/aider-setup.md` (227 lines) — Aider CLI integration guide. Setup via `pipx install aider-chat`, project config in `.aider.conf.yml` (model, always-loaded `read:` doc list, `auto-commits`), `CONVENTIONS.md` wiring (copy or symlink `rules/CLAUDE.md`), typical workflow walkthrough, MCP-handoff strategy (Aider for script edits + Perception IDE for live MCP), `--map-tokens` guidance for the 35k-line doc corpus.
+
+### Changed
+- README — AI Skills count `11` → `14`; tree, skills box, knowledge box, templates list, tools list, and MCP-supported-tools section refreshed.
+- `docs/INDEX.md` — 3 new knowledge entries (engine-godot, pcx-version-matrix, script-organization-patterns) added under their respective subsections.
+- `mcp/perception-mcp-config.json` — unchanged; `mcp-tool-routing` skill cross-references its 37-tool list authoritatively.
+
+## [1.11.0] — 2026-06-17
+
+### Added
+- **4 new RE tools** in `tools/` (stdlib-only Python, matches the existing tool-shape contract):
+  - `offset-diff.py` — diff named sigs between two binary versions. Reads a `sigs.json` list of `{name, pattern, kind: direct|rip, rip_offset, insn_len}` entries, scans both binaries' executable sections, RIP-resolves where requested, prints a status table per sig (`UNCHANGED` / `MOVED` / `LOST_IN_NEW` / `NEW_IN_NEW` / `MULTIPLE_HITS_*`) with the signed delta. JSON output for scripting. **The patch-day workflow's missing tool.**
+  - `sig-uniqueness-checker.py` — verdict per candidate sig: `UNIQUE` (with margin), `AMBIGUOUS` (with all hit addresses + 16-byte context for each), `STALE` (with `--near-misses N` reporting wildcarded variants that do hit), `BRITTLE` (margin=0, one byte from collision). Batch mode via `--sig-file name=sig` lines, section filtering, JSON output. **Closes the "is my sig still good after this patch?" loop in seconds.**
+  - `pattern-format-converter.py` — round-trips byte patterns between 8 formats: `ida`, `ghidra`, `x64dbg`, `ce` (Cheat Engine AOB), `enma` (quoted literal), `cstyle` (`\x..` + mask), `bytes` (Python `b"..."`), `sig_mask` (separate). `--to all` dumps every format at once. Strict validation rejects odd-length hex / unknown chars. **The per-session paper cut.**
+  - `dumper-to-enma.py` — converts community-dumper output into a paste-ready `offsets.em` module. Auto-detects Dumper-7 (UE), IL2CPPDumper (Unity, parses `// RVA:` annotations above struct fields), hazedumper (Source-style JSON/YAML), Source2Gen-style flat JSON, and Cheat Engine `.CT` tables. Outputs `const uint64 OFFSET_X = 0x...;` for fields, `const string SIG_Y = "...";` for sigs, category headers per source struct. `--module-name`, `--prefix`, `--out`, `--json`. **Bridges the dumper ecosystem to PCX.**
+- **5 new AI skills** under `.claude/skills/`:
+  - `pcx-angelscript-discipline` (406 lines) — AngelScript-specific companion to `game-cheat-guidelines`. 10 numbered rules covering handles vs values (`Type@`), `deref()` requirement, `&out` parameter syntax, `array<T>` / `dictionary` containers, raw RGBA ints in draw calls, `register_callback` signature and hot-reload boundaries. Closes the gap where the AI defaulted to Enma idioms inside `.as` files.
+  - `pcx-lua-discipline` (369 lines) — Lua-specific companion. 10 numbered rules: 64-bit integer subtype handling for addresses, `0`-is-truthy versus return-checking, table-as-array-or-map discipline, metatable boundaries for PCX userdata, function-value callback registration, closure-over-loop-variable trap, `pcall` for risky reads, hot-reload-safe globals via the package add-on.
+  - `pcx-patch-day-playbook` (289 lines) — the ordered triage workflow when a game update breaks the script. Seven steps: snapshot first → `offset-diff.py` triage → bisect the cascade (process / base / first-sig / RIP / read in dependency order) → re-sig with `--near-misses` → re-verify RIP math (instruction-length drift is half of patch breakage) → live-target validation → patch-log entry. Decision matrix for when to patch vs when to re-RE from scratch.
+  - `pcx-streamproof` (185 lines) — capture compatibility for PCX overlays. Maps the three capture categories (process-internal swap-chain hook / desktop-composited DXGI / signal-level HDMI) against the render surfaces PCX exposes; explains why "OBS Game Capture didn't see it but Discord screenshare does" is a capture-path mismatch, not a bug. Pre-stream checklist, differential-diagnosis script for the "friend on Discord sees my menu" report.
+  - `pcx-perf-budget` (323 lines) — turns `game-cheat-guidelines` rule #4 into numeric targets. Per-refresh-rate frame budgets (60 / 120 / 144 / 240 / 360 Hz), per-call cost rules of thumb (cross-process reads = expensive, draws + math = cheap), drop-in `profile_begin/end` recipe using `mono_us()` with fixed bucket accumulators and second-window dumps, read-coalescing examples (single `read_memory` struct-dump vs N scalar reads), cache-what / recompute-what matrix.
+- **5 new knowledge references** under `knowledge/`:
+  - `aimbot-math.md` (554 lines) — the math half of `common-patterns.md` (which only covers W2S). Angle calc (`atan2`, engine conventions), wrap-around delta `((d+540)%360)-180`, FOV cone (3D dot + 2D pixel), target selection (screen / angular / world / hybrid), ordered validation gate (cheap checks first, traces last), linear and gravity-aware prediction (closed-form quadratic intercept), recoil compensation, smoothing (linear / exponential / SmoothDamp), radians-vs-degrees and handedness pitfalls. Full Enma snippets using `vec3`, `atan2`, real `proc_t` reads.
+  - `engine-cryengine.md` (250 lines) — CryEngine family (Hunt: Showdown, Star Citizen, Kingdom Come): `gEnv` global anchor, entity system, camera math; reversal workflow first-60-minutes; anti-cheat coverage.
+  - `engine-frostbite.md` (255 lines) — DICE/EA Frostbite (Battlefield, FIFA / FC25, Anthem, Mass Effect Andromeda): data-driven entity bus, manager-chain layout, RenderView camera model; EAAC kernel-level integration notes.
+  - `engine-re-engine.md` (250 lines) — Capcom RE Engine (RE2/3/4 remakes, Monster Hunter Rise/Wilds, Street Fighter 6, Dragon's Dogma 2): reflected `via.*` type system, REFramework parsing layer, anti-tamper landscape (Denuvo + SF6 kernel AC).
+  - `engine-redengine.md` (253 lines) — CD Projekt Red REDengine (Cyberpunk 2077 on RED4, Witcher 3 on RED3): RTTI/reflection system, REDscript gameplay VM, fixed-point world-coord quirk, RED4ext / Cyber Engine Tweaks parsing layer. Note: Witcher 4 / Polaris move to UE5 — out of scope for this file.
+- **2 new templates** under `templates/`, both following all 12 game-cheat-guidelines:
+  - `aimbot-skeleton.em` (180 lines) — FOV-based closest-target picker with one-shot sig resolution, null-guarded entity walk, RIP-relative resolver, `world_to_screen_rowmajor` for projection, write-free aim via `mouse_move_relative`, full GUI binding for every tunable. UNVERIFIED placeholders for target-specific offsets.
+  - `minimap.em` (180 lines) — rotation-aware player-relative radar with rim clamping, GUI-tunable scale and screen position, pre-sized read-side caches (legitimate caching, distinct from per-frame color/vec construction), correct `-yaw` rotation math (cross-referenced with `knowledge/aimbot-math.md`).
+- **`rules/CURSOR.md`** — drop-in `.cursorrules` companion to `rules/CLAUDE.md`, parallel structure tailored for Cursor's tighter token budget. References `mcp/cursor-setup.md` for MCP wiring without duplicating it; references `rules/KARPATHY.md` for workflow discipline.
+
+### Changed
+- README — AI Skills count `6` → `11`; directory tree updated to show new tools, skills, knowledge files, and templates; "AI Skills" section enumerates the five new ones with one-line descriptions.
+- `docs/INDEX.md` — added the 5 new knowledge files (4 engines + aimbot-math) under a new "Engine RE References" subsection.
+- `.claude/skills/game-hacking-pcx` — cross-references added to the new skills (angelscript / lua / patch-day / streamproof / perf-budget) and the new tools (`offset-diff.py`, `sig-uniqueness-checker.py`, `pattern-format-converter.py`, `dumper-to-enma.py`).
+
 ## [1.10.0] — 2026-06-17
 
 ### Added

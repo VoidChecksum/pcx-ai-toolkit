@@ -47,11 +47,15 @@ jobs:
           print("All YAML valid")
           PY
 
-      - name: Check doc count (expect 110+ pages)
+      - name: Check doc count (expect 110+ source pages, excluding generated bundles)
         run: |
-          count=$(find docs -name '*.md' ! -name 'INDEX.md' | wc -l)
-          echo "Doc pages: $count"
+          count=$(find docs -name '*.md' ! -name 'INDEX.md' ! -path 'docs/llms-*' | wc -l)
+          echo "Source doc pages: $count"
           [ "$count" -ge 110 ] || { echo "Expected >= 110 doc pages, got $count"; exit 1; }
+
+      - name: Check llms-index bundles in sync (build-llms-index.py --check)
+        run: |
+          python3 tools/build-llms-index.py --check
 
       - name: Check internal markdown links
         run: |
@@ -62,6 +66,10 @@ jobs:
           broken = []
           for md in glob.glob('**/*.md', recursive=True):
               if md.startswith('lsp/'): continue
+              # Skip generated bundles — they concatenate files from many dirs,
+              # so relative links inside no longer resolve relative to docs/.
+              # The source files those links live in ARE checked individually.
+              if md.startswith('docs/llms-'): continue
               d = os.path.dirname(md)
               try: txt = open(md, encoding='utf-8', errors='ignore').read()
               except: continue
