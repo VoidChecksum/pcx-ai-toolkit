@@ -60,15 +60,16 @@ Tools for reversing kernel drivers, analyzing anti-cheat systems, and inspecting
 
 ## Perception.cx Integration
 
-| Tool | PCX API | What It Does |
+| Tool | Surface | What It Does |
 |------|---------|-------------|
 | `system/list_drivers` | MCP | Enumerate loaded kernel modules (gated: `kernel_rw_access`) |
-| `get_eprocess` | `proc_t` | Get target's EPROCESS kernel address (gated: `kernel_rw_access`) |
-| `read_memory` (kernel range) | `proc_t` | Read kernel memory when `kernel_rw_access` is granted |
-| `find_pattern` | `proc_t` | Pattern scan driver .text sections |
-| `struct_dump` | MCP | Dump driver data structures |
-| `disassemble` | MCP | Disassemble driver code at kernel addresses |
-| `analyze_vtable` | MCP | Walk vtables in kernel objects |
+| `get_eprocess` | `proc_t` (Enma/AS/Lua) | Get target's EPROCESS kernel address (gated: `kernel_rw_access`) |
+| `ru64` / `ru32` / `read_struct` (kernel range) | `proc_t` (Enma/AS/Lua) | Read kernel memory when `kernel_rw_access` is granted |
+| `find_code_pattern` | `proc_t` (Enma/AS/Lua) | Pattern-scan driver `.text` sections |
+| `struct_dump` | Perception IDE AI tool | Heuristically dump + classify a driver data structure at an address |
+| `process/disassemble` | MCP | Disassemble driver code at kernel addresses |
+| `process/analyze_vtable` | MCP | Walk vtables in kernel objects |
+| `process/find_xrefs` | MCP | Find code references into driver `.text` |
 
 ## Recommended Analysis Environment
 

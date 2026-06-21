@@ -21,9 +21,9 @@ The niche Continue fills that the other integrations don't:
   OpenAI model for architecture and offset reasoning, a cheap fast one for autocomplete,
   a local model for offline work. One config, many providers.
 - **MCP-as-a-tool-source.** Continue speaks the Model Context Protocol in agent mode, so
-  the Perception MCP server's `read_memory` / `find_pattern` / `generate_signature`
-  tools become callable from inside the editor — the same live-verification loop the
-  Perception IDE chat gives you, without leaving VS Code or JetBrains.
+  the Perception MCP server's `process/read_virtual_memory` / `process/find_pattern` /
+  `process/generate_signature` tools become callable from inside the editor — the same
+  live-verification loop the Perception IDE chat gives you, without leaving VS Code or JetBrains.
 
 ## Install
 
@@ -122,8 +122,8 @@ mcpServers:
 
 Start the Perception IDE with MCP enabled first so the endpoint is live, then reload
 Continue. In agent mode the assistant can now call the server's tools directly —
-`list_processes`, `read_memory`, `find_pattern`, `read_pointer_chain`,
-`generate_signature`, `analyze_vtable`, `disassemble`, and the rest. See
+`process/list`, `process/read_virtual_memory`, `process/find_pattern`, `process/read_pointer_chain`,
+`process/generate_signature`, `process/analyze_vtable`, `process/disassemble`, and the rest. See
 `mcp/perception-mcp-config.json` for the full tool list and
 `.claude/skills/mcp-tool-routing/SKILL.md` for which tool to reach for when (scan vs.
 read vs. xref vs. signature generation).
@@ -132,9 +132,9 @@ If you came from Cursor or Cline, Continue also auto-picks-up any JSON MCP confi
 dropped into `.continue/mcpServers/` — so `mcp/perception-mcp-config.json` can be copied
 there verbatim instead of translating it to YAML.
 
-For binary analysis backed by IDA, install the binary-analysis suite from `installers/`
-(see [`binary-analysis-setup.md`](binary-analysis-setup.md)) and register its stdio MCP
-server alongside `perception` with `type: stdio`.
+For binary analysis backed by IDA, install a legitimately-licensed IDA yourself and wire
+up the binary-analysis MCP server (see [`binary-analysis-setup.md`](binary-analysis-setup.md)),
+then register its stdio MCP server alongside `perception` with `type: stdio`.
 
 ## Typical Workflow
 

@@ -99,10 +99,10 @@ Long form: `rules/KARPATHY.md`. Short form:
 
 ## Cline-Specific Notes
 
-- **Auto-approval.** Read-only MCP tools (`read_memory`, `read_typed_value`, `list_processes`, `get_process_info`, `get_module_exports`, `get_module_imports`, `disassemble`, `find_pattern`, `scan_*`) are safe to auto-approve. Keep write / execute tools gated (`memory_write`, `write_file`, `edit_file`, `execute_script`).
+- **Auto-approval.** Read-only MCP tools (`process/read_virtual_memory`, `process/read_typed_value`, `process/read_string`, `process/read_pointer_chain`, `process/list`, `process/info_by_*`, `process/list_module_exports`, `process/get_module_imports`, `process/disassemble`, `process/find_pattern`, `process/find_xrefs`, `process/scan_*`) are safe to auto-approve. Keep write / execute tools gated (`process/write_virtual_memory`, `process/write_typed_value`, `process/write_string`, `process/copy_memory`, `process/fill_memory`, `process/allocate_memory`, `process/free_memory`, `script/execute`).
 - **Plan / Act split.** For multi-step RE work, start in **Plan** mode; produce the workflow as a sequence of MCP calls; approve; switch to **Act**. The 12 Guidelines shape the plan most usefully *in Plan mode* — they catch the wrong instinct before any tool runs.
 - **Token budget.** Documentation is ~35k lines across `docs/`. Do not preload it all into context. Instead, `@`-reference *specific* doc files when needed: `@docs/perception/render-api.md`, `@docs/enma/addon-math.md`. For per-task lookups, prefer `@knowledge/pcx-api-cheatsheet.md` (15 KB, all APIs at a glance) over the full corpus.
-- **Workflow checkpoints.** Cline supports checkpoint/restore. Use checkpoints before any operation touching `memory_write`, `execute_script`, or external state; the rollback path is the safety net.
+- **Workflow checkpoints.** Cline supports checkpoint/restore. Use checkpoints before any operation touching `process/write_virtual_memory` (or any `process/write_*` / `process/allocate_memory`), `script/execute`, or external state; the rollback path is the safety net.
 - **Diff review.** Cline shows file diffs before applying. Read them — never blanket-approve a multi-file change; the 12 Guidelines (especially #2 `uint64`, #4 update/render split, #8 `f` suffix) are the highest-value pattern matches to scan for.
 
 ## Cross-References

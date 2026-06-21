@@ -143,14 +143,17 @@ automatically; no editor restart. Confirm the green indicator next to `perceptio
 Agent panel's settings view ("Server is active"). The Agent panel then auto-picks up the
 tools.
 
-The authoritative tool list is in [`perception-mcp-config.json`](perception-mcp-config.json):
-live process enumeration (`list_processes`, `get_process_info`), reads
-(`read_memory`, `read_typed_value`, `read_pointer_chain`, `read_string`), pattern and
-value scans (`find_pattern`, `scan_value`, `scan_string`, `scan_changed`), analysis
-(`disassemble`, `find_xrefs`, `analyze_function`, `analyze_vtable`, `read_rtti`,
-`generate_signature`), and script tooling (`check_script`, `validate_script`,
-`get_script_api`). These let the agent resolve and verify an offset against the live
-binary instead of guessing — guideline 12.
+The authoritative tool list is in [`perception-mcp-config.json`](perception-mcp-config.json)
+(kept in sync with `docs/perception/mcp-api.md` by `tools/check-mcp-config.py`): process
+discovery + reference lifecycle (`process/list`, `process/info_by_pid`, `process/info_by_name`,
+`process/reference_by_*`), reads (`process/read_virtual_memory`, `process/read_typed_value`,
+`process/read_pointer_chain`, `process/read_string`), pattern + value scans
+(`process/find_pattern`, `process/find_all_patterns`, `process/scan_value`, `process/scan_string`,
+`process/scan_pointer_to`, `process/diff_memory`), analysis (`process/disassemble`,
+`process/find_xrefs`, `process/find_string_refs`, `process/find_function_bounds`,
+`process/analyze_vtable`, `process/read_rtti`, `process/generate_signature`), and the
+scripting bridge (`script/get_context`, `script/validate`, `script/execute`). These let the
+agent resolve and verify an offset against the live binary instead of guessing — guideline 12.
 
 If your Zed version exposes a native URL/SSE field for remote context servers, point it
 straight at `http://127.0.0.1:42069` and drop the bridge.
