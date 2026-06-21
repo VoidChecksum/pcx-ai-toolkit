@@ -196,8 +196,9 @@ Behavioral / discipline skills loaded automatically by AI tools (Claude Code / O
 - [AI Pair Programming — Driving Claude / Cursor / Cline / Aider Well on PCX Projects](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/ai-pair-programming/SKILL.md): The other skills cover what to write; this one covers how to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it 
 - [Anti-Cheat Reverse Engineering — Kernel-Level Game Protection Analysis](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/anti-cheat-re/SKILL.md): Methodology for reverse engineering kernel-level anti-cheat systems: EAC (Easy Anti-Cheat), BattlEye, Vanguard, GameGuard, XIGNCODE3, and similar kernel drivers that protect game processes. Covers the
 - [Deobfuscation — Reversing Protected Binaries](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/deobfuscation/SKILL.md): Methodology for reversing binaries protected by commercial obfuscators (Themida/WinLicense, VMProtect, Code Virtualizer), compiler-level obfuscation (LLVM-obfuscator, Hikari, OLLVM), and custom protec
-- [Perception.cx Script Development Guidelines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-guidelines/SKILL.md): Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: memory reading, visualization, overlay rendering, h
-- [Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-hacking-pcx/SKILL.md): Game hacking, game cheats, memory reading/writing, ESP, aimbot, pattern scanning, vtable hooking,
+- [Perception.cx Game-Cheat Script Development Guidelines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-guidelines/SKILL.md): Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot,
+- [Game Cheat Script Master — Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-script-master/SKILL.md): This skill turns any LLM into a specialized Perception.cx cheat-script developer.
+- [Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-hacking-pcx/SKILL.md): Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
 - [Kernel Driver Analysis — Technical Patterns for AC Driver Reversing](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/kernel-analysis/SKILL.md): Technical patterns for reversing Windows kernel drivers: WDM/KMDF structure identification, IOCTL dispatch table extraction, kernel callback enumeration, integrity check routines, obfuscation layers, 
 - [Perception MCP Tool Routing — The Decision Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/mcp-tool-routing/SKILL.md): 59 tools across memory I/O, modules/threads/PE, memory regions, pattern/scanner/xrefs/signature, code analysis, symbol/function lookup, handles, system/environment, and the Enma scripting bridge. This
 - [Multi-Binary Targeting — One Script, N Game Versions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/multi-binary-targeting/SKILL.md): The pattern for supporting multiple binaries (game versions, architectures, storefront builds, beta channels) from one Enma codebase. A well-organized script can target v1.42.3 and v1.42.4, 32-bit and
@@ -224,6 +225,7 @@ Quick references for engines, anti-cheat architecture, patterns, methodology.
 
 - [Aimbot Math Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/aimbot-math.md): This is the math companion to common-patterns.md. That file
 - [Kernel Anti-Cheat Architecture Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/anti-cheat-architecture.md): Architecture, components, and detection techniques for major kernel-level anti-cheat systems. Read this before starting AC analysis — it tells you what you're looking at and what each AC is known to m
+- [Cheat Script Cookbook](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/cheat-script-cookbook.md): This file is the practical companion to game-cheat-guidelines and game-hacking-pcx.
 - [Common Enma Scripting Patterns for Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/common-patterns.md): proct gproc;
 - [Community Tools & MCP Servers](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/community-tools.md): Third-party tools, MCP servers, VS Code extensions, and utilities built by the Perception.cx community.
 - [Custom Draw API Patterns for Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/custom-draw-patterns.md): Direct D3D11 GPU access from AngelScript/Enma. Write HLSL shaders, create
@@ -263,6 +265,15 @@ Project-rules drop-ins for Claude Code / Cursor / Cline / Copilot / Aider / Zed 
 Starter scripts; copy and customize for your project.
 
 - [aimbot-skeleton](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/aimbot-skeleton.em)
+- [aim](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/aim.em)
+- [esp](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/esp.em)
+- [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/globals.em)
+- [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/main.em)
+- [menu](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/menu.em)
+- [offsets](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/offsets.em)
+- [radar](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/radar.em)
+- [triggerbot](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/triggerbot.em)
+- [utils](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/utils.em)
 - [feature](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project/feature.em)
 - [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project/globals.em)
 - [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project/main.em)
@@ -276,6 +287,15 @@ Starter scripts; copy and customize for your project.
 
 Starter AngelScript scaffolds.
 
+- [aim](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/aim.as)
+- [esp](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/esp.as)
+- [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/globals.as)
+- [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/main.as)
+- [menu](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/menu.as)
+- [offsets](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/offsets.as)
+- [radar](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/radar.as)
+- [triggerbot](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/triggerbot.as)
+- [utils](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/utils.as)
 - [feature](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project-as/feature.as)
 - [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project-as/globals.as)
 - [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project-as/main.as)

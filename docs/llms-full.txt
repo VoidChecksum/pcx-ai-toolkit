@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 213**
+**Source files included: 233**
 
 ---
 
@@ -45469,22 +45469,23 @@ Devirtualization is expensive (days to weeks for a single function). Before inve
 ---
 name: game-cheat-guidelines
 description: >
-  Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and
-  C++ for authorized reverse engineering, analysis, overlay rendering, and
-  research. Derived from Karpathy principles: memory reading, visualization,
-  hooking, render pipelines, and RE workflows. Always active — these rules
-  apply every time you write or edit Perception.cx script code. Authorized use
-  only — analyze software you own or are permitted to test.
+  Mandatory behavioral rules and practical patterns for writing Perception.cx
+  game-cheat scripts in Enma, AngelScript, and C++. Always active — these
+  rules apply every time you write or edit game-cheat code, including ESP,
+  aimbot, triggerbot, radar, pattern scanning, and overlay rendering.
+  Authorized use only — analyze software you own or are permitted to test.
 license: MIT
 ---
 
-# Perception.cx Script Development Guidelines
+# Perception.cx Game-Cheat Script Development Guidelines
 
-Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: memory reading, visualization, overlay rendering, hooking, and reverse-engineering workflows on the Perception.cx platform. These rules originated in game-overlay development and apply equally to authorized reverse engineering, security research, and analysis — analyze only software you own or are authorized to test.
+Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pattern scanning, world-to-screen math, memory reads/writes, and overlay rendering. These rules apply to authorized reverse engineering, security research, and game-cheat development — analyze only software you own or are authorized to test.
 
-**Always active.** These rules apply every time you write or edit Perception.cx script code. They are not suggestions.
+**Always active.** These rules apply every time you write or edit a game-cheat script. They are not suggestions.
 
-**Prerequisite:** The `game-hacking-pcx` skill MUST be loaded alongside this one. It contains the full doc index (33,580 lines across 99 files) for Enma, AngelScript, and all Perception.cx APIs. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
+**Prerequisites:** Load the `game-cheat-script-master` skill first. It defines the mandatory co-skills, read-first docs, and the canonical project layout. Then keep `game-hacking-pcx` loaded for the full API doc index. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
+
+**Templates:** Use `templates/cheat-skeleton-em/` and `templates/cheat-skeleton-as/` as the starting scaffold for every new cheat. See `knowledge/cheat-script-cookbook.md` for reusable recipes (W2S, ESP, aimbot smoothing, triggerbot, radar, config save/load).
 
 ---
 
@@ -45828,25 +45829,281 @@ Debugging checklist:
 
 ---
 
+## Source: `.claude/skills/game-cheat-script-master/SKILL.md`
+
+---
+name: game-cheat-script-master
+description: >
+  Master skill for Perception.cx game cheat script development. Activates on any
+  request for cheats, hacks, ESP, aimbot, triggerbot, radar, overlay, memory
+  reading, pattern scanning, or anti-cheat research. Loads the complete doc
+  index, the 12 cheat guidelines, the AI pair-programming workflow, and the
+  official cheat templates. Always use this alongside game-cheat-guidelines and
+  game-hacking-pcx.
+license: MIT
+---
+
+# Game Cheat Script Master — Perception.cx
+
+This skill turns any LLM into a specialized Perception.cx cheat-script developer.
+It is the single entry point for **ESP, aimbot, triggerbot, radar, overlay,
+memory-reading, world-to-screen, pattern-scanning, and anti-cheat research**
+requests. It tells the model exactly which docs to read, which rules to follow,
+which templates to scaffold from, and how to stay safe and legal.
+
+**Always active when the user asks for any kind of game cheat, hack, overlay,
+memory script, or Perception.cx tooling related to games.**
+
+---
+
+## Trigger
+
+- Any request containing: cheat, hack, esp, wallhack, aimbot, triggerbot,
+  recoil, no-recoil, radar, overlay, menu, gui, memory read, pattern scan,
+  signature, offset, vtable hook, anti-cheat, EAC, BattlEye, Vanguard, GameGuard,
+  integrity check, bypass, streamproof, kernel driver, dump, IDA, Ghidra, r5sdk,
+  source engine, Unreal Engine, Unity, Frostbite, REDengine, CryEngine, Godot.
+- Any file extension: `.em`, `.as`, `.lua` in a Perception.cx context.
+- Any mention of `ref_process`, `find_code_pattern`, `ru64`, `draw_rect`,
+  `world_to_screen`, `register_routine`, `proc_t`, `perception`, `enma`, `angelscript`.
+
+---
+
+## Mandatory Co-Loaded Skills
+
+Load these on every cheat-script session. They are prerequisites, not options.
+
+| Skill | Why it matters |
+|-------|----------------|
+| `skill://game-cheat-guidelines` | The 12 hard rules: `uint64` addresses, null checks, scan/render separation, sigs over hardcodes, GUI for tunables, etc. |
+| `skill://game-hacking-pcx` | The full doc router: which `docs/perception/` and `docs/enma/` files to read before writing any API call. |
+| `skill://ai-pair-programming` | How to drive the AI: read docs first, plan before code, verify sigs with MCP, diff-review, unstuck questions. |
+| `skill://pcx-patch-day-playbook` | What to do when the script breaks after a game update. |
+| `skill://mcp-tool-routing` | Which of the 59 Perception MCP tools to use for binary discovery. |
+
+---
+
+## Read-First Docs
+
+Before writing **any** cheat script code, read these in order. They are small
+and prevent the most expensive mistakes.
+
+1. **Quick API surface:** `knowledge/pcx-api-cheatsheet.md` (15 KB)
+2. **The 12 guidelines:** `.claude/skills/game-cheat-guidelines/SKILL.md`
+3. **Language reference:** `docs/enma/llms-language.md` (Enma) or `docs/angelscript-lang/INDEX.md` (AS)
+4. **Core APIs for almost every cheat:**
+   - `docs/perception/proc-api.md` — process attach, memory reads, pattern scan
+   - `docs/perception/render-api.md` — 2D overlay drawing
+   - `docs/perception/gui-api.md` — sidebar widgets for every tunable
+   - `docs/perception/input-api.md` — keybinds and polling
+5. **Math & patterns:**
+   - `knowledge/aimbot-math.md` — `calc_angle`, smoothing, FOV checks, angle wrap
+   - `knowledge/common-patterns.md` — world-to-screen, ESP boxes, snaplines, radar
+   - `knowledge/offset-methodology.md` — how to find and maintain offsets
+6. **Engine-specific notes:** `knowledge/engine-*.md` and `signatures/*/*.md`
+7. **Anti-cheat research:** `knowledge/anti-cheat-architecture.md`, `signatures/anti-cheat/common-ac-patterns.md`
+8. **Cheat cookbook (templates + recipes):** `knowledge/cheat-script-cookbook.md`
+
+---
+
+## Project Scaffolding
+
+Use the official templates. Do **not** invent a layout.
+
+| Template | Use when |
+|----------|----------|
+| `templates/cheat-skeleton-em/` | Full Enma cheat project (ESP, aim, triggerbot, radar, menu) |
+| `templates/cheat-skeleton-as/` | Full AngelScript cheat project |
+| `templates/full-project/` | Minimal one-feature Enma scaffold |
+| `templates/full-project-as/` | Minimal one-feature AngelScript scaffold |
+| `templates/aimbot-skeleton.em` | Standalone aimbot math/reference |
+| `templates/overlay-basic.em` | Tiny overlay-only script |
+
+Scaffold command pattern:
+
+```bash
+pcx new cheat-skeleton-em my-esp
+```
+
+If `pcx new` is not available, copy the template directory manually.
+
+---
+
+## Standard Module Layout
+
+Every full cheat project should look like this. One feature, one file.
+
+```
+project/
+├── globals.em/as/lua   # proc_t, base/size, entity cache, config state
+├── offsets.em/as/lua   # all sigs + resolved addresses + RIP helpers
+├── esp.em/as/lua       # entity reads + 2D/3D box / health / name
+├── aim.em/as/lua       # target selection + smoothing + angle writeback
+├── triggerbot.em/as/lua # trigger timing + crosshair check
+├── radar.em/as/lua     # world-to-map + blips
+├── menu.em/as/lua      # GUI sidebar, keybinds, config load/save
+├── utils.em/as/lua     # W2S, distance, team check, visibility helper
+└── main.em/as/lua      # attach, resolve, register routines, unload
+```
+
+If the target engine or game is known, name the process string and module
+explicitly, but never hardcode an absolute address.
+
+---
+
+## Domain-Specific Rules (In Addition to the 12 Guidelines)
+
+### Anti-Cheat & Legal Scope
+
+- **Analyze only software you own or are authorized to test.**
+- Single-player, offline, or your-own-process research is the default scope.
+- Multi-player or live-service work requires explicit authorization; if unsure,
+  refuse and tell the user to verify their rights.
+- Do not produce code whose sole purpose is to bypass kernel anti-cheat or evade
+  detection in a protected online environment.
+- Defensive anti-cheat analysis (understanding how detection works, writing
+  detection tools, mapping integrity checks for authorized research) is allowed.
+
+### Memory Safety
+
+- `uint64` for every address, pointer, module base, and VTable slot.
+- Null-check after **every** `ru64`, `find_code_pattern`, `get_module_base`,
+  `ref_process`, and pointer-chain step.
+- Failed reads return `0`, not exceptions. Treat `0` as "I don't know yet."
+- Prefer read-only analysis and visualization. Writes are a last resort,
+  minimal bytes, verified with read-back, gated behind permissions.
+
+### Pattern Scanning
+
+- Never generate a sig from memory. Use `mcp:find_pattern` or
+  `python tools/sig-uniqueness-checker.py --sig` on the actual binary.
+- Keep sigs in `offsets.*`, named, with a comment describing the instruction.
+- Resolve RIP-relative displacements correctly: `final = hit + insn_len + signed_disp`.
+- Wildcard only the displacement bytes; don't wildcard opcodes that identify the
+  instruction pattern.
+
+### Rendering
+
+- Update routines read + build a cache. Render routines draw only from the cache.
+- Construct `color`, `vec2`, `vec3` per frame; they are stack value types.
+- Always check `w > 0.001` (or engine-equivalent) before trusting world-to-screen.
+- Use `get_view_width()` / `get_view_height()` for screen-space scaling.
+
+### Aimbot
+
+- `calc_angle` returns `(pitch, yaw)` in degrees, engine-convention specific.
+- Normalize yaw delta to `[-180, 180)` with the `fmod(delta + 540.0, 360.0) - 180.0` trick.
+- Clamp pitch to `[-89, 89]` or engine limits; never wrap pitch.
+- Smooth with `current + delta * factor`, factor exposed in GUI as a slider.
+- FOV check before aiming; prefer the closest in-FOV enemy or the one under
+  crosshair, configurable in GUI.
+
+### Triggerbot
+
+- Read the same entity data the ESP uses; do not duplicate entity walks.
+- Add a small random delay or fire only when crosshair is stable to avoid robotic
+  timing; expose the delay range in the GUI.
+- Respect game fire-rate by checking `can_fire()` or equivalent if available.
+
+### Radar
+
+- Project world positions to a 2D map coordinate using a chosen reference origin
+  and scale; do not call expensive W2S per blip.
+- Draw blips as colored circles with team differentiation.
+- Keep the radar in its own render routine with no memory reads.
+
+### Config / Menu
+
+- Every tunable (distance, color, smoothing, FOV, hotkey, toggle) is bound to a
+  GUI widget in `menu.*`.
+- Load config from a JSON file in `main()` and save on change.
+- Use `section_checkbox`, `section_slider_float`, `section_keybind`,
+  `section_color_picker`, `section_combo_box` as appropriate.
+
+---
+
+## Decision Tree for "Which Language?"
+
+| User wants... | Default | Alternative |
+|---------------|---------|-------------|
+| Modern PCX, hot reload, typed, fast | **Enma (.em)** | — |
+| Host already loads AngelScript | AngelScript (.as) | — |
+| Minimal embedded scripting, existing Lua host | Lua (.lua) | — |
+| Cross-engine portability | Enma | Lua |
+| Tight C++ interop / SDK work | C++ host + Enma | — |
+
+See `knowledge/pcx-cross-language-bridge.md` for the full comparison.
+
+---
+
+## Decision Tree for "Which Doc First?"
+
+| Task | Read first | Then read |
+|------|------------|-----------|
+| "Write an ESP" | `docs/perception/proc-api.md` | `docs/perception/render-api.md`, `knowledge/common-patterns.md` |
+| "Write an aimbot" | `knowledge/aimbot-math.md` | `docs/perception/proc-api.md`, `docs/perception/input-api.md` |
+| "Add a menu" | `docs/perception/gui-api.md` | `knowledge/common-patterns.md` |
+| "Find offsets/sigs" | `knowledge/offset-methodology.md` | `signatures/<engine>/*.md`, `skill://mcp-tool-routing` |
+| "Script broke after patch" | `skill://pcx-patch-day-playbook` | `knowledge/offset-methodology.md` |
+| "Anti-cheat research" | `knowledge/anti-cheat-architecture.md` | `signatures/anti-cheat/common-ac-patterns.md` |
+
+---
+
+## Common Pitfalls to Catch in Diff Review
+
+| Code smell | Rule | Fix |
+|------------|------|-----|
+| `int64` / `int32` near `addr`, `base`, `ptr`, `offset` | #2 | Change to `uint64` |
+| Bare float literal in GPU/vertex data | #8 | Add `f` suffix |
+| `ru64()` result used without `== 0` check | #3 | Add null guard |
+| `find_code_pattern` in render/update tick | #4 | Move to `main()` / `offsets.*` |
+| Hardcoded RVA without citation | #1, #12 | Replace with sig + `// E-NNN` or `// UNVERIFIED` |
+| `color` / `vec2` / `vec3` at file scope | #7 | Construct per frame |
+| Hotkey hardcoded, no GUI widget | #11 | Add `section_keybind` |
+| Memory write not gated / too large | #9 | Minimize bytes, verify, use permissions |
+| W2S without `w > 0.001` check | #10 | Add behind-camera guard |
+| One giant file | #6 | Split into globals/offsets/esp/aim/menu/main |
+
+---
+
+## Summary Checklist
+
+Before delivering any cheat script:
+
+1. [ ] Read the relevant docs (see "Read-First Docs" above).
+2. [ ] Load the mandatory co-skills.
+3. [ ] Scaffold from an official template.
+4. [ ] Honor the 12 `game-cheat-guidelines` plus the domain rules here.
+5. [ ] Verify sigs/offsets against a real binary, not from memory.
+6. [ ] Separate update (reads) from render (draws).
+7. [ ] Bind every tunable to a GUI widget.
+8. [ ] Add `uint64` address checks, null checks, and `w > 0` guards.
+9. [ ] Confirm the work is for authorized/single-player/educational targets.
+10. [ ] Suggest `pcx lint <file>` and a diff review before running.
+
+---
+
 ## Source: `.claude/skills/game-hacking-pcx/SKILL.md`
 
 ---
 name: game-hacking-pcx
 description: >
   Mandatory doc router for all PCX scripting sessions. Triggers on any game
-  hacking, Enma, AngelScript, or Perception.cx work. Provides the full doc
-  index (43,000+ lines across 139 files) and enforces reading the relevant
-  documentation before writing any API call. Load alongside
-  game-cheat-guidelines on every PCX session.
+  hacking, game cheat, ESP, aimbot, triggerbot, radar, Enma, AngelScript, or
+  Perception.cx work. Provides the full doc index (43,000+ lines across 139
+  files) and enforces reading the relevant documentation before writing any
+  API call. Load alongside game-cheat-script-master and game-cheat-guidelines
+  on every PCX game-cheat session.
 license: MIT
 ---
 
 # Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
 
 ## Trigger
-Game hacking, game cheats, memory reading/writing, ESP, aimbot, pattern scanning, vtable hooking,
-process manipulation, Enma scripting, AngelScript scripting, Perception.cx, PCX, render overlays,
-any `.em` or `.as` game script work, or any mention of the Perception platform.
+Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
+pattern scanning, vtable hooking, process manipulation, Enma scripting, AngelScript scripting,
+Perception.cx, PCX, render overlays, any `.em` or `.as` game script work, or any mention of the
+Perception platform.
 
 ## MANDATORY: Read Before Writing Code
 
@@ -46000,11 +46257,19 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 
 ## How To Use These Docs
 
-1. **Before writing Enma code**: `read docs/enma/llms-language.md` (the single-page complete ref)
-2. **Before calling a PCX API**: `read docs/perception/<api-name>.md`
-3. **Before writing AngelScript**: `read docs/perception/angelscript/<api-name>.md`
-4. **If unsure about a type, function, or parameter**: read the doc, don't guess
-5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
+1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
+2. **Before writing Enma code**: `read docs/enma/llms-language.md` (the single-page complete ref)
+3. **Before calling a PCX API**: `read docs/perception/<api-name>.md`
+4. **Before writing AngelScript**: `read docs/perception/angelscript/<api-name>.md`
+5. **If unsure about a type, function, or parameter**: read the doc, don't guess
+6. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
+7. **For a starting project scaffold**: use `templates/cheat-skeleton-em/` or `templates/cheat-skeleton-as/`
+
+## Cheat-Script Scaffolds
+
+- **Enma skeleton**: `templates/cheat-skeleton-em/` — globals, offsets, utils, ESP, aim, triggerbot, radar, menu, main
+- **AngelScript skeleton**: `templates/cheat-skeleton-as/` — same layout in AngelScript
+- **Cookbook recipes**: `knowledge/cheat-script-cookbook.md` — pattern scan, pointer chain, W2S, ESP, aim smoothing, FOV, triggerbot, radar, config, unload cleanup
 
 ## Critical Enma Rules (from the docs)
 
@@ -51846,6 +52111,508 @@ typedef struct _OB_PRE_OPERATION_INFORMATION {
 3. **Follow `skill://anti-cheat-re`** — the six-step methodology
 4. **Use `skill://kernel-analysis`** — technical patterns for driver reversing
 5. **Refer to `knowledge/kernel-re-tools.md`** — tooling for each workflow stage
+
+---
+
+## Source: `knowledge/cheat-script-cookbook.md`
+
+> **Scope:** Educational cookbook for Perception.cx cheat-script development. Authorized targets only — analyze software you own or have permission to test.
+
+# Cheat Script Cookbook
+
+This file is the practical companion to `game-cheat-guidelines` and `game-hacking-pcx`.
+It contains small, reusable recipes for the most common cheat-script tasks. Copy
+and adapt them inside your own projects; they follow the 12 guidelines and the
+cheat-script master rules.
+
+All examples are written in **Enma (.em)** because that is the default PCX
+language. AngelScript and Lua equivalents follow the same logic with their own
+syntax (see `knowledge/pcx-cross-language-bridge.md`).
+
+---
+
+## Table of Contents
+
+1. [Project skeleton](#project-skeleton)
+2. [Process attach + pattern scan](#process-attach--pattern-scan)
+3. [Pointer chain walk](#pointer-chain-walk)
+4. [World-to-screen](#world-to-screen)
+5. [ESP box](#esp-box)
+6. [Snapline](#snapline)
+7. [Aimbot angle + smoothing](#aimbot-angle--smoothing)
+8. [FOV cone check](#fov-cone-check)
+9. [Triggerbot](#triggerbot)
+10. [Radar](#radar)
+11. [Config save/load](#config-saveload)
+12. [Unload cleanup](#unload-cleanup)
+
+---
+
+## Project skeleton
+
+```
+my_cheat/
+├── globals.em    # proc_t, base/size, cache, config
+├── offsets.em    # sigs + resolved addresses
+├── utils.em      # W2S, distance, team check
+├── esp.em        # read + render ESP
+├── aim.em        # aimbot logic
+├── triggerbot.em # trigger logic
+├── radar.em      # 2D radar
+├── menu.em       # GUI + config
+└── main.em       # setup + routines
+```
+
+Compile bundle order: `globals` → `offsets` → `utils` → `esp` → `aim` → `triggerbot`
+→ `radar` → `menu` → `main`.
+
+---
+
+## Process attach + pattern scan
+
+```cpp
+// main.em
+import "globals";
+import "offsets";
+import "menu";
+import "esp";
+import "aim";
+
+int64 main() {
+    g_proc = ref_process("game.exe");     // set real process name
+    if (!g_proc.alive()) {
+        println("[main] target not found");
+        return 0;
+    }
+
+    g_base = g_proc.base_address();
+    g_size = g_proc.get_module_size("game.exe");
+    if (g_base == 0 || g_size == 0) {
+        println("[main] module not ready");
+        return 0;
+    }
+
+    if (!resolve_all()) {
+        println("[main] sigs stale");
+        return 0;
+    }
+
+    setup_menu();
+    register_routine(cast<int64>(on_update), 0);  // memory reads
+    register_routine(cast<int64>(on_render), 0);  // drawing
+
+    println("[main] loaded");
+    return 1;
+}
+```
+
+```cpp
+// offsets.em
+import "globals";
+
+const string SIG_ENTITY_LIST = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 ??"; // UNVERIFIED
+const string SIG_LOCAL_PLAYER = "48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ??"; // UNVERIFIED
+
+uint64 resolve_rip(uint64 hit, int32 disp_off, int32 insn_len) {
+    if (hit == 0) return 0;
+    int32 disp = g_proc.r32(hit + cast<uint64>(disp_off));
+    return hit + cast<uint64>(insn_len) + cast<uint64>(disp);
+}
+
+bool resolve_all() {
+    uint64 hit_el = g_proc.find_code_pattern(g_base, g_size, SIG_ENTITY_LIST);
+    if (hit_el == 0) { println("[offsets] entity_list sig stale"); return false; }
+    g_entity_list = resolve_rip(hit_el, 3, 7);
+
+    uint64 hit_lp = g_proc.find_code_pattern(g_base, g_size, SIG_LOCAL_PLAYER);
+    if (hit_lp == 0) { println("[offsets] local_player sig stale"); return false; }
+    g_local_player = resolve_rip(hit_lp, 3, 7);
+
+    return g_entity_list != 0 && g_local_player != 0;
+}
+```
+
+---
+
+## Pointer chain walk
+
+```cpp
+// utils.em
+import "globals";
+
+uint64 read_chain(uint64 base, int32[] offsets) {
+    uint64 addr = base;
+    for (int32 i = 0; i < offsets.length(); i++) {
+        if (addr == 0) return 0;
+        addr = g_proc.ru64(addr);
+        if (addr == 0) return 0;
+        addr += cast<uint64>(offsets[i]);
+    }
+    return addr;
+}
+```
+
+Usage:
+
+```cpp
+int32[] health_chain = { 0x10, 0x20, 0xE8 };
+uint64 health_addr = read_chain(g_local_player, health_chain);
+if (health_addr == 0) return;
+int32 health = g_proc.r32(health_addr);
+```
+
+---
+
+## World-to-screen
+
+Source-engine column-major 4x4. Adapt matrix layout for your engine.
+
+```cpp
+// utils.em
+import "vec";
+import "color";
+import "globals";
+
+bool world_to_screen(vec3 world, out vec2 screen) {
+    float64 m[16];
+    // read 16 floats from g_view_matrix (set in offsets.em)
+    for (int32 i = 0; i < 16; i++) {
+        m[i] = g_proc.rf32(g_view_matrix + cast<uint64>(i * 4));
+    }
+
+    float64 w = m[3]*world.x + m[7]*world.y + m[11]*world.z + m[15];
+    if (w < 0.001) return false;
+
+    float64 inv_w = 1.0 / w;
+    float64 nx = (m[0]*world.x + m[4]*world.y + m[8]*world.z + m[12]) * inv_w;
+    float64 ny = (m[1]*world.x + m[5]*world.y + m[9]*world.z + m[13]) * inv_w;
+
+    float64 vw = get_view_width();
+    float64 vh = get_view_height();
+    screen = vec2((vw * 0.5) + (nx * vw * 0.5), (vh * 0.5) - (ny * vh * 0.5));
+    return true;
+}
+```
+
+---
+
+## ESP box
+
+```cpp
+// esp.em
+import "vec";
+import "color";
+import "globals";
+import "utils";
+
+void esp_update(int64 data) {
+    if (!g_esp_enabled || !g_initialized || !g_proc.alive()) return;
+
+    g_esp_count = 0;
+    for (int32 i = 0; i < MAX_ENTITIES; i++) {
+        uint64 ent = g_proc.ru64(g_entity_list + cast<uint64>(i) * 8);
+        if (ent == 0) continue;
+        if (ent == g_local_player) continue;
+
+        EntityInfo info;
+        info.pos = g_proc.read_vec3_fl32(ent + OFF_POS);     // verify in IDA
+        info.health = g_proc.r32(ent + OFF_HEALTH);
+        info.team = g_proc.r32(ent + OFF_TEAM);
+        info.valid = true;
+
+        g_entities[g_esp_count] = info;
+        g_esp_count++;
+        if (g_esp_count >= MAX_ENTITIES) break;
+    }
+}
+
+void esp_render(int64 data) {
+    if (!g_esp_enabled) return;
+
+    color enemy = color(255, 80, 80, 220);
+    color ally  = color(80, 255, 80, 220);
+    color white = color(255, 255, 255, 255);
+
+    for (int32 i = 0; i < g_esp_count; i++) {
+        EntityInfo e = g_entities[i];
+        if (!e.valid) continue;
+
+        vec2 head2d, feet2d;
+        vec3 head = e.pos; head.z += 72.0;  // approximate player height
+        vec3 feet = e.pos;
+
+        if (!world_to_screen(head, head2d)) continue;
+        if (!world_to_screen(feet, feet2d)) continue;
+
+        float64 h = feet2d.y - head2d.y;
+        float64 w = h * 0.5;
+        color c = (e.team == g_local_team) ? ally : enemy;
+
+        draw_rect(vec2(head2d.x - w*0.5, head2d.y), vec2(w, h), c, 1.0, false);
+
+        string hp_text = format("{}", e.health);
+        draw_text(hp_text, vec2(head2d.x - 10.0, head2d.y - 18.0), white,
+                  get_font14(), 0, color(0,0,0,0), 0.0);
+    }
+}
+```
+
+---
+
+## Snapline
+
+```cpp
+// esp.em (inside esp_render)
+vec2 screen_center = vec2(get_view_width() * 0.5, get_view_height());
+for (int32 i = 0; i < g_esp_count; i++) {
+    EntityInfo e = g_entities[i];
+    if (!e.valid) continue;
+    vec2 pos;
+    if (!world_to_screen(e.pos, pos)) continue;
+    draw_line(screen_center, pos, color(255, 255, 255, 120), 1.0);
+}
+```
+
+---
+
+## Aimbot angle + smoothing
+
+```cpp
+// aim.em
+import "vec";
+import "math";
+import "globals";
+import "utils";
+
+const float64 PI = 3.14159265358979;
+const float64 RAD2DEG = 180.0 / PI;
+
+vec2 calc_angle(vec3 src, vec3 dst) {
+    vec3 d = dst.sub(src);
+    float64 dist_xy = sqrt(d.x*d.x + d.y*d.y);
+    float64 pitch = atan2(-d.z, dist_xy) * RAD2DEG;
+    float64 yaw   = atan2(d.y, d.x) * RAD2DEG;
+    return vec2(pitch, yaw);
+}
+
+float64 normalize_delta(float64 delta) {
+    return fmod(delta + 540.0, 360.0) - 180.0;
+}
+
+void aimbot_update(int64 data) {
+    if (!g_aim_enabled || !g_initialized || !g_proc.alive()) return;
+    if (!is_key_down(g_aim_key)) { g_aim_target.valid = false; return; }
+
+    vec3 local_pos = g_proc.read_vec3_fl32(g_local_player + OFF_POS);
+    vec2 current = read_view_angles();  // engine-specific helper
+
+    EntityInfo best;
+    float64 best_score = 1e9;
+    for (int32 i = 0; i < g_esp_count; i++) {
+        EntityInfo e = g_entities[i];
+        if (!e.valid || e.team == g_local_team || e.health <= 0) continue;
+
+        vec2 target_ang = calc_angle(local_pos, e.pos);
+        float64 yaw_delta = normalize_delta(target_ang.y - current.y);
+        float64 pitch_delta = fclamp(target_ang.x - current.x, -89.0, 89.0);
+        float64 score = yaw_delta*yaw_delta + pitch_delta*pitch_delta;
+
+        if (score < best_score) {
+            best_score = score;
+            best = e;
+        }
+    }
+
+    g_aim_target = best;
+}
+
+void aimbot_render(int64 data) {
+    if (!g_aim_enabled || !g_aim_target.valid) return;
+
+    vec3 local_pos = g_proc.read_vec3_fl32(g_local_player + OFF_POS);
+    vec2 target = calc_angle(local_pos, g_aim_target.pos);
+    vec2 current = read_view_angles();
+
+    float64 yaw_delta   = normalize_delta(target.y - current.y);
+    float64 pitch_delta = fclamp(target.x - current.x, -89.0, 89.0);
+
+    vec2 smoothed = vec2(
+        current.x + pitch_delta * g_aim_smooth,
+        current.y + yaw_delta   * g_aim_smooth
+    );
+
+    write_view_angles(smoothed);  // engine-specific helper
+}
+```
+
+---
+
+## FOV cone check
+
+```cpp
+// utils.em
+import "math";
+import "vec";
+import "globals";
+
+vec3 angles_to_forward(float64 pitch_deg, float64 yaw_deg) {
+    float64 p = pitch_deg * (PI / 180.0);
+    float64 y = yaw_deg * (PI / 180.0);
+    float64 cp = cos(p);
+    return vec3(cp * cos(y), cp * sin(y), -sin(p));
+}
+
+bool in_fov(vec3 src, vec2 view_angles, vec3 target, float64 fov_deg) {
+    vec3 dir = target.sub(src);
+    float64 len = sqrt(dir.x*dir.x + dir.y*dir.y + dir.z*dir.z);
+    if (len == 0.0) return false;
+    dir = vec3(dir.x / len, dir.y / len, dir.z / len);
+
+    vec3 fwd = angles_to_forward(view_angles.x, view_angles.y);
+    float64 dot = fwd.x*dir.x + fwd.y*dir.y + fwd.z*dir.z;
+    return dot >= cos(fov_deg * (PI / 180.0));
+}
+```
+
+Use it inside `aimbot_update` to filter candidates before scoring.
+
+---
+
+## Triggerbot
+
+```cpp
+// triggerbot.em
+import "globals";
+import "utils";
+
+void triggerbot_update(int64 data) {
+    if (!g_trigger_enabled || !g_initialized || !g_proc.alive()) return;
+    if (!is_key_down(g_trigger_key)) return;
+
+    EntityInfo crosshair_target = get_entity_under_crosshair(); // engine helper
+    if (!crosshair_target.valid) return;
+    if (crosshair_target.team == g_local_team) return;
+    if (crosshair_target.health <= 0) return;
+
+    // simple fire-rate gate: last fire timestamp
+    if (time_ms() - g_last_fire < g_trigger_delay_ms) return;
+    g_last_fire = time_ms();
+
+    press_mouse_left();  // or engine-specific fire command
+}
+
+void triggerbot_render(int64 data) {
+    // nothing to draw; render routine present for registration symmetry
+}
+```
+
+---
+
+## Radar
+
+```cpp
+// radar.em
+import "vec";
+import "color";
+import "globals";
+
+const float64 RADAR_SCALE = 0.05;  // world-units per radar-pixel
+
+void radar_render(int64 data) {
+    if (!g_radar_enabled) return;
+
+    vec2 local2d;
+    vec3 local_pos = g_proc.read_vec3_fl32(g_local_player + OFF_POS);
+    if (!world_to_map(local_pos, local2d)) return;  // project X/Z to 2D
+
+    float64 cx = get_view_width()  - 150.0;
+    float64 cy = get_view_height() - 150.0;
+    float64 radius = 100.0;
+
+    color bg = color(0, 0, 0, 160);
+    draw_circle(vec2(cx, cy), radius, bg, 2.0, true);
+
+    for (int32 i = 0; i < g_esp_count; i++) {
+        EntityInfo e = g_entities[i];
+        if (!e.valid) continue;
+
+        vec2 blip;
+        if (!world_to_map(e.pos, blip)) continue;
+        vec2 rel = blip.sub(local2d);
+        rel = vec2(rel.x * RADAR_SCALE, rel.y * RADAR_SCALE);
+        if (rel.x*rel.x + rel.y*rel.y > radius*radius) continue;
+
+        color c = (e.team == g_local_team) ? color(80,255,80,255) : color(255,80,80,255);
+        draw_circle(vec2(cx + rel.x, cy + rel.y), 4.0, c, 1.0, true);
+    }
+}
+```
+
+---
+
+## Config save/load
+
+```cpp
+// menu.em
+import "json";
+import "file";
+import "globals";
+
+const string CONFIG_PATH = "my_cheat_config.json";
+
+void save_config() {
+    json_value root = json_object();
+    root["esp_enabled"] = json_bool(g_esp_enabled);
+    root["aim_enabled"] = json_bool(g_aim_enabled);
+    root["aim_smooth"]  = json_float(g_aim_smooth);
+    root["aim_fov"]     = json_float(g_aim_fov);
+    root["trigger_enabled"] = json_bool(g_trigger_enabled);
+    root["radar_enabled"]   = json_bool(g_radar_enabled);
+
+    string text = json_stringify(root, 2);
+    file_write(CONFIG_PATH, text);
+}
+
+void load_config() {
+    if (!file_exists(CONFIG_PATH)) return;
+    string text = file_read(CONFIG_PATH);
+    json_value root = json_parse(text);
+    if (root.type() != JSON_OBJECT) return;
+
+    g_esp_enabled     = root["esp_enabled"].as_bool(g_esp_enabled);
+    g_aim_enabled     = root["aim_enabled"].as_bool(g_aim_enabled);
+    g_aim_smooth      = root["aim_smooth"].as_float(g_aim_smooth);
+    g_aim_fov         = root["aim_fov"].as_float(g_aim_fov);
+    g_trigger_enabled = root["trigger_enabled"].as_bool(g_trigger_enabled);
+    g_radar_enabled   = root["radar_enabled"].as_bool(g_radar_enabled);
+}
+```
+
+---
+
+## Unload cleanup
+
+```cpp
+// main.em
+void on_unload() {
+    g_initialized = false;
+    // no explicit proc_t release in Enma; handle goes out of scope
+    println("[main] unloaded");
+}
+```
+
+For AngelScript, explicitly `deref()` the handle and unregister callbacks.
+
+---
+
+## See Also
+
+- `skill://game-cheat-guidelines` — the 12 hard rules
+- `skill://game-hacking-pcx` — full doc index
+- `knowledge/aimbot-math.md` — angle math in depth
+- `knowledge/common-patterns.md` — W2S, ESP, radar patterns
+- `knowledge/offset-methodology.md` — finding and maintaining offsets
+- `templates/cheat-skeleton-em/` — full working scaffold
 
 ---
 
@@ -58734,6 +59501,544 @@ int64 main() {
 
 ---
 
+## Source: `templates/cheat-skeleton-em/aim.em`
+
+// aim.em — smooth aimbot with FOV filter
+#pragma once
+
+import "globals";
+import "utils";
+
+// Engine-specific helpers — replace with your target's angle read/write.
+vec2 read_view_angles() {
+    // placeholder: read from your engine's view-angle address
+    return vec2(0, 0);
+}
+
+void write_view_angles(vec2 angles) {
+    // placeholder: clamp pitch to [-89, 89] and write to engine memory
+}
+
+void aimbot_update(int64 data) {
+    if (!g_aim_enabled || !g_initialized || !g_proc.alive()) return;
+    if (!is_key_down(g_aim_key)) { g_aim_target.valid = false; return; }
+
+    vec3 local_pos = read_vec3(g_local_player + OFF_POS);
+    vec2 current   = read_view_angles();
+
+    EntityInfo best;
+    float64 best_score = 1e9;
+
+    for (int32 i = 0; i < g_esp_count; i++) {
+        EntityInfo e = g_entities[i];
+        if (!e.valid || e.team == g_local_team || e.health <= 0) continue;
+        if (!in_fov(local_pos, current, e.head, g_aim_fov)) continue;
+
+        vec2 target_ang = calc_angle(local_pos, e.head);
+        float64 yaw_delta   = normalize_delta(target_ang.y - current.y);
+        float64 pitch_delta = fclamp(target_ang.x - current.x, -89.0, 89.0);
+        float64 score = yaw_delta*yaw_delta + pitch_delta*pitch_delta;
+
+        if (score < best_score) {
+            best_score = score;
+            best = e;
+        }
+    }
+
+    g_aim_target = best;
+}
+
+void aimbot_render(int64 data) {
+    if (!g_aim_enabled || !g_aim_target.valid) return;
+
+    vec3 local_pos = read_vec3(g_local_player + OFF_POS);
+    vec2 target = calc_angle(local_pos, g_aim_target.head);
+    vec2 current = read_view_angles();
+
+    float64 yaw_delta   = normalize_delta(target.y - current.y);
+    float64 pitch_delta = fclamp(target.x - current.x, -89.0, 89.0);
+
+    vec2 smoothed = vec2(
+        current.x + pitch_delta * g_aim_smooth,
+        current.y + yaw_delta   * g_aim_smooth
+    );
+
+    write_view_angles(smoothed);
+}
+
+---
+
+## Source: `templates/cheat-skeleton-em/esp.em`
+
+// esp.em — box ESP, snaplines, health text
+#pragma once
+
+import "globals";
+import "utils";
+import "color";
+
+const float64 PLAYER_HEIGHT = 72.0;
+
+void esp_update(int64 data) {
+    if (!g_esp_enabled || !g_initialized || !g_proc.alive()) return;
+
+    g_esp_count = 0;
+
+    if (g_local_player != 0) {
+        g_local_team = g_proc.r32(g_local_player + OFF_TEAM);
+    }
+
+    for (int32 i = 0; i < MAX_ENTITIES; i++) {
+        uint64 ent = g_proc.ru64(g_entity_list + cast<uint64>(i) * 8);
+        if (ent == 0) continue;
+        if (ent == g_local_player) continue;
+
+        int32 health = g_proc.r32(ent + OFF_HEALTH);
+        if (health <= 0 || health > 999) continue;
+
+        EntityInfo info;
+        info.ptr    = ent;
+        info.health = health;
+        info.team   = g_proc.r32(ent + OFF_TEAM);
+        info.pos    = read_vec3(ent + OFF_POS);
+        info.head   = info.pos; info.head.z += PLAYER_HEIGHT;
+        info.valid  = true;
+
+        g_entities[g_esp_count] = info;
+        g_esp_count++;
+        if (g_esp_count >= MAX_ENTITIES) break;
+    }
+}
+
+void esp_render(int64 data) {
+    if (!g_esp_enabled || g_esp_count == 0) return;
+
+    color enemy = color(255, 80, 80, 220);
+    color ally  = color(80, 255, 80, 220);
+    color white = color(255, 255, 255, 255);
+
+    float64 vw = get_view_width();
+    vec2 screen_bottom = vec2(vw * 0.5, get_view_height());
+
+    for (int32 i = 0; i < g_esp_count; i++) {
+        EntityInfo e = g_entities[i];
+        if (!e.valid) continue;
+
+        vec2 head2d, feet2d;
+        if (!world_to_screen(e.head, head2d)) continue;
+        if (!world_to_screen(e.pos,  feet2d)) continue;
+
+        float64 h = feet2d.y - head2d.y;
+        float64 w = h * 0.5;
+        float64 x = head2d.x - w * 0.5;
+        color c = (e.team == g_local_team && e.team != 0) ? ally : enemy;
+
+        draw_rect(vec2(x, head2d.y), vec2(w, h), c, 1.0, false);
+        draw_line(screen_bottom, feet2d, color(255, 255, 255, 120), 1.0);
+
+        string hp = format("{}", e.health);
+        draw_text(hp, vec2(head2d.x - 10.0, head2d.y - 18.0), white,
+                  get_font14(), 0, color(0,0,0,0), 0.0);
+    }
+}
+
+---
+
+## Source: `templates/cheat-skeleton-em/globals.em`
+
+// globals.em — shared state and configuration
+#pragma once
+
+import "proc";
+import "vec";
+import "math";
+import "color";
+
+const int32 MAX_ENTITIES = 64;
+
+// Target handles (set in main.em)
+proc_t g_proc;
+uint64 g_base = 0;
+uint64 g_size = 0;
+bool g_initialized = false;
+
+// Resolved in offsets.em
+uint64 g_entity_list = 0;
+uint64 g_local_player = 0;
+uint64 g_view_matrix = 0;
+
+// Team cache
+int32 g_local_team = 0;
+
+// Feature toggles
+bool g_esp_enabled     = true;
+bool g_aim_enabled     = false;
+bool g_trigger_enabled = false;
+bool g_radar_enabled   = true;
+
+// Aim settings
+float64 g_aim_smooth = 0.15;
+float64 g_aim_fov    = 30.0;
+int32   g_aim_key    = VK_LSHIFT;   // hold key
+
+// Trigger settings
+int32   g_trigger_key   = VK_LMENU; // Alt
+int32   g_trigger_delay_ms = 50;
+int64   g_last_fire = 0;
+
+// Entity cache
+struct EntityInfo {
+    bool    valid   = false;
+    uint64  ptr     = 0;
+    int32   health  = 0;
+    int32   team    = 0;
+    vec3    pos     = vec3(0,0,0);
+    vec3    head    = vec3(0,0,0);
+};
+
+EntityInfo g_entities[MAX_ENTITIES];
+int32 g_esp_count = 0;
+
+// Active aim target
+EntityInfo g_aim_target;
+
+// Offset constants — replace with real values from your target
+const uint64 OFF_POS    = 0x100; // UNVERIFIED
+const uint64 OFF_HEALTH = 0x200; // UNVERIFIED
+const uint64 OFF_TEAM   = 0x300; // UNVERIFIED
+const uint64 OFF_NAME   = 0x400; // UNVERIFIED
+
+---
+
+## Source: `templates/cheat-skeleton-em/main.em`
+
+// main.em — entry point and routine registration
+import "globals";
+import "offsets";
+import "utils";
+import "esp";
+import "aim";
+import "triggerbot";
+import "radar";
+import "menu";
+
+const string TARGET_PROCESS = "game.exe"; // REPLACE WITH REAL TARGET
+
+int64 main() {
+    g_proc = ref_process(TARGET_PROCESS);
+    if (!g_proc.alive()) {
+        println("[main] target not found: " + TARGET_PROCESS);
+        return 0;
+    }
+
+    g_base = g_proc.base_address();
+    g_size = g_proc.get_module_size(TARGET_PROCESS);
+    if (g_base == 0 || g_size == 0) {
+        println("[main] module not ready");
+        return 0;
+    }
+
+    if (!resolve_all()) {
+        println("[main] signature resolution failed");
+        return 0;
+    }
+
+    g_initialized = true;
+    setup_menu();
+
+    // Memory/update routines
+    register_routine(cast<int64>(esp_update), 0);
+    register_routine(cast<int64>(aimbot_update), 0);
+    register_routine(cast<int64>(triggerbot_update), 0);
+
+    // Render routines
+    register_routine(cast<int64>(esp_render), 1);
+    register_routine(cast<int64>(aimbot_render), 1);
+    register_routine(cast<int64>(triggerbot_render), 1);
+    register_routine(cast<int64>(radar_render), 1);
+
+    println("[main] cheat skeleton loaded");
+    return 1;
+}
+
+---
+
+## Source: `templates/cheat-skeleton-em/menu.em`
+
+// menu.em — config, keybinds, save/load
+#pragma once
+
+import "globals";
+import "json";
+import "file";
+
+const string CONFIG_PATH = "cheat_skeleton_config.json";
+
+void setup_menu() {
+    load_config();
+
+    create_checkbox("ESP",      g_esp_enabled);
+    create_checkbox("Aimbot",   g_aim_enabled);
+    create_slider("Aim Smooth", g_aim_smooth, 0.01, 1.0);
+    create_slider("Aim FOV",    g_aim_fov,    1.0,  180.0);
+    create_checkbox("Trigger",  g_trigger_enabled);
+    create_checkbox("Radar",    g_radar_enabled);
+    create_button("Save Config", save_config);
+}
+
+void save_config() {
+    json_value root = json_object();
+    root["esp_enabled"]     = json_bool(g_esp_enabled);
+    root["aim_enabled"]     = json_bool(g_aim_enabled);
+    root["aim_smooth"]      = json_float(g_aim_smooth);
+    root["aim_fov"]         = json_float(g_aim_fov);
+    root["trigger_enabled"] = json_bool(g_trigger_enabled);
+    root["radar_enabled"]   = json_bool(g_radar_enabled);
+
+    file_write(CONFIG_PATH, json_stringify(root, 2));
+}
+
+void load_config() {
+    if (!file_exists(CONFIG_PATH)) return;
+    string text = file_read(CONFIG_PATH);
+    json_value root = json_parse(text);
+    if (root.type() != JSON_OBJECT) return;
+
+    g_esp_enabled     = root["esp_enabled"].as_bool(g_esp_enabled);
+    g_aim_enabled     = root["aim_enabled"].as_bool(g_aim_enabled);
+    g_aim_smooth      = root["aim_smooth"].as_float(g_aim_smooth);
+    g_aim_fov         = root["aim_fov"].as_float(g_aim_fov);
+    g_trigger_enabled = root["trigger_enabled"].as_bool(g_trigger_enabled);
+    g_radar_enabled   = root["radar_enabled"].as_bool(g_radar_enabled);
+}
+
+---
+
+## Source: `templates/cheat-skeleton-em/offsets.em`
+
+// offsets.em — signatures and resolution helpers
+#pragma once
+
+import "globals";
+
+// Placeholder signatures. Replace after dumping with IDA/ReClass.
+const string SIG_ENTITY_LIST  = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 ??"; // UNVERIFIED
+const string SIG_LOCAL_PLAYER = "48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ??"; // UNVERIFIED
+const string SIG_VIEW_MATRIX  = "48 8D 05 ?? ?? ?? ?? 48 89 ?? 48 ?? ??"; // UNVERIFIED
+
+// Resolve RIP-relative mov/lea instruction: hit + displacement + instruction length.
+uint64 resolve_rip(uint64 hit, int32 disp_off, int32 insn_len) {
+    if (hit == 0) return 0;
+    int32 disp = g_proc.r32(hit + cast<uint64>(disp_off));
+    return hit + cast<uint64>(insn_len) + cast<uint64>(disp);
+}
+
+// Resolve all signatures. Return false if any signature is stale.
+bool resolve_all() {
+    if (!g_proc.alive() || g_base == 0 || g_size == 0) return false;
+
+    uint64 hit_el = g_proc.find_code_pattern(g_base, g_size, SIG_ENTITY_LIST);
+    if (hit_el == 0) { println("[offsets] entity_list sig stale"); return false; }
+    g_entity_list = resolve_rip(hit_el, 3, 7);
+
+    uint64 hit_lp = g_proc.find_code_pattern(g_base, g_size, SIG_LOCAL_PLAYER);
+    if (hit_lp == 0) { println("[offsets] local_player sig stale"); return false; }
+    g_local_player = resolve_rip(hit_lp, 3, 7);
+
+    uint64 hit_vm = g_proc.find_code_pattern(g_base, g_size, SIG_VIEW_MATRIX);
+    if (hit_vm == 0) { println("[offsets] view_matrix sig stale"); return false; }
+    g_view_matrix = resolve_rip(hit_vm, 3, 7);
+
+    return g_entity_list != 0 && g_local_player != 0 && g_view_matrix != 0;
+}
+
+---
+
+## Source: `templates/cheat-skeleton-em/radar.em`
+
+// radar.em — 2D world radar
+#pragma once
+
+import "globals";
+import "utils";
+import "color";
+
+const float64 RADAR_SCALE = 0.05;
+const float64 RADAR_RADIUS = 100.0;
+
+bool world_to_map(vec3 world, out vec2 map) {
+    map = vec2(world.x, world.y);
+    return true;
+}
+
+void radar_render(int64 data) {
+    if (!g_radar_enabled || g_esp_count == 0) return;
+
+    vec3 local_pos = read_vec3(g_local_player + OFF_POS);
+    vec2 local2d;
+    if (!world_to_map(local_pos, local2d)) return;
+
+    float64 cx = get_view_width()  - 150.0;
+    float64 cy = get_view_height() - 150.0;
+
+    color bg = color(0, 0, 0, 160);
+    draw_circle(vec2(cx, cy), RADAR_RADIUS, bg, 2.0, true);
+
+    color local_color = color(255, 255, 255, 255);
+    draw_circle(vec2(cx, cy), 4.0, local_color, 1.0, true);
+
+    for (int32 i = 0; i < g_esp_count; i++) {
+        EntityInfo e = g_entities[i];
+        if (!e.valid) continue;
+
+        vec2 blip;
+        if (!world_to_map(e.pos, blip)) continue;
+        vec2 rel = blip.sub(local2d);
+        rel.x *= RADAR_SCALE;
+        rel.y *= RADAR_SCALE;
+
+        if (rel.x*rel.x + rel.y*rel.y > RADAR_RADIUS*RADAR_RADIUS) continue;
+
+        color c = (e.team == g_local_team && g_local_team != 0)
+            ? color(80, 255, 80, 255)
+            : color(255, 80, 80, 255);
+        draw_circle(vec2(cx + rel.x, cy + rel.y), 4.0, c, 1.0, true);
+    }
+}
+
+---
+
+## Source: `templates/cheat-skeleton-em/triggerbot.em`
+
+// triggerbot.em — crosshair-trigger logic
+#pragma once
+
+import "globals";
+import "utils";
+
+// Engine-specific helper: return the entity under the crosshair.
+EntityInfo get_entity_under_crosshair() {
+    EntityInfo empty;
+    empty.valid = false;
+    return empty; // replace with real logic
+}
+
+void triggerbot_update(int64 data) {
+    if (!g_trigger_enabled || !g_initialized || !g_proc.alive()) return;
+    if (!is_key_down(g_trigger_key)) return;
+
+    EntityInfo t = get_entity_under_crosshair();
+    if (!t.valid) return;
+    if (t.team == g_local_team && g_local_team != 0) return;
+    if (t.health <= 0) return;
+
+    if (time_ms() - g_last_fire < g_trigger_delay_ms) return;
+    g_last_fire = time_ms();
+
+    press_mouse_left();
+}
+
+void triggerbot_render(int64 data) {
+    // no rendering
+}
+
+---
+
+## Source: `templates/cheat-skeleton-em/utils.em`
+
+// utils.em — W2S, distance, team helpers
+#pragma once
+
+import "globals";
+import "math";
+import "vec";
+
+const float64 PI = 3.14159265358979323846;
+const float64 RAD2DEG = 180.0 / PI;
+const float64 DEG2RAD = PI / 180.0;
+
+// Read a 3-float vector from a memory address.
+vec3 read_vec3(uint64 addr) {
+    if (addr == 0) return vec3(0,0,0);
+    float64 x = g_proc.rf32(addr + 0);
+    float64 y = g_proc.rf32(addr + 4);
+    float64 z = g_proc.rf32(addr + 8);
+    return vec3(x, y, z);
+}
+
+// Pointer-chain reader.
+uint64 read_chain(uint64 base, int32[] offsets) {
+    uint64 addr = base;
+    for (int32 i = 0; i < offsets.length(); i++) {
+        if (addr == 0) return 0;
+        addr = g_proc.ru64(addr);
+        if (addr == 0) return 0;
+        addr += cast<uint64>(offsets[i]);
+    }
+    return addr;
+}
+
+float64 distance3d(vec3 a, vec3 b) {
+    float64 dx = a.x - b.x;
+    float64 dy = a.y - b.y;
+    float64 dz = a.z - b.z;
+    return sqrt(dx*dx + dy*dy + dz*dz);
+}
+
+bool world_to_screen(vec3 world, out vec2 screen) {
+    if (g_view_matrix == 0) return false;
+
+    float64 m[16];
+    for (int32 i = 0; i < 16; i++) {
+        m[i] = g_proc.rf32(g_view_matrix + cast<uint64>(i * 4));
+    }
+
+    float64 w = m[3]*world.x + m[7]*world.y + m[11]*world.z + m[15];
+    if (w < 0.001) return false;
+
+    float64 inv_w = 1.0 / w;
+    float64 nx = (m[0]*world.x + m[4]*world.y + m[8]*world.z + m[12]) * inv_w;
+    float64 ny = (m[1]*world.x + m[5]*world.y + m[9]*world.z + m[13]) * inv_w;
+
+    float64 vw = get_view_width();
+    float64 vh = get_view_height();
+    screen.x = (vw * 0.5) + (nx * vw * 0.5);
+    screen.y = (vh * 0.5) - (ny * vh * 0.5);
+    return true;
+}
+
+vec2 calc_angle(vec3 src, vec3 dst) {
+    vec3 d = dst.sub(src);
+    float64 dist_xy = sqrt(d.x*d.x + d.y*d.y);
+    float64 pitch = atan2(-d.z, dist_xy) * RAD2DEG;
+    float64 yaw   = atan2(d.y, d.x) * RAD2DEG;
+    return vec2(pitch, yaw);
+}
+
+float64 normalize_delta(float64 delta) {
+    return fmod(delta + 540.0, 360.0) - 180.0;
+}
+
+vec3 angles_to_forward(float64 pitch_deg, float64 yaw_deg) {
+    float64 p = pitch_deg * DEG2RAD;
+    float64 y = yaw_deg   * DEG2RAD;
+    float64 cp = cos(p);
+    return vec3(cp * cos(y), cp * sin(y), -sin(p));
+}
+
+bool in_fov(vec3 src, vec2 view_angles, vec3 target, float64 fov_deg) {
+    vec3 dir = target.sub(src);
+    float64 len = sqrt(dir.x*dir.x + dir.y*dir.y + dir.z*dir.z);
+    if (len == 0.0) return false;
+    dir = vec3(dir.x / len, dir.y / len, dir.z / len);
+
+    vec3 fwd = angles_to_forward(view_angles.x, view_angles.y);
+    float64 dot = fwd.x*dir.x + fwd.y*dir.y + fwd.z*dir.z;
+    return dot >= cos(fov_deg * DEG2RAD);
+}
+
+---
+
 ## Source: `templates/full-project/feature.em`
 
 // feature.em — one feature, one file. Update reads state; render draws it.
@@ -59190,6 +60495,533 @@ int64 main() {
     register_routine(cast<int64>(on_update), 0);
     register_routine(cast<int64>(on_render), 0);
     return 1;
+}
+
+---
+
+## Source: `templates/cheat-skeleton-as/aim.as`
+
+// aim.as — smooth aimbot with FOV filter
+namespace Cheat {
+
+// Engine-specific helpers — replace with your target's angle read/write.
+vec2 read_view_angles() {
+    // placeholder: read from your engine's view-angle address
+    return vec2(0, 0);
+}
+
+void write_view_angles(const vec2&in angles) {
+    // placeholder: clamp pitch to [-89, 89] and write to engine memory
+}
+
+void aimbot_update(int64 data) {
+    if (!g_aim_enabled || !g_initialized || !g_proc.alive()) return;
+    if (!is_key_down(g_aim_key)) { g_aim_target.valid = false; return; }
+
+    vec3 local_pos = read_vec3(g_local_player + OFF_POS);
+    vec2 current   = read_view_angles();
+
+    EntityInfo best;
+    double best_score = 1e9;
+
+    for (int i = 0; i < g_esp_count; i++) {
+        EntityInfo@ e = g_entities[i];
+        if (!e.valid || e.team == g_local_team || e.health <= 0) continue;
+        if (!in_fov(local_pos, current, e.head, g_aim_fov)) continue;
+
+        vec2 target_ang = calc_angle(local_pos, e.head);
+        double yaw_delta   = normalize_delta(target_ang.y - current.y);
+        double pitch_delta = clamp(target_ang.x - current.x, -89.0, 89.0);
+        double score = yaw_delta*yaw_delta + pitch_delta*pitch_delta;
+
+        if (score < best_score) {
+            best_score = score;
+            best = e;
+        }
+    }
+
+    g_aim_target = best;
+}
+
+void aimbot_render(int64 data) {
+    if (!g_aim_enabled || !g_aim_target.valid) return;
+
+    vec3 local_pos = read_vec3(g_local_player + OFF_POS);
+    vec2 target = calc_angle(local_pos, g_aim_target.head);
+    vec2 current = read_view_angles();
+
+    double yaw_delta   = normalize_delta(target.y - current.y);
+    double pitch_delta = clamp(target.x - current.x, -89.0, 89.0);
+
+    vec2 smoothed(
+        current.x + pitch_delta * g_aim_smooth,
+        current.y + yaw_delta   * g_aim_smooth
+    );
+
+    write_view_angles(smoothed);
+}
+
+}
+
+---
+
+## Source: `templates/cheat-skeleton-as/esp.as`
+
+// esp.as — box ESP, snaplines, health text
+namespace Cheat {
+
+const double PLAYER_HEIGHT = 72.0;
+
+void esp_update(int64 data) {
+    if (!g_esp_enabled || !g_initialized || !g_proc.alive()) return;
+
+    g_esp_count = 0;
+
+    if (g_local_player != 0) {
+        g_local_team = g_proc.r32(g_local_player + OFF_TEAM);
+    }
+
+    for (int i = 0; i < MAX_ENTITIES; i++) {
+        uint64 ent = g_proc.ru64(g_entity_list + uint64(i) * 8);
+        if (ent == 0) continue;
+        if (ent == g_local_player) continue;
+
+        int health = g_proc.r32(ent + OFF_HEALTH);
+        if (health <= 0 || health > 999) continue;
+
+        EntityInfo info;
+        info.ptr    = ent;
+        info.health = health;
+        info.team   = g_proc.r32(ent + OFF_TEAM);
+        info.pos    = read_vec3(ent + OFF_POS);
+        info.head   = info.pos; info.head.z += PLAYER_HEIGHT;
+        info.valid  = true;
+
+        g_entities[g_esp_count] = info;
+        g_esp_count++;
+        if (g_esp_count >= MAX_ENTITIES) break;
+    }
+}
+
+void esp_render(int64 data) {
+    if (!g_esp_enabled || g_esp_count == 0) return;
+
+    color enemy(255, 80, 80, 220);
+    color ally(80, 255, 80, 220);
+    color white(255, 255, 255, 255);
+
+    double vw = get_view_width();
+    vec2 screen_bottom(vw * 0.5, get_view_height());
+
+    for (int i = 0; i < g_esp_count; i++) {
+        EntityInfo@ e = g_entities[i];
+        if (!e.valid) continue;
+
+        vec2 head2d, feet2d;
+        if (!world_to_screen(e.head, head2d)) continue;
+        if (!world_to_screen(e.pos,  feet2d)) continue;
+
+        double h = feet2d.y - head2d.y;
+        double w = h * 0.5;
+        double x = head2d.x - w * 0.5;
+        color c = (e.team == g_local_team && e.team != 0) ? ally : enemy;
+
+        draw_rect(vec2(x, head2d.y), vec2(w, h), c, 1.0, false);
+        draw_line(screen_bottom, feet2d, color(255, 255, 255, 120), 1.0);
+
+        string hp = format("{}", e.health);
+        draw_text(hp, vec2(head2d.x - 10.0, head2d.y - 18.0), white,
+                  get_font14(), 0, color(0,0,0,0), 0.0);
+    }
+}
+
+}
+
+---
+
+## Source: `templates/cheat-skeleton-as/globals.as`
+
+// globals.as — shared state and configuration
+namespace Cheat {
+
+const int MAX_ENTITIES = 64;
+
+// Target handles (set in main.as)
+proc_t@ g_proc;
+uint64 g_base = 0;
+uint64 g_size = 0;
+bool g_initialized = false;
+
+// Resolved in offsets.as
+uint64 g_entity_list = 0;
+uint64 g_local_player = 0;
+uint64 g_view_matrix = 0;
+
+// Team cache
+int g_local_team = 0;
+
+// Feature toggles
+bool g_esp_enabled     = true;
+bool g_aim_enabled     = false;
+bool g_trigger_enabled = false;
+bool g_radar_enabled   = true;
+
+// Aim settings
+double g_aim_smooth = 0.15;
+double g_aim_fov    = 30.0;
+int g_aim_key       = 0xA0; // VK_LSHIFT
+
+// Trigger settings
+int g_trigger_key         = 0x12; // VK_MENU (Alt)
+int g_trigger_delay_ms    = 50;
+int64 g_last_fire         = 0;
+
+// Entity cache
+class EntityInfo {
+    bool valid  = false;
+    uint64 ptr  = 0;
+    int health  = 0;
+    int team    = 0;
+    vec3 pos;
+    vec3 head;
+};
+
+EntityInfo[] g_entities(MAX_ENTITIES);
+int g_esp_count = 0;
+
+// Active aim target
+EntityInfo g_aim_target;
+
+// Offset constants — replace with real values from your target
+const uint64 OFF_POS    = 0x100; // UNVERIFIED
+const uint64 OFF_HEALTH = 0x200; // UNVERIFIED
+const uint64 OFF_TEAM   = 0x300; // UNVERIFIED
+const uint64 OFF_NAME   = 0x400; // UNVERIFIED
+
+}
+
+---
+
+## Source: `templates/cheat-skeleton-as/main.as`
+
+// main.as — entry point and routine registration
+#include "globals.as"
+#include "offsets.as"
+#include "utils.as"
+#include "esp.as"
+#include "aim.as"
+#include "triggerbot.as"
+#include "radar.as"
+#include "menu.as"
+
+using namespace Cheat;
+
+const string TARGET_PROCESS = "game.exe"; // REPLACE WITH REAL TARGET
+
+int main() {
+    @g_proc = ref_process(TARGET_PROCESS);
+    if (!g_proc.alive()) {
+        println("[main] target not found: " + TARGET_PROCESS);
+        return 0;
+    }
+
+    g_base = g_proc.base_address();
+    g_size = g_proc.get_module_size(TARGET_PROCESS);
+    if (g_base == 0 || g_size == 0) {
+        println("[main] module not ready");
+        return 0;
+    }
+
+    if (!resolve_all()) {
+        println("[main] signature resolution failed");
+        return 0;
+    }
+
+    g_initialized = true;
+    setup_menu();
+
+    // Memory/update routines
+    register_routine(int64(esp_update), 0);
+    register_routine(int64(aimbot_update), 0);
+    register_routine(int64(triggerbot_update), 0);
+
+    // Render routines
+    register_routine(int64(esp_render), 1);
+    register_routine(int64(aimbot_render), 1);
+    register_routine(int64(triggerbot_render), 1);
+    register_routine(int64(radar_render), 1);
+
+    println("[main] cheat skeleton loaded");
+    return 1;
+}
+
+---
+
+## Source: `templates/cheat-skeleton-as/menu.as`
+
+// menu.as — config, keybinds, save/load
+namespace Cheat {
+
+const string CONFIG_PATH = "cheat_skeleton_config.json";
+
+void setup_menu() {
+    load_config();
+
+    create_checkbox("ESP",      g_esp_enabled);
+    create_checkbox("Aimbot",   g_aim_enabled);
+    create_slider("Aim Smooth", g_aim_smooth, 0.01, 1.0);
+    create_slider("Aim FOV",    g_aim_fov,    1.0,  180.0);
+    create_checkbox("Trigger",  g_trigger_enabled);
+    create_checkbox("Radar",    g_radar_enabled);
+    create_button("Save Config", save_config);
+}
+
+void save_config() {
+    json_value root;
+    root["esp_enabled"]     = json_bool(g_esp_enabled);
+    root["aim_enabled"]     = json_bool(g_aim_enabled);
+    root["aim_smooth"]      = json_float(g_aim_smooth);
+    root["aim_fov"]         = json_float(g_aim_fov);
+    root["trigger_enabled"] = json_bool(g_trigger_enabled);
+    root["radar_enabled"]   = json_bool(g_radar_enabled);
+
+    file_write(CONFIG_PATH, json_stringify(root, 2));
+}
+
+void load_config() {
+    if (!file_exists(CONFIG_PATH)) return;
+    string text = file_read(CONFIG_PATH);
+    json_value root = json_parse(text);
+    if (root.type() != JSON_OBJECT) return;
+
+    g_esp_enabled     = root["esp_enabled"].as_bool(g_esp_enabled);
+    g_aim_enabled     = root["aim_enabled"].as_bool(g_aim_enabled);
+    g_aim_smooth      = root["aim_smooth"].as_float(g_aim_smooth);
+    g_aim_fov         = root["aim_fov"].as_float(g_aim_fov);
+    g_trigger_enabled = root["trigger_enabled"].as_bool(g_trigger_enabled);
+    g_radar_enabled   = root["radar_enabled"].as_bool(g_radar_enabled);
+}
+
+}
+
+---
+
+## Source: `templates/cheat-skeleton-as/offsets.as`
+
+// offsets.as — signatures and resolution helpers
+namespace Cheat {
+
+// Placeholder signatures. Replace after dumping with IDA/ReClass.
+const string SIG_ENTITY_LIST  = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 ??"; // UNVERIFIED
+const string SIG_LOCAL_PLAYER = "48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ??"; // UNVERIFIED
+const string SIG_VIEW_MATRIX  = "48 8D 05 ?? ?? ?? ?? 48 89 ?? 48 ?? ??"; // UNVERIFIED
+
+// Resolve RIP-relative mov/lea instruction: hit + displacement + instruction length.
+uint64 resolve_rip(uint64 hit, int disp_off, int insn_len) {
+    if (hit == 0) return 0;
+    int disp = g_proc.r32(hit + uint64(disp_off));
+    return hit + uint64(insn_len) + uint64(disp);
+}
+
+// Resolve all signatures. Return false if any signature is stale.
+bool resolve_all() {
+    if (!g_proc.alive() || g_base == 0 || g_size == 0) return false;
+
+    uint64 hit_el = g_proc.find_code_pattern(g_base, g_size, SIG_ENTITY_LIST);
+    if (hit_el == 0) { println("[offsets] entity_list sig stale"); return false; }
+    g_entity_list = resolve_rip(hit_el, 3, 7);
+
+    uint64 hit_lp = g_proc.find_code_pattern(g_base, g_size, SIG_LOCAL_PLAYER);
+    if (hit_lp == 0) { println("[offsets] local_player sig stale"); return false; }
+    g_local_player = resolve_rip(hit_lp, 3, 7);
+
+    uint64 hit_vm = g_proc.find_code_pattern(g_base, g_size, SIG_VIEW_MATRIX);
+    if (hit_vm == 0) { println("[offsets] view_matrix sig stale"); return false; }
+    g_view_matrix = resolve_rip(hit_vm, 3, 7);
+
+    return g_entity_list != 0 && g_local_player != 0 && g_view_matrix != 0;
+}
+
+}
+
+---
+
+## Source: `templates/cheat-skeleton-as/radar.as`
+
+// radar.as — 2D world radar
+namespace Cheat {
+
+const double RADAR_SCALE  = 0.05;
+const double RADAR_RADIUS = 100.0;
+
+bool world_to_map(const vec3&in world, vec2&out map) {
+    map = vec2(world.x, world.y);
+    return true;
+}
+
+void radar_render(int64 data) {
+    if (!g_radar_enabled || g_esp_count == 0) return;
+
+    vec3 local_pos = read_vec3(g_local_player + OFF_POS);
+    vec2 local2d;
+    if (!world_to_map(local_pos, local2d)) return;
+
+    double cx = get_view_width()  - 150.0;
+    double cy = get_view_height() - 150.0;
+
+    color bg(0, 0, 0, 160);
+    draw_circle(vec2(cx, cy), RADAR_RADIUS, bg, 2.0, true);
+
+    color local_color(255, 255, 255, 255);
+    draw_circle(vec2(cx, cy), 4.0, local_color, 1.0, true);
+
+    for (int i = 0; i < g_esp_count; i++) {
+        EntityInfo@ e = g_entities[i];
+        if (!e.valid) continue;
+
+        vec2 blip;
+        if (!world_to_map(e.pos, blip)) continue;
+        vec2 rel = blip - local2d;
+        rel.x *= RADAR_SCALE;
+        rel.y *= RADAR_SCALE;
+
+        if (rel.x*rel.x + rel.y*rel.y > RADAR_RADIUS*RADAR_RADIUS) continue;
+
+        color c = (e.team == g_local_team && g_local_team != 0)
+            ? color(80, 255, 80, 255)
+            : color(255, 80, 80, 255);
+        draw_circle(vec2(cx + rel.x, cy + rel.y), 4.0, c, 1.0, true);
+    }
+}
+
+}
+
+---
+
+## Source: `templates/cheat-skeleton-as/triggerbot.as`
+
+// triggerbot.as — crosshair-trigger logic
+namespace Cheat {
+
+// Engine-specific helper: return the entity under the crosshair.
+EntityInfo get_entity_under_crosshair() {
+    EntityInfo empty;
+    empty.valid = false;
+    return empty; // replace with real logic
+}
+
+void triggerbot_update(int64 data) {
+    if (!g_trigger_enabled || !g_initialized || !g_proc.alive()) return;
+    if (!is_key_down(g_trigger_key)) return;
+
+    EntityInfo t = get_entity_under_crosshair();
+    if (!t.valid) return;
+    if (t.team == g_local_team && g_local_team != 0) return;
+    if (t.health <= 0) return;
+
+    if (time_ms() - g_last_fire < g_trigger_delay_ms) return;
+    g_last_fire = time_ms();
+
+    press_mouse_left();
+}
+
+void triggerbot_render(int64 data) {
+    // no rendering
+}
+
+}
+
+---
+
+## Source: `templates/cheat-skeleton-as/utils.as`
+
+// utils.as — W2S, distance, team helpers
+namespace Cheat {
+
+const double PI = 3.14159265358979323846;
+const double RAD2DEG = 180.0 / PI;
+const double DEG2RAD = PI / 180.0;
+
+// Read a 3-float vector from a memory address.
+vec3 read_vec3(uint64 addr) {
+    if (addr == 0) return vec3(0,0,0);
+    double x = g_proc.rf32(addr + 0);
+    double y = g_proc.rf32(addr + 4);
+    double z = g_proc.rf32(addr + 8);
+    return vec3(x, y, z);
+}
+
+// Pointer-chain reader.
+uint64 read_chain(uint64 base, const int[]&in offsets) {
+    uint64 addr = base;
+    for (uint i = 0; i < offsets.length(); i++) {
+        if (addr == 0) return 0;
+        addr = g_proc.ru64(addr);
+        if (addr == 0) return 0;
+        addr += uint64(offsets[i]);
+    }
+    return addr;
+}
+
+double distance3d(const vec3&in a, const vec3&in b) {
+    double dx = a.x - b.x;
+    double dy = a.y - b.y;
+    double dz = a.z - b.z;
+    return sqrt(dx*dx + dy*dy + dz*dz);
+}
+
+bool world_to_screen(const vec3&in world, vec2&out screen) {
+    if (g_view_matrix == 0) return false;
+
+    double m[16];
+    for (int i = 0; i < 16; i++) {
+        m[i] = g_proc.rf32(g_view_matrix + uint64(i * 4));
+    }
+
+    double w = m[3]*world.x + m[7]*world.y + m[11]*world.z + m[15];
+    if (w < 0.001) return false;
+
+    double inv_w = 1.0 / w;
+    double nx = (m[0]*world.x + m[4]*world.y + m[8]*world.z + m[12]) * inv_w;
+    double ny = (m[1]*world.x + m[5]*world.y + m[9]*world.z + m[13]) * inv_w;
+
+    double vw = get_view_width();
+    double vh = get_view_height();
+    screen.x = (vw * 0.5) + (nx * vw * 0.5);
+    screen.y = (vh * 0.5) - (ny * vh * 0.5);
+    return true;
+}
+
+vec2 calc_angle(const vec3&in src, const vec3&in dst) {
+    vec3 d = dst - src;
+    double dist_xy = sqrt(d.x*d.x + d.y*d.y);
+    double pitch = atan2(-d.z, dist_xy) * RAD2DEG;
+    double yaw   = atan2(d.y, d.x) * RAD2DEG;
+    return vec2(pitch, yaw);
+}
+
+double normalize_delta(double delta) {
+    return fmod(delta + 540.0, 360.0) - 180.0;
+}
+
+vec3 angles_to_forward(double pitch_deg, double yaw_deg) {
+    double p = pitch_deg * DEG2RAD;
+    double y = yaw_deg   * DEG2RAD;
+    double cp = cos(p);
+    return vec3(cp * cos(y), cp * sin(y), -sin(p));
+}
+
+bool in_fov(const vec3&in src, const vec2&in view_angles, const vec3&in target, double fov_deg) {
+    vec3 dir = target - src;
+    double len = sqrt(dir.x*dir.x + dir.y*dir.y + dir.z*dir.z);
+    if (len == 0.0) return false;
+    dir = vec3(dir.x / len, dir.y / len, dir.z / len);
+
+    vec3 fwd = angles_to_forward(view_angles.x, view_angles.y);
+    double dot = fwd.x*dir.x + fwd.y*dir.y + fwd.z*dir.z;
+    return dot >= cos(fov_deg * DEG2RAD);
+}
+
 }
 
 ---

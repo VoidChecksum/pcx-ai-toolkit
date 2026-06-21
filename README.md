@@ -6,7 +6,7 @@
 
 # pcx-ai-toolkit
 
-### The Complete AI-Powered Scripting Toolkit for Perception.cx
+### The Complete AI-Powered Toolkit for Perception.cx Game-Cheat Script Making
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.docs&label=Docs&suffix=%20pages&color=brightgreen)](#documentation-coverage)
@@ -17,8 +17,8 @@
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
-**Turn any LLM into an expert Perception.cx developer.**<br>
-Complete Enma language docs, every PCX API, coding guidelines, MCP configs, and LSP servers — in one package.
+**Turn any LLM into an expert Perception.cx game-cheat script maker.**<br>
+Complete Enma language docs, every PCX API, cheat-specific guidelines, scaffolds for ESP/aimbot/triggerbot/radar, MCP configs, and LSP servers — in one package.
 
 [Quick Start](#quick-start) · [Documentation](#documentation-coverage) · [AI Skills](#ai-skills) · [MCP Integration](#mcp-integration) · [Contributing](#contributing)
 
@@ -41,11 +41,11 @@ Complete Enma language docs, every PCX API, coding guidelines, MCP configs, and 
 
 ## The Problem
 
-LLMs don't know Enma. They don't know the Perception.cx API. Ask them to write a PCX script and they hallucinate function names, invent parameters, and produce code that doesn't compile.
+LLMs don't know Enma. They don't know the Perception.cx API. Ask them to write a game-cheat script and they hallucinate function names, use `int` for addresses, and forget null checks — producing code that silently crashes or doesn't compile.
 
 ## The Solution
 
-Give the AI **43,000+ lines of real documentation** and **12 coding rules** that prevent the most common mistakes. The AI reads the actual docs before writing code, follows real API signatures, and produces scripts that work.
+Give the AI **43,000+ lines of real documentation**, a **game-cheat master skill**, the **12 hard rules**, and **ready-to-use scaffolds** for ESP, aimbot, triggerbot, and radar. The AI reads the actual docs, follows real API signatures, and produces scripts that work.
 
 ```
 Before:  "Write me an ESP overlay"
@@ -53,7 +53,8 @@ AI:      *invents draw_esp(), uses int for addresses, forgets null checks*
 Result:  Doesn't compile. Wrong types. Silent crashes.
 
 After:   "Write me an ESP overlay"  (with pcx-ai-toolkit loaded)
-AI:      *reads render-api.md, uses draw_rect + draw_text, uint64 addresses, validates pointers*
+AI:      *loads skill://game-cheat-script-master, reads render-api.md + cheat-script-cookbook.md,
+          uses draw_rect + draw_text, uint64 addresses, validates pointers, follows skeleton layout*
 Result:  Compiles. Runs. Correct API calls.
 ```
 
@@ -66,13 +67,14 @@ The toolkit installs a unified CLI tool (`pcx`) directly to your system `PATH`. 
 
 ## Scope
 
-This toolkit is for **authorized** reverse engineering, security research,
-single-player modding, defensive anti-cheat analysis, and Perception.cx tooling
-development. Analyze only software you own or are authorized to test. The
-memory-read, world-to-screen, and GUI patterns here are general reverse-
-engineering and overlay-rendering techniques; they are not guidance for evading
-anti-cheat enforcement or violating game terms of service. See `SECURITY.md`
-for the toolkit's own security policy.
+This toolkit is purpose-built for **authorized game-cheat script making** and
+Perception.cx tooling development. It is equally useful for authorized reverse
+engineering, security research, single-player modding, and defensive anti-cheat
+analysis. Analyze only software you own or are authorized to test. The ESP,
+aimbot, triggerbot, radar, memory-read, world-to-screen, and GUI patterns are
+educational reverse-engineering and overlay-rendering techniques; they are not
+guidance for evading anti-cheat enforcement or violating game terms of service.
+See `SECURITY.md` for the toolkit's own security policy.
 
 ---
 
@@ -212,9 +214,10 @@ Upgrade anytime with `uv tool upgrade ida-pro-mcp`. Full reference:
 <td width="50%" valign="top">
 
 ### AI Skills
-23 Claude Code / OMC skills
+24 Claude Code / OMC skills
 
-- **game-hacking-pcx** — doc index, API rules
+- **game-cheat-script-master** — mandatory entry point for all game-cheat requests: co-skills, read-first docs, project scaffold, and domain rules
+- **game-hacking-pcx** — doc index, API rules, scaffolds, cookbook links
 - **game-cheat-guidelines** — 12 behavioral rules (Enma)
 - **pcx-angelscript-discipline** — 10 AS-specific rules (`@` handles, `&out`, `array<T>`)
 - **pcx-lua-discipline** — 10 Lua-specific rules (int subtype, `pcall`, hot-reload)
@@ -246,10 +249,11 @@ Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
 <td width="50%" valign="top">
 
 ### Knowledge Base
-23 reference files
+24 reference files
 
 - Enma + PCX API cheatsheets
 - Working code patterns (13 recipes)
+- **cheat-script-cookbook.md** — game-cheat recipes: pattern scan, pointer chain, W2S, ESP, aim smoothing, FOV, triggerbot, radar, config save/load, unload cleanup
 - GUI design patterns (section layout, slider discipline, hotkey conventions)
 - Cross-language bridge (Enma vs AngelScript vs Lua decision guide)
 - Offset-finding methodology, RE plugin reference
@@ -362,8 +366,9 @@ pcx-ai-toolkit/
 │   ├── angelscript-lang/              ── Core AngelScript language manual (angelcode.com, zlib license)
 │   └── lua-lang/                      ── Core Lua 5.4 reference (lua.org, Lua license)
 │
-├── .claude/skills/                   ── AI Skills (23)
-│   ├── game-hacking-pcx/                Doc index + coding rules
+├── .claude/skills/                   ── AI Skills (24)
+│   ├── game-cheat-script-master/        Mandatory entry point for every game-cheat request
+│   ├── game-hacking-pcx/                Doc index + coding rules + scaffolds/cookbook links
 │   ├── game-cheat-guidelines/           12 behavioral guidelines (Enma)
 │   ├── pcx-angelscript-discipline/      10 AS-specific rules
 │   ├── pcx-lua-discipline/              10 Lua-specific rules
@@ -387,7 +392,7 @@ pcx-ai-toolkit/
 │   ├── anti-cheat-re/                   Kernel AC RE methodology (6 steps)
 │   └── kernel-analysis/                 Driver analysis patterns (WDM/KMDF)
 │
-├── knowledge/                        ── Quick References
+├── knowledge/                        ── Quick References (24 files)
 │   ├── enma-cheatsheet.md                Language quick-ref card
 │   ├── pcx-api-cheatsheet.md             All APIs at a glance
 │   ├── pcx-version-matrix.md             Since-version API matrix (sourced from changelogs.md)
@@ -400,6 +405,7 @@ pcx-ai-toolkit/
 │   ├── re-plugins-and-tools.md           IDA/Ghidra plugins, FLIRT sigs, diffing, ret-sync
 │   ├── offset-methodology.md             Sig scanning methodology
 │   ├── aimbot-math.md                    angles, FOV, prediction, recoil comp, smoothing
+│   ├── cheat-script-cookbook.md          game-cheat recipes: W2S, ESP, aim, triggerbot, radar
 │   ├── engine-cryengine.md               CryEngine family (Hunt: Showdown, Star Citizen, KCD)
 │   ├── engine-frostbite.md               Frostbite (Battlefield, FIFA, Anthem, Andromeda)
 │   ├── engine-godot.md                   Godot 3.x / 4.x (Brotato, Cassette Beasts, Halls of Torment)
@@ -441,7 +447,9 @@ pcx-ai-toolkit/
 │   ├── aimbot-skeleton.em                Closest-target-in-FOV with smoothing + RIP resolver
 │   ├── minimap.em                        Rotation-aware radar with rim clamping
 │   ├── full-project/                     5-file Enma project scaffold
-│   └── full-project-as/                  3-file AngelScript scaffold (globals.as, feature.as, main.as)
+│   ├── full-project-as/                  3-file AngelScript scaffold (globals.as, feature.as, main.as)
+│   ├── cheat-skeleton-em/                Full Enma cheat scaffold (globals/offsets/utils/esp/aim/triggerbot/radar/menu/main)
+│   └── cheat-skeleton-as/                Full AngelScript cheat scaffold (same modules)
 │
 ├── signatures/source-engine/         ── Signature Examples
 ├── signatures/unreal-engine/         ── UE Reversal (GWorld, GObjects, Dumper-7)

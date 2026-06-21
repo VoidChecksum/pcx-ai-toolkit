@@ -1,22 +1,23 @@
 ---
 name: game-cheat-guidelines
 description: >
-  Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and
-  C++ for authorized reverse engineering, analysis, overlay rendering, and
-  research. Derived from Karpathy principles: memory reading, visualization,
-  hooking, render pipelines, and RE workflows. Always active — these rules
-  apply every time you write or edit Perception.cx script code. Authorized use
-  only — analyze software you own or are permitted to test.
+  Mandatory behavioral rules and practical patterns for writing Perception.cx
+  game-cheat scripts in Enma, AngelScript, and C++. Always active — these
+  rules apply every time you write or edit game-cheat code, including ESP,
+  aimbot, triggerbot, radar, pattern scanning, and overlay rendering.
+  Authorized use only — analyze software you own or are permitted to test.
 license: MIT
 ---
 
-# Perception.cx Script Development Guidelines
+# Perception.cx Game-Cheat Script Development Guidelines
 
-Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: memory reading, visualization, overlay rendering, hooking, and reverse-engineering workflows on the Perception.cx platform. These rules originated in game-overlay development and apply equally to authorized reverse engineering, security research, and analysis — analyze only software you own or are authorized to test.
+Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pattern scanning, world-to-screen math, memory reads/writes, and overlay rendering. These rules apply to authorized reverse engineering, security research, and game-cheat development — analyze only software you own or are authorized to test.
 
-**Always active.** These rules apply every time you write or edit Perception.cx script code. They are not suggestions.
+**Always active.** These rules apply every time you write or edit a game-cheat script. They are not suggestions.
 
-**Prerequisite:** The `game-hacking-pcx` skill MUST be loaded alongside this one. It contains the full doc index (33,580 lines across 99 files) for Enma, AngelScript, and all Perception.cx APIs. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
+**Prerequisites:** Load the `game-cheat-script-master` skill first. It defines the mandatory co-skills, read-first docs, and the canonical project layout. Then keep `game-hacking-pcx` loaded for the full API doc index. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
+
+**Templates:** Use `templates/cheat-skeleton-em/` and `templates/cheat-skeleton-as/` as the starting scaffold for every new cheat. See `knowledge/cheat-script-cookbook.md` for reusable recipes (W2S, ESP, aimbot smoothing, triggerbot, radar, config save/load).
 
 ---
 

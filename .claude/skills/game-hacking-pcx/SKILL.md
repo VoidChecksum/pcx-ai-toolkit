@@ -2,19 +2,21 @@
 name: game-hacking-pcx
 description: >
   Mandatory doc router for all PCX scripting sessions. Triggers on any game
-  hacking, Enma, AngelScript, or Perception.cx work. Provides the full doc
-  index (43,000+ lines across 139 files) and enforces reading the relevant
-  documentation before writing any API call. Load alongside
-  game-cheat-guidelines on every PCX session.
+  hacking, game cheat, ESP, aimbot, triggerbot, radar, Enma, AngelScript, or
+  Perception.cx work. Provides the full doc index (43,000+ lines across 139
+  files) and enforces reading the relevant documentation before writing any
+  API call. Load alongside game-cheat-script-master and game-cheat-guidelines
+  on every PCX game-cheat session.
 license: MIT
 ---
 
 # Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
 
 ## Trigger
-Game hacking, game cheats, memory reading/writing, ESP, aimbot, pattern scanning, vtable hooking,
-process manipulation, Enma scripting, AngelScript scripting, Perception.cx, PCX, render overlays,
-any `.em` or `.as` game script work, or any mention of the Perception platform.
+Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
+pattern scanning, vtable hooking, process manipulation, Enma scripting, AngelScript scripting,
+Perception.cx, PCX, render overlays, any `.em` or `.as` game script work, or any mention of the
+Perception platform.
 
 ## MANDATORY: Read Before Writing Code
 
@@ -168,11 +170,19 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 
 ## How To Use These Docs
 
-1. **Before writing Enma code**: `read docs/enma/llms-language.md` (the single-page complete ref)
-2. **Before calling a PCX API**: `read docs/perception/<api-name>.md`
-3. **Before writing AngelScript**: `read docs/perception/angelscript/<api-name>.md`
-4. **If unsure about a type, function, or parameter**: read the doc, don't guess
-5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
+1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
+2. **Before writing Enma code**: `read docs/enma/llms-language.md` (the single-page complete ref)
+3. **Before calling a PCX API**: `read docs/perception/<api-name>.md`
+4. **Before writing AngelScript**: `read docs/perception/angelscript/<api-name>.md`
+5. **If unsure about a type, function, or parameter**: read the doc, don't guess
+6. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
+7. **For a starting project scaffold**: use `templates/cheat-skeleton-em/` or `templates/cheat-skeleton-as/`
+
+## Cheat-Script Scaffolds
+
+- **Enma skeleton**: `templates/cheat-skeleton-em/` — globals, offsets, utils, ESP, aim, triggerbot, radar, menu, main
+- **AngelScript skeleton**: `templates/cheat-skeleton-as/` — same layout in AngelScript
+- **Cookbook recipes**: `knowledge/cheat-script-cookbook.md` — pattern scan, pointer chain, W2S, ESP, aim smoothing, FOV, triggerbot, radar, config, unload cleanup
 
 ## Critical Enma Rules (from the docs)
 

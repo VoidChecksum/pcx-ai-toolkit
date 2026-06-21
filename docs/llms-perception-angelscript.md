@@ -14286,22 +14286,23 @@ void on_unload() {
 ---
 name: game-cheat-guidelines
 description: >
-  Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and
-  C++ for authorized reverse engineering, analysis, overlay rendering, and
-  research. Derived from Karpathy principles: memory reading, visualization,
-  hooking, render pipelines, and RE workflows. Always active — these rules
-  apply every time you write or edit Perception.cx script code. Authorized use
-  only — analyze software you own or are permitted to test.
+  Mandatory behavioral rules and practical patterns for writing Perception.cx
+  game-cheat scripts in Enma, AngelScript, and C++. Always active — these
+  rules apply every time you write or edit game-cheat code, including ESP,
+  aimbot, triggerbot, radar, pattern scanning, and overlay rendering.
+  Authorized use only — analyze software you own or are permitted to test.
 license: MIT
 ---
 
-# Perception.cx Script Development Guidelines
+# Perception.cx Game-Cheat Script Development Guidelines
 
-Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: memory reading, visualization, overlay rendering, hooking, and reverse-engineering workflows on the Perception.cx platform. These rules originated in game-overlay development and apply equally to authorized reverse engineering, security research, and analysis — analyze only software you own or are authorized to test.
+Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pattern scanning, world-to-screen math, memory reads/writes, and overlay rendering. These rules apply to authorized reverse engineering, security research, and game-cheat development — analyze only software you own or are authorized to test.
 
-**Always active.** These rules apply every time you write or edit Perception.cx script code. They are not suggestions.
+**Always active.** These rules apply every time you write or edit a game-cheat script. They are not suggestions.
 
-**Prerequisite:** The `game-hacking-pcx` skill MUST be loaded alongside this one. It contains the full doc index (33,580 lines across 99 files) for Enma, AngelScript, and all Perception.cx APIs. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
+**Prerequisites:** Load the `game-cheat-script-master` skill first. It defines the mandatory co-skills, read-first docs, and the canonical project layout. Then keep `game-hacking-pcx` loaded for the full API doc index. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
+
+**Templates:** Use `templates/cheat-skeleton-em/` and `templates/cheat-skeleton-as/` as the starting scaffold for every new cheat. See `knowledge/cheat-script-cookbook.md` for reusable recipes (W2S, ESP, aimbot smoothing, triggerbot, radar, config save/load).
 
 ---
 
@@ -14651,19 +14652,21 @@ Debugging checklist:
 name: game-hacking-pcx
 description: >
   Mandatory doc router for all PCX scripting sessions. Triggers on any game
-  hacking, Enma, AngelScript, or Perception.cx work. Provides the full doc
-  index (43,000+ lines across 139 files) and enforces reading the relevant
-  documentation before writing any API call. Load alongside
-  game-cheat-guidelines on every PCX session.
+  hacking, game cheat, ESP, aimbot, triggerbot, radar, Enma, AngelScript, or
+  Perception.cx work. Provides the full doc index (43,000+ lines across 139
+  files) and enforces reading the relevant documentation before writing any
+  API call. Load alongside game-cheat-script-master and game-cheat-guidelines
+  on every PCX game-cheat session.
 license: MIT
 ---
 
 # Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
 
 ## Trigger
-Game hacking, game cheats, memory reading/writing, ESP, aimbot, pattern scanning, vtable hooking,
-process manipulation, Enma scripting, AngelScript scripting, Perception.cx, PCX, render overlays,
-any `.em` or `.as` game script work, or any mention of the Perception platform.
+Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
+pattern scanning, vtable hooking, process manipulation, Enma scripting, AngelScript scripting,
+Perception.cx, PCX, render overlays, any `.em` or `.as` game script work, or any mention of the
+Perception platform.
 
 ## MANDATORY: Read Before Writing Code
 
@@ -14817,11 +14820,19 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 
 ## How To Use These Docs
 
-1. **Before writing Enma code**: `read docs/enma/llms-language.md` (the single-page complete ref)
-2. **Before calling a PCX API**: `read docs/perception/<api-name>.md`
-3. **Before writing AngelScript**: `read docs/perception/angelscript/<api-name>.md`
-4. **If unsure about a type, function, or parameter**: read the doc, don't guess
-5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
+1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
+2. **Before writing Enma code**: `read docs/enma/llms-language.md` (the single-page complete ref)
+3. **Before calling a PCX API**: `read docs/perception/<api-name>.md`
+4. **Before writing AngelScript**: `read docs/perception/angelscript/<api-name>.md`
+5. **If unsure about a type, function, or parameter**: read the doc, don't guess
+6. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
+7. **For a starting project scaffold**: use `templates/cheat-skeleton-em/` or `templates/cheat-skeleton-as/`
+
+## Cheat-Script Scaffolds
+
+- **Enma skeleton**: `templates/cheat-skeleton-em/` — globals, offsets, utils, ESP, aim, triggerbot, radar, menu, main
+- **AngelScript skeleton**: `templates/cheat-skeleton-as/` — same layout in AngelScript
+- **Cookbook recipes**: `knowledge/cheat-script-cookbook.md` — pattern scan, pointer chain, W2S, ESP, aim smoothing, FOV, triggerbot, radar, config, unload cleanup
 
 ## Critical Enma Rules (from the docs)
 
