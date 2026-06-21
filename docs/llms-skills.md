@@ -935,19 +935,20 @@ Devirtualization is expensive (days to weeks for a single function). Before inve
 ---
 name: game-cheat-guidelines
 description: >
-  Behavioral rules for writing game cheats in Enma, AngelScript, and C++ on
-  Perception.cx. Derived from Karpathy principles, rewritten for cheat
-  development: memory hacking, ESP, aimbot, hooking, overlay rendering, and
-  RE workflows. Always active — these rules apply every time you write or
-  edit cheat code.
+  Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and
+  C++ for authorized reverse engineering, analysis, overlay rendering, and
+  research. Derived from Karpathy principles: memory reading, visualization,
+  hooking, render pipelines, and RE workflows. Always active — these rules
+  apply every time you write or edit Perception.cx script code. Authorized use
+  only — analyze software you own or are permitted to test.
 license: MIT
 ---
 
-# Game Cheat Development Guidelines
+# Perception.cx Script Development Guidelines
 
-Behavioral rules for writing game cheats in Enma, AngelScript, and C++. Derived from the Karpathy principles but rewritten for the domain: memory hacking, ESP, aimbot, hooking, overlay rendering, and reverse engineering workflows on the Perception.cx platform.
+Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: memory reading, visualization, overlay rendering, hooking, and reverse-engineering workflows on the Perception.cx platform. These rules originated in game-overlay development and apply equally to authorized reverse engineering, security research, and analysis — analyze only software you own or are authorized to test.
 
-**Always active.** These rules apply every time you write or edit cheat code. They are not suggestions.
+**Always active.** These rules apply every time you write or edit Perception.cx script code. They are not suggestions.
 
 **Prerequisite:** The `game-hacking-pcx` skill MUST be loaded alongside this one. It contains the full doc index (33,580 lines across 99 files) for Enma, AngelScript, and all Perception.cx APIs. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
 
@@ -1089,7 +1090,7 @@ uint64 resolve_entity_list(proc_t& p, uint64 base, uint64 size) {
 
 ## 6. One Feature, One File
 
-**Each cheat feature lives in its own file. No god scripts.**
+**Each feature lives in its own file. No god scripts.**
 
 - ESP in `esp.em`. Aimbot in `aim.em`. Radar in `radar.em`. Config/GUI in `menu.em`.
 - Shared state (process handle, entity cache, config values) goes in a `globals.em` module and is imported.
@@ -1163,26 +1164,26 @@ draw_line(vec2(10.0, 20.0), vec2(100.0, 200.0), white, 1.0);
 
 ---
 
-## 9. Don't Write Memory Unless You Must
+## 9. Prefer Reads Over Writes
 
-**Read-only cheats are invisible. Writes leave forensic traces.**
+**Reads are non-invasive. Writes alter the target's state and are inherently riskier.**
 
-- ESP, radar, entity highlighting, distance display — all read-only. Prefer these.
-- If you must write (aimbot smoothing via angle writes, no-recoil via value patches, speed hacks), write the minimum bytes needed.
+- Analysis, visualization, entity inspection, distance display — all read-only. Prefer these.
+- If you must write (patching for research on a target you own or are authorized to test, modifying your own single-player session), write the minimum bytes needed and know exactly why.
 - Never `wvm` a large buffer when `wu32` or `wf32` on a single field suffices.
-- After writing, verify the write took effect with a read-back if the field is contested (anti-cheat may revert it).
-- Gate all writes behind `write_memory` permission checks — Perception enforces this, respect it in your design too.
+- After a research write, verify it took effect with a read-back; some targets revert unexpected patches.
+- Gate all writes behind `write_memory` permission checks — Perception enforces this; respect it in your design too.
 
 ```cpp
-// WRONG — nop-patching 16 bytes of recoil code
+// WRONG — nop-patching 16 bytes when you only need one field
 array<uint8> nops = {0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
 p.wvm(recoil_addr, nops);
 
-// RIGHT — write the float that controls recoil spread, minimal footprint
+// RIGHT — write the single float you actually mean to change, minimal footprint
 p.wf32(recoil_spread_addr, 0.0f);
 ```
 
-**Why:** Every memory write is a detection surface. Anti-cheats integrity-check code sections (`.text`), monitor write patterns on game state, and log anomalous page faults. A single float write to a gameplay variable is orders of magnitude harder to detect than a 16-byte NOP sled in executable memory.
+**Why:** Every memory write mutates the target's state — a read is observation, a write is intervention. For analysis and overlay work you almost never need to write, and when you do, a minimal, deliberate write is easier to reason about and roll back than a large patch. Treat writes as a last resort, not a default.
 
 ---
 
@@ -1286,7 +1287,7 @@ Debugging checklist:
 | 6 | One feature, one file | No god scripts |
 | 7 | Construct every frame | Colors and vecs are free |
 | 8 | `f` suffix for float32 | The GPU cares |
-| 9 | Minimize writes | Reads are invisible |
+| 9 | Prefer reads over writes | Reads are non-invasive |
 | 10 | W2S once, correctly | Math, not magic |
 | 11 | GUI for all tunables | No magic constants |
 | 12 | Verify with the binary | Trust live reads over memory |
@@ -1904,187 +1905,227 @@ Some ACs write scan results directly into the game process memory (via `KeStackA
 ---
 name: mcp-tool-routing
 description: >
-  Routing guide for the 42+ Perception MCP tools — which to pick for memory
-  reads, scans, disassembly, and analysis to avoid slower or redundant calls.
-  Always active when calling Perception MCP tools. Answers "which tool for
-  this task" so the AI picks the cheapest tool with the required precision.
+  Routing guide for the 59 Perception MCP tools — which to pick for memory
+  reads, scans, disassembly, PE/module walks, and the Enma scripting bridge
+  to avoid slower or redundant calls. Always active when calling Perception
+  MCP tools. Answers "which tool for this task" so the AI picks the cheapest
+  tool with the required precision.
 license: MIT
 ---
 
 # Perception MCP Tool Routing — The Decision Guide
 
-37 tools across memory / analysis / scanning / process / files. This skill answers "which one for this task" so the AI doesn't reach for the wrong tool. The Perception MCP server (`mcp/perception-mcp-config.json`) exposes a wide surface where several tools overlap in capability but differ wildly in cost or precision — using `read_memory` for what `read_typed_value` does costs you a parse step; using `find_pattern` for what `scan_string` does is an order of magnitude slower; using `analyze_function` for what `disassemble` does costs an unnecessary IDA-style pass. Routing matters.
+59 tools across memory I/O, modules/threads/PE, memory regions, pattern/scanner/xrefs/signature, code analysis, symbol/function lookup, handles, system/environment, and the Enma scripting bridge. This skill answers "which one for this task" so the AI doesn't reach for the wrong tool. The Perception MCP server (`mcp/perception-mcp-config.json`, kept in sync with `docs/perception/mcp-api.md` by CI) exposes a wide surface where several tools overlap in capability but differ wildly in cost or precision — using `process/read_virtual_memory` for what `process/read_typed_value` does costs you a parse step; using `process/find_pattern` for what `process/scan_string` does is an order of magnitude slower; using `process/find_function_by_signature` for what `process/find_function_bounds` does costs an unnecessary AOB rescan. Routing matters.
 
 **Always active when calling Perception MCP tools.** Before every MCP call, the question is: am I picking the cheapest tool that gives me the precision I need? This skill makes that decision tree explicit.
 
-**Prerequisite:** `mcp/perception-mcp-config.json` is the authoritative tool list and signatures. `mcp/claude-code-setup.md` covers the wiring. `mcp/cursor-setup.md` covers the Cursor variant. This skill is the *routing* layer that sits above all of those.
+**Prerequisite:** `mcp/perception-mcp-config.json` is the authoritative 59-tool list and signatures. `mcp/claude-code-setup.md` covers the wiring. `mcp/cursor-setup.md` covers the Cursor variant. This skill is the *routing* layer that sits above all of those.
+
+**Three load-bearing facts that shape every routing decision below:**
+
+1. **Addresses + handles are HEX STRINGS** (`"0x7ff7..."`), not JSON numbers — JSON numbers lose precision past 2^53. Every `address`/`module_base`/`target_address`/`handle` param is a hex string.
+2. **Handles are per-connection.** Most `process/*` tools take a `handle` as their first param (omitted from the param columns below for readability). You obtain it with `process/reference_by_pid` or `process/reference_by_name`; other connections can't use it; disconnecting releases everything; `process/dereference` releases one, `process/cleanup_references` releases all, `process/list_references` shows what you hold. A stale/cross-connection handle returns `-32002`. **Acquire a handle before any process-scoped call.**
+3. **Permissions gate whole tool classes.** Toggle in Perception's *Scripting → API permissions*:
+   - `kernel_rw_access` → kernel addresses in any read/write/disasm/`query_memory_region`/`find_pattern*` call, the `eprocess` field in `process/list` + `info_by_*`, the `ethread` field in `process/get_threads`, and `system/list_drivers`.
+   - `write_memory` → every write tool: `process/write_virtual_memory`, `process/write_typed_value`, `process/write_string`, `process/copy_memory`, `process/fill_memory`.
+   - `virtual_memory_operations` → `process/allocate_memory`, `process/free_memory`.
+
+   A blocked call returns `-32001` naming the missing permission. Surface this in the routing advice where relevant.
 
 ---
 
 ## Trigger
 
-About to call a Perception MCP tool, deciding between `read_memory` vs `read_typed_value` vs `struct_dump`, choosing between `find_pattern` vs `scan_string` vs `find_string_refs`, deciding when `analyze_function` is worth its cost over `disassemble`, deciding whether to call a tool per-frame or cache the result, composing multiple tools into a workflow.
+About to call a Perception MCP tool: deciding between `process/read_virtual_memory` vs `process/read_typed_value` vs `process/read_pointer_chain`, choosing between `process/find_pattern` vs `process/scan_string` vs `process/find_string_refs`, deciding when `process/disassemble` is enough vs an iterative bounds+disasm walk, deciding whether to call a tool per-frame or cache the result, composing multiple tools into a workflow, or deciding which `script/*` call answers a scripting question.
+
+---
+
+## 0. Attach to the Target (handles — a prerequisite)
+
+**Before any `process/*` call that takes a handle, you must hold one.** This is the first routing decision of every session.
+
+```
+Know the PID?            → process/reference_by_pid(pid)          → handle (hex string)
+Know the image name?     → process/reference_by_name(name)        → handle (hex string)
+Just want to browse?     → process/list()                          → [{pid, name, ...}]
+Confirm one process?     → process/info_by_pid(pid) / info_by_name(name)
+What handles do I hold?  → process/list_references()                → per-connection table
+Done with one target?    → process/dereference(handle)              → releases that one
+Session ending / reset?  → process/cleanup_references()             → releases all
+```
+
+`process/list` and `process/info_by_*` do **not** require a handle — they enumerate. Everything scoped to a live target (memory I/O, modules, scans, disasm) does. `system/info`, `system/list_drivers`, `script/*`, and the handle-lifecycle tools themselves take no handle.
+
+**Why:** Skipping the reference step is the #1 first-call failure. `-32002` (stale/cross-connection handle) almost always means "I forgot to acquire one this session" or "I'm reusing a handle from a connection that disconnected."
 
 ---
 
 ## 1. "I Need to Read N Bytes at Address X"
 
-**Decision tree, cheapest precise option first:**
+**Decision tree, cheapest precise option first.** Every call below takes a `handle` plus the params shown.
 
 ```
-Is it a typed scalar (one int / float / pointer)?
-  └── yes → read_typed_value(addr, type)
-            cheapest; parses for you; one round trip
+Is it a typed scalar (one int / float / pointer / bool)?
+  └── yes → process/read_typed_value(handle, address, type)
+            type ∈ u8..u64 / i8..i64 / f32 / f64 / ptr / bool
+            cheapest; one round trip; parsed for you
 
-Is it a known struct (you have a declaration)?
-  └── yes → struct_dump(addr, struct_name)
-            one read of the whole struct, parsed by name
-
-Is it a pointer chain (deref → +offset → deref → ...)?
-  └── yes → read_pointer_chain(start, [offsets...])
-            saves N round trips; the server does the chase
-
-Is it a null-terminated string?
-  └── yes → read_string(addr, max_len, charset?)
+Is it a null-terminated / length-capped string?
+  └── yes → process/read_string(handle, address, max_len?, encoding?)
+            max_len default 1024; encoding ∈ auto/ascii/utf16 (auto-sniffs)
             chooses null termination over fixed length
 
-Otherwise — a raw byte buffer:
-  └── read_memory(addr, length)
-            no parsing, returns bytes
+Is it a pointer chain (deref → +offset → deref → ...)?
+  └── yes → process/read_pointer_chain(handle, base_address, offsets[])
+            offsets is an int array, max 64; saves N round trips
+
+Need to know the address resolves at all before reading?
+  └── yes → process/is_valid_address(handle, address)   (cheap guard)
+
+Otherwise — a raw byte buffer (struct, blob, opcode bytes):
+  └── process/read_virtual_memory(handle, address, size)
+            returns bytes as hex; max 16 MiB; no parsing
 ```
 
 The cost gradient (cheapest left, most expensive right):
 
 ```
-read_typed_value < read_string < struct_dump < read_pointer_chain < read_memory(large N)
+process/is_valid_address < process/read_typed_value < process/read_string < process/read_pointer_chain < process/read_virtual_memory(large N)
 ```
 
-`read_memory` for a 4-byte field where `read_typed_value` would do it costs you a manual struct-unpack on the client side and one extra parse round trip. `read_memory` for a 12-byte vec3 where `read_typed_value` for each component would also work depends — if you call `read_typed_value` three times, that's three round trips vs one `read_memory` for 12 bytes. Use `read_memory` when N ≥ 8 *and* you need the raw bytes, or use `read_typed_value` when you need one specific component cheaply.
+**There is no server-side struct dumper.** Reading a whole struct means `process/read_virtual_memory(addr, sizeof_struct)` + client-side parse, or one `process/read_typed_value` per field. Pick by shape: a 12-byte vec3 is one `process/read_virtual_memory` (12 bytes, one trip) vs three `process/read_typed_value` calls (three trips) — take the single read when you need all the bytes; take the typed read when you need one field cheaply. If you'll re-read the same struct shape often, define it in your Enma script instead of wishing for a dumper the server doesn't provide.
 
-`struct_dump` requires that the server side knows the struct. When it does, it's the right answer almost always. When it doesn't, fall back to `read_memory(addr, sizeof_struct)` + client-side parsing — but consider whether to define the struct so future calls are clean.
+`process/read_pointer_chain` is the killer feature for entity-list walks. Instead of `process/read_typed_value` × 3 (deref base, deref +offset, deref +offset), one call does all three — but the chain is capped at 64 offsets.
 
-`read_pointer_chain` is the killer feature for entity-list walks. Instead of `read_typed_value` × 3 (deref base, deref +offset, deref +offset), one call does all three.
-
-**Why:** Most "slow MCP" complaints reduce to picking `read_memory` when a typed variant would be faster, or picking three calls when `read_pointer_chain` would do it in one. The cost of a wrong choice is per-frame latency; the cost of the right choice is reading the doc once.
+**Why:** Most "slow MCP" complaints reduce to picking `process/read_virtual_memory` when a typed variant would be faster, or picking three calls when `process/read_pointer_chain` would do it in one. The cost of a wrong choice is per-frame latency; the cost of the right choice is reading the doc once.
 
 ---
 
 ## 2. "I Need to Find Something in Memory"
 
-**Different "find" tools for different inputs.** Picking the wrong one is the most common search-related mistake.
+**Different "find" tools for different inputs.** Picking the wrong one is the most common search-related mistake. All take a `handle`.
 
 ```
 What are you looking for?
-  ASCII / UTF-8 string?  → scan_string(needle, [section?])
-  UTF-16LE string?       → scan_wstring(needle, [section?])
-  Specific numeric value (4/8 bytes)?  → scan_value(value, size)
-  A pointer to a known address?         → scan_pointer_to(target_addr)
-  A specific instruction pattern (bytes + wildcards)?  → find_pattern(bytes, mask)
-  References to a function in code?     → find_xrefs(func_addr)
-  References to a known string?         → find_string_refs(string_addr OR string_literal)
-  What changed since I last looked?     → scan_changed() then diff_memory(then, now)
+  ASCII string?                          → process/scan_string(text, encoding:"ascii", heap_only?)
+  UTF-16LE string?                       → process/scan_string(text, encoding:"utf16", heap_only?)
+                                          (no separate wide-string scanner — the encoding param picks it)
+  Specific numeric value (1..8 bytes)?   → process/scan_value(type, value, aligned?, heap_only?)
+                                          type ∈ u8..u64 / i8..i64 / f32 / f64; value is hex for u64/i64
+  A pointer to a known address?          → process/scan_pointer_to(target_address, heap_only?)
+  A code pattern (bytes + wildcards)?    → process/find_pattern(start, size, signature)        (first hit)
+                                          or process/find_all_patterns(start, size, signature)   (cap 1024 hits)
+  References to a function in code?      → process/find_xrefs(module_base, target_address)       (decodes .text)
+  References to a known string?          → process/find_string_refs(module_base, text, encoding?, heap_only?, string_module?)
+  What changed since a snapshot?         → process/scan_next(compare, value?, min?, max?)
+                                          compare ∈ exact/range/unchanged/changed/increased/decreased
+                                          then process/diff_memory(addr_a, addr_b, size) for byte-level diffs
+  What module owns this VA?              → process/lookup_symbol(address)  (VA → module+offset+nearest export)
 ```
 
 The cost gradient (cheapest first):
 
 ```
-scan_string ~ scan_wstring ~ scan_value < scan_pointer_to < find_pattern < find_xrefs < find_string_refs < scan_changed
+process/scan_string ~ process/scan_value < process/scan_pointer_to < process/find_pattern < process/find_xrefs < process/find_string_refs < process/scan_next(iterative) < process/diff_memory
 ```
 
 Special-case observations:
 
-- **`find_pattern` is for *code* sigs**, not random data — it's faster on `.text` than `.data` because the search is bounded to executable sections by default. If you're searching `.data`, a `scan_value` for the discriminating field is usually faster.
-- **`scan_pointer_to` is the right tool for "find every variable that points to this object"** — pointer scans for tracing object ownership / entity-list discovery. Faster than `find_pattern` for an 8-byte address because the search knows the alignment and excludes obvious-noise patterns.
-- **`find_string_refs` does the cross-reference walk for you**: pass a string literal, get back the addresses of every instruction that loads it via `LEA`/`MOV [rip+...]`. The combo `find a UI label → find_string_refs → analyze_function` is the canonical "find the function that owns this UI element" workflow.
-- **`scan_changed` + `diff_memory` is the cheat-engine workflow**: snapshot the process state, do an in-game action, snapshot again, diff. The output is a list of changed addresses + before/after values. Use sparingly — it scans the whole process and is expensive.
+- **`process/scan_string` is the one string scanner** — pass `encoding:"utf16"` for wide strings; there is no separate wide-string tool. `heap_only` defaults to the MCP UI's "Heap-only by default" toggle (on by default); pass `heap_only=false` only if you need to walk the full image.
+- **`process/scan_value` with `aligned` (default true)** is the right tool for a discriminating data field — alignment narrows the hit set by 4–8×. For u64/i64, `value` is a hex string.
+- **`process/scan_pointer_to` is the right tool for "find every variable that points to this object"** — aligned-QWORD scan, faster than `process/find_pattern` for an 8-byte address because alignment is known and obvious-noise patterns are excluded.
+- **`process/find_pattern` takes `start` + `size` + an IDA-style signature** (`"AB CD ?? EF"`). It is for *code* sigs on a bounded region — usually a module's `.text`. For data search (string/value/pointer), the dedicated scan tools are 5–10× faster because they know the type they're hunting. Use `process/find_all_patterns` when you need every hit (cap 1024).
+- **`process/find_string_refs` does the cross-reference walk for you**: pass a string literal, get back every instruction that loads it via `LEA`/`MOV [rip+...]`. Phase 1 (string search) is **pre-capped at 1 GiB** — if the cap fires, the call errors and asks you to pass `heap_only=true` or set `string_module` (hex VA of the module that owns the string, usually the same as `module_base`) for a fast bounded scan. Phase 2 caps code hits at 4096 and sets a `truncated` flag. The combo `scan the label → find_string_refs → disassemble the call site` is the canonical "find the function that owns this UI element" workflow.
+- **The cheat-engine workflow is `process/scan_next` + `process/diff_memory`, not a whole-process snapshot.** There is no tool that snapshots the entire process. `process/scan_next(compare:"changed")` narrows the value-type hits you've accumulated across scans; `process/diff_memory(addr_a, addr_b, size)` gives byte-level before/after on a region you choose (cap 1 MiB). Decide the region up front — there is no global diff.
 
-**Why:** `find_pattern` is the tool every new user reaches for because it sounds the most general. It's actually the most *specialized* — it scans `.text` for code patterns. For data search (string, value, pointer), the dedicated scan tools are 5-10× faster because they know the type they're hunting for.
+**Why:** `process/find_pattern` is the tool every new user reaches for because it sounds the most general. It's actually the most *specialized* — it scans a bounded region for a byte pattern. For data search (string, value, pointer), the dedicated scan tools are faster because they know the type they're hunting for. And the "what changed" workflow is `scan_next` (typed narrowing) + `diff_memory` (region diff), not a magic snapshot tool.
 
 ---
 
 ## 3. "I Need to Understand This Function"
 
-**Cost-tiered: just see the asm vs full IDA-style analysis. Pick the depth you actually need.**
+**Cost-tiered: just see the asm vs walk bounds vs AOB-rescan. Pick the depth you actually need.** All take a `handle`.
 
 ```
 Just want the disassembly of a few instructions?
-  → disassemble(addr, num_insns)
-    cheap; one call; bytes → asm
+  → process/disassemble(handle, address, max_bytes?, max_instructions?)
+    Zydis; defaults 256 bytes / 32 insns; cheap; bytes → asm
 
 Need start/end of the function containing addr?
-  → find_function_bounds(addr)
-    cheap; returns [start, end]
+  → process/find_function_bounds(handle, address, scan_back?, scan_forward?)
+    heuristic; defaults 4096 back / 65536 forward; returns [start, end]
+    for precision, use process/get_exception_table(module_base) — .pdata RUNTIME_FUNCTION entries are exact
 
-Need what the function calls + complexity hints?
-  → analyze_function(addr)
-    medium; recursive into prologue/epilogue, calls table
+Need to find a function by an AOB sig across a module?
+  → process/find_function_by_signature(handle, module_base, signature)
+    AOB-scans .text + runs bounds walk on each hit; more expensive than a single bounds call
 
-Need the full call graph rooted at addr?
-  → build_call_graph(addr, depth)
-    expensive; can be slow on deep / wide call graphs — cap depth
-
-Need to know what value RCX/RDX/etc. holds at a specific instruction?
-  → trace_register(addr, register, direction)
-    medium; useful for "what's the first argument to this call site"
+Want to know what function lives at a VA / which module owns it?
+  → process/lookup_symbol(handle, address)
+    VA → {module_base, module_name, module_offset, section, nearest_export}
+  → process/find_function_by_name(handle, pattern, case_sensitive?, max_results?)
+    substring match across all modules' export tables; default case-insensitive, 64 results
 ```
+
+There is **no function-analyzer tool** and **no call-graph builder**. For "what does this function call," `process/disassemble` the body and read the `CALL`/`JMP` targets yourself (iterate `process/find_xrefs` if you need incoming callers). For "what value is in RCX at this instruction," there is **no register-tracer** — `process/disassemble` the surrounding instructions and reason about the register set (a `MOV RCX, [rip+x]` tells you the source; a `LEA RCX, [...]` likewise). State the limitation honestly: the MCP gives you bytes and disassembly; register-dataflow analysis is the client's job.
 
 The standard composition:
 
 ```
-find_pattern(sig)              → addr
-find_function_bounds(addr)     → [start, end]
-disassemble(start, end-start)  → asm
-trace_register(call_addr, RCX) → what gets passed
+process/find_pattern(start, size, sig)        → addr
+process/find_function_bounds(handle, addr)    → [start, end]
+process/disassemble(handle, start, end-start) → asm
+process/lookup_symbol(handle, call_target)    → which export each CALL hits
 ```
 
-This is the four-step "what does this code path do?" workflow that replaces an IDA session for most questions.
+This is the four-step "what does this code path do?" workflow that replaces an IDA session for most questions. For precise bounds (stripped binaries, no heuristics), swap `process/find_function_bounds` for `process/get_exception_table(module_base)` and look up the RUNTIME_FUNCTION covering `addr`.
 
-Avoid `build_call_graph` unless you actually need the graph as a graph. For "what does this function call," `analyze_function` returns the immediate call list, which is usually what you wanted.
-
-**Why:** `analyze_function` and `build_call_graph` are the most expensive tools in the routing table. Calling them when `disassemble` would do is multi-second latency vs millisecond latency. The cost isn't visible until you wire one into a per-frame path.
+**Why:** `process/find_function_by_signature` is the expensive one here — it AOB-scans a whole module's `.text` and bounds-walks every hit. Calling it when `process/disassemble` of a known address would do is multi-second latency vs millisecond latency. The cost isn't visible until you wire one into a per-frame path.
 
 ---
 
 ## 4. "I Need to Understand This Class / VTable"
 
-**Two tools, often used together:**
+**Two tools, often used together.** Both take a `handle`.
 
 ```
 Want the vtable function-pointer layout?
-  → analyze_vtable(vtable_addr)
-    returns ordered list of [offset, function_addr] entries
+  → process/analyze_vtable(handle, vtable_address, max_entries?)
+    default 64 entries; classifies each as code/data per loaded modules
 
 Want the RTTI class name + parent chain?
-  → read_rtti(object_addr)
-    returns class name string + inheritance hierarchy
+  → process/read_rtti(handle, vtable_address)
+    Win64 RTTI: class name string + base-class hierarchy
 ```
 
-The combo gives you a full picture of "what is this object?" — start with `read_rtti` to know the class, then `analyze_vtable` to get the methods. Together they replace a Class Informer / Class Explorer pass in IDA.
+The combo gives you a full picture of "what is this object?" — start with `process/read_rtti` to know the class, then `process/analyze_vtable` to get the methods. Together they replace a Class Informer / Class Explorer pass in IDA. Note both take the **vtable address**, not the object address — deref the object to its vtable first (`process/read_typed_value(obj, "ptr")`).
 
-Caveat: RTTI is only present in binaries compiled with `/GR` (MSVC) or `-frtti` (GCC/Clang). Stripped binaries return nothing useful from `read_rtti`. In that case, the vtable layout is your only handle on the class identity — name your "VTable_<addr>" yourself.
+Caveat: RTTI is only present in binaries compiled with `/GR` (MSVC) or `-frtti` (GCC/Clang). Stripped binaries return nothing useful from `process/read_rtti`. In that case, the vtable layout is your only handle on the class identity — name your `VTable_<addr>` yourself. For deeper PE truth (sections, exports, data dirs), see section 6.
 
-**Why:** Class identification is half the battle in any C++ game RE. `read_rtti` answers "what is this?" in one call when it works; falling back to vtable layout matching is the alternative. Routing here is binary: try RTTI first, fall back to vtable analysis.
+**Why:** Class identification is half the battle in any C++ game RE. `process/read_rtti` answers "what is this?" in one call when it works; falling back to vtable layout matching is the alternative. Routing here is binary: try RTTI first, fall back to vtable analysis.
 
 ---
 
 ## 5. "I Need a Sig for This Address"
 
-**`generate_signature(addr, length_hint)` produces a sig from the instruction at `addr`, with sensible wildcarding of relocatable bytes (RIP-relative displacements, call targets).**
+**`process/generate_signature(handle, address, max_length?)`** produces an IDA-style sig from the instruction at `addr`, wildcarding relocatable bytes (RIP-relative displacements, call targets). `max_length` defaults 32; the response carries `is_unique=false` if the length is exhausted without uniqueness.
 
 Pair immediately with `tools/sig-uniqueness-checker.py` (added in this branch) to validate:
 
 ```
-1. generate_signature(addr, 16)         → "48 8D 0D ?? ?? ?? ?? E8"
+1. process/generate_signature(handle, addr, 16)  → "48 8D 0D ?? ?? ?? ?? E8"
 2. write to a temp file, then:
 3. python3 tools/sig-uniqueness-checker.py game.exe --sig "..."
 4. read the verdict:
    - UNIQUE margin=5    → ship it
-   - AMBIGUOUS, N hits  → regenerate with longer length
+   - AMBIGUOUS, N hits  → regenerate with longer max_length
    - STALE              → the sig doesn't match at the expected address (very rare; investigate)
    - BRITTLE margin=0   → regenerate longer
 ```
 
-The `length_hint` is a starting point; you can iterate with `generate_signature(addr, 24)` if the 16-byte version is ambiguous. Each generation is cheap; the validation step is also cheap. Iterate until UNIQUE with `margin ≥ 2` and add the sig to your `offsets.em` with an `// E-NNN` evidence reference (per `skill://re-evidence-log`).
+`max_length` is a starting point; iterate with `process/generate_signature(handle, addr, 24)` if the 16-byte version is ambiguous. Each generation is cheap; the validation step is also cheap. Iterate until UNIQUE with `margin ≥ 2` and add the sig to your `offsets.em` with an `// E-NNN` evidence reference (per `skill://re-evidence-log`).
+
+To *use* a sig to find a function in a module you haven't attached to by address, `process/find_function_by_signature(handle, module_base, signature)` AOB-scans `.text` and bounds-walks each hit — heavier than a plain `process/find_pattern`, but it returns function bounds, not just a hit address.
 
 **Why:** The MCP can generate sigs but cannot validate them; the local Python tool can validate sigs but cannot generate them from a live address. The combination is the workflow.
 
@@ -2092,84 +2133,113 @@ The `length_hint` is a starting point; you can iterate with `generate_signature(
 
 ## 6. "I Need to Know About the Process / Modules"
 
-**Process and module enumeration tools.** All cheap; safe to call at script start.
+**Process, module, thread, and PE enumeration tools.** All cheap and safe to call at session start. The handle-less ones (`process/list`, `process/info_by_*`) come first; the rest take a `handle`.
 
 ```
-What processes are running?                → list_processes()
-Info on one process (pid, threads, modules)? → get_process_info(pid OR name)
-What does this module export?              → get_module_exports(module_name)
-What does this module import?              → get_module_imports(module_name)
+What processes are running?                   → process/list()                                 (no handle)
+One process by PID / by image name?           → process/info_by_pid(pid) / info_by_name(name)  (no handle)
+All loaded modules in the target?             → process/get_modules(handle)
+All threads?                                  → process/get_threads(handle)                   (ethread gated kernel_rw_access)
+One module by name?                           → process/get_module_by_name(handle, name)
+PE sections of a module?                      → process/get_module_sections(handle, module_base)
+NT/optional header summary?                   → process/get_pe_header(handle, module_base)
+One PE data directory?                        → process/get_data_directory(handle, module_base, directory)
+                                              directory ∈ export/import/resource/exception/.../com_descriptor or 0..15
+Full EAT walk?                                → process/list_module_exports(handle, module_base)
+Single export resolve?                        → process/get_export_address(handle, module_base, export_name)
+Full IAT walk?                                → process/get_module_imports(handle, module_base)
+Single IAT slot VA?                           → process/get_import_address(handle, module_base, import_name)
+All strings in a module image?                → process/get_module_strings(handle, module_base, min_length?, encoding?)
+                                              min_length default 4; encoding ∈ ascii/utf16/both
+Precise function bounds from .pdata?          → process/get_exception_table(handle, module_base, max_entries?)
+Target's command line (PEB)?                 → process/get_command_line(handle)               (x64 only)
+Target's environment block (PEB)?             → process/list_environment(handle, max_bytes?)  → [{key, value}]
+System-wide handle table?                    → process/enum_handles(max_entries?)            (no handle; default 8192)
+Build / page size / arch for keyed offsets?  → system/info()                                  (no handle; is_24h2_or_later flag)
+Kernel modules?                              → system/list_drivers(max_entries?)             (no handle; gated kernel_rw_access)
 ```
 
-For deeper cross-module analysis (which other modules import a specific export from this one), pair with `tools/module-export-mapper.py --consumers <dir>` (added in this branch). The MCP gives you exports + imports per module; the Python tool joins them into "this DLL is consumed by ..." map.
+`process/enum_handles`, `system/info`, and `system/list_drivers` take **no handle** — they query the system, not a referenced process.
 
-`get_process_info` is the right call when attaching: it returns the module list including base addresses + sizes, which is what you need for `find_pattern` calls bounded to a specific module. Don't iterate `list_processes` + `get_module_exports` per module yourself — `get_process_info` returns the full picture in one call.
+For deeper cross-module analysis (which other modules import a specific export from this one), pair with `tools/module-export-mapper.py --consumers <dir>` (added in this branch). The MCP gives you exports + imports per module; the Python tool joins them into a "this DLL is consumed by ..." map.
 
-**Why:** These tools are cheap and idempotent; the routing is mostly "use them rather than guessing." The only mistake is overusing `list_processes` in a loop — it scans the system every call. Call it once; cache the result.
+`process/get_modules` is the right call when attaching: it returns the module list including base addresses + sizes, which is what you need for `process/find_pattern` calls bounded to a specific module. Don't iterate `process/list` + `process/list_module_exports` per module yourself — `process/get_modules` returns the full picture in one call.
+
+**Why:** These tools are cheap and idempotent; the routing is mostly "use them rather than guessing." The only mistake is overusing `process/list` in a loop — it snapshots the system every call. Call it once; cache the result. And remember `system/info`'s `is_24h2_or_later` flag for build-keyed offsets — query it once per session, not per call.
 
 ---
 
-## 7. "I Need to Work with Files / Scripts"
+## 7. Scripting Bridge (Enma)
 
-**File and script lifecycle tools.** Mostly self-explanatory but the validate/check/execute trio is worth mapping out.
+**The Enma scripting bridge is three tools, none of which takes a `handle`.** They run a script (or return reference text) with their own permissions, independent of any referenced process. The bridge is exactly these three — there are no MCP tools for host file I/O, host text search, host reference finding, internet search, or duplicate script-lifecycle aliases. File reads/writes are NOT MCP tools; do them via the toolkit's standalone Python tools or the Perception IDE.
 
 ```
-Read a file:        read_file(path)
-Write a file:       write_file(path, contents)
-Patch a file:       edit_file(path, [{search, replace}, ...])
+Need the Enma language + Perception API reference?
+  → script/get_context()
+    Returns the full reference as one context string. CALL ONCE PER SESSION
+    before generating any script — enma is proprietary and its addon surface
+    can't be inferred from training data. Covers language grammar, all 17
+    pre-shipped enma addons, and all 12 Perception API surfaces.
 
-Grep across files:  search_text(pattern, [scope?])
-Find references:    find_references(symbol, [scope?])
+Syntax + type check only (no run)?
+  → script/validate(source)
+    Compile-only. ALL addons registered (render/proc/cpu/zydis/sound/win/
+    unicorn/net/input/gui/thread/filesystem). Returns { ok, errors:[] }.
+    Cheap; safe to run on every save.
 
-Compile-only:       check_script(path)   ← syntax + types, no run
-Semantic check:     validate_script(path) ← deeper passes (unused decls, etc.)
-Run it:             execute_script(path)  ← actually loads + runs
-
-What APIs are available? get_script_api()  ← runtime API surface for the active scripting language
+Actually run the script?
+  → script/execute(source)
+    Compile + run main() once. Returns { ok, logs:[] }.
+    GUI and thread addons are NOT registered here — those resources would
+    outlive a one-shot script and leak. For long-lived scripts with GUI/
+    threads, use the in-app script editor, not script/execute.
 ```
 
-The check/validate/execute progression:
+The validate→execute ladder:
 
-- `check_script` first — compile-only, catches syntax + type errors. Cheap; safe to run on every save.
-- `validate_script` when you're about to ship — deeper checks: unused decls, unreachable code, suspicious patterns. Slower; run before release.
-- `execute_script` only when you actually want to run it — actively loads into the engine and starts callbacks. Has side effects (attaches to processes, allocates GPU resources).
+- `script/get_context` first, once per session — load the reference so you emit valid enma.
+- `script/validate` on every edit — compile-only, all addons registered, catches syntax + type errors. This is the only compile-check; there is no second script-lifecycle alias.
+- `script/execute` only when you actually want to run it — has side effects, and **cannot** register GUI/thread addons.
 
-`get_script_api()` is the version-introspection tool — returns the currently-available API surface, useful for runtime checks and for documenting what your script depends on. Pair with `knowledge/pcx-version-matrix.md` for the historical timeline.
-
-**Why:** Mixing up `check_script` and `execute_script` is the new-user mistake — running the script when you only wanted to check syntax. The progression cheap → medium → side-effecting is the right ladder; climb only as far as the question demands.
+**Why:** Mixing up `script/validate` and `script/execute` is the new-user mistake — running the script when you only wanted to check syntax. And assuming `script/execute` can spawn a GUI is the second mistake — it can't, by design. The progression reference → validate → execute is the right ladder; climb only as far as the question demands.
 
 ---
 
 ## 8. Cost Tiers — What's Expensive, What's Cheap
 
-**Internalize these tiers. Cheap tools are fine in tight loops; expensive ones must be cached or called outside hot paths.**
+**Internalize these tiers. Cheap tools are fine in tight loops; expensive ones must be cached or called outside hot paths.** Latency feel is qualitative; the hard limits are the numbers that bite.
 
-| Tier | Tools | Latency feel |
-|---|---|---|
-| **Cheap** (<1 ms typical) | `list_processes`, `get_process_info`, `get_module_exports`, `get_module_imports`, `read_typed_value`, `read_memory` (small), `read_string`, `disassemble` (1-2 insns), `find_function_bounds`, `read_rtti` | Safe per-call when you need them |
-| **Medium** (1-100 ms) | `find_pattern`, `scan_string`, `scan_wstring`, `scan_value`, `scan_pointer_to`, `struct_dump`, `read_pointer_chain`, `read_memory` (large), `analyze_function` (small), `analyze_vtable`, `find_xrefs`, `find_string_refs`, `trace_register`, `generate_signature` | Cache results; never call per-frame |
-| **Expensive** (100 ms-10 s) | `build_call_graph` (deep), `analyze_function` (with deep recursion), `scan_changed` (whole-process), `diff_memory` (large region), `search_text` (large codebase), `find_references` (large codebase), `validate_script` (large project), `web_search` | Manual workflow tools; never automated into hot paths |
-| **Side-effecting** | `memory_write`, `write_file`, `edit_file`, `execute_script` | Permission-gated; ask before doing |
+| Tier | Tools | Hard limits / notes | Latency feel |
+|---|---|---|---|
+| **Cheap** (sub-ms to few ms) | `process/list`, `process/info_by_pid`, `process/info_by_name`, `process/get_modules`, `process/get_module_by_name`, `process/get_threads`, `process/get_module_sections`, `process/get_pe_header`, `process/get_data_directory`, `process/get_export_address`, `process/get_import_address`, `process/is_valid_address`, `process/read_typed_value`, `process/read_string`, `process/read_pointer_chain` (≤64 offsets), `process/disassemble` (1–2 insns, default 256 B / 32 insns), `process/find_function_bounds`, `process/read_rtti`, `process/lookup_symbol`, `process/find_function_by_name` (default 64 results), `process/query_memory_region`, `process/get_command_line`, `process/list_environment`, `system/info`, `process/enum_handles` (default 8192) | First three + `system/info` + `enum_handles` take no handle. | Safe per-call when you need them |
+| **Medium** (1–100 ms) | `process/scan_string`, `process/scan_value`, `process/scan_pointer_to`, `process/scan_next`, `process/find_pattern`, `process/find_all_patterns` (cap 1024 hits), `process/analyze_vtable` (default 64 entries), `process/find_xrefs`, `process/generate_signature`, `process/read_virtual_memory` (≤16 MiB), `process/copy_memory` (≤64 MiB in 1 MiB chunks), `process/list_module_exports`, `process/get_module_imports`, `process/get_module_strings`, `process/get_exception_table` | `heap_only` defaults to the UI toggle (on) for the scanners — flipping it off walks full user-space and can OOM on multi-GiB heaps. | Cache results; never call per-frame |
+| **Expensive** (100 ms–10 s) | `process/find_string_refs` (phase 1 pre-capped 1 GiB; phase 2 caps code hits 4096), `process/find_function_by_signature` (module-wide AOB + bounds walk per hit), `process/diff_memory` (cap 1 MiB), `process/allocate_memory` (≤256 MiB), `process/enumerate_memory_regions` (full VAD walk), `system/list_drivers` (gated `kernel_rw_access`), `script/get_context` (returns the whole reference) | `find_string_refs` errors if the 1 GiB cap fires — pass `heap_only=true` or set `string_module`. | Manual workflow tools; never automated into hot paths |
+| **Side-effecting** (permission-gated) | `process/write_virtual_memory`, `process/write_typed_value`, `process/write_string`, `process/copy_memory`, `process/fill_memory` (all gated `write_memory`); `process/allocate_memory`, `process/free_memory` (gated `virtual_memory_operations`); `process/dereference`, `process/cleanup_references` (release handles); `script/execute` (runs `main()`, no GUI/thread addons) | Blocked calls return `-32001` naming the missing permission. | Ask before doing; never in a render loop |
 
 The pattern in PCX scripts: call medium-tier tools in `main()` (one-shot setup), cache results into globals, then in `on_update` / `on_render` only call cheap tools. The 12-rule discipline (`game-cheat-guidelines` rule #4: separate update from render; `skill://pcx-perf-budget` Step 5: cache expensive, recompute cheap) is the same principle applied to MCP calls.
 
-**Why:** The MCP latency budget is shared with the rest of your frame. A 5 ms `find_pattern` in `on_render` at 144 Hz eats 72% of the frame. Tier awareness is what keeps the script smooth.
+**Why:** The MCP latency budget is shared with the rest of your frame. A 5 ms `process/find_pattern` in `on_render` at 144 Hz eats 72% of the frame. Tier awareness is what keeps the script smooth.
 
 ---
 
 ## 9. Composition Patterns — Tools That Compose Well
 
-**The standard combos. Each is a four-to-five-call workflow that's reused across most RE sessions.**
+**The standard combos. Each is a multi-call workflow reused across most RE sessions.** Every `process/*` call here implicitly takes a `handle` acquired in section 0.
 
 | Goal | Composition |
 |---|---|
-| "Find the function that handles a UI label" | `scan_string(label)` → `find_string_refs(addr)` → `analyze_function(call_addr)` |
-| "Find a global pointer behind a LEA" | `find_pattern(sig)` → `read_typed_value(hit+3, "int32")` (the disp) → resolve RIP manually → `read_typed_value(resolved, "uint64")` |
-| "What are the args passed to this call?" | `disassemble(call_site, 1)` (confirm it's a CALL) → `trace_register(call_site, "rcx", "backward")` → repeat for `rdx`, `r8`, `r9` |
-| "Map an entity struct" | `read_pointer_chain([entity_list_base, 0, 0])` → `read_rtti(entity_ptr)` → `analyze_vtable(vtable_ptr)` → `struct_dump(entity_ptr, "CEntity")` |
-| "Snapshot, perform action, diff" | `scan_changed()` (snapshot 1) → user does in-game action → `scan_changed()` (snapshot 2) → `diff_memory()` |
-| "Sig + validate" | `generate_signature(addr, 16)` → save → `python3 tools/sig-uniqueness-checker.py game.exe --sig "..."` → if margin < 2, regenerate longer |
-| "Per-binary diff after patch" | `read_file(old_offsets_json)` → `python3 tools/offset-diff.py --old V1 --new V2 --sigs old_offsets_json` → for each LOST: `find_pattern` against V2 with broadened sig → record new sig |
+| "Attach to the target" | `process/list` → `process/reference_by_name(name)` → `process/get_modules` (cache bases+sizes) → `process/cleanup_references` on shutdown |
+| "Find the function that handles a UI label" | `process/scan_string(text, encoding:"utf16")` → `process/find_string_refs(module_base, text)` → `process/disassemble(call_addr)` → `process/lookup_symbol(call_target)` |
+| "Find a global pointer behind a LEA" | `process/find_pattern(start, size, sig)` → `process/disassemble(hit, max_instructions:1)` (confirm `LEA reg, [rip+x]`) → `process/read_typed_value(resolved, "ptr")` |
+| "What are the args passed to this call?" | `process/disassemble(call_site, max_instructions:8)` (read the `MOV RCX/RDX/R8/R9` and `LEA` insns before the `CALL`) → reason about the register set client-side. No register-tracer exists. |
+| "Map an entity struct" | `process/read_pointer_chain(base, [0, 0])` → `process/read_rtti(vtable_addr)` → `process/analyze_vtable(vtable_addr)` → `process/read_virtual_memory(entity, sizeof)` + client parse (no server-side struct dumper) |
+| "Precise function bounds (stripped binary)" | `process/get_module_by_name(name)` → `process/get_exception_table(module_base)` → look up the RUNTIME_FUNCTION covering `addr` (fallback to `process/find_function_bounds` if no .pdata) |
+| "Snapshot, perform action, diff" | `process/scan_value(type, value)` (baseline hits) → user does in-game action → `process/scan_next(compare:"changed")` (narrow) → `process/diff_memory(addr_a, addr_b, size)` for byte-level before/after on a chosen region (cap 1 MiB). No whole-process snapshot tool. |
+| "Sig + validate" | `process/generate_signature(addr, 16)` → save → `python3 tools/sig-uniqueness-checker.py game.exe --sig "..."` → if margin < 2, regenerate longer |
+| "Sig → function in a new build" | `process/get_module_by_name(name)` → `process/find_function_by_signature(module_base, sig)` → if STALE, broaden the sig and retry |
+| "Which module owns this VA?" | `process/lookup_symbol(address)` → `{module_base, module_name, module_offset, section, nearest_export}` |
+| "Write a one-shot Enma script" | `script/get_context` (once) → `script/validate(source)` (compile-only, all addons) → `script/execute(source)` (run `main()` once; no GUI/thread addons) |
+| "Per-binary diff after patch" | `python3 tools/offset-diff.py --old V1 --new V2 --sigs old_offsets_json` → for each LOST: `process/find_pattern` against V2 with broadened sig → record new sig |
 
 These compose without ceremony — each call's output is the next call's input. The AI should *reach for the composition* rather than asking "should I call N more tools?" — the workflow is the unit, not the individual call.
 
@@ -2181,23 +2251,52 @@ These compose without ceremony — each call's output is the next call's input. 
 
 | Goal | Right tool | Wrong tool (common mistake) |
 |---|---|---|
-| Read one int/float at address | `read_typed_value` | `read_memory` + manual unpack |
-| Read whole struct | `struct_dump` | N × `read_typed_value` |
-| Follow pointer chain | `read_pointer_chain` | N × `read_typed_value` |
-| Find string in memory | `scan_string` / `scan_wstring` | `find_pattern` |
-| Find numeric value | `scan_value` | `find_pattern` |
-| Find pointer to X | `scan_pointer_to` | `find_pattern` |
-| Find code pattern | `find_pattern` | `search_text` (search_text is for files, not memory) |
-| Find xrefs to function | `find_xrefs` | `disassemble` + manual scan |
-| Find xrefs to string | `find_string_refs` | `find_pattern` on the string bytes |
-| See some asm | `disassemble` | `analyze_function` |
-| Get function start/end | `find_function_bounds` | `disassemble` + walk |
-| Get class name | `read_rtti` | `analyze_vtable` (use both — RTTI first) |
-| Get vtable layout | `analyze_vtable` | `read_memory` + manual deref |
-| Generate a sig | `generate_signature` + `tools/sig-uniqueness-checker.py` | hand-crafting bytes |
-| Find diff after action | `scan_changed` + `diff_memory` | `find_pattern` on guesses |
+| Attach to a process | `process/reference_by_pid` / `process/reference_by_name` | calling process/* tools with no handle (`-32002`) |
+| Read one int/float/ptr at address | `process/read_typed_value` | `process/read_virtual_memory` + manual unpack |
+| Read a null-terminated string | `process/read_string` | `process/read_virtual_memory` + manual scan for `\0` |
+| Follow a pointer chain (≤64 hops) | `process/read_pointer_chain` | N × `process/read_typed_value` |
+| Read a whole struct | `process/read_virtual_memory(addr, sizeof)` + client parse (no server-side struct dumper) | N × `process/read_typed_value` |
+| Guard a read against bad addr | `process/is_valid_address` | catching `-32004` from the read |
+| Find ASCII/UTF-16 string | `process/scan_string(text, encoding)` (encoding param covers UTF-16) | `process/find_pattern` on the bytes |
+| Find numeric value | `process/scan_value` | `process/find_pattern` |
+| Find pointer to X | `process/scan_pointer_to` | `process/find_pattern` on 8 bytes |
+| Find code pattern (first/all) | `process/find_pattern` / `process/find_all_patterns` | `process/scan_value` |
+| Find xrefs to a function | `process/find_xrefs(module_base, target_address)` | `process/disassemble` + manual scan |
+| Find xrefs to a string | `process/find_string_refs(module_base, text)` | `process/find_pattern` on the string bytes |
+| What changed (typed narrowing) | `process/scan_next(compare:"changed")` | guessing addresses |
+| Byte-level before/after diff | `process/diff_memory(addr_a, addr_b, size)` (cap 1 MiB) | whole-process snapshot (none exists) |
+| Which module owns a VA | `process/lookup_symbol(address)` | guessing from `process/get_modules` |
+| See some asm | `process/disassemble` | (nothing cheaper) |
+| Get function start/end (heuristic) | `process/find_function_bounds` | `process/disassemble` + walk |
+| Get function bounds (precise) | `process/get_exception_table(module_base)` (.pdata) | heuristic when .pdata exists |
+| Find a function by sig in a module | `process/find_function_by_signature` | manual `find_pattern` + bounds loop |
+| Find a function by export name | `process/find_function_by_name(pattern)` | `process/list_module_exports` + client filter |
+| Get class name + parents | `process/read_rtti(vtable_addr)` | `process/analyze_vtable` (use both — RTTI first) |
+| Get vtable layout | `process/analyze_vtable` | `process/read_virtual_memory` + manual deref |
+| Generate a sig | `process/generate_signature` + `tools/sig-uniqueness-checker.py` | hand-crafting bytes |
+| List processes | `process/list` (no handle) | — |
+| One process's info | `process/info_by_pid` / `process/info_by_name` (no handle) | — |
+| All modules + bases | `process/get_modules` | `process/info_by_name` + re-walk |
+| Module exports (all) | `process/list_module_exports(module_base)` | — |
+| One export resolve | `process/get_export_address(module_base, name)` | full EAT walk for one name |
+| Module imports (all) | `process/get_module_imports(module_base)` | — |
+| One IAT slot | `process/get_import_address(module_base, name)` | full IAT walk for one name |
+| PE sections / header | `process/get_module_sections` / `process/get_pe_header` | — |
+| One data directory | `process/get_data_directory(module_base, directory)` | full header + parse |
+| Strings in a module | `process/get_module_strings` | `process/scan_string` across the image |
+| Inspect a memory region | `process/query_memory_region(address)` | `process/read_virtual_memory` (different question) |
+| Enumerate committed regions | `process/enumerate_memory_regions(heap_only?)` | — |
+| Allocate / free target memory | `process/allocate_memory` / `process/free_memory` (gated `virtual_memory_operations`) | — |
+| Target command line / env | `process/get_command_line` / `process/list_environment` | — |
+| System handle table | `process/enum_handles` (no handle) | — |
+| Build / page size / 24H2 flag | `system/info` (no handle) | hardcoding build offsets |
+| Kernel modules | `system/list_drivers` (no handle; gated `kernel_rw_access`) | — |
+| Load Enma reference | `script/get_context` (once per session) | inferring enma from training data |
+| Compile-check a script | `script/validate` (all addons) | `script/execute` (runs it) |
+| Run a one-shot script | `script/execute` (no GUI/thread addons) | — |
+| Write target memory | `process/write_virtual_memory` / `write_typed_value` / `write_string` / `copy_memory` / `fill_memory` (all gated `write_memory`) | — |
 
-**Cross-references:** `mcp/perception-mcp-config.json` (authoritative tool list), `mcp/claude-code-setup.md` / `mcp/cursor-setup.md` / `mcp/aider-setup.md` (per-IDE wiring), `tools/sig-uniqueness-checker.py` / `tools/offset-diff.py` / `tools/dumper-to-enma.py` / `tools/module-export-mapper.py` (local CLI tools that pair with MCP calls), `skill://pcx-perf-budget` (call-cost discipline that applies to MCP calls), `skill://re-evidence-log` (E-NNN cross-references record which MCP calls produced each offset).
+**Cross-references:** `mcp/perception-mcp-config.json` (authoritative 59-tool list), `mcp/claude-code-setup.md` / `mcp/cursor-setup.md` / `mcp/aider-setup.md` (per-IDE wiring), `tools/sig-uniqueness-checker.py` / `tools/offset-diff.py` / `tools/dumper-to-enma.py` / `tools/module-export-mapper.py` (local CLI tools that pair with MCP calls — file I/O and cross-module joins live here, NOT on the MCP server), `skill://pcx-perf-budget` (call-cost discipline that applies to MCP calls), `skill://re-evidence-log` (E-NNN cross-references record which MCP calls produced each offset).
 
 ---
 

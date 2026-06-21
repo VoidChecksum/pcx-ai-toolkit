@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 81**
+**Source files included: 82**
 
 ---
 
@@ -13681,6 +13681,78 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 ---
 
+## Source: `docs/enma/UPSTREAM-SUGGESTIONS.md`
+
+# Upstream Suggestions for the Enma Language & SDK
+
+> Moved here from the repo root (`SuggestionsEnma.txt`). These are wishlist items for
+> the **Enma language team** (upstream, https://enma-1.gitbook.io/enma), not toolkit
+> content. They are kept here as reference for toolkit contributors who hit the same
+> gaps while writing PCX scripts. If you have access to the upstream, file these as
+> GitBook discussions or issues against Enma itself.
+
+The following recommendations are compiled based on the development of the
+Perception.cx (PCX) AI scripting toolkit, focusing on reverse engineering
+ergonomics, template parity, and tooling enhancement.
+
+## 1. Nesting & Nested Template Fields (Unordered Maps/Sets)
+
+* Issue: Enma currently lacks std::unordered_map and std::unordered_set because
+  composing one template's instance as a field within another template is
+  not yet supported.
+* PCX Impact: Scripts must frequently track entities, cache bones, and map
+  game states. The lack of scalar-keyed hash maps restricts developers to
+  string-keyed maps or int-keyed imaps (e.g., map<int64, V> is a compile error).
+* Recommendation: Resolve the nesting limitation for template fields to enable
+  native std::unordered_map<K, V> and std::unordered_set<T> supporting
+  arbitrary scalar and struct keys.
+
+## 2. Byte-Wise Pointer Arithmetic (byte* / void*)
+
+* Issue: Pointer arithmetic in Enma is strictly typed (p + n scales by the
+  sizeof(T)). Assigning raw integers to pointers is rejected at compile time
+  to enforce safety, requiring verbose reinterpret_cast chains to traverse
+  game structures.
+* PCX Impact: When walking structures (like pBase + offset), reverse engineers
+  operate directly in raw byte offsets. Scaling by type size is counter-intuitive
+  when dealing with dynamic struct padding or arbitrary memory regions.
+* Recommendation: Introduce a native byte* (or void* with byte-wise arithmetic) type
+  that permits direct offset additions without scaling, or expose a compiler
+  intrinsic for direct offset dereferencing (e.g., read_mem<T>(base, offset)).
+
+## 3. Overloaded Function Templates
+
+* Issue: Overloaded function templates (selected by call arity) are not supported.
+  This prevents compiling recursive variadic templates with a 1-argument
+  template base.
+* PCX Impact: Developers writing generic serialization routines, net packet
+  decoders, or multi-level pointer resolvers must duplicate code rather than
+  relying on recursive templates.
+* Recommendation: Implement template argument matching for overloaded function
+  templates to bring closer parity with C++ template metaprogramming.
+
+## 4. Character Packing & std::string Support
+
+* Issue: The implementation of std::string in the standard library is currently
+  blocked waiting for Phase 6 character sub-8-byte packing.
+* PCX Impact: Game hooks and memory reads frequently read or write narrow
+  character arrays (char[N]). The absence of a packed std::string makes
+  mapping native C++ struct definitions into Enma scripts error-prone.
+* Recommendation: Finalize char-packing to support std::string and allow
+  script-level structs to mirror native C++ character arrays layout-wise.
+
+## 5. LSP Type Inference for Template Instantiation
+
+* Issue: Type diagnostics are resolved during the compiler's monomorphization
+  phase, which means template errors are only reported at compilation time.
+* PCX Impact: Developers using enma-lsp do not receive real-time feedback on
+  missing methods on generic types, constraint violations, or syntax errors
+  within template definitions.
+* Recommendation: Enhance enma-lsp to parse template instantiations on-the-fly
+  and provide inline diagnostics/autocomplete within specialized template scopes.
+
+---
+
 ## Source: `docs/perception/analyzer.md`
 
 > For the complete documentation index, see [llms.txt](https://docs.perception.cx/perception/llms.txt). Markdown versions of documentation pages are available by appending `.md` to page URLs; this page is available as [Markdown](https://docs.perception.cx/perception/perception-analyzer.md).
@@ -18488,19 +18560,20 @@ Use this mechanism when the answer is not explicitly present in the current page
 ---
 name: game-cheat-guidelines
 description: >
-  Behavioral rules for writing game cheats in Enma, AngelScript, and C++ on
-  Perception.cx. Derived from Karpathy principles, rewritten for cheat
-  development: memory hacking, ESP, aimbot, hooking, overlay rendering, and
-  RE workflows. Always active — these rules apply every time you write or
-  edit cheat code.
+  Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and
+  C++ for authorized reverse engineering, analysis, overlay rendering, and
+  research. Derived from Karpathy principles: memory reading, visualization,
+  hooking, render pipelines, and RE workflows. Always active — these rules
+  apply every time you write or edit Perception.cx script code. Authorized use
+  only — analyze software you own or are permitted to test.
 license: MIT
 ---
 
-# Game Cheat Development Guidelines
+# Perception.cx Script Development Guidelines
 
-Behavioral rules for writing game cheats in Enma, AngelScript, and C++. Derived from the Karpathy principles but rewritten for the domain: memory hacking, ESP, aimbot, hooking, overlay rendering, and reverse engineering workflows on the Perception.cx platform.
+Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: memory reading, visualization, overlay rendering, hooking, and reverse-engineering workflows on the Perception.cx platform. These rules originated in game-overlay development and apply equally to authorized reverse engineering, security research, and analysis — analyze only software you own or are authorized to test.
 
-**Always active.** These rules apply every time you write or edit cheat code. They are not suggestions.
+**Always active.** These rules apply every time you write or edit Perception.cx script code. They are not suggestions.
 
 **Prerequisite:** The `game-hacking-pcx` skill MUST be loaded alongside this one. It contains the full doc index (33,580 lines across 99 files) for Enma, AngelScript, and all Perception.cx APIs. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
 
@@ -18642,7 +18715,7 @@ uint64 resolve_entity_list(proc_t& p, uint64 base, uint64 size) {
 
 ## 6. One Feature, One File
 
-**Each cheat feature lives in its own file. No god scripts.**
+**Each feature lives in its own file. No god scripts.**
 
 - ESP in `esp.em`. Aimbot in `aim.em`. Radar in `radar.em`. Config/GUI in `menu.em`.
 - Shared state (process handle, entity cache, config values) goes in a `globals.em` module and is imported.
@@ -18716,26 +18789,26 @@ draw_line(vec2(10.0, 20.0), vec2(100.0, 200.0), white, 1.0);
 
 ---
 
-## 9. Don't Write Memory Unless You Must
+## 9. Prefer Reads Over Writes
 
-**Read-only cheats are invisible. Writes leave forensic traces.**
+**Reads are non-invasive. Writes alter the target's state and are inherently riskier.**
 
-- ESP, radar, entity highlighting, distance display — all read-only. Prefer these.
-- If you must write (aimbot smoothing via angle writes, no-recoil via value patches, speed hacks), write the minimum bytes needed.
+- Analysis, visualization, entity inspection, distance display — all read-only. Prefer these.
+- If you must write (patching for research on a target you own or are authorized to test, modifying your own single-player session), write the minimum bytes needed and know exactly why.
 - Never `wvm` a large buffer when `wu32` or `wf32` on a single field suffices.
-- After writing, verify the write took effect with a read-back if the field is contested (anti-cheat may revert it).
-- Gate all writes behind `write_memory` permission checks — Perception enforces this, respect it in your design too.
+- After a research write, verify it took effect with a read-back; some targets revert unexpected patches.
+- Gate all writes behind `write_memory` permission checks — Perception enforces this; respect it in your design too.
 
 ```cpp
-// WRONG — nop-patching 16 bytes of recoil code
+// WRONG — nop-patching 16 bytes when you only need one field
 array<uint8> nops = {0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
 p.wvm(recoil_addr, nops);
 
-// RIGHT — write the float that controls recoil spread, minimal footprint
+// RIGHT — write the single float you actually mean to change, minimal footprint
 p.wf32(recoil_spread_addr, 0.0f);
 ```
 
-**Why:** Every memory write is a detection surface. Anti-cheats integrity-check code sections (`.text`), monitor write patterns on game state, and log anomalous page faults. A single float write to a gameplay variable is orders of magnitude harder to detect than a 16-byte NOP sled in executable memory.
+**Why:** Every memory write mutates the target's state — a read is observation, a write is intervention. For analysis and overlay work you almost never need to write, and when you do, a minimal, deliberate write is easier to reason about and roll back than a large patch. Treat writes as a last resort, not a default.
 
 ---
 
@@ -18839,7 +18912,7 @@ Debugging checklist:
 | 6 | One feature, one file | No god scripts |
 | 7 | Construct every frame | Colors and vecs are free |
 | 8 | `f` suffix for float32 | The GPU cares |
-| 9 | Minimize writes | Reads are invisible |
+| 9 | Prefer reads over writes | Reads are non-invasive |
 | 10 | W2S once, correctly | Math, not magic |
 | 11 | GUI for all tunables | No magic constants |
 | 12 | Verify with the binary | Trust live reads over memory |

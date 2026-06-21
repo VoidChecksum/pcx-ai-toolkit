@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 29**
+**Source files included: 55**
 
 ---
 
@@ -11441,6 +11441,2425 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 ---
 
+## Source: `docs/angelscript-lang/addon-array.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_array.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# array template object
+
+**Path:** /sdk/add_on/scriptarray/
+
+The `array` type is a [template object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_template.html) that allow the scripts to declare arrays of any type. Since it is a generic class it is not the most performatic due to the need to determine characteristics at runtime. For that reason it is recommended that the application registers a [template specialization](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_template.html#doc_adv_template_2) for the array types that are most commonly used.
+
+The type is registered with `RegisterScriptArray(asIScriptEngine *engine, bool defaultArrayType)`. The second parameter should be set to true if you wish to allow the syntax form `type[]` to declare arrays.
+
+Compile the add-on with the pre-processor define `AS_USE_STLNAMES=1` to register the methods with the same names as used by C++ STL where the methods have the same significance. Not all methods from STL is implemented in the add-on, but many of the most frequent once are so a port from script to C++ and vice versa might be easier if STL names are used.
+
+Compile the add-on with the pre-processor define `AS_USE_ACCESSORS=1` to register `length` as a virtual property instead of the method `length()`.
+
+Compile the add-on with the pre-processor define `AS_NO_IMPL_OPS_WITH_STRING_AND_PRIMITIVE=1` to disable the implicit operations with primitives that automatically formats the primitive values to strings.
+
+## Public C++ interface
+
+```cpp
+class CScriptArray
+{
+public:
+  // Set the memory functions that should be used by all CScriptArrays
+  static void SetMemoryFunctions(asALLOCFUNC_t allocFunc, asFREEFUNC_t freeFunc);
+
+  // Factory functions
+  static CScriptArray *Create(asITypeInfo *arrayType);
+  static CScriptArray *Create(asITypeInfo *arrayType, asUINT length);
+  static CScriptArray *Create(asITypeInfo *arrayType, asUINT length, void *defaultValue);
+  static CScriptArray *Create(asITypeInfo *arrayType, void *listBuffer);
+
+  // Memory management
+  void AddRef() const;
+  void Release() const;
+
+  // Type information
+  asITypeInfo *GetArrayObjectType() const;
+  int GetArrayTypeId() const;
+  int GetElementTypeId() const;
+
+  // Get the current size
+  asUINT GetSize() const;
+
+  // Returns true if the array is empty
+  bool IsEmpty() const;
+
+  // Pre-allocates memory for elements
+  void Reserve(asUINT numElements);
+
+  // Resize the array
+  void Resize(asUINT numElements);
+
+  // Get a pointer to an element. Returns 0 if out of bounds
+  void *At(asUINT index);
+  const void *At(asUINT index) const;
+
+  // Set value of an element.
+  // The value arg should be a pointer to the value that will be copied to the element.
+  // Remember, if the array holds handles the value parameter should be the
+  // address of the handle. The refCount of the object will also be incremented
+  void SetValue(asUINT index, void *value);
+
+  // Copy the contents of one array to another (only if the types are the same)
+  CScriptArray &operator=(const CScriptArray&);
+
+  // Compare two arrays
+  bool operator==(const CScriptArray &) const;
+
+  // Array manipulation
+  void InsertAt(asUINT index, void *value);
+  void RemoveAt(asUINT index);
+  void InsertLast(void *value);
+  void RemoveLast();
+
+  void SortAsc();
+  void SortAsc(asUINT startAt, asUINT count);
+  void SortDesc();
+  void SortDesc(asUINT startAt, asUINT count);
+  void Sort(asUINT startAt, asUINT count, bool asc);
+  void Sort(asIScriptFunction *less, asUINT startAt, asUINT count);
+  void Reverse();
+
+  int Find(void *value) const;
+  int Find(asUINT startAt, void *value) const;
+  int FindByRef(void *ref) const;
+  int FindByRef(asUINT startAt, void *ref) const;
+
+  // Returns the address of the inner buffer for direct manipulation
+  void *GetBuffer();
+};
+```
+
+## Public script interface
+
+See also: [Arrays in the script language](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_arrays.html)
+
+## C++ example
+
+This function shows how a script array can be instantiated from the application and then passed to the script.
+
+```cpp
+// Registered with AngelScript as 'array<string> @CreateArrayOfString()'
+CScriptArray *CreateArrayOfStrings()
+{
+  // If called from the script, there will always be an active
+  // context, which can be used to obtain a pointer to the engine.
+  asIScriptContext *ctx = asGetActiveContext();
+  if( ctx )
+  {
+    asIScriptEngine* engine = ctx->GetEngine();
+
+    // The script array needs to know its type to properly handle the elements.
+    // Note that the object type should be cached to avoid performance issues
+    // if the function is called frequently.
+    asITypeInfo* t = engine->GetTypeInfoByDecl("array<string>");
+
+    // Create an array with the initial size of 3 elements
+    CScriptArray* arr = CScriptArray::Create(t, 3);
+
+    for( asUINT i = 0; i < arr->GetSize(); i++ )
+    {
+      // Set the value of each element
+      string val("test");
+      arr->SetValue(i, &val);
+    }
+
+    // The ref count for the returned handle was already set in the array's constructor
+    return arr;
+  }
+  return 0;
+}
+```
+
+---
+
+## Source: `docs/angelscript-lang/addon-dictionary.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_dict.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# dictionary object
+
+**Path:** /sdk/add_on/scriptdictionary/
+
+The dictionary object maps string values to values or objects of other types.
+
+Register with `RegisterScriptDictionary(asIScriptEngine*)`.
+
+Compile the add-on with the pre-processor define `AS_USE_STLNAMES=1` to register the methods with the same names as used by C++ STL where the methods have the same significance. Not all methods from STL is implemented in the add-on, but many of the most frequent once are so a port from script to C++ and vice versa might be easier if STL names are used.
+
+## Public C++ interface
+
+```cpp
+typedef std::string dictKey;
+
+class CScriptDictionary
+{
+public:
+  // Factory functions
+  static CScriptDictionary *Create(asIScriptEngine *engine);
+
+  // Reference counting
+  void AddRef() const;
+  void Release() const;
+
+  // Perform a shallow copy of the other dictionary
+  CScriptDictionary &operator=(const CScriptDictionary &other);
+
+  // Sets a key/value pair
+  void Set(const dictKey &key, void *value, int typeId);
+  void Set(const dictKey &key, asINT64 &value);
+  void Set(const dictKey &key, double &value);
+
+  // Gets the stored value. Returns false if the value isn't compatible with informed type
+  bool Get(const dictKey &key, void *value, int typeId) const;
+  bool Get(const dictKey &key, asINT64 &value) const;
+  bool Get(const dictKey &key, double &value) const;
+
+  // Index accessors. If the dictionary is not const it inserts the value if it doesn't already exist.
+  // If the dictionary is const then a script exception is set if it doesn't exist and a null pointer is returned
+  CScriptDictValue *operator[](const dictKey &key);
+  const CScriptDictValue *operator[](const dictKey &key) const;
+
+  // Returns the type id of the stored value, or negative if it doesn't exist
+  int GetTypeId(const dictKey &key) const;
+
+  // Returns true if the key is set
+  bool Exists(const dictKey &key) const;
+
+  // Returns true if the dictionary is empty
+  bool IsEmpty() const;
+
+  // Returns the number of keys in the dictionary
+  asUINT GetSize() const;
+
+  // Deletes the key
+  bool Delete(const dictKey &key);
+
+  // Deletes all keys
+  void DeleteAll();
+
+  // Get an array of all keys
+  CScriptArray *GetKeys() const;
+
+  // STL style iterator
+  class CIterator
+  {
+  public:
+    void operator++();    // Pre-increment
+    void operator++(int);  // Post-increment
+    bool operator==(const CIterator &other) const;
+    bool operator!=(const CIterator &other) const;
+
+    // Accessors
+    const dictKey &GetKey() const;
+    int GetTypeId() const;
+    bool GetValue(asINT64 &value) const;
+    bool GetValue(double &value) const;
+    bool GetValue(void *value, int typeId) const;
+    const void * GetAddressOfValue() const;
+  };
+
+  CIterator begin() const;
+  CIterator end() const;
+  CIterator find(const dictKey &key) const;
+};
+```
+
+## Public script interface
+
+See also: [Dictionaries in the script language](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_dictionary.html)
+
+## Example usage from C++
+
+Here's a skeleton for iterating over the entries in the dictionary. For brevity the code doesn't show how to interpret the values, for more information on that see `asETypeIdFlags` and `asIScriptEngine::GetTypeInfoById`.
+
+```cpp
+void iterateDictionary(CScriptDictionary *dict)
+{
+  // Iterate over each entry
+  for (auto it : *dict)
+  {
+    // Determine the name of the key
+    std::string keyName = it.GetKey();
+    cout << "\"" << keyName << "\"" << " = ";
+
+    // Get the type and address of the value
+    int typeId = it.GetTypeId();
+    const void *addressOfValue = it.GetAddressOfValue();
+
+    // Cast the value to the correct C++ type according to the typeId and then print it
+    ...
+  }
+}
+```
+
+---
+
+## Source: `docs/angelscript-lang/addon-math.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_math.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# math functions
+
+**Path:** /sdk/add_on/scriptmath/
+
+This add-on registers the math functions from the standard C runtime library with the script engine. Use `RegisterScriptMath(asIScriptEngine*)` to perform the registration.
+
+By defining the preprocessor word `AS_USE_FLOAT=0`, the functions will be registered to take and return doubles instead of floats.
+
+The function `RegisterScriptMathComplex(asIScriptEngine*)` registers a type that represents a complex number, i.e. a number with real and imaginary parts.
+
+## Public script interface
+
+```angelscript
+// Trigonometric functions
+float cos(float rad);
+float sin(float rad);
+float tan(float rad);
+
+// Inverse trigonometric functions
+float acos(float val);
+float asin(float val);
+float atan(float val);
+float atan2(float y, float x);
+
+// Hyperbolic functions
+float cosh(float rad);
+float sinh(float rad);
+float tanh(float rad);
+
+// Logarithmic functions
+float log(float val);
+float log10(float val);
+
+// Power to
+float pow(float val, float exp);
+
+// Square root
+float sqrt(float val);
+
+// Absolute value
+float abs(float val);
+
+// Ceil and floor functions
+float ceil(float val);
+float floor(float val);
+
+// Returns the fraction
+float fraction(float val);
+
+// Approximate float comparison, to deal with numeric imprecision
+bool closeTo(float a, float b, float epsilon = 0.00001f);
+bool closeTo(double a, double b, double epsilon = 0.0000000001);
+
+// Conversion between floating point and IEEE 754 representations
+float  fpFromIEEE(uint raw);
+double fpFromIEEE(uint64 raw);
+uint   fpToIEEE(float fp);
+uint64 fpToIEEE(double fp);
+```
+
+### Functions
+
+**cos, sin, tan**
+Calculates the trigonometric functions cosine, sine, and tangent. The input angle should be given in radian.
+
+**acos, asin, atan**
+Calculates the inverse of the trigonometric functions cosine, sine, and tangent. The returned angle is given in radian.
+
+**atan2**
+Calculates the inverse of the trigonometric function tangent. The input is the y and x proportions. The returned angle is given in radian.
+
+**cosh, sinh, tanh**
+Calculates the hyperbolic of the cosine, sine, and tangent. The input angle should be given in radian.
+
+**log, log10**
+Calculates the logarithm of the input value. log is the natural logarithm and log10 is the base-10 logarithm.
+
+**pow**
+Calculates the based raised to the power of exponent.
+
+**sqrt**
+Calculates the square root of the value.
+
+**abs**
+Returns the absolute value.
+
+**ceil, floor**
+ceil returns the closest integer number that is higher or equal to the input. Floor returns the closest integer number that is lower or equal to the input.
+
+**fraction**
+Returns the fraction of the number, i.e. what remains after taking away the integral number.
+
+**closeTo**
+Due to numerical errors with the binary representation of real numbers it is often difficult to do direct comparisons of two float values. The closeTo function will return true of the two values are almost equal, allowing for a small difference up to the size of the epsilon value.
+
+**fpFromIEEE, fpToIEEE**
+Translates the float to and from IEEE 754 representation. This can be used if one wishes to directly inspect or manipulate the floating point value in the binary representation.
+
+### The complex type
+
+```angelscript
+// This type represents a complex number with real and imaginary parts
+class complex
+{
+  // Constructors
+  complex();
+  complex(const complex &in);
+  complex(float r);
+  complex(float r, float i);
+
+  // Equality operator
+  bool opEquals(const complex &in) const;
+
+  // Compound assignment operators
+  complex &opAddAssign(const complex &in);
+  complex &opSubAssign(const complex &in);
+  complex &opMulAssign(const complex &in);
+  complex &opDivAssign(const complex &in);
+
+  // Math operators
+  complex opAdd(const complex &in) const;
+  complex opSub(const complex &in) const;
+  complex opMul(const complex &in) const;
+  complex opDiv(const complex &in) const;
+
+  // Returns the absolute value (magnitude)
+  float abs() const;
+
+  // Swizzle operators
+  complex get_ri() const;
+  void set_ri(const complex &in);
+  complex get_ir() const;
+  void set_ir(const complex &in);
+
+  // The real and imaginary parts
+  float r;
+  float i;
+}
+```
+
+**complex**
+The constructors allow for implicit construction, making a copy, implicit conversion from float, and explicit initialization from two float values.
+
+**=, !=**
+Compares two complex values.
+
+**=, +=, -=, \*=, /=**
+Assign and compound assignment of complex values.
+
+**+, -, \*, /**
+Math operators on complex values.
+
+**abs**
+Returns the absolute (magnitude) of the complex value.
+
+**r, i**
+Retrieves the real and imaginary part of the complex value.
+
+**ri, ir**
+Swizzle operators return a complex value with the ordering of the real and imaginary parts as indicated by the name.
+
+---
+
+## Source: `docs/angelscript-lang/addon-strings.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_std_string.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# string object
+
+**Path:** /sdk/add_on/scriptstdstring/
+
+This add-on registers the `std::string` type as-is with AngelScript. This gives perfect compatibility with C++ functions that use `std::string` in parameters or as return type.
+
+A potential drawback is that the `std::string` type is a value type, thus may increase the number of copies taken when string values are being passed around in the script code. However, this is most likely only a problem for scripts that perform a lot of string operations.
+
+Register the type with `RegisterStdString(asIScriptEngine*)`. Register the optional split method and global join function with `RegisterStdStringUtils(asIScriptEngine*)`. The optional functions require that the [array template object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_array.html) has been registered first.
+
+Compile the add-on with the pre-processor define `AS_USE_STLNAMES=1` to register the methods with the same names as used by C++ STL where the methods have the same significance. Not all methods from STL is implemented in the add-on, but many of the most frequent ones are so a port from script to C++ and vice versa might be easier if STL names are used.
+
+Compile the add-on with the pre-processor define `AS_USE_ACCESSORS=1` to register `length` as a virtual property instead of the method `length()`.
+
+## Public C++ interface
+
+Refer to the `std::string` implementation for your compiler.
+
+## Public script interface
+
+See also: [Strings in the script language](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_stdlib_string.html)
+
+---
+
+## Source: `docs/angelscript-lang/addons-overview.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Add-ons
+
+This page gives a brief description of the add-ons that you'll find in the /sdk/add_on/ folder.
+
+- [Application modules](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_application.html)
+- [Script extensions](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_script.html)
+
+## Script extensions
+
+The script extensions add-ons provide types and functions usable directly from scripts:
+
+- [string object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_std_string.html) — see `addon-strings.md`
+- [array template object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_array.html) — see `addon-array.md`
+- [any object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_any.html)
+- [ref object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_handle.html)
+- [weakref object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_weakref.html)
+- [dictionary object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_dict.html) — see `addon-dictionary.md`
+- [file object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_file.html)
+- [filesystem object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_filesystem.html)
+- [math functions](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_math.html) — see `addon-math.md`
+- [grid template object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_grid.html)
+- [datetime object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_datetime.html)
+- [socket object](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_socket.html)
+- [Exception routines](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_helpers_try.html)
+
+---
+
+## Source: `docs/angelscript-lang/arrays.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_arrays.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Custom array type
+
+Like the [string type](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_strings.html), AngelScript doesn't have a built-in dynamic array type. Instead the application developers that wishes to allow dynamic arrays in the scripts should register this in the way that is best suited for the application. To save time a readily usable add-on is provided with a fully implemented [dynamic array type](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_array.html).
+
+If you wish to create your own array type, you'll need to understand how [template types](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_template.html) work. A template type is a special form of registering a type that the engine can then use to instanciate the true types based on the desired sub-types. This allow a single type registration to cover all possible array types that the script may need, instead of the application having to register a specific type for each type of array.
+
+Of course, a generic type like this will have a drawback in performance due to runtime checks to determine the actual type, so the application should consider registering [template specializations](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_template.html#doc_adv_template_2) of the most common array types. This will allow the best optimizations for those types, and will also permit better interaction with the application as the template specialization can better match the actual array types that the application uses.
+
+---
+
+## Source: `docs/angelscript-lang/coroutines.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_coroutine.html
+     Fetched: 2026-06-20
+     Note: The requested page doc_coroutine.html does not exist on the server (HTTP 404).
+           AngelScript has no standalone script-side coroutine page; the manual covers
+           co-routines on the embedding/advanced page doc_adv_coroutine.html, reproduced here.
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Co-routines
+
+> **Note**
+> Co-routines are an application-embedding feature, not a built-in script construct. This page describes how the host application implements co-routines; the [Context manager](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_ctxmgr.html) add-on provides a ready-made implementation.
+
+Co-routines is a way to allow multiple execution paths in parallel, but without the hazards of pre-emptive scheduling in [multithreading](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_concurrent.html) where one thread can be suspended at any moment so another can resume. Because co-routines always voluntarily suspend themselves in favor of the next co-routine, there is no need to worry about atomic instructions and critical sections.
+
+Co-routines are not natively built-into the AngelScript library, but it can easily be implemented from the application side. In fact, the [Context manager](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_ctxmgr.html) add-on already provides a default implementation for this.
+
+To implement your own version of co-routines you will need a couple of pieces:
+
+- The co-routine itself, which is just an instance of the `asIScriptContext` object. Each co-routine will have its own context object that holds the callstack of the co-routine.
+- A function that will permit the script to create, or spawn, new co-routines. This function will need to be able to refer to starting function of the new co-routine. This reference can be done by name, or perhaps more elegantly with a [function pointer](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_funcptr.html). Once invoked this function will instanciate the new context, and prepare it with the starting function.
+- A function that will permit a co-routine to yield control to the next co-routine. This function will simply suspend the current context so the next co-routine can be resumed.
+- A simple control algorithm for the co-routines. This can just be a loop that will iterate over an array of co-routines, i.e. contexts, until all of them have finished executing. When a new co-routine is created it is simply appended to the array to be picked up when the current co-routine yields the control.
+
+A simple implementation of the function that spawns a new co-routine may look like this:
+
+```cpp
+void CreateCoRoutine(string &func)
+{
+  asIScriptContext *ctx = asGetActiveContext();
+  if( ctx )
+  {
+    asIScriptEngine *engine = ctx->GetEngine();
+    string mod = ctx->GetFunction()->GetModuleName();
+
+    // We need to find the function that will be created as the co-routine
+    string decl = "void " + func + "()";
+    asIScriptFunction *funcPtr = engine->GetModule(mod.c_str())->GetFunctionByDecl(decl.c_str());
+    if( funcPtr == 0 )
+    {
+      // No function could be found, raise an exception
+      ctx->SetException(("Function '" + decl + "' doesn't exist").c_str());
+      return;
+    }
+
+    // Create a new context for the co-routine
+    asIScriptContext *coctx = engine->CreateContext();
+    coctx->Prepare(funcPtr);
+
+    // Add the new co-routine context to the array of co-routines
+    coroutines.push_back(coctx);
+  }
+}
+```
+
+The yield function is even simpler:
+
+```cpp
+void Yield()
+{
+  asIScriptContext *ctx = asGetActiveContext();
+  if( ctx )
+  {
+    // Suspend the context so the next co-routine can be resumed
+    ctx->Suspend();
+  }
+}
+```
+
+A basic control algorithm might look like this:
+
+```cpp
+std::vector<asIScriptContext *> coroutines;
+
+void Execute()
+{
+  int n = 0;
+  while( coroutines.size() > 0 )
+  {
+    // Resume the co-routine
+    int r = coroutines[n]->Execute();
+    if( r == asEXECUTION_SUSPENDED )
+    {
+      // Resume the next co-routine
+      if( ++n == coroutines.size() )
+        n = 0;
+    }
+    else
+    {
+      // The co-routine finished so let's remove it
+      coroutines[n]->Release();
+      coroutines.erase(n);
+    }
+  }
+}
+```
+
+See also: [Context manager](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_ctxmgr.html), [Co-routines sample](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_samples_corout.html), [Concurrent scripts](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_concurrent.html)
+
+---
+
+## Source: `docs/angelscript-lang/datatypes.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Data types
+
+Note that the host application may add types specific to that application, refer to the application's manual for more information.
+
+- [Primitives](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_primitives.html)
+- [Objects and handles](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_obj.html)
+- [Function handles](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_funcptr.html)
+- [Strings](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_strings.html)
+- [Auto declarations](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_auto.html)
+
+See also: [Standard library](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_stdlib.html)
+
+---
+
+## Source: `docs/angelscript-lang/delegate.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_funcptr.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Function handles and delegates
+
+A function handle is a data type that can be dynamically set to point to a global function that has a matching function signature as that defined by the variable declaration. Function handles are commonly used for callbacks, i.e. where a piece of code must be able to call back to some code based on some conditions, but the code that needs to be called is not known at compile time.
+
+To use function handles it is first necessary to [define the function signature](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_funcdef.html) that will be used at the global scope or as a member of a class. Once that is done the variables can be declared using that definition.
+
+Here's an example that shows the syntax for using function handles
+
+```angelscript
+// Define a function signature for the function handle
+funcdef bool CALLBACK(int, int);
+
+// An example function that shows how to use this
+void main()
+{
+  // Declare a function handle, and set it
+  // to point to the myCompare function.
+  CALLBACK @func = @myCompare;
+
+  // The function handle can be compared with the 'is' operator
+  if( func is null )
+  {
+    print("The function handle is null\n");
+    return;
+  }
+
+  // Call the function through the handle, just as if it was a normal function
+  if( func(1, 2) )
+  {
+    print("The function returned true\n");
+  }
+  else
+  {
+    print("The function returned false\n");
+  }
+}
+
+// This function matches the CALLBACK definition, since it has
+// the same return type and parameter types.
+bool myCompare(int a, int b)
+{
+  return a > b;
+}
+```
+
+## Delegates
+
+It is also possible to take function handles to class methods, but in this case the class method must be bound to the object instance that will be used for the call. To do this binding is called creating a delegate, and is done by performing a construct call for the declared function definition passing the class method as the argument.
+
+```angelscript
+class A
+{
+  bool Cmp(int a, int b)
+  {
+     count++;
+     return a > b;
+  }
+  int count = 0;
+}
+
+void main()
+{
+  A a;
+
+  // Create the delegate for the A::Cmp class method
+  CALLBACK @func = CALLBACK(a.Cmp);
+
+  // Call the delegate normally as if it was a global function
+  if( func(1,2) )
+  {
+    print("The function returned true\n");
+  }
+  else
+  {
+    print("The function returned false\n");
+  }
+
+  printf("The number of comparisons performed is "+a.count+"\n");
+}
+```
+
+---
+
+## Source: `docs/angelscript-lang/dictionary.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_dictionary.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# dictionary
+
+> **Note**
+> Dictionaries are only available in the scripts if the application [registers the support for them](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_dict.html). The syntax for using dictionaries may differ for the application you're working with so consult the application's manual for more details.
+
+The dictionary stores key-value pairs, where the key is a string, and the value can be of any type. Key-value pairs can be added or removed dynamically, making the dictionary a good general purpose container object.
+
+```angelscript
+obj object;
+obj @handle;
+
+// Initialize with a list
+dictionary dict = {{'one', 1}, {'object', object}, {'handle', @handle}};
+
+// Examine and access the values through get or set methods ...
+if( dict.exists('one') )
+{
+  // get returns true if the stored type is compatible with the requested type
+  bool isValid = dict.get('handle', @handle);
+  if( isValid )
+  {
+    dict.delete('object');
+    dict.set('value', 1);
+  }
+}
+```
+
+Dictionary values can also be accessed or added by using the index operator.
+
+```angelscript
+// Read and modify an integer value
+int val = int(dict['value']);
+dict['value'] = val + 1;
+
+// Read and modify a handle to an object instance
+@handle = cast<obj>(dict['handle']);
+if( handle is null )
+  @dict['handle'] = object;
+```
+
+Dictionaries can also be created and initialized within expressions as [anonymous objects](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_expressions.html#anonobj).
+
+```angelscript
+// Call a function that expects a dictionary as input and no other overloads
+// In this case it is possible to inform the initialization list without explicitly giving the type
+foo({{'a', 1},{'b', 2}});
+
+// Call a function where there are multiple overloads expecting different
+// In this case it is necessary to explicitly define the type of the initialization list
+foo2(dictionary = {{'a', 1},{'b', 2}});
+```
+
+Dictionaries of dictionaries are created using [anonymous objects](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_expressions.html#anonobj) as well.
+
+```angelscript
+dictionary d2 = {{'a', dictionary = {{'aa', 1}, {'ab', 2}}},
+                 {'b', dictionary = {{'ba', 1}, {'bb', 2}}}};
+```
+
+The dictionary object supports [foreach loops](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_statements.html#while) to easily iterate over all contained elements.
+
+```angelscript
+dictionary dict = {{'a',1},{'b',2},{'c',3}};
+int sum = 0;
+
+// sum the values and clear the entries
+foreach( auto value, auto key : dict ) // The key variable can be omitted if not needed
+{
+  sum += int(value);
+  dict[key] = 0; // use the key to modify the current element in the dictionary
+}
+```
+
+## Supporting dictionary object
+
+The dictionary object is a [reference type](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_obj.html), so it's possible to use handles to the dictionary object when passing it around to avoid costly copies.
+
+### Operators
+
+**= assignment**
+The assignment operator performs a shallow copy of the content.
+
+**[] index operator**
+The index operator takes a string for the key, and returns a reference to the [value](#supporting-dictionaryvalue-object). If the key/value pair doesn't exist it will be inserted with a null value.
+
+### Methods
+
+**`void set(const string &in key, ? &in value)`**
+**`void set(const string &in key, int64 &in value)`**
+**`void set(const string &in key, double &in value)`**
+Sets a key/value pair in the dictionary. If the key already exists, the value will be changed.
+
+**`bool get(const string &in key, ? &out value) const`**
+**`bool get(const string &in key, int64 &out value) const`**
+**`bool get(const string &in key, double &out value) const`**
+Retrieves the value corresponding to the key. The methods return false if the key is not found, and in this case the value will maintain its default value based on the type.
+
+**`array<string> @getKeys() const`**
+This method returns an array with all of the existing keys in the dictionary. The order of the keys in the array is undefined.
+
+**`bool exists(const string &in key) const`**
+Returns true if the key exists in the dictionary.
+
+**`bool delete(const string &in key)`**
+Removes the key and the corresponding value from the dictionary. Returns false if the key wasn't found.
+
+**`void deleteAll()`**
+Removes all entries in the dictionary.
+
+**`bool isEmpty() const`**
+Returns true if the dictionary doesn't hold any entries.
+
+**`uint getSize() const`**
+Returns the number of keys in the dictionary.
+
+## Supporting dictionaryValue object
+
+The dictionaryValue type is how the [dictionary](#supporting-dictionary-object) object stores the values. When accessing the values through the dictionary index operator a reference to a dictionaryValue is returned.
+
+The dictionaryValue type itself is a value type, i.e. no handles to it can be held, but it can hold handles to other objects as well as values of any type.
+
+### Operators
+
+**= assignment**
+The value assignment operator should be used to copy a value into the dictionaryValue.
+
+**@= handle assignment**
+The handle assignment operator should be used to set the dictionaryValue to refer to an object instance.
+
+**cast\<type\> cast operator**
+The cast operator is used to dynamically cast the handle held in the dictionaryValue to the desired type. If the dictionaryValue doesn't hold a handle, or the handle is not compatible with the desired type, the cast operator will return a null handle.
+
+**type() conversion operator**
+The conversion operator is used to return a new value of the desired type. If no value conversion is found, an uninitialized value of the desired type is returned.
+
+---
+
+## Source: `docs/angelscript-lang/enums.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_enums.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Enums
+
+Enums are a convenient way of registering a family of integer constants that may be used throughout the script as named literals instead of numeric constants. Using enums often help improve the readability of the code, as the named literal normally explains what the intention is without the reader having to look up what a numeric value means in the manual.
+
+Even though enums list the valid values, you cannot rely on a variable of the enum type to only contain values from the declared list. Always have a default action in case the variable holds an unexpected value.
+
+The enum values are declared by listing them in an enum statement. Unless a specific value is given for an enum constant it will take the value of the previous constant + 1. The first constant will receive the value 0, unless otherwise specified.
+
+```angelscript
+enum MyEnum
+{
+  eValue0,
+  eValue2 = 2,
+  eValue3,
+  eValue200 = eValue2 * 100
+}
+```
+
+---
+
+## Source: `docs/angelscript-lang/expressions.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_expressions.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Expressions
+
+- [Assignments](#assignments)
+- [Function call](#function-call)
+- [Math operators](#math-operators)
+- [Bitwise operators](#bitwise-operators)
+- [Compound assignments](#compound-assignments)
+- [Logic operators](#logic-operators)
+- [Equality comparison operators](#equality-comparison-operators)
+- [Relational comparison operators](#relational-comparison-operators)
+- [Identity comparison operators](#identity-comparison-operators)
+- [Increment operators](#increment-operators)
+- [Indexing operator](#indexing-operator)
+- [Conditional expression](#conditional-expression)
+- [Member access](#member-access)
+- [Handle-of](#handle-of)
+- [Parenthesis](#parenthesis)
+- [Scope resolution](#scope-resolution)
+- [Type conversions](#type-conversions)
+- [Anonymous objects](#anonymous-objects)
+
+## Assignments
+
+```angelscript
+lvalue = rvalue;
+```
+
+`lvalue` must be an expression that evaluates to a memory location where the expression value can be stored, e.g. a variable. An assignment evaluates to the same value and type of the data stored. The right hand expression is always computed before the left.
+
+## Function call
+
+```angelscript
+func();
+func(arg);
+func(arg1, arg2);
+lvalue = func();
+```
+
+Functions are called to perform an action, and possibly return a value that can be used in further operations. If a function takes more than one argument, the argument expressions are evaluated in the reverse order, i.e. the last argument is evaluated first.
+
+Some functions are declared with output reference parameters to return multiple values. When calling such functions the output parameter must be given as an expression that can be assigned with the returned value. If the additional output value won't be used use the special argument 'void' to tell the compiler that.
+
+```angelscript
+// This function returns a value in the output parameter
+void func(int &out outputValue)
+{
+  outputValue = 42;
+}
+
+// Call the function with a valid lvalue expression to receive the output value
+int value;
+func(value);
+
+// Call the function with 'void' argument to ignore the output value
+func(void);
+```
+
+Arguments can also be named and passed to a specific argument independent of the order the parameters were declared in. No positional arguments may follow any named arguments.
+
+```angelscript
+void func(int flagA = false, int flagB = false, int flagC = false) {}
+
+// Call the function, setting only a subset of its parameters
+func(flagC: true);
+func(flagB: true, flagA: true);
+```
+
+For function templates it is necessary to explicitly inform the subtypes so the compiler can evaluate the correct function template instance to call.
+
+```angelscript
+templ<int,float>(arg1, arg2);
+```
+
+## Math operators
+
+```angelscript
+c = -(a + b);
+```
+
+| **operator** | **description** | **left hand** | **right hand** | **result** |
+| --- | --- | --- | --- | --- |
+| `+` | unary positive |  | *NUM* | *NUM* |
+| `-` | unary negative |  | *NUM* | *NUM* |
+| `+` | addition | *NUM* | *NUM* | *NUM* |
+| `-` | subtraction | *NUM* | *NUM* | *NUM* |
+| `*` | multiplication | *NUM* | *NUM* | *NUM* |
+| `/` | division | *NUM* | *NUM* | *NUM* |
+| `%` | modulos | *NUM* | *NUM* | *NUM* |
+| `**` | exponent | *NUM* | *NUM* | *NUM* |
+
+Plus and minus can be used as unary operators as well. NUM can be exchanged for any numeric type, e.g. `int` or `float`. Both terms of the dual operations will be implicitly converted to have the same type. The result is always the same type as the original terms. One exception is unary negative which is not available for `uint`.
+
+## Bitwise operators
+
+```angelscript
+c = ~(a | b);
+```
+
+| **operator** | **description** | **left hand** | **right hand** | **result** |
+| --- | --- | --- | --- | --- |
+| `~` | bitwise complement |  | *NUM* | *NUM* |
+| `&` | bitwise and | *NUM* | *NUM* | *NUM* |
+| `|` | bitwise or | *NUM* | *NUM* | *NUM* |
+| `^` | bitwise xor | *NUM* | *NUM* | *NUM* |
+| `<<` | left shift | *NUM* | *NUM* | *NUM* |
+| `>>` | right shift | *NUM* | *NUM* | *NUM* |
+| `>>>` | arithmetic right shift | *NUM* | *NUM* | *NUM* |
+
+All except `~` are dual operators.
+
+Both operands will be converted to integers while keeping the sign of the original type before the operation. The resulting type will be the same as the left hand operand.
+
+## Compound assignments
+
+```angelscript
+lvalue += rvalue;
+lvalue = lvalue + rvalue;
+```
+
+A compound assignment is a combination of an operator followed by the assignment. The two expressions above means practically the same thing. Except that first one is more efficient in that the lvalue is only evaluated once, which can make a difference if the lvalue is complex expression in itself.
+
+Available operators: `+= -= *= /= %= **= &= |= ^= <<= >>= >>>=`
+
+## Logic operators
+
+```angelscript
+if( a and b or not c )
+{
+  // ... do something
+}
+```
+
+| **operator** | **description** | **left hand** | **right hand** | **result** |
+| --- | --- | --- | --- | --- |
+| `not` | logical not |  | `bool` | `bool` |
+| `and` | logical and | `bool` | `bool` | `bool` |
+| `or` | logical or | `bool` | `bool` | `bool` |
+| `xor` | logical exclusive or | `bool` | `bool` | `bool` |
+
+Boolean operators only evaluate necessary terms. For example in expression `a and b`, `b` is only evaluated if `a` is `true`.
+
+Each of the logic operators can be written as symbols as well, i.e. `||` for `or`, `&&` for `and`, `^^` for `xor`, and `!` for `not`.
+
+## Equality comparison operators
+
+```angelscript
+if( a == b )
+{
+  // ... do something
+}
+```
+
+The operators `==` and `!=` are used to compare two values to determine if they are equal or not equal, respectively. The result of this operation is always a boolean value.
+
+## Relational comparison operators
+
+```angelscript
+if( a > b )
+{
+  // ... do something
+}
+```
+
+The operators `<`, `>`, `<=`, and `>=` are used to compare two values to determine their relationship. The result is always a boolean value.
+
+## Identity comparison operators
+
+```angelscript
+if( a is null )
+{
+  // ... do something
+}
+else if( a is b )
+{
+  // ... do something
+}
+```
+
+The operators `is` and `!is` are used to compare the identity of two objects, i.e. to determine if the two are the same object or not. These operators are only valid for reference types as they compare the address of two objects. The result is always a boolean value.
+
+## Increment operators
+
+```angelscript
+// The following means a = i; i = i + 1;
+a = i++;
+
+// The following means i = i - 1; b = i;
+b = --i;
+```
+
+These operators can be placed either before or after an lvalue to increment/decrement its value either before or after the value is used in the expression. The value is always incremented or decremented with 1.
+
+## Indexing operator
+
+```angelscript
+arr[i] = 1;
+```
+
+This operator is used to access an element contained within the object. Depending on the object type, the expression between the `[]` needs to be of different types.
+
+## Conditional expression
+
+```angelscript
+choose ? a : b;
+```
+
+If the value of `choose` is `true` then the expression returns `a` otherwise it will return `b`.
+
+Both `a` and `b` must be of the same type. If they are not, the compiler will attempt an implicit conversion by following the principle of least cost, i.e. the expression that will be converted is the one that cost less to convert. This cost is determined the same way as is done for [matching arguments in function calls](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_overload.html).
+
+If the conversion doesn't work, or the conversion of either expression cost the same, then the compiler will give an error.
+
+The conditional expression can be used as an lvalue, i.e. on the left value of an assignment expression, if both `a` and `b` are lvalues of the same type.
+
+```angelscript
+int a, b;
+(expr ? a : b) = 42;
+```
+
+## Member access
+
+```angelscript
+object.property = 1;
+object.method();
+```
+
+`object` must be an expression resulting in a data type that have members. `property` is the name of a member variable that can be read/set directly. `method` is the name of a member method that can be called on the object.
+
+## Handle-of
+
+```angelscript
+// Make handle reference the object instance
+@handle = @object;
+
+// Clear the handle and release the object it references
+@handle = null;
+```
+
+Object handles are references to an object. More than one handle can reference the same object, and only when no more handles reference an object is the object destroyed.
+
+The members of the object that the handle references are accessed the same way through the handle as if accessed directly through the object variable, i.e. with `.` operator.
+
+See also: [Object handles](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_handle.html)
+
+## Parenthesis
+
+```angelscript
+a = c * (a + b);
+if( (a or b) and c )
+{
+  // ... do something
+}
+```
+
+Parenthesis are used to group expressions when the [operator precedence](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_operator_precedence.html) does not give the desired order of evaluation.
+
+## Scope resolution
+
+```angelscript
+int value;
+void function()
+{
+  int value;       // local variable overloads the global variable
+  ::value = value; // use scope resolution operator to refer to the global variable
+}
+```
+
+The scope resolution operator `::` can be used to access variables or functions from another scope when the name is overloaded by a local variable or function. Write the scope name on the left (or blank for the global scope) and the name of the variable/function on the right.
+
+See also: [Namespaces](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_namespace.html)
+
+## Type conversions
+
+```angelscript
+// implicitly convert the clss handle to a intf handle
+intf @a = @clss();
+
+// explicitly convert the intf handle to a clss handle
+clss @b = cast<clss>(a);
+```
+
+Object handles can be converted to other object handles with the cast operator. If the cast is valid, i.e. the true object implements the class or interface being requested, the operator returns a valid handle. If the cast is not valid, the cast returns a null handle.
+
+The above is called a reference cast, and only works for types that support object handles. In this case the handle still refers to the same object, it is just exposed through a different interface.
+
+Types that do not support object handles can be converted with a value cast instead. In this case a new value is constructed, or in case of objects a new instance of the object is created.
+
+```angelscript
+// implicit value cast
+int a = 1.0f;
+
+// explicit value cast
+float b = float(a)/2;
+```
+
+In most cases an explicit cast is not necessary for primitive types, however, as the compiler is usually able to do an implicit cast to the correct type.
+
+## Anonymous objects
+
+Anonymous objects, i.e. objects that are created without being declared as variables, can be instantiated in expressions by calling invoking the object's constructor as if it was a function. Both reference types and value types can be created like this.
+
+```angelscript
+// Call the function with a new object of the type MyClass
+func(MyClass(1,2,3));
+```
+
+For types that support it, the anonymous objects can also be initialized with initialization lists.
+
+```angelscript
+// Call the function with a dictionary, explicitly informing the type of the initialization list
+func(dictionary = {{'banana',1}, {'apple',2}, {'orange',3}});
+
+// When there is only one possible type that support initialization lists it is possible
+// to omit the type and let the compiler implicitly determine it based on the use
+funcExpectsAnArrayOfInts({1,2,3,4});
+```
+
+If the desired type for the anonymous object is a template, it may be necessary to explicitly inform the template type;
+
+```angelscript
+funcExpectsAnArray(array<int> = {1,2,3,4});
+```
+
+---
+
+## Source: `docs/angelscript-lang/funcdef.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_funcdef.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Funcdefs
+
+Funcdefs are used to define a function signature that will be used to store pointers to functions with matching signatures. With this a function pointer can be created, which is able to store dynamic pointers that can be invoked at a later time as a normal function call.
+
+```angelscript
+// Define a function signature for the function pointer
+funcdef bool CALLBACK(int, int);
+```
+
+See also: [Function handles](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_funcptr.html) for more information on how to use this.
+
+---
+
+## Source: `docs/angelscript-lang/functions.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Functions
+
+Functions are declared globally, and consists of a signature where the types of the arguments and the return value is defined, and a body where the implementation is declared.
+
+- [Function declaration](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_decl.html)
+- [Parameter references](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_ref.html)
+- [Return references](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_retref.html)
+- [Function overloading](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_overload.html)
+- [Default arguments](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_defarg.html)
+- [Anonymous functions](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_anonfunc.html)
+
+---
+
+## Source: `docs/angelscript-lang/generics.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_generic.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# The generic calling convention
+
+> **Note**
+> This page describes the *generic calling convention* used when registering C++ functions with the engine — an application-embedding topic. AngelScript's script-side "generics" are [template types](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_template.html). This page is reproduced for completeness because the manual files it indexes are part of the core reference tree.
+
+The generic calling convention is available for those situations where the application's native calling convention doesn't work, for example on platforms where support for native calling conventions haven't been added yet. You can detect if native calling conventions isn't supported on your target platform by calling the `asGetLibraryOptions` function and checking the returned string for "AS_MAX_PORTABILITY". If the identifier is in the returned string, then native calling conventions is not supported.
+
+Functions implementing the generic calling conventions are always global functions (or static class methods), that take as parameter a pointer to an `asIScriptGeneric` interface and returns void.
+
+```cpp
+// The function has been registered with signature:
+// MyIntf @func(int, float, MyIntf @+)
+
+void MyGenericFunction(asIScriptGeneric *gen)
+{
+  // Extract the arguments
+  int arg0 = gen->GetArgDWord(0);
+  float arg1 = gen->GetArgFloat(1);
+  asIScriptObject *arg2 = reinterpret_cast<asIScriptObject*>(gen->GetArgObject(2));
+
+  // Call the real function
+  asIScriptObject *ret = MyFunction(arg0, arg1, arg2);
+
+  // Set the return value
+  gen->SetReturnObject(ret);
+}
+```
+
+Functions using the generic calling convention can be registered anywhere the script engine is expecting global functions or class methods (except where explicitly written otherwise).
+
+Writing the functions for the generic calling convention requires extracting each argument from the AngelScript stack, and then manually giving the return value back. For that reason it may be desired to use the [automatic wrapper functions](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_autowrap.html) rather than writing the functions yourself.
+
+## Extracting function arguments
+
+To extract functions arguments from the generic interface you should call one of the GetArg methods that will return the value of the argument, or the `GetAddressOfArg` method. The GetAddressOfArg method returns a pointer to the actual value. The application should then cast this pointer to a pointer of the correct type so that the value can be read from the address.
+
+If the function you're implementing represents a class method, the pointer to the object instance should be obtained with a call to `GetObject`.
+
+For arguments that receive output references, i.e. &out, the GetAddressOfArg will give an address to a valid instance of the type. If the function does not want to return anything in these arguments it is not necessary to do anything.
+
+The `asIScriptGeneric` interface treats the ref count the same way as in native calling conventions, i.e. the application function is responsible to releasing any handle received as a handle (or [register the function with +](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_obj_handle.html#doc_obj_handle_4)).
+
+## Returning values
+
+To return a value from the function one of the SetReturn methods can be called to pass the value to the generic interface. Returning primitive values is straight forward, but care must be taken when returning object types, either by value, reference, or as object handle. Depending on the type and the function used it may be necessary to increment the reference count, or even make a copy of the object first. Carefully read the instructions for `SetReturnAddress` and `SetReturnObject` to determine what needs to be done to get the expected result.
+
+It is also possible to use the `GetAddressOfReturnLocation` method to obtain the address of the memory where the return value will be stored. The memory is not initialized, so you should use the placement new operator to initialize this memory with a call to the constructor. This also works for primitive types, which makes this ideal for template implementations, such as that in the [automatic wrapper functions](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_autowrap.html).
+
+If the return type is a handle then the GetAddressOfReturnLocation will refer to a location holding a null pointer, so if the function is to return null it is not necessary to do anything. For primitives it will be an undefined value, so if the value is important it must be set. For objects of value types returned by value the function must initialize the return value at the location already preallocated by the calling function, unless an exception is set with `asIScriptContext::SetException`.
+
+If the function is registered to return a +, then the script engine will [automatically increment the ref count](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_obj_handle.html#doc_obj_handle_4), just as is done for native calling conventions.
+
+---
+
+## Source: `docs/angelscript-lang/handles.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_handle.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Object handles
+
+An object handle is a type that can hold a reference to an object. With object handles it is possible to declare more than one variables that refer to the same physical object.
+
+Not all types allow object handles to be used. None of the primitive data types, bool, int, float, etc, can have object handles. Object types registered by the application may or may not allow object handles, depending on how they have been registered.
+
+See also: [Object handles to the application](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_obj_handle.html)
+
+## General usage
+
+An object handle is declared by appending the @ symbol to the data type.
+
+```angelscript
+object@ obj_h;
+```
+
+This code declares the object handle obj and initializes it to null, i.e. it doesn't hold a reference to any object.
+
+In expressions variables declared as object handles are used the exact same way as normal objects. But you should be aware that object handles are not guaranteed to actually reference an object, and if you try to access the contents of an object in a handle that is null an exception will be raised.
+
+```angelscript
+object obj;
+object@ obj_h;
+obj.Method();
+obj_h.Method();
+```
+
+Operators like = or any other operator registered for the object type work on the actual object that the handle references. These will also throw an exception if the handle is empty.
+
+```angelscript
+object obj;
+object@ obj_h;
+obj_h = obj;
+```
+
+When you need to make an operation on the actual handle, you should prepend the expression with the @ symbol. Setting the object handle to point to an object is for example done like this:
+
+```angelscript
+object obj;
+object@ obj_h;
+@obj_h = @obj;
+```
+
+Note that the compiler can often implicitly determine that it is the handle of the object that is needed rather than the actual object itself. In these cases it is not necessary to explicitly prepend the expression with @.
+
+An object handle can be compared against another object handle (of the same type) to verify if they are pointing to the same object or not. It can also be compared against null, which is a special keyword that represents an empty handle. This is done using the identity operator, is.
+
+```angelscript
+object@ obj_a, obj_b;
+if( obj_a is obj_b ) {}
+if( obj_a !is null ) {}
+```
+
+Observe, the == and != operators will do a value comparison on the objects referred to by the handles using the [opEquals](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_ops.html#doc_script_class_cmp_ops) or [opCmp](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_ops.html#doc_script_class_cmp_ops) operator overloads. Though, if the expressions are prepended with @ the operators will have the same function as is and !is.
+
+## Object life times
+
+An object's life time is normally for the duration of the scope the variable was declared in. But if a handle outside the scope is set to reference the object, the object will live on until all object handles are released.
+
+```angelscript
+object@ obj_h;
+{
+  object obj;
+  @obj_h = @obj;
+
+  // The object would normally die when the block ends,
+  // but the handle is still holding a reference to it
+}
+
+// The object still lives on in obj_h ...
+obj_h.Method();
+
+// ... until the reference is explicitly released
+// or the object handle goes out of scope
+@obj_h = null;
+```
+
+## Object relations and polymorphing
+
+Object handles can be used to write common code for related types, by means of inheritance or interfaces. This allows a handle to an interface to store references to all object types that implement that interface, similarly a handle to a base class can store references to all object types that derive from that class.
+
+```angelscript
+interface I {}
+class A : I {}
+class B : I {}
+
+// Store reference in handle to interface
+I @i1 = A();
+I @i2 = B();
+
+void function(I @i)
+{
+  // Functions implemented by the interface can be
+  // called directly on the interface handle. But if
+  // special treatment is need for a specific type, a
+  // cast can be used to get a handle to the true type.
+  A @a = cast<A>(i);
+  if( a !is null )
+  {
+    // Access A's members directly
+    ...
+  }
+  else
+  {
+    // The object referenced by i is not of type A
+    ...
+  }
+}
+```
+
+## Const handles
+
+Sometimes it is necessary to hold handles to objects that shouldn't be allowed to be modified. This is done by prefixing the type with 'const', e.g.
+
+```angelscript
+obj @a;                      // handle to modifiable object
+const obj @b;                // handle to non-modifiable object
+```
+
+A handle to a non-modifiable object can refer to both modifiable objects and non-modifiable objects, but the script will not allow the object to be modified through that handle, nor allow the handle to be passed to another handle that would allow modifications.
+
+This syntax is not to be confused with handles that are themselves read-only, i.e. the handle cannot be re-assigned to refer to a different object. Read-only handles like this are declared by adding the 'const' keyword as a suffix after the '@' symbol.
+
+```angelscript
+obj @ const c = obj();       // read-only handle to a modifiable object
+const obj @ const d = obj(); // read-only handle to a non-modifiable object
+```
+
+A read-only handle can only be initialized when declared.
+
+---
+
+## Source: `docs/angelscript-lang/INDEX.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/ (Doxygen, AngelScript 2.38.0)
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# AngelScript core language reference
+
+This directory holds a curated scrape of the **core AngelScript language reference** from the
+official manual at <https://www.angelcode.com/angelscript/sdk/docs/manual/> (Doxygen, version
+2.38.0). It documents the AngelScript scripting language itself — data types, expressions,
+statements, functions, classes, handles, inheritance, funcdefs/delegates, enums, namespaces,
+co-routines, and the standard script add-ons (string, array, dictionary, math). It is **not**
+the PCX Perception.cx AngelScript API bindings, which live separately under
+`docs/perception/angelscript/`.
+
+AngelScript is licensed under the zlib/libpng license (see `license.md`). All pages here are
+reproduced under that license with attribution to Andreas Jönsson / AngelCode. Each `.md` file
+carries a provenance + license header identifying its source URL and fetch date.
+
+## Files
+
+| File | Source page | Topic |
+| --- | --- | --- |
+| `overview.md` | [doc_overview.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_overview.html) | AngelScript overview (engine, modules, contexts, language, memory) |
+| `license.md` | [doc_license.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_license.html) | zlib/libpng license text |
+| `datatypes.md` | [doc_datatypes.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes.html) | Data types (index of primitives, objects, handles, strings, auto) |
+| `strings.md` | [doc_strings.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_strings.html) | Custom string type (registration, Unicode/ASCII, multiline/char literals) |
+| `arrays.md` | [doc_arrays.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_arrays.html) | Custom array type (template types, specializations) |
+| `dictionary.md` | [doc_datatypes_dictionary.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_dictionary.html) | dictionary type (script-side usage, operators, methods) |
+| `expressions.md` | [doc_expressions.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_expressions.html) | Expressions (assignment, math, logic, comparison, casts, anonymous objects) |
+| `statements.md` | [doc_script_statements.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_statements.html) | Statements (if/switch, loops, foreach, break/continue, return, try-catch) |
+| `functions.md` | [doc_script_func.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func.html) | Functions (declaration, parameter/return refs, overloading, defaults, anon) |
+| `variables.md` | [doc_global_variable.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_variable.html) | Global variables (init order, lifetime) |
+| `script-class.md` | [doc_script_class.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class.html) | Script classes (index: constructors, methods, inheritance, ops, accessors) |
+| `script-class-props.md` | [doc_script_class_prop.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_prop.html) | Property accessors (virtual + indexed) |
+| `inheritance.md` | [doc_script_class_inheritance.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_inheritance.html) | Inheritance and polymorphism (super, final, abstract, override, casts) |
+| `handles.md` | [doc_script_handle.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_handle.html) | Object handles (usage, lifetimes, polymorphing, const handles) |
+| `generics.md` | [doc_generic.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_generic.html) | The generic calling convention (embedding; template types are the script-side "generics") |
+| `funcdef.md` | [doc_global_funcdef.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_funcdef.html) | Funcdefs (function signature definitions) |
+| `delegate.md` | [doc_datatypes_funcptr.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_funcptr.html) | Function handles and delegates |
+| `enums.md` | [doc_global_enums.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_enums.html) | Enums (named integer constants) |
+| `namespaces.md` | [doc_global_namespace.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_namespace.html) | Namespaces and `using namespace` |
+| `coroutines.md` | [doc_adv_coroutine.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_coroutine.html) | Co-routines (embedding-side; no standalone script coroutine page exists) |
+| `addons-overview.md` | [doc_addon.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon.html) | Add-ons overview and script extensions index |
+| `addon-strings.md` | [doc_addon_std_string.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_std_string.html) | std::string add-on (scriptstdstring) |
+| `addon-array.md` | [doc_addon_array.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_array.html) | array template object add-on (scriptarray) |
+| `addon-dictionary.md` | [doc_addon_dict.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_dict.html) | dictionary object add-on (scriptdictionary) |
+| `addon-math.md` | [doc_addon_math.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_math.html) | math functions add-on (scriptmath, complex type) |
+
+## Requested filenames that do not exist on the server
+
+The task brief named several pages whose exact URLs return HTTP 404 on the manual server. For
+each, the table above used the real manual page covering the same topic:
+
+| Requested (404) | Real page used |
+| --- | --- |
+| `doc_statements.html` | `doc_script_statements.html` |
+| `doc_functions.html` | `doc_script_func.html` |
+| `doc_variables.html` | `doc_global_variable.html` |
+| `doc_inheritance.html` | `doc_script_class_inheritance.html` |
+| `doc_handle.html` | `doc_script_handle.html` |
+| `doc_funcdef.html` | `doc_global_funcdef.html` |
+| `doc_delegate.html` | `doc_datatypes_funcptr.html` (covers delegates) |
+| `doc_enum.html` | `doc_global_enums.html` |
+| `doc_namespace.html` | `doc_global_namespace.html` |
+| `doc_coroutine.html` | `doc_adv_coroutine.html` (embedding-side; no script coroutine page) |
+| `doc_dictionary.html` | `doc_datatypes_dictionary.html` |
+| `doc_addon_1.html` | `doc_addon.html` |
+| `doc_addon_strings.html` | `doc_addon_std_string.html` |
+
+## Not included (deferred)
+
+The following manual pages were intentionally **not** scraped. They are either C++ embedding /
+engine-registration material (out of scope for a script-writer language reference) or remaining
+add-on / sample / good-practice pages. A future contributor can fetch them to extend coverage.
+
+### C++ embedding / registration (engine-side, not the script language)
+
+- [doc_register_api.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_api.html) — registering the API
+- [doc_register_func.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_func.html)
+- [doc_register_prop.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_prop.html)
+- [doc_register_type.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_type.html)
+- [doc_register_obj.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_obj.html)
+- [doc_register_global.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_global.html)
+- [doc_callbacks.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_callbacks.html)
+- [doc_exceptions.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_exceptions.html)
+- [doc_adv_*](https://www.angelcode.com/angelscript/sdk/docs/manual/) — all `doc_advanced_*` / `doc_adv_*` embedding pages (templates, access masks, concurrent scripts, custom options, etc.)
+- [doc_module.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_module.html)
+- [doc_call_script_func.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_call_script_func.html)
+- [doc_debug.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_debug.html)
+- [doc_memory.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_memory.html)
+- [doc_gc.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_gc.html)
+
+### Remaining script-side / reference pages not scraped
+
+- [doc_datatypes_primitives.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_primitives.html) — primitives
+- [doc_datatypes_obj.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_obj.html) — objects and handles
+- [doc_datatypes_strings.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_strings.html) — string literals / heredoc
+- [doc_datatypes_arrays.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_arrays.html) — array script usage
+- [doc_datatypes_auto.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_auto.html) — auto declarations
+- [doc_script_class_desc.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_desc.html), [doc_script_class_construct.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_construct.html), [doc_script_class_memberinit.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_memberinit.html), [doc_script_class_destruct.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_destruct.html), [doc_script_class_methods.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_methods.html), [doc_script_class_private.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_private.html), [doc_script_class_ops.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_ops.html) — class sub-topics
+- [doc_script_func_decl.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_decl.html), [doc_script_func_ref.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_ref.html), [doc_script_func_retref.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_retref.html), [doc_script_func_overload.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_overload.html), [doc_script_func_defarg.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func_defarg.html), [doc_script_anonfunc.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_anonfunc.html) — function sub-topics
+- [doc_global_func.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_func.html), [doc_global_virtprop.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_virtprop.html), [doc_global_class.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_class.html), [doc_global_interface.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_interface.html), [doc_script_mixin.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_mixin.html), [doc_global_typedef.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_typedef.html), [doc_global_import.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_import.html)
+- [doc_script_shared.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_shared.html) — shared script entities
+- [doc_operator_precedence.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_operator_precedence.html) — operator precedence
+- [doc_reserved_keywords.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_reserved_keywords.html) — reserved keywords/tokens
+- [doc_script_bnf.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_bnf.html) — script language grammar
+- [doc_script_stdlib.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_stdlib.html) — standard library index
+- [doc_good_practice.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_good_practice.html) — good practices
+- [doc_samples.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_samples.html) and [doc_samples_corout.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_samples_corout.html) — samples
+
+### Remaining add-on pages not scraped
+
+- [doc_addon_application.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_application.html) — application module add-ons
+- [doc_addon_any.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_any.html) — any object
+- [doc_addon_handle.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_handle.html) — ref object
+- [doc_addon_weakref.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_weakref.html) — weakref object
+- [doc_addon_file.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_file.html) — file object
+- [doc_addon_filesystem.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_filesystem.html) — filesystem object
+- [doc_addon_grid.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_grid.html) — grid template object
+- [doc_addon_datetime.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_datetime.html) — datetime object
+- [doc_addon_socket.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_socket.html) — socket object
+- [doc_addon_helpers_try.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_helpers_try.html) — exception routines
+- [doc_addon_ctxmgr.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_ctxmgr.html) — context manager (default co-routine impl)
+- [doc_addon_autowrap.html](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_autowrap.html) — automatic wrapper functions
+
+---
+
+## Source: `docs/angelscript-lang/inheritance.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_inheritance.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Inheritance and polymorphism
+
+AngelScript supports single inheritance, where a derived class inherits the properties and methods of its base class. Multiple inheritance is not supported, but polymorphism is supported by implementing [interfaces](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_interface.html), and code reuse is provided by including [mixin classes](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_mixin.html).
+
+All the class methods are virtual, so it is not necessary to specify this manually. When a derived class overrides an implementation, it can extend the original implementation by specifically calling the base class' method using the scope resolution operator. When implementing the constructor for a derived class the constructor for the base class is called using the `super` keyword. If none of the base class' constructors is manually called, the compiler will automatically insert a call to the default constructor in the beginning. The base class' destructor will always be called after the derived class' destructor, so there is no need to manually do this.
+
+```angelscript
+// A derived class
+class MyDerived : MyBase
+{
+  // The default constructor
+  MyDerived()
+  {
+    // Calling the non-default constructor of the base class
+    super(10);
+
+    b = 0;
+  }
+
+  // Overloading a virtual method
+  void DoSomething()
+  {
+    // Call the base class' implementation
+    MyBase::DoSomething();
+
+    // Do something more
+    b = a;
+  }
+
+  int b;
+}
+```
+
+A class that is derived from another can be implicitly cast to the base class. The same works for interfaces that are implemented by a class. The other direction requires an [explicit cast](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_expressions.html#conversion), as it is not known at compile time if the cast is valid.
+
+```angelscript
+class A {}
+class B : A {}
+void Foo()
+{
+  A @handle_to_A;
+  B @handle_to_B;
+
+  @handle_to_A = A(); // OK
+  @handle_to_A = B(); // OK. The reference will be implicitly cast to A@
+
+  @handle_to_B = A(); // Not OK. This will give a compilation error
+  @handle_to_B = B(); // OK
+
+  @handle_to_A = handle_to_B; // OK. The reference will be implicitly cast to A@
+  @handle_to_B = handle_to_A; // Not OK. This will give a compilation error
+
+  @handle_to_B = cast<B>(handle_to_A); // OK. Though, the explicit cast will return null
+                                       // if the object in handle_to_a is not really an
+                                       // instance of B
+}
+```
+
+## Extra control with final, abstract, and override
+
+A class can be marked as 'final' to prevent the inheritance of it. This is an optional feature and mostly used in larger projects where there are many classes and it may be difficult to manually control the correct use of all classes. It is also possible to mark individual class methods of a class as 'final', in which case it is still possible to inherit from the class, but the finalled method cannot be overridden.
+
+Another keyword that can be used to mark a class is 'abstract'. Abstract classes cannot be instantiated, but they can be derived from. Abstract classes are most frequently used when you want to create a family of classes by deriving from a common base class, but do not want the base class to be instantiated by itself. It is currently not possible to mark methods as abstract so all methods must have an implementation even for abstract classes.
+
+```angelscript
+// A final class that cannot be inherited from
+final class MyFinal
+{
+  MyFinal() {}
+  void Method() {}
+}
+
+// A class with individual methods finalled
+class MyPartiallyFinal
+{
+  // A final method that cannot be overridden
+  void Method1() final {}
+
+  // Normal method that can still be overridden by derived class
+  void Method2() {}
+}
+
+// An abstract class
+abstract class MyAbstractBase {}
+```
+
+When deriving a class it is possible to tell the compiler that a method is meant to override a method in the inherited base class. When this is done and there is no matching method in the base class the compiler will emit an error, as it knows that something wasn't implemented quite the way it was meant. This is especially useful to catch errors in large projects where a base class might be modified, but the derived classes was forgotten.
+
+```angelscript
+class MyBase
+{
+  void Method() {}
+  void Method(int) {}
+}
+
+class MyDerived : MyBase
+{
+  void Method() override {}      // OK. The method is overriding a method in the base class
+  void Method(float) override {} // Not OK. The method isn't overriding a method in base class
+}
+```
+
+---
+
+## Source: `docs/angelscript-lang/license.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_license.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# License
+
+## AngelCode Scripting Library
+
+Copyright © 2003-2025 Andreas Jönsson
+
+This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose, including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+
+3. This notice may not be removed or altered from any source distribution.
+
+---
+
+## Source: `docs/angelscript-lang/namespaces.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_namespace.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Namespaces
+
+Namespaces can be used to organize large projects in logical units that may be easier to remember. When using namespaces it is also not necessary to worry about using names for entities that may exist in a different part of the project under a different namespace.
+
+```angelscript
+namespace A
+{
+  // Entities in a namespace see each other normally.
+  void function() { variable++; }
+  int variable;
+}
+
+namespace B
+{
+  // Entities in different namespaces don't immediately see each other and
+  // can reuse the same name without causing name conflicts. By using the
+  // scoping operator the entity from the desired namespace can be explicitly
+  // informed.
+  void function() { A::function(); }
+}
+```
+
+Observe that in order to refer to an entity from a different namespace the scoping operator must be used, unless it is a parent namespace in which case it is only necessary if the child namespace declare the same entity.
+
+```angelscript
+int var;
+namespace Parent
+{
+  int var;
+  namespace Child
+  {
+    int var;
+    void func()
+    {
+      // Accessing variable in parent namespace requires
+      // specifying the scope if an entity in a child namespace
+      // uses the same name
+      var = Parent::var;
+
+      // To access variables in global scope the scoping
+      // operator without any name should be used
+      Parent::var = ::var;
+    }
+  }
+}
+
+void func()
+{
+  // Access variable in a nested namespace requires
+  // fully qualified scope specifier
+  int var = Parent::Child::var;
+}
+```
+
+## Using namespace
+
+In order to avoid having to always prefix symbols with their namespace it is also possible to use 'using namespace' to tell the compiler to also search for symbols in a specific namespace.
+
+```angelscript
+namespace test
+{
+  void func() {}
+}
+using namespace test;
+void main()
+{
+  func(); // The function will be found within the test namespace
+}
+```
+
+If 'using namespace' is used globally or within a namespace, the symbols from the given namespace will be visible throughout the entire enclosing namespace.
+
+See also: [Statement 'using namespace'](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_statements.html#using_ns)
+
+---
+
+## Source: `docs/angelscript-lang/overview.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_overview.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Overview
+
+AngelScript is structured around an [engine](https://www.angelcode.com/angelscript/sdk/docs/manual/classas_i_script_engine.html) where the application should [register](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_api.html) the [functions](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_func.html), [properties](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_prop.html), and even [types](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_type.html), that the scripts will be able to use. The scripts are then compiled into [modules](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_module.html), where the application may have one or more modules, depending on the need of the application. The application can also expose a different interface to each module through the use of [access profiles](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_access_mask.html). This is especially useful when the application works with multiple types of scripts, e.g. GUI, AI control, etc.
+
+As the scripts are compiled into bytecode AngelScript also provides a virtual machine, also known as a [script context](https://www.angelcode.com/angelscript/sdk/docs/manual/classas_i_script_context.html), for [executing](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_call_script_func.html) the bytecode. The application can have any number of script context at the same time, though most applications will probably only need one. The contexts support [suspending](https://www.angelcode.com/angelscript/sdk/docs/manual/classas_i_script_context.html#ad4ac8be3586c46069b5870e40c86544a) the execution and then resuming it, so the application can easily implement features such as [concurrent scripts](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_concurrent.html) and [co-routines](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_coroutine.html). The script context also provides an interface for extracting run-time information, useful for [debugging](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_debug.html) scripts.
+
+The [script language](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script.html) is based on the well known syntax of C++ and more modern languages such as Java, C#, and D. Anyone with some knowledge of those languages, or other script languages with similar syntax, such as Javascript and ActionScript, should feel right at home with AngelScript. Contrary to most script languages, AngelScript is a strongly typed language, which permits faster execution of the code and smoother interaction with the host application as there will be less need for runtime evaluation of the true type of values.
+
+The [memory management](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_memory.html) in AngelScript is based on reference counting with an incremental [garbage collector](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_gc.html) for detecting and freeing objects with circular references. This provides for a controlled environment without application freezes as the garbage collector steps in to free up memory.
+
+---
+
+## Source: `docs/angelscript-lang/script-class-props.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_prop.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Property accessors
+
+> **Note**
+> The application can optionally [turn off support for property accessors](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_custom_options.html#doc_adv_custom_options_lang_mod), so you need to verify your application's manual to determine if this is supported for your application or not.
+
+Many times when working with properties it is necessary to make sure specific logic is followed when accessing them. An example would be to always send a notification when a property is modified, or computing the value of the property from other properties. By implementing property accessor methods for the properties this can be implemented by the class itself, making it easier for the one who accesses the properties.
+
+In AngelScript property accessors are declared with the following syntax:
+
+```angelscript
+class MyObj
+{
+  // A virtual property with accessors
+  int prop
+  {
+    get const
+    {
+      // The actual value of the property could be stored
+      // somewhere else, or even computed at access time.
+      return realProp;
+    }
+    set
+    {
+      // The new value is stored in a hidden parameter appropriately called 'value'.
+      realProp = value;
+    }
+  }
+
+  // The actual value can be stored in a member or elsewhere.
+  // It is actually possible to use the same name for the real property, if so is desired.
+  private int realProp;
+}
+```
+
+Behind the scene the compiler transforms this into two methods with the name of the property and the prefixes get_ and set_, and with the function decorator 'property'. The following generates the equivalent code, and is perfectly valid too:
+
+```angelscript
+class MyObj
+{
+  int get_prop() const property { return realProp; }
+  void set_prop(int value) property { realProp = value; }
+  private int realProp;
+}
+```
+
+If you implement the property accessors by explicitly writing the two methods you must make sure the return type of the get accessor and the parameter type of the set accessor match, otherwise the compiler will not know which is the correct type to use.
+
+For interfaces the first alternative is usually the preferred way of declaring the property accessors, as it gets quite short and easy to read.
+
+```angelscript
+interface IProp
+{
+  int prop { get const; set; }
+}
+```
+
+You can also leave out either the get or set accessor. If you leave out the set accessor, then the property will be read-only. If you leave out the get accessor, then the property will be write-only.
+
+Property accessors can also be implemented for global properties, which follows the same rules, except the functions are global.
+
+When the property accessors have been declared it is possible to access them like ordinary properties, and the compiler will automatically expand the expressions to the appropriate function calls, either set_ or get_ depending on how the property is used in the expression.
+
+```angelscript
+void Func()
+{
+  MyObj obj;
+
+  // Set the property value just like a normal property.
+  // The compiler will convert this to a call to set_prop(10000).
+  obj.prop = 10000;
+
+  // Get the property value just a like a normal property.
+  // The compiler will convert this to a call to get_prop().
+  assert( obj.prop == 1000 );
+}
+```
+
+Observe that as property accessors are actually a pair of methods rather than direct access to the value, some restrictions apply as to how they can be used in expressions that inspect and mutate in the same operation. Compound assignments can be used on property accessors if the owning object is a reference type, but not if the owning object is a value type. This is because the compiler must be able to guarantee that the object stays alive between the two calls to the get accessor and set accessor.
+
+The increment and decrement operators are currently not supported.
+
+In such cases the expression must be expanded so that the read and write operation are performed separately, e.g. the increment operator must be rewritten as follows:
+
+```angelscript
+a++;     // will not work if a is a virtual property
+a += 1;  // this is OK, as long as the owner of the virtual
+         // property is a reference type or the property is global
+```
+
+## Indexed property accessors
+
+Property accessors can be used to emulate a single property or an array of properties accessed through the index operator. Property accessors for indexed access work the same way as ordinary property accessors, except that they take an index argument. The get accessor should take the index argument as the only argument, and the set accessor should take the index argument as the first argument, and the new value as the second argument.
+
+```angelscript
+string firstString;
+string secondString;
+
+// A global indexed get accessor
+string get_stringArray(int idx) property
+{
+  switch( idx )
+  {
+  case 0: return firstString;
+  case 1: return secondString;
+  }
+  return "";
+}
+
+// A global indexed set accessor
+void set_stringArray(int idx, const string &in value) property
+{
+  switch( idx )
+  {
+  case 0: firstString = value; break;
+  case 1: secondString = value; break;
+  }
+}
+
+void main()
+{
+  // Setting the value of the indexed properties
+  stringArray[0] = "Hello";
+  stringArray[1] = "World";
+
+  // Reading the value of the indexed properties
+  print(StringArray[0] + " " + stringArray[1] + "\n");
+}
+```
+
+Compound assignments currently doesn't work for indexed properties.
+
+---
+
+## Source: `docs/angelscript-lang/script-class.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Script classes
+
+Script classes are declared globally and provides an easy way of grouping properties and methods into logical units. The syntax for classes is similar to C++ and Java.
+
+- [Script class overview](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_desc.html)
+- [Class constructors](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_construct.html)
+- [Initialization of class members](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_memberinit.html)
+- [Class destructor](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_destruct.html)
+- [Class methods](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_methods.html)
+- [Inheritance and polymorphism](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_inheritance.html)
+- [Protected and private class members](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_private.html)
+- [Operator overloads](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_ops.html)
+- [Property accessors](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_prop.html)
+
+---
+
+## Source: `docs/angelscript-lang/statements.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_statements.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Statements
+
+- [Variable declarations](#variable-declarations)
+- [Expression statement](#expression-statement)
+- [Conditions: if / if-else / switch-case](#conditions-if--if-else--switch-case)
+- [Loops: while / do-while / for / foreach](#loops-while--do-while--for--foreach)
+- [Loop control: break / continue](#loop-control-break--continue)
+- [Return statement](#return-statement)
+- [Statement blocks](#statement-blocks)
+- [Try-catch blocks](#try-catch-blocks)
+- [Using namespace](#using-namespace)
+
+## Variable declarations
+
+```angelscript
+int var = 0, var2 = 10;
+object@ handle, handle2;
+const float pi = 3.141592f;
+object obj(23), obj2 = object(23);
+array<int> arr, arr2 = {1,2,3};
+```
+
+Variables must be declared before they are used within the statement block, or any sub blocks. When the code exits the statement block where the variable was declared the variable is no longer valid.
+
+A variable can be declared with or without an initial expression. If it is declared with an initial expression it, the expression must evaluate to a type compatible with the variable type.
+
+Any number of variables can be declared on the same line separated with commas, where all variables then get the same type.
+
+Variables can be declared as `const`. In these cases the value of the variable cannot be changed after initialization.
+
+Variables of primitive types that are declared without an initial value, will have a random value. Variables of complex types, such as handles and object are initialized with a default value. For handles this is `null`, for objects this is what is defined by the object's default constructor.
+
+See also: [Auto declarations](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_auto.html)
+
+## Expression statement
+
+```angelscript
+a = b;  // a variable assignment
+func(); // a function call
+```
+
+Any [expression](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_expressions.html) may be placed alone on a line as a statement. This will normally be used for variable assignments or function calls that don't return any value of importance.
+
+All expression statements must end with a `;`.
+
+## Conditions: if / if-else / switch-case
+
+```angelscript
+if( condition )
+{
+  // Do something if condition is true
+}
+
+if( value < 10 )
+{
+  // Do something if value is less than 10
+}
+else
+{
+  // Do something else if value is greater than or equal to 10
+}
+```
+
+If statements are used to decide whether to execute a part of the logic or not depending on a certain condition. The conditional expression must always evaluate to `true` or `false`.
+
+It's possible to chain several `if-else` statements, in which case each condition will be evaluated sequencially until one is found to be `true`.
+
+```angelscript
+switch( value )
+{
+case 0:
+  // Do something if value equals 0, then leave
+  break;
+
+case 2:
+case constant_value:
+  // This will be executed if value equals 2 or the constant_value
+  break;
+
+default:
+  // This will be executed if value doesn't equal any of the cases
+}
+```
+
+If you have an integer (signed or unsigned) expression that have many different outcomes that should lead to different code, a switch case is often the best choice for implementing the condition. It is much faster than a series of ifs, especially if all of the case values are close in numbers.
+
+Each case should be terminated with a break statement unless you want the code to continue with the next case.
+
+The case value can be a constant variable that was initialized with a constant expression. If the constant variable was initialized with an expression that cannot be determined at compile time it cannot be used in the case values.
+
+## Loops: while / do-while / for / foreach
+
+```angelscript
+// Loop, where the condition is checked before the logic is executed
+int i = 0;
+while( i < 10 )
+{
+  // Do something
+  i++;
+}
+
+// Loop, where the logic is executed before the condition is checked
+int j = 0;
+do
+{
+  // Do something
+  j++;
+} while( j < 10 );
+```
+
+For both `while` and `do-while` the expression that determines if the loop should continue must evaluate to either true or false. If it evaluates to true, the loop continues, otherwise it stops and the code will continue with the next statement immediately following the loop.
+
+```angelscript
+// More compact loop, where condition is checked before the logic is executed
+for( int n = 0; n < 10; n++ )
+{
+  // Do something
+}
+```
+
+The `for` loop is a more compact form of a `while` loop. The first part of the statement (until the first `;`) is executed only once, before the loop starts. Here it is possible to declare a variable that will be visible only within the loop statement. The second part is the condition that must be satisfied for the loop to be executed. A blank expression here will always evaluate to true. The last part is executed after the logic within the loop, e.g. used to increment an iteration variable.
+
+Multiple variables can be declared in the `for` loop, separated by `,`. Likewise, multiple increment expressions can be used in the last part by separating them with `,`.
+
+```angelscript
+// A foreach loop iterates over each element in a container object
+dictionary dict = {...};
+int count = 0;
+int sum = 0;
+foreach( auto val, auto key : dict )
+{
+   count++;
+   sum += int(val);
+   dict[key] = 0;
+}
+double average = double(sum)/count;
+```
+
+A `foreach` is a special kind of loop for container objects, where the loop will iterate over each element in the container.
+
+The type and number of values that can be used for the container depends on the type of the container. Each container type that supports `foreach` loops will have a set of methods to allow the compiler to build the logic for iterating over the elements.
+
+If the container is modified while still within the `foreach` loop, e.g. an element is removed or added, the behavior is undefined.
+
+See also: [Foreach loop operators](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_ops.html#doc_script_class_foreach_ops)
+
+## Loop control: break / continue
+
+```angelscript
+for(;;) // endless loop
+{
+  // Do something
+
+  // End the loop when condition is true
+  if( condition )
+    break;
+}
+```
+
+`break` terminates the smallest enclosing loop statement or switch statement.
+
+```angelscript
+for(int n = 0; n < 10; n++ )
+{
+  if( n == 5 )
+    continue;
+
+  // Do something for all values from 0 to 9, except for the value 5
+}
+```
+
+`continue` jumps to the next iteration of the smallest enclosing loop statement.
+
+## Return statement
+
+```angelscript
+float valueOfPI()
+{
+  return 3.141592f; // return a value
+}
+```
+
+Any function with a return type other than `void` must be finished with a `return` statement where expression evaluates to the same data type as the function return type. Functions declared as `void` can have `return` statements without any expression to terminate early.
+
+## Statement blocks
+
+```angelscript
+{
+  int a;
+  float b;
+
+  {
+    float a; // Override the declaration of the outer variable
+             // but only within the scope of this block.
+
+    // variables from outer blocks are still visible
+    b = a;
+  }
+
+  // a now refers to the integer variable again
+}
+```
+
+A statement block is a collection of statements. Each statement block has its own scope of visibility, so variables declared within a statement block are not visible outside the block.
+
+## Try-catch blocks
+
+```angelscript
+{
+  try
+  {
+    DoSomethingThatMightThrowException();
+
+    // This is not executed if an exception was thrown
+  }
+  catch
+  {
+    // This is executed if an exception was thrown
+  }
+ }
+```
+
+A try-catch block can be used if you're executing some code that might throw an exception and you want to catch that exception and continue with the exception rather than just abort the script.
+
+Exceptions can occur for various reasons, some examples include, accessing null pointers in uninitialized handles, division by zero, or exceptions raised from application registered functions. In some cases exceptions are intentionally raised by the script to interrupt some execution.
+
+See also: [Exception handling](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_stdlib_exception.html)
+
+## Using namespace
+
+It is possible to declare 'using namespace' within a statement block. When this is done, all subsequent statements within that block will also search for symbols in the given namespace.
+
+```angelscript
+namespace test
+{
+  void func() {}
+}
+void main()
+{
+  test::func(); // This call must explicitly inform the namespace
+  {
+    using namespace test;
+    func(); // This call will implicitly search the namespace
+  }
+  test::func(); // This is after the statement block and must again explicitly inform the namespace
+}
+```
+
+See also: [Global 'using namespace'](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_namespace.html#doc_global_using_ns)
+
+---
+
+## Source: `docs/angelscript-lang/strings.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_strings.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Custom string type
+
+Almost all applications have some need to manipulate text strings in one way or another. However most applications have very different needs, and also different ways of representing their string types. For that reason, AngelScript doesn't come with its own built-in string type that the application would be forced to adapt to, instead AngelScript allows the application to [register its own string type](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_api.html).
+
+This article presents the options for customizing the script language to the application's needs with regards to strings. If you do not want, or do not need to have AngelScript use your own string type, then I suggest you use the standard add-on for [std::string registration](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_std_string.html).
+
+## Registering the custom string type
+
+To make the script language support strings, the string type must first be [registered as type](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_register_type.html) with the engine. The application is free to use any valid type name, not necessarily 'string', though it is probably the most commonly used name. The custom string type can also be either value type or a reference type at the preference of the application developer.
+
+Once the string type is registered, the application must also provide a string factory to allow the scripts to use literal string constants. The string factory must implement the `asIStringFactory` interface, and be registered with the `asIScriptEngine::RegisterStringFactory` method.
+
+The string factory must implement all 3 methods of the `asIStringFactory` interface. The `GetStringConstant` method receives the raw string data by the compiler and should return a pointer to the custom string object that represents that string. The `ReleaseStringConstant` is called when the engine no longer needs the string constant, e.g. when discarding a module. The `GetRawStringData` is called by the engine when the raw string data is needed, e.g. when saving bytecode or when requesting a copy of a string constant.
+
+Although not necessary, the application should preferably implement caching of the string constants, so that if two calls to GetStringConstant with the same raw string data is received the string factory returns the address of the same string instance in both calls. This will reduce the amount of memory needed to store the string constants, especially when scripts use the same string constants in many places. Remember, when using caching, the ReleaseStringConstant must only free the string object when the last call for that same object is done.
+
+See also: [The standard string add-on](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_std_string.html)
+
+## Unicode vs ASCII
+
+Is your application using Unicode or plain ASCII for the text? If you use Unicode, then you'll want to encode the scripts in UTF-8, which the AngelScript compiler supports natively. By default AngelScript expects the scripts to have been encoded in UTF-8, but should you prefer ASCII you can turn this off by setting the engine property `asEP_SCRIPT_SCANNER` to 0 right after creating the engine.
+
+```cpp
+// Set engine to use ASCII scanner for script code
+engine->SetEngineProperty(asEP_SCRIPT_SCANNER, 0);
+```
+
+> `asEP_SCRIPT_SCANNER` — Select scanning method: 0 - ASCII, 1 - UTF8. Default: 1 (UTF8).
+
+If you do use Unicode, then you'll also want to choose the desired encoding for the string literals, either UTF-8 or UTF-16. By default the string literals in AngelScript are encoded with UTF-8, but if your application is better prepared for UTF-16 then you'll want to change this by setting the engine property `asEP_STRING_ENCODING` to 1 before compiling your scripts.
+
+```cpp
+// Set engine to use UTF-16 encoding for string literals
+engine->SetEngineProperty(asEP_STRING_ENCODING, 1);
+```
+
+> `asEP_STRING_ENCODING` — Select string encoding for literals: 0 - UTF8/ASCII, 1 - UTF16. Default: 0 (UTF8)
+
+Observe that the string factory called by the engine to create new strings gives the size of the string data in bytes even for UTF-16 encoded strings, so you'll need to divide the size by two to get the number of characters in the string.
+
+## Multiline string literals
+
+There is also a couple of options that affect the script language itself a bit. If you like the convenience of allowing string literals to span multiple lines of code, then you can turn this on by setting the engine property `asEP_ALLOW_MULTILINE_STRINGS` to true. Without this the compiler will give an error if it encounters a line break before the end of the string.
+
+```cpp
+// Set engine to allow string literals with line breaks
+engine->SetEngineProperty(asEP_ALLOW_MULTILINE_STRINGS, true);
+```
+
+> `asEP_ALLOW_MULTILINE_STRINGS` — Allow linebreaks in string constants. Default: false.
+
+Observe that the line ending encoding of the source file will not be modified by the script compiler, so depending on how the file has been saved, you may get strings using different line endings.
+
+The [heredoc strings](https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_strings.html) are not affected by this setting, as they are designed to support multiline text sections.
+
+## Character literals
+
+By default AngelScript doesn't have character literals as C and C++ does. A string literal can be written with double quotes or single quotes and still have the same meaning. This makes it convenient to embed scripts in XML files or C/C++ source files where double quotes would otherwise end the script code.
+
+If you want to have single quoted literals mean a single character literal instead of a string, then you can do so by setting the engine property `asEP_USE_CHARACTER_LITERALS` to true. The compiler will then convert single quoted literals to an integer number representing the first character.
+
+```cpp
+// Set engine to use character literals
+engine->SetEngineProperty(asEP_USE_CHARACTER_LITERALS, true);
+```
+
+> `asEP_USE_CHARACTER_LITERALS` — Interpret single quoted strings as character literals. Default: false.
+
+Observe that the `asEP_SCRIPT_SCANNER` property has great importance in this case, as an ASCII character can only represent values between 0 and 255, whereas a Unicode character can represent values between 0 and 1,114,111.
+
+---
+
+## Source: `docs/angelscript-lang/variables.md`
+
+<!-- Source: https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_variable.html
+     Fetched: 2026-06-20
+     License: AngelScript is licensed under the zlib/libpng license (see license.md).
+     Reproduced under that license with attribution to Andreas Jönsson / AngelCode.
+     This is the core AngelScript language reference, scraped from the official manual.
+     Do not edit manually — regenerate via tools/scrape-angelscript-manual.py (TODO) or re-fetch. -->
+
+# Variables
+
+Global variables may be declared in the scripts, which will then be shared between all contexts accessing the script module.
+
+Variables declared globally like this are accessible from all functions. The value of the variables are initialized at compile time and any changes are maintained between calls. If a global variable holds a memory resource, e.g. a string, its memory is released when the module is discarded or the script engine is reset.
+
+```angelscript
+int MyValue = 0;
+const uint Flag1 = 0x01;
+```
+
+Variables of primitive types are initialized before variables of non-primitive types. This allows class constructors to access other global variables already with their correct initial value. The exception is if the other global variable also is of a non-primitive type, in which case there is no guarantee which variable is initialized first, which may lead to null-pointer exceptions being thrown during initialization.
+
+Be careful with calling functions that may access global variables from within the initialization expression of global variables. While the compiler tries to initialize the global variables in the order they are needed, there is no guarantee that it will always succeed. Should a function access a global variable that has not yet been initialized you will get unpredictable behaviour or a null-pointer exception.
+
+---
+
 ## Source: `.claude/skills/pcx-angelscript-discipline/SKILL.md`
 
 ---
@@ -11867,19 +14286,20 @@ void on_unload() {
 ---
 name: game-cheat-guidelines
 description: >
-  Behavioral rules for writing game cheats in Enma, AngelScript, and C++ on
-  Perception.cx. Derived from Karpathy principles, rewritten for cheat
-  development: memory hacking, ESP, aimbot, hooking, overlay rendering, and
-  RE workflows. Always active — these rules apply every time you write or
-  edit cheat code.
+  Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and
+  C++ for authorized reverse engineering, analysis, overlay rendering, and
+  research. Derived from Karpathy principles: memory reading, visualization,
+  hooking, render pipelines, and RE workflows. Always active — these rules
+  apply every time you write or edit Perception.cx script code. Authorized use
+  only — analyze software you own or are permitted to test.
 license: MIT
 ---
 
-# Game Cheat Development Guidelines
+# Perception.cx Script Development Guidelines
 
-Behavioral rules for writing game cheats in Enma, AngelScript, and C++. Derived from the Karpathy principles but rewritten for the domain: memory hacking, ESP, aimbot, hooking, overlay rendering, and reverse engineering workflows on the Perception.cx platform.
+Behavioral rules for writing Perception.cx scripts in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: memory reading, visualization, overlay rendering, hooking, and reverse-engineering workflows on the Perception.cx platform. These rules originated in game-overlay development and apply equally to authorized reverse engineering, security research, and analysis — analyze only software you own or are authorized to test.
 
-**Always active.** These rules apply every time you write or edit cheat code. They are not suggestions.
+**Always active.** These rules apply every time you write or edit Perception.cx script code. They are not suggestions.
 
 **Prerequisite:** The `game-hacking-pcx` skill MUST be loaded alongside this one. It contains the full doc index (33,580 lines across 99 files) for Enma, AngelScript, and all Perception.cx APIs. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
 
@@ -12021,7 +14441,7 @@ uint64 resolve_entity_list(proc_t& p, uint64 base, uint64 size) {
 
 ## 6. One Feature, One File
 
-**Each cheat feature lives in its own file. No god scripts.**
+**Each feature lives in its own file. No god scripts.**
 
 - ESP in `esp.em`. Aimbot in `aim.em`. Radar in `radar.em`. Config/GUI in `menu.em`.
 - Shared state (process handle, entity cache, config values) goes in a `globals.em` module and is imported.
@@ -12095,26 +14515,26 @@ draw_line(vec2(10.0, 20.0), vec2(100.0, 200.0), white, 1.0);
 
 ---
 
-## 9. Don't Write Memory Unless You Must
+## 9. Prefer Reads Over Writes
 
-**Read-only cheats are invisible. Writes leave forensic traces.**
+**Reads are non-invasive. Writes alter the target's state and are inherently riskier.**
 
-- ESP, radar, entity highlighting, distance display — all read-only. Prefer these.
-- If you must write (aimbot smoothing via angle writes, no-recoil via value patches, speed hacks), write the minimum bytes needed.
+- Analysis, visualization, entity inspection, distance display — all read-only. Prefer these.
+- If you must write (patching for research on a target you own or are authorized to test, modifying your own single-player session), write the minimum bytes needed and know exactly why.
 - Never `wvm` a large buffer when `wu32` or `wf32` on a single field suffices.
-- After writing, verify the write took effect with a read-back if the field is contested (anti-cheat may revert it).
-- Gate all writes behind `write_memory` permission checks — Perception enforces this, respect it in your design too.
+- After a research write, verify it took effect with a read-back; some targets revert unexpected patches.
+- Gate all writes behind `write_memory` permission checks — Perception enforces this; respect it in your design too.
 
 ```cpp
-// WRONG — nop-patching 16 bytes of recoil code
+// WRONG — nop-patching 16 bytes when you only need one field
 array<uint8> nops = {0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
 p.wvm(recoil_addr, nops);
 
-// RIGHT — write the float that controls recoil spread, minimal footprint
+// RIGHT — write the single float you actually mean to change, minimal footprint
 p.wf32(recoil_spread_addr, 0.0f);
 ```
 
-**Why:** Every memory write is a detection surface. Anti-cheats integrity-check code sections (`.text`), monitor write patterns on game state, and log anomalous page faults. A single float write to a gameplay variable is orders of magnitude harder to detect than a 16-byte NOP sled in executable memory.
+**Why:** Every memory write mutates the target's state — a read is observation, a write is intervention. For analysis and overlay work you almost never need to write, and when you do, a minimal, deliberate write is easier to reason about and roll back than a large patch. Treat writes as a last resort, not a default.
 
 ---
 
@@ -12218,7 +14638,7 @@ Debugging checklist:
 | 6 | One feature, one file | No god scripts |
 | 7 | Construct every frame | Colors and vecs are free |
 | 8 | `f` suffix for float32 | The GPU cares |
-| 9 | Minimize writes | Reads are invisible |
+| 9 | Prefer reads over writes | Reads are non-invasive |
 | 10 | W2S once, correctly | Math, not magic |
 | 11 | GUI for all tunables | No magic constants |
 | 12 | Verify with the binary | Trust live reads over memory |
