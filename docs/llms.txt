@@ -22,6 +22,7 @@ See `docs/INDEX.md` for the complete file index. The most useful single-file con
 
 The native Perception.cx scripting language: syntax, addons, SDK, lifecycle.
 
+- [Upstream Suggestions for the Enma Language & SDK](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/UPSTREAM-SUGGESTIONS.md): The following recommendations are compiled based on the development of the
 - [Arrays](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/addon-arrays.md): Registered with registeraddonarray(engine).
 - [Atomic](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/addon-atomic.md): Script-exposed atomic integers and memory barriers backed by std::atomic<>. Use these when multiple threads touch the same value. Plain aint32 / aint64 keywords exist as Enma types but the codegen doe
 - [Bits](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/addon-bits.md): Registered with registeraddonbits(engine).
@@ -72,7 +73,6 @@ The native Perception.cx scripting language: syntax, addons, SDK, lifecycle.
 - [Safety](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/sdk-safety.md): Safety mechanisms at every layer.
 - [Serialization & Linking](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/sdk-serialization-and-linking.md): Compile once, distribute the binary; no source required at runtime.
 - [Type Registration](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/sdk-type-registration.md): typebuilder exposes native types to scripts: fields, methods, properties, operators (full set including opCmp, compound assign, ++/--), subscript, iteration, conversion, factory, destructor.
-- [Upstream Suggestions for the Enma Language & SDK](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/UPSTREAM-SUGGESTIONS.md): The following recommendations are compiled based on the development of the
 
 ## Enma Platform APIs
 
@@ -153,6 +153,7 @@ The Perception.cx host API surface as exposed to Lua.
 
 The core AngelScript language manual scraped from angelcode.com (zlib/libpng license): datatypes, strings, arrays, expressions, statements, functions, classes, handles, generics, delegates, enums, namespaces, coroutines, add-ons.
 
+- [AngelScript core language reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/INDEX.md): This directory holds a curated scrape of the core AngelScript language reference from the
 - [array template object](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/addon-array.md): The array type is a template object that allow the scripts to declare arrays of any type. Since it is a generic class it is not the most performatic due to the need to determine characteristics at run
 - [dictionary object](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/addon-dictionary.md): The dictionary object maps string values to values or objects of other types.
 - [math functions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/addon-math.md): This add-on registers the math functions from the standard C runtime library with the script engine. Use RegisterScriptMath(asIScriptEngine) to perform the registration.
@@ -169,7 +170,6 @@ The core AngelScript language manual scraped from angelcode.com (zlib/libpng lic
 - [Functions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/functions.md): Functions are declared globally, and consists of a signature where the types of the arguments and the return value is defined, and a body where the implementation is declared.
 - [The generic calling convention](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/generics.md): The generic calling convention is available for those situations where the application's native calling convention doesn't work, for example on platforms where support for native calling conventions h
 - [Object handles](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/handles.md): An object handle is a type that can hold a reference to an object. With object handles it is possible to declare more than one variables that refer to the same physical object.
-- [AngelScript core language reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/INDEX.md): This directory holds a curated scrape of the core AngelScript language reference from the
 - [Inheritance and polymorphism](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/inheritance.md): AngelScript supports single inheritance, where a derived class inherits the properties and methods of its base class. Multiple inheritance is not supported, but polymorphism is supported by implementi
 - [License](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/license.md): Copyright © 2003-2025 Andreas Jönsson
 - [Namespaces](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/namespaces.md): Namespaces can be used to organize large projects in logical units that may be easier to remember. When using namespaces it is also not necessary to worry about using names for entities that may exist

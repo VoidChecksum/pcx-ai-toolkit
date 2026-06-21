@@ -168,7 +168,7 @@ def extract_title_and_desc(path: Path) -> tuple[str, str]:
 
 def find_files(glob: str) -> list[Path]:
     out = []
-    for p in sorted(REPO_ROOT.glob(glob)):
+    for p in sorted(REPO_ROOT.glob(glob), key=lambda x: str(x.relative_to(REPO_ROOT)).replace(os.sep, '/')):
         if not p.is_file():
             continue
         rel = str(p.relative_to(REPO_ROOT)).replace(os.sep, '/')
