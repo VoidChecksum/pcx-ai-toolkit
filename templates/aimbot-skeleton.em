@@ -11,9 +11,9 @@ import "color";
 // ── Signatures (UNVERIFIED — instruction patterns, not version offsets) ──
 // Each matches the instruction that loads a global pointer; the 4-byte
 // RIP-relative displacement is wildcarded and resolved at runtime (rule 5).
-const string SIG_ENTITY_LIST  = "48 8B 0D ?? ?? ?? ?? 48 85 C9 74"; // MOV RCX,[rip+????]
-const string SIG_LOCAL_PLAYER = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74"; // MOV RAX,[rip+????]
-const string SIG_VIEW_MATRIX  = "48 8D 0D ?? ?? ?? ?? 48 89";       // LEA RCX,[rip+????]
+const string SIG_ENTITY_LIST  = "48 8B 0D ?? ?? ?? ?? 48 85 C9 74"; // UNVERIFIED — MOV RCX,[rip+????]
+const string SIG_LOCAL_PLAYER = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74"; // UNVERIFIED — MOV RAX,[rip+????]
+const string SIG_VIEW_MATRIX  = "48 8D 0D ?? ?? ?? ?? 48 89";       // UNVERIFIED — LEA RCX,[rip+????]
 
 // ── Struct field offsets (UNVERIFIED — fill from YOUR target before use) ──
 const uint64 OFF_HEALTH      = 0x0;  // UNVERIFIED — int32 health field
