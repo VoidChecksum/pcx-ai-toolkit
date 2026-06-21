@@ -12,7 +12,12 @@ strict = true
 module = [
     "tools.anti-debug-scanner",
     "tools.binary-diff-summary",
+    "tools.build-counts",
     "tools.build-llms-index",
+    "tools.build-provenance",
+    "tools.check-doc-drift",
+    "tools.check-mcp-config",
+    "tools.check-version-matrix",
     "tools.dump-strings-xor",
     "tools.dumper-to-enma",
     "tools.evidence-log-validator",
