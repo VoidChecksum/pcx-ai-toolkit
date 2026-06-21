@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 211**
+**Source files included: 213**
 
 ---
 
@@ -50928,6 +50928,96 @@ If you script the checklist, save it as `pre-ship.sh` and run it before every `g
 
 ---
 
+## Source: `.claude/skills/test-discipline/SKILL.md`
+
+---
+name: test-discipline
+description: >
+  Guides the AI and developer to build small, modular verification scripts or test
+  routines that read target memory and validate struct layouts, offsets, and type shapes
+  before writing complex rendering or logic code.
+license: MIT
+---
+
+# Test Discipline & Memory Verification
+
+Ensure every offset, pointer chain, and struct layout is verified with live memory reads BEFORE committing it to a production overlay or aimbot loop.
+
+## Trigger
+Writing new memory scan/read logic, resolving offsets, debugging incorrect data rendering, initializing a new script, or modifying structs and pointer chains.
+
+## Core Philosophy: Verify Before You Build
+
+When writing scripts for Perception.cx, it is easy to write a large amount of overlay and helper code before verifying if the underlying memory reading logic works. This leads to complex debugging scenarios.
+
+**Test Discipline** means writing a separate, single-purpose verification script (or an isolated test routine) that:
+1. Attaches to the game process.
+2. Reads the target structure (e.g., Local Player, Entity List).
+3. Prints the raw read values to the console or log.
+4. Validates that the fields change correctly with live action (e.g., coordinates change as you move, health decreases as you take damage).
+
+---
+
+## 3-Step Verification Checklist
+
+### Step 1: Write a Minimum Viable Reader (MVR)
+Before writing ESP drawing code, write a script that does nothing but print variables.
+
+*WRONG (Monolithic guess-work):*
+```enma
+// Writing 100 lines of ESP box calculations and text drawing on untested offsets
+void draw_esp() {
+    uint64 local = proc_read_uint64(g_proc, g_local_player);
+    // ... ESP rendering code ...
+}
+```
+
+*RIGHT (Isolated test verification):*
+```enma
+// test-player-coords.em
+import "proc";
+
+void main() {
+    proc_t proc = ref_process_by_name("game.exe");
+    if (!proc.alive()) {
+        print("[-] Game process not found");
+        return;
+    }
+    
+    uint64 base = proc_module_base(proc, "game.exe");
+    uint64 local = proc_read_uint64(proc, base + 0x1A2B3C); // player base pointer
+    print("[+] Local Player Ptr: 0x" + hex(local));
+    
+    if (local == 0) return;
+    
+    // Read and verify coordinates
+    float x = proc_read_float(proc, local + 0x90);
+    float y = proc_read_float(proc, local + 0x94);
+    float z = proc_read_float(proc, local + 0x98);
+    
+    print("[+] Player Position: " + x + ", " + y + ", " + z);
+}
+```
+
+### Step 2: Validate Under Mutation
+Do not trust static values. Make sure values change dynamically as expected:
+- **Movement:** Check if position coordinates change in real-time when the player moves.
+- **State Change:** Check if health/shield values decrease/increase when taking damage or healing.
+- **Pointers:** Restart the game and verify that the pattern scanner resolves the correct offsets dynamically.
+
+### Step 3: Validate with `pcx lint`
+Run `pcx lint <test_file.em>` to verify your test script adheres to safety guidelines (e.g., using `uint64` for addresses, adding proper null guards).
+
+---
+
+## Logging & Formatting Guidelines
+When writing test verification logs, format outputs cleanly so that failures stand out:
+- Use `[+]` for successful checks.
+- Use `[-]` or `[!]` for failures, null pointers, or unexpected values.
+- Print address values in hex format (`0x` prefix) using the `hex()` helper.
+
+---
+
 ## Source: `knowledge/aimbot-math.md`
 
 # Aimbot Math Reference
@@ -56935,6 +57025,7 @@ release carrying every API a script needs. Pure IDE/Analyzer/decompiler internal
 | Release | Script-facing API added / changed |
 |---------|-----------------------------------|
 | `Enma Open Beta — Phase 2 (May 2026)` | Enma language added (AOT/JIT); Perception MCP (60-70+ tools); IDE + Analyzer discontinued |
+| `2026-04-06` | Analyzer memory usage reduced; no script-facing API changes |
 | `2026-03-31(b)` | Overlay protection modes: Disabled / Default / Perceptproof |
 | `2026-03-30(b)` | GUI taskbar + force-on-top; stream proof hardened (no longer disableable) |
 | `2026-03-30(a)` | Stream Proof / Anti-Screenshot enable-disable toggle re-added |
@@ -58373,6 +58464,88 @@ The four Karpathy principles, rewritten for cheat development and reverse engine
 | Goal-driven execution | Done = visible criteria met on the live target |
 
 Full detail with examples: `skill://pcx-coding-discipline` (writing scripts) and `skill://pcx-re-discipline` (reverse engineering).
+
+---
+
+## Source: `rules/WINDSURF.md`
+
+# Windsurf Rules — Perception.cx Scripting
+
+Drop-in project rules for Windsurf (the IDE) and Cascade. Parallel to `rules/CLAUDE.md` and `rules/CURSOR.md` but tailored for Windsurf's context system and Cascade agent.
+
+**How to use this.** Save as `.windsurfrules` at your project root. Windsurf/Cascade reads `.windsurfrules` automatically as persistent instructions on every prompt. Keep it concise to save Cascade's context token budget.
+
+---
+
+## Project Context
+
+- **Languages:** Enma (`.em`), AngelScript (`.as`), C++. Enma is the primary scripting language.
+- **Platform:** Perception.cx. Scripts attach to a game process, read state, and draw an overlay.
+- **Read the relevant doc before writing any API call.** Point Windsurf/Cascade to these files:
+  - Enma language: `docs/enma/llms-language.md` (complete single-page reference)
+  - PCX Enma APIs: `docs/perception/` (proc, render, gui, input, cpu, zydis, unicorn, net, win, fs, sound, lifecycle, mcp)
+  - PCX AngelScript APIs: `docs/perception/angelscript/`
+  - Quick references: `knowledge/enma-cheatsheet.md`, `knowledge/pcx-api-cheatsheet.md`
+  - Common patterns: `knowledge/common-patterns.md`
+
+---
+
+## Coding Standards
+
+- **Addresses are `uint64`** — never `int64`. Sign-extension breaks high usermode addresses.
+- **`float32` literals need an `f` suffix**: `0.2f`, not `0.2`. Vertex buffers and the GPU care.
+- **`color(r,g,b,a)` and `vec2(x,y)` are value types** — construct fresh every frame, no globals.
+- **`import "vec"; import "color";`** required before using those types.
+- **`main()` returns `> 0` to stay loaded**, `<= 0` to unload immediately.
+- **Routines:** `register_routine(cast<int64>(fn), 0)` — separate update and render routines.
+- **`signed ↔ unsigned` is a compile error** — use `cast<uint64>(x)`.
+- **`float → int` is a compile error** — use `cast<int32>(f)`.
+- **Failed reads return 0** — validate every pointer in a chain before dereferencing.
+- **Pattern scans over hardcoded offsets** — sigs survive game patches.
+- **RAII:** `proc_t` releases on scope exit. No GC. Destructors are deterministic.
+
+---
+
+## The 12 Guidelines (one-line form)
+
+Long form with WRONG/RIGHT examples: `.claude/skills/game-cheat-guidelines/SKILL.md`.
+
+1. Ground every offset — cite the source (sig, SDK header, IDA xref); mark guesses `UNVERIFIED`.
+2. `uint64` for all addresses — no sign-extension bugs.
+3. Validate every pointer — check for 0 after every `ru64` / `find_code_pattern` / `ref_process`.
+4. Separate update from render — no memory reads in the draw path.
+5. Sigs over hardcodes — survive game patches.
+6. One feature, one file — no monolith scripts.
+7. Construct colors/vecs every frame — they're 4-8 byte stack values.
+8. `f` suffix on float32 literals — the GPU cares.
+9. Minimize memory writes — reads are detection-invisible.
+10. World-to-screen once, correctly — check `w > 0.001`, match the engine matrix layout.
+11. GUI for all tunables — no magic constants in code.
+12. Verify with live reads — trust the binary, not cached offsets.
+
+---
+
+## File Structure
+
+One feature per file. Use Cascade to scaffold across these without merging features into one file:
+
+```
+project/
+├── main.em         # Entry point, setup, routine registration
+├── globals.em      # Shared state (proc handle, entity cache, config)
+├── offsets.em      # Named sig constants + resolver functions
+├── features/       # One file per feature (esp.em, aim.em, radar.em)
+├── menu.em         # GUI sidebar widgets + config load/save
+└── config.txt      # Persisted settings
+```
+
+---
+
+## Windsurf / Cascade Specifics
+
+- **Using Cascade's Agent Mode:** Cascade can run commands and edit files. Safe to auto-approve read-only MCP commands. Gating is recommended for write/execute operations.
+- **Context Pinning:** In Windsurf, you can pin specific reference files (like `knowledge/pcx-api-cheatsheet.md`) to the Cascade context so it keeps them active in chat history.
+- **LSP Setup:** Refer to the LSP section in the setup docs for editor compilation diagnostics.
 
 ---
 

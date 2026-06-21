@@ -354,6 +354,7 @@ release carrying every API a script needs. Pure IDE/Analyzer/decompiler internal
 | Release | Script-facing API added / changed |
 |---------|-----------------------------------|
 | `Enma Open Beta — Phase 2 (May 2026)` | Enma language added (AOT/JIT); Perception MCP (60-70+ tools); IDE + Analyzer discontinued |
+| `2026-04-06` | Analyzer memory usage reduced; no script-facing API changes |
 | `2026-03-31(b)` | Overlay protection modes: Disabled / Default / Perceptproof |
 | `2026-03-30(b)` | GUI taskbar + force-on-top; stream proof hardened (no longer disableable) |
 | `2026-03-30(a)` | Stream Proof / Anti-Screenshot enable-disable toggle re-added |

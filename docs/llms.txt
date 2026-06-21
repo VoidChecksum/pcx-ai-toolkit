@@ -216,6 +216,7 @@ Behavioral / discipline skills loaded automatically by AI tools (Claude Code / O
 - [RE Evidence Log — Every Claim Cites Its Proof](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/re-evidence-log/SKILL.md): The discipline of recording why you trust each offset and sig in your project. The offset table is data; the evidence log is the proof behind it. Without the log, every patch day starts from zero on t
 - [Rust-Python Integration & Native Proxying Discipline](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/rust-python-integration/SKILL.md): Guidelines for designing, developing, and extending hybrid Rust-Python tools in the pcx-ai-toolkit environment.
 - [Script Bundler — Packaging and Shipping PCX Scripts](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/script-bundler/SKILL.md): The build and deployment workflow for PCX scripts: when to distribute raw .em source vs precompiled .emb, the bundle order that respects the module-import graph, what survives hot-reload, the pre-ship
+- [Test Discipline & Memory Verification](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/test-discipline/SKILL.md): Ensure every offset, pointer chain, and struct layout is verified with live memory reads BEFORE committing it to a production overlay or aimbot loop.
 
 ## Knowledge References
 
@@ -255,6 +256,7 @@ Project-rules drop-ins for Claude Code / Cursor / Cline / Copilot / Aider / Zed 
 - [GitHub Copilot Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/COPILOT.md): Drop-in custom instructions for GitHub Copilot. Sibling to rules/CLAUDE.md (Claude Code), rules/CURSOR.md (Cursor), rules/CLINE.md (Cline). Copilot reads .github/copilot-instructions.md for repo-wide 
 - [Cursor Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CURSOR.md): Drop-in project rules for Cursor (the IDE), parallel to CLAUDE.md but tailored for Cursor's context system.
 - [Karpathy Discipline for PCX Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/KARPATHY.md): Drop-in work-discipline rules for any AI tool writing Perception.cx scripts. Companion to CLAUDE.md (which covers code standards). Copy both into your project.
+- [Windsurf Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/WINDSURF.md): Drop-in project rules for Windsurf (the IDE) and Cascade. Parallel to rules/CLAUDE.md and rules/CURSOR.md but tailored for Windsurf's context system and Cascade agent.
 
 ## Enma Templates
 
@@ -293,6 +295,7 @@ Engine-specific reversal guides (Source, UE, Unity IL2CPP, Source 2, anti-cheat,
 
 Stdlib-only Python tools for binary RE / sig validation / dumper conversion / linting.
 
+- [pcx-ai-toolkit tools package](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/__init__.py)
 - [── Detection tables ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/anti-debug-scanner.py): DIRECTCHECKIMPORTS = {
 - [.text classifier thresholds (block-level identical %, raw-size delta %).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/binary-diff-summary.py): RECOMPILEMINSAME = 70.0
 - [Exclude only the generated bundles sitting directly under docs/.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-counts.py): if p.parent == (REPOROOT / "docs") and p.name.startswith("llms-"):
@@ -308,9 +311,11 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/module-export-mapper.py): import os
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/offset-diff.py): import os
 - [A normalized pattern is a list where each element is an int byte (0-255)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pattern-format-converter.py): # or None for a wildcard. All parsing converts to this; all emitting reads it.
+- [ANSI colors (disabled on Windows if not supported)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pcx.py): def supportscolor() -> bool:
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pe-section-analyzer.py): import os
 - [── Hash algorithms ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/resolve-api-hashes.py): def ror13add(name: bytes) -> int:
 - [── Rule registry ─────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/script-linter.py): # rule number -> (severity, one-liner). Severity is fixed per rule, not per hit.
+- [1. Update submodules](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/setup-core.py): print("[..] Checking git submodules...")
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/sig-uniqueness-checker.py): import os
 
 ## Build Scripts

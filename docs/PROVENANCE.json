@@ -1,7 +1,12 @@
 {
-  "count": 137,
+  "count": 139,
   "drift_checkable": 107,
   "files": {
+    "docs/FAQ.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/angelscript-lang/addon-array.md": {
       "drift_check": false,
       "source": "angelcode",
@@ -387,6 +392,11 @@
       "source": "lua",
       "url": "https://www.lua.org/manual/5.4/readme.html"
     },
+    "docs/marketplace-install.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/perception/analyzer.md": {
       "drift_check": true,
       "source": "gitbook",
@@ -691,6 +701,8 @@
   "generated": "2026-06-21",
   "unmapped": [
     "docs/enma/UPSTREAM-SUGGESTIONS.md",
+    "docs/FAQ.md",
+    "docs/marketplace-install.md",
     "docs/perception/changelogs.md"
   ]
 }

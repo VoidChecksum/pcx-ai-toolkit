@@ -7,7 +7,7 @@
     refreshes AI skills, and regenerates the llms-* knowledge bundles
     if they have drifted from the source.
 .PARAMETER Check
-    Check only — report whether an update is available, exit 1 if needed.
+    Check only -- report whether an update is available, exit 1 if needed.
 .PARAMETER Force
     Force re-run of post-update hooks even if already up to date.
 .PARAMETER SkipLsp
@@ -34,11 +34,11 @@ $ToolkitDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Pat
 
 Set-Location $ToolkitDir
 
-# ── preflight ────────────────────────────────────────────────────────────────
+# -- preflight ----------------------------------------------------------------
 
 $remoteUrl = git remote get-url origin 2>$null
 if (-not $remoteUrl) {
-    Write-Error "No git remote 'origin' found — cannot auto-update."
+    Write-Error "No git remote 'origin' found -- cannot auto-update."
     exit 3
 }
 
@@ -56,11 +56,11 @@ if ($currentBranch -eq "HEAD") {
     $remoteBranch = "origin/main"
 }
 
-# ── fetch ────────────────────────────────────────────────────────────────────
+# -- fetch --------------------------------------------------------------------
 
 Write-Host "Fetching from origin..."
 git fetch origin 2>$null
-if ($LASTEXITCODE -ne 0) { Write-Error "Fetch failed — check network"; exit 3 }
+if ($LASTEXITCODE -ne 0) { Write-Error "Fetch failed -- check network"; exit 3 }
 
 $remoteRef = git rev-parse $remoteBranch 2>$null
 if (-not $remoteRef) { Write-Error "Could not resolve $remoteBranch"; exit 3 }
@@ -83,27 +83,27 @@ if ($Check) {
     exit 1
 }
 
-# ── safety: abort if local has uncommitted changes ──────────────────────────
+# -- safety: abort if local has uncommitted changes --------------------------
 
 $diff = git diff --quiet 2>$null
 $diffCached = git diff --cached --quiet 2>$null
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "Uncommitted changes detected — stash or commit before updating."
+    Write-Error "Uncommitted changes detected -- stash or commit before updating."
     exit 3
 }
 
-# ── update ───────────────────────────────────────────────────────────────────
+# -- update -------------------------------------------------------------------
 
 Write-Host "Updating $currentBranch..."
 $oldVersion = if (Test-Path "VERSION") { Get-Content VERSION -Raw } else { "unknown" }
 $oldVersion = $oldVersion.Trim()
 
 if ($Force -and $currentRef -eq $remoteRef) {
-    Write-Host "Forced run — skipping git pull (already at latest)"
+    Write-Host "Forced run -- skipping git pull (already at latest)"
 } else {
     git pull --ff-only origin $currentBranch 2>$null
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "Pull failed — local and remote have diverged.`nResolve manually: git pull --rebase origin $currentBranch"
+        Write-Error "Pull failed -- local and remote have diverged.`nResolve manually: git pull --rebase origin $currentBranch"
         exit 3
     }
 }
@@ -115,7 +115,7 @@ $newRef = git rev-parse HEAD
 $newVersion = if (Test-Path "VERSION") { (Get-Content VERSION -Raw).Trim() } else { "unknown" }
 Write-Host "[ok] Updated: $oldVersion -> $newVersion ($newRef)"
 
-# ── post-update: rebuild LSP servers ────────────────────────────────────────
+# -- post-update: rebuild LSP servers ----------------------------------------
 
 if (-not $SkipLsp) {
     Write-Host ""
@@ -131,13 +131,13 @@ if (-not $SkipLsp) {
                 npm run compile 2>$null
                 Write-Host "    [ok]"
             } catch {
-                Write-Host "    [warn] build failed — run manually: cd $lspDir ; npm install ; npm run compile"
+                Write-Host "    [warn] build failed -- run manually: cd $lspDir ; npm install ; npm run compile"
             }
             Pop-Location
         }
     }
 }
-# ── post-update: rebuild Rust core parser ───────────────────────────────────
+# -- post-update: rebuild Rust core parser -----------------------------------
 $cargo = Get-Command cargo -ErrorAction SilentlyContinue
 if (-not $SkipLsp -and $cargo) {
     Write-Host ""
@@ -152,16 +152,16 @@ if (-not $SkipLsp -and $cargo) {
         if (Test-Path (Join-Path $binDir "pe-parser.exe")) {
             Write-Host "  [ok] Rust core parser rebuilt: tools\bin\pe-parser.exe"
         } else {
-            Write-Host "  [warn] Rust core build failed — falling back to Python" -ForegroundColor Yellow
+            Write-Host "  [warn] Rust core build failed -- falling back to Python" -ForegroundColor Yellow
         }
     } catch {
-        Write-Host "  [warn] Rust core build failed — falling back to Python" -ForegroundColor Yellow
+        Write-Host "  [warn] Rust core build failed -- falling back to Python" -ForegroundColor Yellow
     } finally {
         Pop-Location
     }
 }
 
-# ── post-update: refresh AI skills ───────────────────────────────────────────
+# -- post-update: refresh AI skills -------------------------------------------
 
 if (-not $SkipSkills -and (Test-Path "$env:USERPROFILE\.claude")) {
     Write-Host ""
@@ -182,7 +182,7 @@ if (-not $SkipSkills -and (Test-Path "$env:USERPROFILE\.claude")) {
     }
 }
 
-# ── post-update: regenerate knowledge bundles ───────────────────────────────
+# -- post-update: regenerate knowledge bundles -------------------------------
 
 if (-not $SkipBundles) {
     Write-Host ""
@@ -193,18 +193,18 @@ if (-not $SkipBundles) {
         if ($LASTEXITCODE -eq 0) {
             Write-Host "  [ok] Bundles in sync"
         } else {
-            Write-Host "  Bundles out of sync — regenerating..."
+            Write-Host "  Bundles out of sync -- regenerating..."
             python3 $builder --quiet 2>$null
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "  [ok] Bundles regenerated"
             } else {
-                Write-Host "  [warn] Bundle regeneration failed — run: python3 tools\build-llms-index.py"
+                Write-Host "  [warn] Bundle regeneration failed -- run: python3 tools\build-llms-index.py"
             }
         }
     }
 }
 
-# ── done ─────────────────────────────────────────────────────────────────────
+# -- done ---------------------------------------------------------------------
 
 Write-Host ""
 Write-Host "Update complete."

@@ -140,9 +140,21 @@ def cmd_doctor() -> int:
                    "Run: pcx setup  (or: cd lsp/angel-lsp-pcx && npm install && npm run compile)"))
 
     # --- AI Skills sync ---
-    skills_dir = Path.home() / ".claude" / "skills"
-    checks.append(("AI skills synced to ~/.claude/skills/", skills_dir.is_dir(),
+    local_skills = REPO_ROOT / ".claude" / "skills"
+    installed_skills = Path.home() / ".claude" / "skills"
+    all_skills_synced = installed_skills.is_dir()
+    if all_skills_synced and local_skills.is_dir():
+        missing = [d.name for d in local_skills.iterdir() if d.is_dir()
+                   and not (installed_skills / d.name / "SKILL.md").exists()]
+        if missing:
+            all_skills_synced = False
+    checks.append(("AI skills synced to ~/.claude/skills/", all_skills_synced,
                    "Run: pcx setup  to sync skills to ~/.claude/skills/"))
+
+    # --- pcx CLI on PATH ---
+    pcx_on_path = bool(shutil.which("pcx"))
+    checks.append(("pcx CLI on PATH", pcx_on_path,
+                   "Run: pcx setup  (or add tools/ directory to your PATH manually)"))
 
     # --- Docs index ---
     counts_json = REPO_ROOT / "docs" / "COUNTS.json"
@@ -203,10 +215,10 @@ def cmd_new(args: list[str]) -> int:
             elif item.suffix == ".em":
                 print(f"  {item.stem}  ({item.name})")
 
-    if not args:
+    if not args or any(a in ("-h", "--help") for a in args):
         print("Usage: pcx new <template> [output_dir]\n")
         list_templates()
-        return 1
+        return 0 if any(a in ("-h", "--help") for a in args) else 1
 
     template_name = args[0]
     output_dir = Path(args[1]) if len(args) > 1 else Path.cwd() / template_name
@@ -244,18 +256,28 @@ def cmd_new(args: list[str]) -> int:
 def main() -> int:
     desc = f"pcx-ai-toolkit manager CLI v{get_version()}"
     ap = argparse.ArgumentParser(description=desc, usage="pcx <command> [args]")
-    ap.add_argument("command", help=(
+    ap.add_argument("-V", "--version", action="version",
+                    version=f"pcx-ai-toolkit v{get_version()}")
+    ap.add_argument("command", nargs="?", help=(
         "Command to run: setup, update, lint, check-drift, check-mcp, "
-        "check-matrix, counts, version, doctor, new"
+        "check-matrix, counts, version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
     args = ap.parse_args()
 
+    if args.command is None:
+        ap.print_help()
+        return 0
+
     cmd = args.command.lower()
     sub_args = args.args
 
-    if cmd == "version":
+    if cmd in ("version", "-v", "--version"):
         print(f"pcx-ai-toolkit v{get_version()}")
+        return 0
+
+    if cmd == "help":
+        ap.print_help()
         return 0
 
     if cmd == "setup":

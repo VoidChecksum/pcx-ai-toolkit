@@ -48,11 +48,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pcx-ai-toolkit"
-version = "0.1.0"
+version = "1.16.0"
 description = "AI-powered scripting toolkit for Perception.cx"
 readme = "README.md"
 requires-python = ">=3.10"
+license = {text = "MIT"}
 dependencies = []
 
 [project.scripts]
 pcx = "tools.pcx:main"
+
+[project.urls]
+Homepage = "https://github.com/VoidChecksum/pcx-ai-toolkit"
+Issues = "https://github.com/VoidChecksum/pcx-ai-toolkit/issues"
+
+[tool.setuptools]
+packages = ["tools", "tools.lib"]

@@ -1,11 +1,11 @@
 {
-  "doc_lines": 43683,
-  "docs": 139,
+  "doc_lines": 43926,
+  "docs": 141,
   "engines": 5,
   "knowledge": 23,
   "mcp_tools": 59,
   "signatures": 6,
-  "skills": 23,
+  "skills": 24,
   "templates": 12,
-  "tools": 24
+  "tools": 27
 }

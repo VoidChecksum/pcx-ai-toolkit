@@ -15,31 +15,61 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
-def run_command(cmd: list[str], cwd: Path) -> bool:
+class CmdResult:
+    def __init__(self, ok: bool, stdout: str = "", stderr: str = "") -> None:
+        self.ok = ok
+        self.stdout = stdout
+        self.stderr = stderr
+
+
+def run_command(cmd: list[str], cwd: Path) -> CmdResult:
     try:
-        res = subprocess.run(cmd, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        return res.returncode == 0
-    except Exception:
-        return False
+        res = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=300)
+        return CmdResult(res.returncode == 0, res.stdout or "", res.stderr or "")
+    except subprocess.TimeoutExpired as e:
+        return CmdResult(False, stderr=f"timed out after {e.timeout}s")
+    except Exception as e:
+        return CmdResult(False, stderr=str(e))
+
+
+def _print_failure(cmd: list[str], res: CmdResult) -> None:
+    print(f"    command: {' '.join(cmd)}")
+    if res.stdout.strip():
+        print("    stdout:")
+        for line in res.stdout.strip().splitlines():
+            print(f"      {line}")
+    if res.stderr.strip():
+        print("    stderr:")
+        for line in res.stderr.strip().splitlines():
+            print(f"      {line}")
 
 
 def build_lsp(name: str, path: Path, out_file: str) -> None:
     print(f"[..] Building {name}...")
     if not (path / "package.json").exists():
-        print(f"[!!] {name} directory not found or invalid.")
+        print(f"[!!] {name} directory not found or invalid. Run: git submodule update --init --recursive")
         return
 
-    # Check for npm
     if not shutil.which("npm"):
-        print("[!!] npm not found. Skipping LSP build. Install Node.js first.")
+        print("[!!] npm not found. Skipping LSP build. Install Node.js 18+ first.")
         return
 
-    # Run npm install and npm run compile
-    ok = run_command(["npm", "install"], path) and run_command(["npm", "run", "compile"], path)
-    if ok and (path / out_file).exists():
+    install = run_command(["npm", "install"], path)
+    if not install.ok:
+        print(f"[!!] {name}: npm install failed")
+        _print_failure(["npm", "install"], install)
+        return
+
+    compile_ = run_command(["npm", "run", "compile"], path)
+    if not compile_.ok:
+        print(f"[!!] {name}: npm run compile failed")
+        _print_failure(["npm", "run", "compile"], compile_)
+        return
+
+    if (path / out_file).exists():
         print(f"[ok] {name} built successfully: {out_file}")
     else:
-        print(f"[!!] {name} build failed. Run manually in {path.relative_to(REPO_ROOT)}")
+        print(f"[!!] {name} build did not produce {out_file}")
 
 
 def build_rust_parser() -> None:
@@ -54,19 +84,21 @@ def build_rust_parser() -> None:
         return
 
     print("\n[..] Building Rust core parser (pe-parser)...")
-    ok = run_command(["cargo", "build", "--release"], parser_dir)
-    if ok:
-        bin_dir.mkdir(parents=True, exist_ok=True)
-        ext = ".exe" if os.name == "nt" else ""
-        src_bin = parser_dir / "target" / "release" / f"pe-parser{ext}"
-        dest_bin = bin_dir / f"pe-parser{ext}"
-        try:
-            shutil.copy2(src_bin, dest_bin)
-            print(f"[ok] Rust core parser built: tools/bin/pe-parser{ext}")
-        except Exception as e:
-            print(f"[!!] Failed to copy Rust binary: {e}")
-    else:
+    build = run_command(["cargo", "build", "--release"], parser_dir)
+    if not build.ok:
         print("[!!] Rust core build failed — falling back to Python implementations")
+        _print_failure(["cargo", "build", "--release"], build)
+        return
+
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    ext = ".exe" if os.name == "nt" else ""
+    src_bin = parser_dir / "target" / "release" / f"pe-parser{ext}"
+    dest_bin = bin_dir / f"pe-parser{ext}"
+    try:
+        shutil.copy2(src_bin, dest_bin)
+        print(f"[ok] Rust core parser built: tools/bin/pe-parser{ext}")
+    except Exception as e:
+        print(f"[!!] Failed to copy Rust binary: {e}")
 
 
 def sync_skills() -> None:
@@ -84,15 +116,20 @@ def sync_skills() -> None:
         return
 
     print("\n[..] Claude Code detected — installing skills...")
+    installed = 0
     try:
         for skill_dir in local_skills.iterdir():
-            if skill_dir.is_dir():
-                src_skill = skill_dir / "SKILL.md"
-                if src_skill.exists():
-                    dest_dir = claude_skills / skill_dir.name
-                    dest_dir.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(src_skill, dest_dir / "SKILL.md")
-        print(f"[ok] Skills installed to {claude_skills}")
+            if not skill_dir.is_dir():
+                continue
+            dest_dir = claude_skills / skill_dir.name
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            copied = 0
+            for md_file in skill_dir.glob("*.md"):
+                shutil.copy2(md_file, dest_dir / md_file.name)
+                copied += 1
+            if copied:
+                installed += 1
+        print(f"[ok] {installed} skills installed to {claude_skills}")
     except Exception as e:
         print(f"[!!] Failed to sync skills: {e}")
 
@@ -134,6 +171,14 @@ def main() -> int:
     # 5. Copy project rules if requested
     if args.project:
         copy_rules(args.project)
+
+    # 6. Ensure the CLI wrapper is executable on Unix
+    pcx_wrapper = REPO_ROOT / "tools" / "pcx"
+    if pcx_wrapper.exists() and os.name != "nt":
+        try:
+            pcx_wrapper.chmod(0o755)
+        except Exception:
+            pass
 
     return 0
 
