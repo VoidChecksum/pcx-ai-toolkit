@@ -57,6 +57,8 @@ CATEGORIES = [
     ('docs/perception/*.md',           'Enma Platform APIs',     'The Perception.cx host API surface as exposed to Enma.'),
     ('docs/perception/angelscript/**/*.md', 'AngelScript APIs',  'The Perception.cx host API surface as exposed to AngelScript.'),
     ('docs/perception/lua/**/*.md',    'Lua APIs',               'The Perception.cx host API surface as exposed to Lua.'),
+    ('docs/angelscript-lang/**/*.md', 'AngelScript Language (Core)', 'The core AngelScript language manual scraped from angelcode.com (zlib/libpng license): datatypes, strings, arrays, expressions, statements, functions, classes, handles, generics, delegates, enums, namespaces, coroutines, add-ons.'),
+    ('docs/lua-lang/**/*.md',         'Lua Language (Core)',         'The core Lua 5.4 reference manual scraped from lua.org (Lua license).'),
     ('.claude/skills/*/SKILL.md',      'AI Skills',              'Behavioral / discipline skills loaded automatically by AI tools (Claude Code / OMC).'),
     ('knowledge/*.md',                 'Knowledge References',   'Quick references for engines, anti-cheat architecture, patterns, methodology.'),
     ('rules/*.md',                     'IDE Drop-Ins',           'Project-rules drop-ins for Claude Code / Cursor / Cline / Copilot / Aider / Zed / Continue.'),
@@ -105,6 +107,7 @@ LANG_BUNDLES = {
         'desc':  'Single-file context pack for AI tools writing AngelScript scripts on Perception.cx. Bundles the AngelScript API surface, the discipline skill, and cross-references to the underlying 12 guidelines.',
         'globs': [
             'docs/perception/angelscript/**/*.md',
+            'docs/angelscript-lang/**/*.md',
             '.claude/skills/pcx-angelscript-discipline/SKILL.md',
             '.claude/skills/game-cheat-guidelines/SKILL.md',
             '.claude/skills/game-hacking-pcx/SKILL.md',
@@ -117,6 +120,7 @@ LANG_BUNDLES = {
         'desc':  'Single-file context pack for AI tools writing Lua scripts on Perception.cx. Bundles the Lua API surface, the discipline skill, and cross-references to the underlying 12 guidelines.',
         'globs': [
             'docs/perception/lua/**/*.md',
+            'docs/lua-lang/**/*.md',
             '.claude/skills/pcx-lua-discipline/SKILL.md',
             '.claude/skills/game-cheat-guidelines/SKILL.md',
             '.claude/skills/game-hacking-pcx/SKILL.md',

@@ -126,6 +126,16 @@ Covers: Overview, Life Cycle, Engine, Atomic Types, Proc API, Render API, **Cust
 
 Covers: Overview, Life Cycle, Engine, Proc API, Render API, GUI API, Input API, System/CPU/Disassembly, Net API, File System, Extended Math, Win API, JSON API, Utilities, Sound, Engine Specific, CS2 Extended.
 
+## AngelScript Language (Core)
+
+The core AngelScript language manual (the language itself, not the PCX API bindings). 25 files in [`angelscript-lang/`](angelscript-lang/) — scraped from [angelcode.com](https://www.angelcode.com/angelscript/sdk/docs/manual/) under the zlib/libpng license (see [`angelscript-lang/license.md`](angelscript-lang/license.md)).
+
+Covers: overview, license, datatypes, strings, arrays, dictionary, expressions, statements, functions, variables, script classes + properties, inheritance, handles, generics, funcdef, delegate, enums, namespaces, coroutines, add-ons overview + strings/array/dictionary/math. See [`angelscript-lang/INDEX.md`](angelscript-lang/INDEX.md) for the full file list and the deferred pages.
+
+## Lua Language (Core)
+
+The core Lua 5.4 reference manual (the language itself, not the PCX API bindings). 3 files in [`lua-lang/`](lua-lang/) — scraped from [lua.org](https://www.lua.org/manual/5.4/) under the Lua license (see [`lua-lang/license.md`](lua-lang/license.md)): the full `manual-5.4.md` (all 9 sections — language, C API, auxiliary library, standard libraries, standalone, incompatibilities, syntax), `readme-5.4.md`, and `INDEX.md`.
+
 ## Knowledge Base
 
 | File | Description |
