@@ -63,6 +63,31 @@ jmp     <vmenter>                ; E9 ?? ?? ?? ??
 68 ?? ?? ?? ?? E9 ?? ?? ?? ??    # push key; jmp vmenter
 ```
 
+**Python / toolkit snippet:**
+```python
+# tools/analyze-vmprotect.py detects these automatically, but you can scan manually:
+import re
+for m in re.finditer(rb'\x68....[\xe8\xe9]....', code_section):
+    print(f"possible VMP entry stub at file offset {m.start()}")
+```
+
+### VMProtect 2.x Import Stub
+
+VMP 2.x typically replaces each imported API call with a small stub that loads
+the resolved address from a private IAT slot at runtime:
+
+```asm
+jmp     qword ptr [rip + iat_entry]
+; or
+mov     rax, [rip + iat_entry]
+jmp     rax
+```
+
+```
+FF 25 ?? ?? ?? ??          # jmp [rip+imm32]
+48 8B 05 ?? ?? ?? ?? FF E0  # mov rax,[rip+imm32]; jmp rax
+```
+
 ### VM Dispatcher (inner loop)
 
 ```asm

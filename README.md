@@ -249,11 +249,12 @@ Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
 <td width="50%" valign="top">
 
 ### Knowledge Base
-24 reference files
+25 reference files
 
 - Enma + PCX API cheatsheets
 - Working code patterns (13 recipes)
 - **cheat-script-cookbook.md** — game-cheat recipes: pattern scan, pointer chain, W2S, ESP, aim smoothing, FOV, triggerbot, radar, config save/load, unload cleanup
+- **vmprotect2-analysis.md** — VMP 2.x triage, `vmp2` suite (`vmemu`/`vmdevirt`/`vmprofiler`), x64dbg VMProtect plugin workflow
 - GUI design patterns (section layout, slider discipline, hotkey conventions)
 - Cross-language bridge (Enma vs AngelScript vs Lua decision guide)
 - Offset-finding methodology, RE plugin reference
@@ -275,7 +276,7 @@ MCP + LSP + Rules + 3 LLM-knowledge surfaces
 - **Enma + AngelScript LSPs** (syntax, completion, hover)
 - **`docs/llms.txt`** + 6 concatenated context-pack bundles
 - **Rules drop-ins** for Claude / Cursor / Cline / Copilot
-- **23 standalone tools** (Python + bash, stdlib-only)
+- **28 standalone tools** (Python + bash, stdlib-only)
 </td>
 </tr>
 </table>
@@ -460,6 +461,7 @@ pcx-ai-toolkit/
 │
 ├── tools/                            ── Standalone RE Tools (Python, no deps beyond stdlib)
 │   ├── identify-protector.py            Detect VMProtect/Themida/UPX/etc. by sections + byte sigs
+│   ├── analyze-vmprotect.py             VMP 2.x triage: section/entry-stub/entropy scan + vmp2 recommendations
 │   ├── pe-section-analyzer.py           Entropy analysis, packing detection, anomaly flagging
 │   ├── resolve-api-hashes.py            Resolve API hashes (ROR13, CRC32, DJB2, FNV-1a, MurmurHash3, SDBM)
 │   ├── dump-strings-xor.py              Extract XOR-encrypted strings (brute-force single-byte keys)

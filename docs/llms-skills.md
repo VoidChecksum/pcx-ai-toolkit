@@ -844,7 +844,8 @@ g
 
 | VM | Tool | How |
 |----|------|-----|
-| VMProtect | **NoVmp** | Static devirtualizer; lifts VMP bytecode to LLVM IR, optimizes, outputs x86 |
+| VMProtect 2.x | **backengineering/vmp2** (`vmemu`, `vmdevirt`, `vmprofiler`) | Unpack, lift, and profile VMP 2.x; see `knowledge/vmprotect2-analysis.md` |
+| VMProtect 3.x | **NoVmp** | Static devirtualizer; lifts VMP bytecode to LLVM IR, optimizes, outputs x86 |
 | VMProtect | **VMHunt** | Trace-based; records handler semantics, reconstructs expressions |
 | VMProtect | **vtil** (Virtual-machine Translation IL) | VTIL framework + optimizer for VMP lifting |
 | Themida | **Themida devirtualizer scripts** | Community IDA scripts; handler identification + trace lifting |
@@ -883,7 +884,7 @@ The devirtualized output must match the original program's behavior:
 - **Handler mutation:** Handlers are code-mutated (instruction substitution) on top of virtualization — double obfuscation.
 - **Bytecode encryption:** The bytecode stream is XOR'd or rolling-key encrypted; decrypted at VM entry.
 - **Ultra mode:** VMP Ultra adds nested virtualization — a VM inside a VM. The inner VM's handlers are themselves virtualized by the outer VM.
-- **Counter:** NoVmp handles most VMP versions; for Ultra mode, trace the outer VM to recover the inner VM's bytecode, then devirtualize the inner VM separately.
+- **Counter:** For VMP 2.x use the `backengineering/vmp2` suite (`vmemu` to unpack, `vmdevirt` to lift, `vmprofiler` for coverage; see `knowledge/vmprotect2-analysis.md`). For VMP 3.x use NoVmp. For Ultra mode, trace the outer VM to recover the inner VM's bytecode, then devirtualize the inner VM separately.
 
 ### LLVM-Obfuscator (Hikari, OLLVM, Pluto)
 

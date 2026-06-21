@@ -97,6 +97,9 @@ python3 "$TOOLKIT_DIR/tools/dumper-to-enma.py" --help > /dev/null
 echo " 13. evidence-log-validator..."
 python3 "$TOOLKIT_DIR/tools/evidence-log-validator.py" --help > /dev/null
 
+echo " 14. analyze-vmprotect..."
+python3 "$TOOLKIT_DIR/tools/analyze-vmprotect.py" --json "$TEST_EXE" > /dev/null
+
 echo "Cleaning up..."
 rm -f "$TEST_EXE" "$SIGS_JSON"
 

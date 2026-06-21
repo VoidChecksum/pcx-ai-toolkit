@@ -10,7 +10,8 @@ Tools for defeating binary protection: devirtualizers, unpackers, symbolic execu
 
 | Tool | Target VM | Output | Status |
 |------|-----------|--------|--------|
-| **NoVmp** | VMProtect 3.x | LLVM IR → x86 | Active; best open-source VMP devirtualizer |
+| **backengineering/vmp2** (`vmemu` / `vmdevirt` / `vmprofiler`) | VMProtect 2.x | Unpacked memory / lifted IR / handler stats | Active; full VMP 2.x research toolchain |
+| **NoVmp** | VMProtect 3.x | LLVM IR → x86 | Active; best open-source VMP 3.x devirtualizer |
 | **VMHunt** | VMProtect | Expression trees | Research; trace-based handler semantic extraction |
 | **vtil** (Virtual-machine Translation IL) | VMProtect, generic | VTIL IR → optimized | Active; VTIL is a dedicated IR for VM lifting |
 | **Oreans UnVirtualizer** | Themida/CV (older) | x86 | Limited on newer versions |
@@ -38,6 +39,41 @@ opt -O2 lifted.ll -o optimized.ll
 ```
 
 **Source:** [github.com/can1357/NoVmp](https://github.com/can1357/NoVmp)
+
+---
+
+### backengineering/vmp2 — VMProtect 2.x Research Suite
+
+**What:** A complete open-source research toolchain for VMProtect 2.x. `vmemu`
+unpacks the protected binary by emulating the VM runtime; `vmdevirt` lifts the
+VM bytecode closer to native code; `vmprofiler`/`vmprofiler-cli` profile
+handler coverage; `vmhook` captures bytecode streams at runtime; `vmassembler`
+assembles/disassembles VMP bytecode.
+
+**Install:**
+```bash
+git clone https://github.com/backengineering/vmp2.git
+cd vmp2
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
+
+**Usage:**
+```bash
+# Unpack to an image
+vmemu --bin target.exe --unpack --out unpacked.bin
+
+# Lift a VM bytecode region
+vmdevirt --input target.exe --bytecode-rva 0x12345 --output lifted.asm
+
+# Profile handler coverage
+vmprofiler-cli --input target.exe --trace trace.txt --output report.json
+```
+
+**Workflow:** see `knowledge/vmprotect2-analysis.md` for the full
+identify → bypass anti-debug → unpack → lift → validate workflow.
+
+**Source:** [github.com/backengineering/vmp2](https://github.com/backengineering/vmp2)
 
 ---
 

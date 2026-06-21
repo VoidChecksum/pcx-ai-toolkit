@@ -247,6 +247,7 @@ Quick references for engines, anti-cheat architecture, patterns, methodology.
 - [PCX API Version Matrix](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-version-matrix.md): This file maps each PCX API addition / change / removal to the version it landed in, so scripts that target older PCX runtimes know what's safe. Drawn from docs/perception/changelogs.md.
 - [RE Plugins & Tools Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/re-plugins-and-tools.md): IDA Pro plugins, Ghidra extensions, FLIRT signature databases, binary diffing tools, and debugger sync infrastructure for game binary reverse engineering. Every tool listed here is cloned, ready to bu
 - [Script Organization Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/script-organization-patterns.md): How an Enma project on Perception.cx is laid out once it grows past a single
+- [VMProtect 2.x Analysis with vmp2](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/vmprotect2-analysis.md): Practical guide for analyzing binaries protected by VMProtect 2.x using the
 
 ## IDE Drop-Ins
 
@@ -316,6 +317,7 @@ Engine-specific reversal guides (Source, UE, Unity IL2CPP, Source 2, anti-cheat,
 Stdlib-only Python tools for binary RE / sig validation / dumper conversion / linting.
 
 - [pcx-ai-toolkit tools package](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/__init__.py)
+- [Section names strongly associated with VMProtect](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/analyze-vmprotect.py): VMPSECTIONS = (b'.vmp0', b'.vmp1', b'.vmp2', b'.vmp3', b'.vmp4')
 - [── Detection tables ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/anti-debug-scanner.py): DIRECTCHECKIMPORTS = {
 - [.text classifier thresholds (block-level identical %, raw-size delta %).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/binary-diff-summary.py): RECOMPILEMINSAME = 70.0
 - [Exclude only the generated bundles sitting directly under docs/.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-counts.py): if p.parent == (REPOROOT / "docs") and p.name.startswith("llms-"):
