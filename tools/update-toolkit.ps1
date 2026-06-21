@@ -137,6 +137,29 @@ if (-not $SkipLsp) {
         }
     }
 }
+# ── post-update: rebuild Rust core parser ───────────────────────────────────
+$cargo = Get-Command cargo -ErrorAction SilentlyContinue
+if (-not $SkipLsp -and $cargo) {
+    Write-Host ""
+    Write-Host "Rebuilding Rust core parser (pe-parser.exe)..."
+    $parserDir = Join-Path $ToolkitDir "tools\pe-parser"
+    $binDir = Join-Path $ToolkitDir "tools\bin"
+    Push-Location $parserDir
+    try {
+        & cargo build --release 2>&1 | Out-Null
+        New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+        Copy-Item (Join-Path $parserDir "target\release\pe-parser.exe") (Join-Path $binDir "pe-parser.exe") -Force -ErrorAction SilentlyContinue
+        if (Test-Path (Join-Path $binDir "pe-parser.exe")) {
+            Write-Host "  [ok] Rust core parser rebuilt: tools\bin\pe-parser.exe"
+        } else {
+            Write-Host "  [warn] Rust core build failed — falling back to Python" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "  [warn] Rust core build failed — falling back to Python" -ForegroundColor Yellow
+    } finally {
+        Pop-Location
+    }
+}
 
 # ── post-update: refresh AI skills ───────────────────────────────────────────
 
@@ -189,5 +212,8 @@ Write-Host "  Version:  $newVersion"
 Write-Host "  Commit:   $newRef"
 Write-Host "  Branch:   $currentBranch"
 if (-not $SkipLsp)     { Write-Host "  LSP:      rebuilt" }
+$binDir = Join-Path $ToolkitDir "tools\bin"
+$cargo = Get-Command cargo -ErrorAction SilentlyContinue
+if (-not $SkipLsp -and $cargo -and (Test-Path (Join-Path $binDir "pe-parser.exe"))) { Write-Host "  Rust:     rebuilt" }
 if (-not $SkipSkills)   { Write-Host "  Skills:   refreshed" }
 if (-not $SkipBundles)  { Write-Host "  Bundles:  checked" }

@@ -143,6 +143,18 @@ if [ "$SKIP_LSP" -eq 0 ]; then
     done
 fi
 
+# ── post-update: rebuild Rust core parser ───────────────────────────────────
+if [ "$SKIP_LSP" -eq 0 ] && command -v cargo &>/dev/null; then
+    echo ""
+    echo "Rebuilding Rust core parser (pe-parser)..."
+    ( cd "$TOOLKIT_DIR/tools/pe-parser" && cargo build --release && mkdir -p ../bin && cp target/release/pe-parser ../bin/pe-parser ) >/dev/null 2>&1 || true
+    if [ -f "$TOOLKIT_DIR/tools/bin/pe-parser" ]; then
+        echo "  [ok] Rust core parser rebuilt: tools/bin/pe-parser"
+    else
+        echo "  [warn] Rust core build failed — falling back to Python"
+    fi
+fi
+
 # ── post-update: refresh AI skills ───────────────────────────────────────────
 
 if [ "$SKIP_SKILLS" -eq 0 ] && [ -d "$HOME/.claude" ]; then
@@ -188,5 +200,6 @@ echo "  Version:  $NEW_VERSION"
 echo "  Commit:   $NEW_REF"
 echo "  Branch:   $CURRENT_BRANCH"
 [ "$SKIP_LSP" -eq 0 ]    && echo "  LSP:      rebuilt"
+[ "$SKIP_LSP" -eq 0 ]    && command -v cargo &>/dev/null && [ -f "$TOOLKIT_DIR/tools/bin/pe-parser" ] && echo "  Rust:     rebuilt"
 [ "$SKIP_SKILLS" -eq 0 ]  && echo "  Skills:   refreshed"
 [ "$SKIP_BUNDLES" -eq 0 ] && echo "  Bundles:  checked"

@@ -105,6 +105,38 @@ if [ "${1:-}" = "--project" ] && [ -n "${2:-}" ]; then
     fi
 fi
 
+# --- Add tools to PATH ---
+PCX_TOOLS_DIR="$TOOLKIT_DIR/tools"
+chmod +x "$PCX_TOOLS_DIR/pcx" 2>/dev/null || true
+ADD_PATH_LINE="export PATH=\"\$PATH:$PCX_TOOLS_DIR\""
+
+# Determine shell profile
+SHELL_PROFILE=""
+if [ -n "${ZSH_VERSION:-}" ] && [ -f "$HOME/.zshrc" ]; then
+    SHELL_PROFILE="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then
+    SHELL_PROFILE="$HOME/.bashrc"
+elif [ -f "$HOME/.bash_profile" ]; then
+    SHELL_PROFILE="$HOME/.bash_profile"
+elif [ -f "$HOME/.profile" ]; then
+    SHELL_PROFILE="$HOME/.profile"
+fi
+
+if [ -n "$SHELL_PROFILE" ]; then
+    if ! grep -qF "$PCX_TOOLS_DIR" "$SHELL_PROFILE" 2>/dev/null; then
+        echo "" >> "$SHELL_PROFILE"
+        echo "# pcx-ai-toolkit CLI" >> "$SHELL_PROFILE"
+        echo "$ADD_PATH_LINE" >> "$SHELL_PROFILE"
+        echo "[ok] Added $PCX_TOOLS_DIR to $SHELL_PROFILE"
+        echo "     Please run: source $SHELL_PROFILE"
+    else
+        echo "[ok] pcx tools directory already in $SHELL_PROFILE"
+    fi
+else
+    echo "[warn] Could not auto-detect shell profile. Add this manually to your shell profile:"
+    echo "  $ADD_PATH_LINE"
+fi
+
 # --- Record installed version ---
 TOOLKIT_VERSION="$(cat "$TOOLKIT_DIR/VERSION" 2>/dev/null || echo unknown)"
 echo "Version: $TOOLKIT_VERSION"

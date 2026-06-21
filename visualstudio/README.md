@@ -43,7 +43,7 @@ msbuild visualstudio\EnmaVS\EnmaVS.csproj /p:Configuration=Release /restore
 msbuild visualstudio\AngelScriptVS\AngelScriptVS.csproj /p:Configuration=Release /restore
 ```
 
-The exact staging commands are in [`.github/workflows/release-vs.yml`](../.github/workflows/release-vs.yml), which builds both `.vsix` on every release tag.
+The exact staging commands are in [`.github/workflows/release.yml`](../.github/workflows/release.yml), which builds both `.vsix` on every release tag.
 
 ## Project layout
 

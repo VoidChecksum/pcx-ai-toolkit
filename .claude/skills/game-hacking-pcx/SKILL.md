@@ -3,7 +3,7 @@ name: game-hacking-pcx
 description: >
   Mandatory doc router for all PCX scripting sessions. Triggers on any game
   hacking, Enma, AngelScript, or Perception.cx work. Provides the full doc
-  index (34,000+ lines across 110 files) and enforces reading the relevant
+  index (43,000+ lines across 139 files) and enforces reading the relevant
   documentation before writing any API call. Load alongside
   game-cheat-guidelines on every PCX session.
 license: MIT
@@ -105,6 +105,17 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 | **Lifecycle** | `docs/perception/lifecycle-and-routines.md` | 134 | main(), routines, unload, exceptions |
 | **MCP API** | `docs/perception/mcp-api.md` | 268 | AI agent JSON-RPC surface |
 
+### When writing core AngelScript (.as) code — read the language manual:
+
+| Doc | Path | Lines | Content |
+|-----|------|-------|---------|
+| **Language Index** | `docs/angelscript-lang/INDEX.md` | - | Overview of the core language, data types, statements, etc. |
+| Datatypes | `docs/angelscript-lang/datatypes.md` | 17 | Landing page for primitives, objects, and handles |
+| Handles | `docs/angelscript-lang/handles.md` | - | Core AngelScript `@` object handles and memory management |
+| Script Classes | `docs/angelscript-lang/script-class.md` | - | User-defined classes, members, and methods |
+| Expressions | `docs/angelscript-lang/expressions.md` | - | Math, logic, assignments, and operator precedence |
+| Statements | `docs/angelscript-lang/statements.md` | - | If, switch, loops, try/catch |
+
 ### When writing PCX AngelScript (.as) code — read these:
 
 | API | Path | Lines |
@@ -140,6 +151,13 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 | Perception IDE | `docs/perception/ide.md` | 585 |
 | Extensions API | `docs/perception/extensions-api.md` | 371 |
 | Analyzer | `docs/perception/analyzer.md` | 370 |
+
+### When writing core Lua (.lua) code — read the language manual:
+
+| Doc | Path | Lines | Content |
+|-----|------|-------|---------|
+| **Reference Manual** | `docs/lua-lang/manual-5.4.md` | 6056 | Full, authoritative Lua 5.4 reference manual |
+| Welcome & Readme | `docs/lua-lang/readme-5.4.md` | 150 | Lua 5.4 readme and changes |
 
 ### PCX Lua (.lua) scripting:
 

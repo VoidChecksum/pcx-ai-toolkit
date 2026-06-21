@@ -125,6 +125,17 @@ if ($Project -ne "") {
     }
 }
 
+# --- Add tools to PATH ---
+$toolsDir = Join-Path $ToolkitDir "tools"
+$currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+if ($currentPath -split ';' -notcontains $toolsDir) {
+    $newPath = "$currentPath;$toolsDir"
+    [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
+    Write-Host "[ok] Added $toolsDir to user Environment PATH" -ForegroundColor Green
+    Write-Host "     Restart your terminal for PATH changes to take effect."
+} else {
+    Write-Host "[ok] pcx tools directory already in User PATH"
+}
 # --- Record installed version ---
 $versionFile = Join-Path $ToolkitDir "VERSION"
 $toolkitVersion = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { "unknown" }

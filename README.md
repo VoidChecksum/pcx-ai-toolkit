@@ -57,6 +57,13 @@ AI:      *reads render-api.md, uses draw_rect + draw_text, uint64 addresses, val
 Result:  Compiles. Runs. Correct API calls.
 ```
 
+### Unified CLI Manager (`pcx`)
+
+The toolkit installs a unified CLI tool (`pcx`) directly to your system `PATH`. Manage compilation, synchronization, linting, and auto-updating with simple commands from any folder:
+- `pcx lint <script.em>` – Lints Enma scripts against the 12 guidelines.
+- `pcx update` – Self-updates the toolkit from git, syncs skills, and rebuilds LSP.
+- `pcx setup` – Re-runs LSP compilation, rebuilds core parser, and syncs AI skills.
+
 ## Scope
 
 This toolkit is for **authorized** reverse engineering, security research,
@@ -116,28 +123,32 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 - LSP servers (Enma + AngelScript) built from submodules
 - AI skills registered with Claude Code (if detected)
 - Skill docs copied to `~/.claude/skills/`
+- Adds the `pcx` CLI tool to your user/system `PATH`
+
+Once installed, restart your terminal. You can run `pcx` from anywhere to manage the toolkit.
 
 
-### Part 1.5 — Auto-Update
+### Part 1.5 — Auto-Update & CLI Commands
 
-To update the toolkit, pull the latest documentation/skills, rebuild LSP servers, and regenerate the llms-index corpus automatically:
+To update the toolkit, pull the latest changes, compile LSP servers, refresh skills, and check knowledge indexes in one command:
 
-**Linux / macOS / WSL / Git Bash:**
 ```bash
-./tools/update-toolkit.sh
+pcx update
 ```
 
-**Windows 10 / 11 (PowerShell):**
-```powershell
-powershell -ExecutionPolicy Bypass -File tools/update-toolkit.ps1
+You can also run other helper tools via the `pcx` CLI from anywhere:
+
+```bash
+pcx setup          # re-run LSP build and skill sync
+pcx lint [file]    # lint Enma (.em) script against the 12 guidelines
+pcx check-drift    # check documentation drift against live upstream
+pcx check-mcp      # verify MCP config is 100% in sync with mcp-api.md
+pcx check-matrix   # advisory version-matrix vs changelogs sync check
+pcx counts         # regenerate docs/COUNTS.json
+pcx version        # print the toolkit version
 ```
 
-**Supported flags:**
-- `--check` / `-Check`: Check only — prints whether an update is available (exits `1` if update is available, `0` if up to date).
-- `--force` / `-Force`: Force run all post-update hooks (LSP rebuild, skill refresh, index regeneration) even if already up-to-date.
-- `--skip-lsp` / `-SkipLsp`: Skip rebuilding the LSP servers.
-- `--skip-skills` / `-SkipSkills`: Skip copying AI skills to `~/.claude/skills/`.
-- `--skip-bundles` / `-SkipBundles`: Skip checking/regenerating the `llms-index` bundles under `docs/`.
+*(Legacy wrappers `tools/update-toolkit.sh` and `tools/update-toolkit.ps1` are still supported)*
 ---
 
 ### Part 2 — Binary Analysis MCP (optional, bring your own IDA)

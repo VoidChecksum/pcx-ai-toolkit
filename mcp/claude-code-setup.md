@@ -1,38 +1,30 @@
 # Setting Up pcx-ai-toolkit with Claude Code
 
-## 1. Install Skills
+## 1. Quick Setup (Automated)
 
-Copy the skill directories to your Claude Code skills folder:
+Run the setup command from the repository root. This compiles the LSP servers, registers all 23 AI skills to Claude Code, and adds the `pcx` CLI tool to your system `PATH`:
 
 ```bash
-# Linux / macOS / WSL / Git Bash
-cp -r .claude/skills/game-hacking-pcx ~/.claude/skills/
-cp -r .claude/skills/game-cheat-guidelines ~/.claude/skills/
-```
+# Linux / macOS / WSL
+./setup.sh
 
-```powershell
 # Windows (PowerShell)
-Copy-Item -Recurse .claude\skills\game-hacking-pcx     $env:USERPROFILE\.claude\skills\
-Copy-Item -Recurse .claude\skills\game-cheat-guidelines $env:USERPROFILE\.claude\skills\
+powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
 
-The skills auto-trigger when you work with `.em`/`.as` files or ask about Perception.cx scripting.
+Restart your terminal after installation. You can now use the `pcx` command from anywhere!
 
 ## 2. Add CLAUDE.md to Your Project
 
-Copy the drop-in project rules to your scripting project:
+You can copy the drop-in project rules to your scripting project using the `pcx` command:
 
 ```bash
-# Linux / macOS
-cp rules/CLAUDE.md /path/to/your/pcx-project/CLAUDE.md
+pcx setup --project /path/to/your/pcx-project
 ```
 
-```powershell
-# Windows
-Copy-Item rules\CLAUDE.md C:\path\to\your\pcx-project\CLAUDE.md
-```
+*(Manual alternative: `cp rules/CLAUDE.md /path/to/your/pcx-project/CLAUDE.md`)*
 
-Claude Code reads this automatically when working in that directory.
+Claude Code reads this rules file automatically when launched in your project directory.
 
 ## 3. Configure Perception MCP (Optional)
 

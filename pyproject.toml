@@ -25,6 +25,7 @@ module = [
     "tools.module-export-mapper",
     "tools.offset-diff",
     "tools.pattern-format-converter",
+    "tools.pcx",
     "tools.pe-section-analyzer",
     "tools.resolve-api-hashes",
     "tools.script-linter",

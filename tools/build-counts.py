@@ -78,7 +78,7 @@ def build() -> dict:
     knowledge = sorted((REPO_ROOT / "knowledge").glob("*.md"))
     templates = sorted((REPO_ROOT / "templates").rglob("*"))
     templates = [p for p in templates if p.is_file() and p.suffix in {".em", ".as", ".lua", ".md"} and p.name != "README.md"]
-    tools = [p for p in (REPO_ROOT / "tools").iterdir() if p.is_file() and p.suffix in {".py", ".sh"}]
+    tools = [p for p in (REPO_ROOT / "tools").iterdir() if p.is_file() and (p.suffix in {".py", ".sh"} or p.name == "pcx")]
     sigs = sorted((REPO_ROOT / "signatures").rglob("*.md"))
     engines = sorted((REPO_ROOT / "knowledge").glob("engine-*.md"))
     return {
