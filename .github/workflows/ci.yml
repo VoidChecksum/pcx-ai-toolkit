@@ -96,15 +96,28 @@ jobs:
           print("All YAML valid")
           PY
 
-      - name: Check doc count (expect 110+ source pages, excluding generated bundles)
-        run: |
-          count=$(find docs -name '*.md' ! -name 'INDEX.md' ! -path 'docs/llms-*' | wc -l)
-          echo "Source doc pages: $count"
-          [ "$count" -ge 110 ] || { echo "Expected >= 110 doc pages, got $count"; exit 1; }
+      - name: Check docs/COUNTS.json in sync with the tree
+        run: python3 tools/build-counts.py --check
 
       - name: Check llms-index bundles in sync (build-llms-index.py --check)
+        run: python3 tools/build-llms-index.py --check
+
+      - name: Check docs/PROVENANCE.json in sync with the tree
+        run: python3 tools/build-provenance.py --check
+
+      - name: Check MCP config in sync with mcp-api.md (compatibility gate)
+        run: python3 tools/check-mcp-config.py --check
+
+      - name: Version-matrix drift advisory (changelogs vs pcx-version-matrix.md)
+        run: python3 tools/check-version-matrix.py || true   # advisory — prints WARN, never fails the build
+
+      - name: Dogfood — lint the toolkit's own templates
         run: |
-          python3 tools/build-llms-index.py --check
+          set -e
+          for f in templates/*.em; do
+            [ -f "$f" ] && python3 tools/script-linter.py --strict "$f"
+          done
+          echo "All templates pass the toolkit's own linter (--strict)"
 
       - name: Validate skill frontmatter (name + description + license in every SKILL.md)
         run: |
