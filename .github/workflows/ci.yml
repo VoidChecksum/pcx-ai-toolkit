@@ -97,7 +97,13 @@ jobs:
         run: python3 tools/build-counts.py --check
 
       - name: Check llms-index bundles in sync (build-llms-index.py --check)
-        run: python3 tools/build-llms-index.py --check
+        run: |
+          python3 tools/build-llms-index.py --check || {
+            echo "Drift detected! Showing differences:"
+            python3 tools/build-llms-index.py
+            git diff
+            exit 1
+          }
 
       - name: Check docs/PROVENANCE.json in sync with the tree
         run: python3 tools/build-provenance.py --check
