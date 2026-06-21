@@ -73,14 +73,10 @@ Or let the skill handle it — the `game-hacking-pcx` skill instructs Claude to 
 Gives Claude Code static analysis tools (disassemble, decompile, xrefs, type info,
 pattern search, rename, …) without needing the GUI open.
 
-**Suite not installed yet** — full install (pulls LFS files, installs + patches + MCP):
-```bash
-git lfs pull
-./installers/install.sh          # Linux / macOS / WSL
-.\installers\install.ps1         # Windows
-```
+**Requires a legitimately-licensed IDA** you already have on this machine — the toolkit
+does not provide, patch, or license IDA. With IDA present, activate the idalib bindings
+and register the MCP server:
 
-**Suite already installed** — MCP only:
 ```bash
 ./mcp/setup-binary-analysis.sh                           # Linux / macOS / WSL
 ./mcp/setup-binary-analysis.sh --skip-pkg                # already have ida-pro-mcp

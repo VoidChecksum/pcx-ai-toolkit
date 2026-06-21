@@ -13,7 +13,7 @@ a skill-equipped Claude Code session does.
 The niche Aider fills that the GUI tools don't:
 
 - **Terminal-first.** No editor, no IDE. SSH into a box, `cd` into your script dir, work.
-  Good fit for headless RE boxes and the analysis VMs the toolkit's `installers/` provision.
+  Good fit for headless RE boxes and analysis VMs you provision yourself.
 - **Model-agnostic.** Any OpenAI-compatible endpoint — GPT-4o, Claude, local models via
   an OpenAI-compatible proxy. You are not locked to one vendor's chat.
 - **Git-aware.** Every accepted change is its own commit. A bad offset edit is one
@@ -172,9 +172,9 @@ standalone analysis tools are pure-stdlib CLIs built for exactly this:
 
 Aider then sees the protector/section report and can reason about it while editing.
 
-For live IDA-backed analysis, install the binary-analysis suite from `installers/`
-(see [`binary-analysis-setup.md`](binary-analysis-setup.md)). Note that `idalib-mcp` is a
-**stdio MCP server**, not a one-shot CLI — it is meant for the MCP clients in Option A,
+For live IDA-backed analysis, install a legitimately-licensed IDA yourself and wire up
+the binary-analysis MCP server (see [`binary-analysis-setup.md`](binary-analysis-setup.md)).
+Note that `idalib-mcp` is a **stdio MCP server**, not a one-shot CLI — it is meant for the MCP clients in Option A,
 not for `/run`. For Aider, prefer the standalone Python tools above; keep `idalib-mcp` as
 the handoff target for the IDE chat.
 

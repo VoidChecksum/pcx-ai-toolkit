@@ -24,11 +24,3 @@
 *.gif   binary
 *.webp  binary
 *.ico   binary
-# installer shell script must be LF (*.sh rule above covers it, explicit for clarity)
-installers/install.sh text eol=lf
-# LFS-tracked binary installers
-installers/kg_patch/win/*.dll filter=lfs diff=lfs merge=lfs -text
-installers/*.run filter=lfs diff=lfs merge=lfs -text
-installers/*.exe filter=lfs diff=lfs merge=lfs -text
-installers/*.zip filter=lfs diff=lfs merge=lfs -text
-installers/*.js filter=lfs diff=lfs merge=lfs -text

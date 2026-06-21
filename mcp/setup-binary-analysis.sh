@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# MCP-only setup — use this if the analysis suite is already installed.
-# For a fresh install (suite + MCP together), use installers/install.sh instead.
+# MCP-only setup — activates the idalib bindings of an IDA installation you
+# already have (legitimately licensed) and registers the binary-analysis MCP
+# server. The toolkit does not install or license IDA — bring your own.
 #
 # What this does:
 #   1. Installs uv if not present

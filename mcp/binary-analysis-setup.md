@@ -6,29 +6,20 @@ Works on Windows, Linux, and macOS.
 
 ---
 
-## Which script to use
+## Prerequisite — bring your own legitimately-licensed IDA
 
-| Situation | Script |
-|---|---|
-| Fresh install — suite not yet on this machine | `installers/install.sh` or `installers/install.ps1` |
-| Suite already installed, just need MCP | `mcp/setup-binary-analysis.sh` or `mcp/setup-binary-analysis.ps1` |
+The toolkit wires up the MCP server; **it does not provide, patch, or license IDA**. You
+need your own IDA Pro or IDA Free installation already on this machine. The scripts below
+only activate that existing installation's idalib bindings and register the MCP server —
+they do not install IDA itself.
 
----
-
-## Full install (suite not yet installed)
-
-See [`installers/install.sh`](../installers/install.sh) and [`installers/install.ps1`](../installers/install.ps1).
-
-Requires Git LFS:
-```bash
-git lfs pull
-./installers/install.sh           # Linux / macOS / WSL
-.\installers\install.ps1          # Windows
-```
+No IDA license? The standalone Python tools under `tools/` (PE analysis, pattern scanning,
+sig uniqueness, protector ID) need only Python 3, and [Ghidra](https://ghidra-sre.org/) /
+[Binary Ninja Free](https://binary.ninja/) are free static-analysis alternatives.
 
 ---
 
-## MCP-only setup (suite already installed)
+## MCP setup (activate your existing IDA + register the server)
 
 ```bash
 # Linux / macOS / WSL
