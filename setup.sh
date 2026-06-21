@@ -65,12 +65,12 @@ install_lsp "angel-lsp-pcx" "https://github.com/sinnafuls/angel-lsp-pcx.git" "se
 # --- Build Rust tools if cargo is available ---
 if command -v cargo &>/dev/null; then
     echo ""
-    echo "[..] Building Rust tools (pe-parser, sig-uniqueness-checker, binary-diff-summary, offset-diff)..."
-    ( cd "$TOOLKIT_DIR/tools/pe-parser" && cargo build --release && mkdir -p ../bin && cp target/release/pe-parser ../bin/pe-parser && cp target/release/sig-uniqueness-checker ../bin/sig-uniqueness-checker && cp target/release/binary-diff-summary ../bin/binary-diff-summary && cp target/release/offset-diff ../bin/offset-diff ) >/dev/null 2>&1 || true
+    echo "[..] Building Rust core parser (pe-parser)..."
+    ( cd "$TOOLKIT_DIR/tools/pe-parser" && cargo build --release && mkdir -p ../bin && cp target/release/pe-parser ../bin/pe-parser ) >/dev/null 2>&1 || true
     if [ -f "$TOOLKIT_DIR/tools/bin/pe-parser" ]; then
-        echo "[ok] Rust tools built: tools/bin/pe-parser, tools/bin/sig-uniqueness-checker, tools/bin/binary-diff-summary, tools/bin/offset-diff"
+        echo "[ok] Rust core parser built: tools/bin/pe-parser"
     else
-        echo "[!!] Rust tools build failed — falling back to Python implementations"
+        echo "[!!] Rust core build failed — falling back to Python implementations"
     fi
 else
     echo ""

@@ -73,7 +73,7 @@ Install-Lsp "angel-lsp-pcx" "https://github.com/sinnafuls/angel-lsp-pcx.git" "se
 $cargo = Get-Command cargo -ErrorAction SilentlyContinue
 if ($cargo) {
     Write-Host ""
-    Write-Host "[..] Building Rust tools (pe-parser, sig-uniqueness-checker, binary-diff-summary, offset-diff)..."
+    Write-Host "[..] Building Rust core parser (pe-parser.exe)..."
     $parserDir = Join-Path $ToolkitDir "tools\pe-parser"
     $binDir = Join-Path $ToolkitDir "tools\bin"
     Push-Location $parserDir
@@ -81,16 +81,13 @@ if ($cargo) {
         & cargo build --release 2>&1 | Out-Null
         New-Item -ItemType Directory -Force -Path $binDir | Out-Null
         Copy-Item (Join-Path $parserDir "target\release\pe-parser.exe") (Join-Path $binDir "pe-parser.exe") -Force -ErrorAction SilentlyContinue
-        Copy-Item (Join-Path $parserDir "target\release\sig-uniqueness-checker.exe") (Join-Path $binDir "sig-uniqueness-checker.exe") -Force -ErrorAction SilentlyContinue
-        Copy-Item (Join-Path $parserDir "target\release\binary-diff-summary.exe") (Join-Path $binDir "binary-diff-summary.exe") -Force -ErrorAction SilentlyContinue
-        Copy-Item (Join-Path $parserDir "target\release\offset-diff.exe") (Join-Path $binDir "offset-diff.exe") -Force -ErrorAction SilentlyContinue
         if (Test-Path (Join-Path $binDir "pe-parser.exe")) {
-            Write-Host "[ok] Rust tools built: tools\bin\pe-parser.exe, tools\bin\sig-uniqueness-checker.exe, tools\bin\binary-diff-summary.exe, tools\bin\offset-diff.exe"
+            Write-Host "[ok] Rust core parser built: tools\bin\pe-parser.exe"
         } else {
-            Write-Host "[!!] Rust tools build failed — falling back to Python implementations" -ForegroundColor Yellow
+            Write-Host "[!!] Rust core build failed — falling back to Python implementations" -ForegroundColor Yellow
         }
     } catch {
-        Write-Host "[!!] Rust tools build failed — falling back to Python implementations" -ForegroundColor Yellow
+        Write-Host "[!!] Rust core build failed — falling back to Python implementations" -ForegroundColor Yellow
     } finally {
         Pop-Location
     }

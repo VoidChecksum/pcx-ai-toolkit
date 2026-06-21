@@ -56,9 +56,6 @@ jobs:
           cargo build --release
           mkdir -p ../bin
           cp target/release/pe-parser ../bin/pe-parser
-          cp target/release/sig-uniqueness-checker ../bin/sig-uniqueness-checker
-          cp target/release/binary-diff-summary ../bin/binary-diff-summary
-          cp target/release/offset-diff ../bin/offset-diff
 
       - name: Run smoke tests
         run: ./tools/test-runner.sh
