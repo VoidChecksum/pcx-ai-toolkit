@@ -9,11 +9,11 @@
 ### The Complete AI-Powered Scripting Toolkit for Perception.cx
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Docs](https://img.shields.io/badge/Docs-110%20pages-brightgreen.svg)](#documentation-coverage)
-[![Lines](https://img.shields.io/badge/Doc%20Lines-35%2C000%2B-brightgreen.svg)](#documentation-coverage)
+[![Docs](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.docs&label=Docs&suffix=%20pages&color=brightgreen)](#documentation-coverage)
+[![Doc Lines](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.doc_lines&label=Doc%20Lines&color=brightgreen)](#documentation-coverage)
 [![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
-[![MCP Tools](https://img.shields.io/badge/MCP%20Tools-42%2B-purple.svg)](#perception-mcp-server)
-[![Skills](https://img.shields.io/badge/AI%20Skills-23-yellow.svg)](#ai-skills)
+[![MCP Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.mcp_tools&label=MCP%20Tools&color=purple)](#perception-mcp-server)
+[![Skills](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.skills&label=AI%20Skills&color=yellow)](#ai-skills)
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 
@@ -24,6 +24,19 @@ Complete Enma language docs, every PCX API, coding guidelines, MCP configs, and 
 
 </div>
 
+<details>
+<summary><strong>Table of Contents</strong></summary>
+
+- [The Problem](#the-problem) · [The Solution](#the-solution) · [Scope](#scope)
+- [Quick Start](#quick-start) · [Installation Guide](#installation-guide) · [Part 1.5 — Auto-Update](#part-15--auto-update)
+- [What's Inside](#whats-inside) · [Indexed Knowledge Surfaces](#indexed-knowledge-surfaces)
+- [Perception IDE](#perception-ide--built-in-script-editor-and-ai-assistant) · [Directory Structure](#directory-structure)
+- [Documentation Coverage](#documentation-coverage) · [AI Skills](#ai-skills) · [Knowledge Base](#knowledge-base)
+- [MCP Integration](#mcp-integration) · [Templates](#templates) · [Editor Extensions](#editor-extensions)
+- [Project Rules](#project-rules) · [Contributing](#contributing) · [License](#license)
+
+</details>
+
 ---
 
 ## The Problem
@@ -32,7 +45,7 @@ LLMs don't know Enma. They don't know the Perception.cx API. Ask them to write a
 
 ## The Solution
 
-Give the AI **34,000+ lines of real documentation** and **12 coding rules** that prevent the most common mistakes. The AI reads the actual docs before writing code, follows real API signatures, and produces scripts that work.
+Give the AI **43,000+ lines of real documentation** and **12 coding rules** that prevent the most common mistakes. The AI reads the actual docs before writing code, follows real API signatures, and produces scripts that work.
 
 ```
 Before:  "Write me an ESP overlay"
@@ -43,6 +56,16 @@ After:   "Write me an ESP overlay"  (with pcx-ai-toolkit loaded)
 AI:      *reads render-api.md, uses draw_rect + draw_text, uint64 addresses, validates pointers*
 Result:  Compiles. Runs. Correct API calls.
 ```
+
+## Scope
+
+This toolkit is for **authorized** reverse engineering, security research,
+single-player modding, defensive anti-cheat analysis, and Perception.cx tooling
+development. Analyze only software you own or are authorized to test. The
+memory-read, world-to-screen, and GUI patterns here are general reverse-
+engineering and overlay-rendering techniques; they are not guidance for evading
+anti-cheat enforcement or violating game terms of service. See `SECURITY.md`
+for the toolkit's own security policy.
 
 ---
 
@@ -68,7 +91,7 @@ cp rules/CLAUDE.md /path/to/your/pcx-project/   # Linux/macOS
 copy rules\CLAUDE.md C:\path\to\your\project\   # Windows
 ```
 
-> **Requirements:** [Node.js 18+](https://nodejs.org/) · [Git](https://git-scm.com/) · [Git LFS](https://git-lfs.github.com/) (for the analysis suite)
+> **Requirements:** [Node.js 18+](https://nodejs.org/) · [Git](https://git-scm.com/) · (optional) [Git LFS](https://git-lfs.github.com/) only if you vendor large binary assets into your own project
 
 ---
 
@@ -117,83 +140,22 @@ powershell -ExecutionPolicy Bypass -File tools/update-toolkit.ps1
 - `--skip-bundles` / `-SkipBundles`: Skip checking/regenerating the `llms-index` bundles under `docs/`.
 ---
 
-### Part 2 — Analysis Suite (headless, fully automatic)
+### Part 2 — Binary Analysis MCP (optional, bring your own IDA)
 
-Installs the static analysis tool permanently for your OS, patches the binaries,
-generates the license, activates the Python bindings, and wires up the binary
-analysis MCP server for Claude Code — **zero interaction, one command**.
+The toolkit can wire up [mrexodia/ida-pro-mcp](https://github.com/mrexodia/ida-pro-mcp)
+as a `binary-analysis` MCP server so your AI client can disassemble, find xrefs, and
+generate signatures without the GUI open. This requires a **legitimately licensed**
+IDA Pro or IDA Free installation you already have on your machine — the toolkit does
+not provide, patch, or license IDA, and ships no installer binaries.
 
-#### Prerequisites
-
-| Prerequisite | Linux / WSL | macOS | Windows |
-|---|---|---|---|
-| [Node.js 18+](https://nodejs.org/) | `sudo apt-get install nodejs` | `brew install node` | installer from nodejs.org |
-| [Xvfb](https://www.x.org/releases/individual/app/) | `sudo apt-get install xvfb` | not needed | not needed |
-| Git LFS | `sudo apt-get install git-lfs` | `brew install git-lfs` | [git-lfs.github.com](https://git-lfs.github.com/) |
-| Python 3.11+ | installed automatically via uv | installed automatically via uv | installed automatically via uv |
-
-> **Why Xvfb?** The installer binary uses Qt for its UI layer even in unattended mode.
-> The script spins up a throwaway virtual display, runs the installer through it, then
-> tears it down. You never see a window.
-
-#### Install
-
-```bash
-# Pull the installer binaries (stored in Git LFS, ~3 GB)
-git lfs pull
-
-# Linux / macOS / WSL — one command does everything
-./installers/install.sh
-```
-
-```powershell
-# Windows — run PowerShell as Administrator if installing to Program Files
-git lfs pull
-powershell -ExecutionPolicy Bypass -File installers\install.ps1
-```
-
-#### What happens, step by step
-
-| Step | Linux / macOS | Windows |
-|---|---|---|
-| 1 | Checks Node.js + Xvfb are available | Checks Node.js is available |
-| 2 | Spins up a Xvfb virtual display | — |
-| 3 | Runs the native `.run` / `.app.zip` installer silently via `--mode unattended` | Runs `.exe` installer silently via `--mode unattended` |
-| 4 | `node keygen.js` patches `libida.so` + `libida32.so` (or `.dylib`) in-place | Pre-patched `ida.dll` + `ida32.dll` dropped into the install dir |
-| 5 | `node keygen.js` writes `idapro.hexlic` to the install dir | Same |
-| 6 | Installs `uv` if not present | Same |
-| 7 | Installs Python 3.11+ via uv if not present | Same |
-| 8 | Activates idalib Python bindings via `py-activate-idalib.py` | Same |
-| 9 | `uv tool install ida-pro-mcp` | Same |
-| 10 | Merges `binary-analysis` entry into `~/.claude/mcp.json` | Merges into `%USERPROFILE%\.claude\mcp.json` |
-
-#### Options
-
-```bash
-# Custom install location (default: /opt/ida-pro-9.3 or ~/ida-pro-9.3)
-./installers/install.sh --prefix /opt/mydir
-
-# Skip MCP server install (just install + patch the suite)
-./installers/install.sh --skip-mcp
-```
-
-```powershell
-# Custom install location (default: C:\Program Files\IDA Professional 9.3)
-.\installers\install.ps1 -Prefix "D:\tools\ida"
-
-# Skip MCP server install
-.\installers\install.ps1 -SkipMcp
-```
-
-#### Already have it installed?
-
-Skip the 3 GB download — just activate the bindings and wire up MCP:
+If you already have IDA installed, one command activates the idalib Python bindings and
+registers the MCP server:
 
 ```bash
 # Linux / macOS / WSL
-./mcp/setup-binary-analysis.sh                            # auto-detect install dir
+./mcp/setup-binary-analysis.sh                           # auto-detect install dir
 ./mcp/setup-binary-analysis.sh --install-dir /your/path  # explicit path
-./mcp/setup-binary-analysis.sh --skip-pkg                # skip package download too
+./mcp/setup-binary-analysis.sh --skip-pkg                # skip the ida-pro-mcp download
 ```
 
 ```powershell
@@ -203,26 +165,21 @@ Skip the 3 GB download — just activate the bindings and wire up MCP:
 .\mcp\setup-binary-analysis.ps1 -SkipPkg
 ```
 
-#### After install
-
-Restart Claude Code. The `binary-analysis` MCP server is now available:
+After install, restart Claude Code. The `binary-analysis` MCP server is available:
 
 ```bash
-# Headless — stdio (used automatically by Claude Code)
-uvx idalib-mcp --stdio
-
-# HTTP — for persistent sessions or multiple clients
-uvx idalib-mcp --host 127.0.0.1 --port 8745
-
-# Optional GUI plugin (connects to a live interactive session via SSE)
-pip install ida-pro-mcp && ida-pro-mcp --install
+uvx idalib-mcp --stdio                            # headless (Claude Code, Cursor, Zed)
+uvx idalib-mcp --host 127.0.0.1 --port 8745       # HTTP, multiple clients
+pip install ida-pro-mcp && ida-pro-mcp --install # optional GUI plugin (SSE)
 ```
 
-Upgrade the MCP server at any time:
-```bash
-uv tool upgrade ida-pro-mcp
-```
+Upgrade anytime with `uv tool upgrade ida-pro-mcp`. Full reference:
+[`mcp/binary-analysis-setup.md`](mcp/binary-analysis-setup.md).
 
+> **No IDA license?** The standalone Python tools under `tools/` (PE analysis, pattern
+> scanning, sig uniqueness, protector ID, deobfuscation) need only Python 3 — no IDA
+> required. [Ghidra](https://ghidra-sre.org/) and [Binary Ninja Free](https://binary.ninja/)
+> are free alternatives for static analysis.
 ---
 
 ## What's Inside
@@ -232,7 +189,7 @@ uv tool upgrade ida-pro-mcp
 <td width="50%" valign="top">
 
 ### Documentation
-110 pages, 35,000+ lines
+130+ pages, 43,000+ lines (live counts in docs/COUNTS.json)
 
 - Complete Enma language spec
 - All 18 standard library addons
@@ -261,7 +218,7 @@ uv tool upgrade ida-pro-mcp
 - **script-bundler** — packaging, hot-reload boundaries, pre-ship hygiene
 - **pcx-perf-budget** — frame-time targets + `mono_us` profiler recipe
 - **pcx-streamproof** — capture-path taxonomy for OBS / Discord / capture cards
-- **mcp-tool-routing** — which of the 37 Perception MCP tools for which task
+- **mcp-tool-routing** — which of the 59 Perception MCP tools for which task
 - **anti-cheat-re** — kernel AC methodology
 - **kernel-analysis** — driver analysis patterns
 - **deobfuscation** — unpacking and string deobfuscation
@@ -298,12 +255,12 @@ Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
 ### Tooling & Indexed Knowledge
 MCP + LSP + Rules + 3 LLM-knowledge surfaces
 
-- **Perception MCP** (42+ live-process tools)
+- **Perception MCP** (59 live-process tools)
 - **pcx-knowledge-mcp** (search + fetch over 211 docs)
 - **Enma + AngelScript LSPs** (syntax, completion, hover)
 - **`docs/llms.txt`** + 6 concatenated context-pack bundles
 - **Rules drop-ins** for Claude / Cursor / Cline / Copilot
-- **16 standalone tools** (Python + bash, stdlib-only)
+- **23 standalone tools** (Python + bash, stdlib-only)
 </td>
 </tr>
 </table>
@@ -343,7 +300,7 @@ All static bundles are generated by [`tools/build-llms-index.py`](tools/build-ll
 </tr>
 <tr>
 <td align="center" colspan="2">
-<strong>42+ RE Tools available via MCP</strong><br>
+<strong>59 RE tools available via MCP</strong><br>
 <img src="assets/pcx-ide-tools.png" alt="Perception IDE - RE Tools" width="500">
 </td>
 </tr>
@@ -360,7 +317,7 @@ All static bundles are generated by [`tools/build-llms-index.py`](tools/build-ll
 ```
 pcx-ai-toolkit/
 │
-├── docs/                             110 pages of documentation
+├── docs/                             130+ pages of documentation (live count in docs/COUNTS.json)
 │   ├── enma/                         ── Enma language, addons, SDK (50 files)
 │   │   ├── llms-language.md              Complete language reference (2,861 lines)
 │   │   ├── llms-sdk.md                   Complete SDK reference (832 lines)
@@ -368,10 +325,12 @@ pcx-ai-toolkit/
 │   │   ├── addon-*.md                    18 standard library addons
 │   │   └── sdk-*.md                      SDK embedding guide (17 files)
 │   │
-│   └── perception/                   ── Perception.cx platform APIs
-│       ├── *.md                          Enma APIs (17 files)
-│       ├── angelscript/                  AngelScript APIs (23 files)
-│       └── lua/                          Lua APIs (17 files)
+│   ├── perception/                   ── Perception.cx platform APIs
+│   │   ├── *.md                          Enma APIs (19 files)
+│   │   ├── angelscript/                  AngelScript APIs (24 files)
+│   │   └── lua/                          Lua APIs (17 files)
+│   ├── angelscript-lang/              ── Core AngelScript language manual (angelcode.com, zlib license)
+│   └── lua-lang/                      ── Core Lua 5.4 reference (lua.org, Lua license)
 │
 ├── .claude/skills/                   ── AI Skills (23)
 │   ├── game-hacking-pcx/                Doc index + coding rules
@@ -389,7 +348,7 @@ pcx-ai-toolkit/
 │   ├── pcx-streamproof/                 Capture-path taxonomy for OBS / Discord / cards
 │   ├── pcx-debug-overlay/               Diagnostic / profiler / status overlay (gated, read-only)
 │   ├── pcx-knowledge-index/             How AI tools reach the corpus: llms.txt + bundles + MCP
-│   ├── mcp-tool-routing/                Decision guide across the 37 Perception MCP tools
+│   ├── mcp-tool-routing/                Decision guide across the 59 Perception MCP tools
 │   ├── deobfuscation/                   Unpacking and string deobfuscation
 │   ├── pcx-bloat-audit/                 Scan code for unnecessary/redundant imports & helpers
 │   ├── pcx-bloat-review/                Manual code complexity review guidelines
@@ -418,17 +377,6 @@ pcx-ai-toolkit/
 │   ├── network-protocol-re.md            Packet capture + dissection + wire-to-memory mapping
 │   └── engine-redengine.md               REDengine (Cyberpunk 2077, Witcher 3)
 │
-├── installers/                       ── Analysis Suite Installers (Git LFS)
-│   ├── install.sh                        Full install — Linux / macOS / WSL
-│   ├── install.ps1                       Full install — Windows
-│   ├── keygen.js                         License generator + in-place patcher
-│   ├── ida-pro_93_x64linux.run           Linux x64 installer  [LFS]
-│   ├── ida-pro_93_armlinux.run           Linux ARM64 installer [LFS]
-│   ├── ida-pro_93_x64mac.app.zip         macOS x64 installer  [LFS]
-│   ├── ida-pro_93_armmac.app.zip         macOS ARM64 installer [LFS]
-│   ├── ida-pro_93_x64win.exe             Windows x64 installer [LFS]
-│   └── kg_patch/win/                     Pre-patched Windows DLLs [LFS]
-│
 ├── rules/                            ── Project Rules
 │   ├── CLAUDE.md                         Drop-in for Claude Code
 │   ├── CURSOR.md                         Drop-in `.cursorrules` for Cursor
@@ -438,7 +386,7 @@ pcx-ai-toolkit/
 │   └── KARPATHY.md                       Work-discipline drop-in (4 principles)
 │
 ├── mcp/                              ── MCP Configs
-│   ├── perception-mcp-config.json        42+ tool definitions
+│   ├── perception-mcp-config.json        59 tool definitions
 │   ├── claude-code-setup.md              Claude Code guide
 │   ├── cursor-setup.md                   Cursor guide
 │   ├── aider-setup.md                    Aider CLI integration (.aider.conf.yml, CONVENTIONS.md)
@@ -498,7 +446,7 @@ pcx-ai-toolkit/
 
 ## Documentation Coverage
 
-> **107 out of 107 gitbook pages — 100% coverage of both the Enma and Perception.cx documentation.**
+> **All published Enma + Perception.cx GitBook pages are mirrored, plus the core AngelScript and Lua language references. Counts are live — see the badges above, sourced from [`docs/COUNTS.json`](docs/COUNTS.json).**
 
 <table>
 <tr>
@@ -510,20 +458,20 @@ pcx-ai-toolkit/
 <tr>
 <td><strong>Enma Language</strong></td>
 <td align="center">50</td>
-<td align="center">13,518</td>
+<td align="center">13,423</td>
 <td>Every type, operator, control flow, function, pointer, struct, class, template, coroutine, exception, FFI, annotation, module, preprocessor + all 18 addons + full SDK</td>
 </tr>
 <tr>
 <td><strong>PCX Enma APIs</strong></td>
-<td align="center">17</td>
-<td align="center">3,915</td>
-<td>Proc, Render, GUI, Input, CPU, Zydis, Unicorn, Net, Win, Filesystem, Sound, Lifecycle, MCP, IDE, Extensions, Analyzer</td>
+<td align="center">19</td>
+<td align="center">4,707</td>
+<td>Proc, Render, GUI, Input, CPU, Zydis, Unicorn, Net, Win, Filesystem, Sound, Lifecycle, MCP, IDE, Extensions, Analyzer, Custom Draw, Changelogs</td>
 </tr>
 <tr>
 <td><strong>PCX AngelScript APIs</strong></td>
-<td align="center">23</td>
-<td align="center">10,820</td>
-<td>All of the above + Intrinsics, Zydis Encoder, Bit Reinterpret, Mutex, Atomic Types, CS2 Extended</td>
+<td align="center">24</td>
+<td align="center">11,313</td>
+<td>All of the above + Intrinsics, Zydis Encoder, Bit Reinterpret, Mutex, Atomic Types, CS2 Extended, Custom Draw</td>
 </tr>
 <tr>
 <td><strong>PCX Lua APIs</strong></td>
@@ -532,9 +480,21 @@ pcx-ai-toolkit/
 <td>All core APIs in Lua syntax</td>
 </tr>
 <tr>
+<td><strong>AngelScript language (core)</strong></td>
+<td align="center">25</td>
+<td align="center">2,162</td>
+<td>Core AS language manual scraped from angelcode.com (zlib/libpng license) — datatypes, strings, arrays, expressions, statements, functions, classes, handles, generics, delegates, enums, namespaces, coroutines, add-ons</td>
+</tr>
+<tr>
+<td><strong>Lua language (core)</strong></td>
+<td align="center">3</td>
+<td align="center">6,232</td>
+<td>Core Lua 5.4 reference from lua.org (Lua license) — see <a href="docs/lua-lang/">docs/lua-lang/</a></td>
+</tr>
+<tr>
 <td><strong>Total</strong></td>
-<td align="center"><strong>110</strong></td>
-<td align="center"><strong>35,222</strong></td>
+<td align="center"><strong>138</strong></td>
+<td align="center"><strong>43,616</strong></td>
 </tr>
 </table>
 
@@ -741,25 +701,40 @@ Browse the full set at [`knowledge/`](knowledge/). Topics include: `aimbot-math`
 
 ### Perception MCP Server
 
-> 42+ tools exposed via JSON-RPC — connect any MCP-compatible AI to Perception's live tooling.
+> 59 tools exposed via JSON-RPC — connect any MCP-compatible AI to Perception's live tooling. Tool names below are the live JSON-RPC method names, kept in sync with `docs/perception/mcp-api.md` by `tools/check-mcp-config.py`.
 
 <details>
 <summary><strong>Full tool list</strong> (click to expand)</summary>
 
-**Process Memory**
-`read_memory` · `read_typed_value` · `find_pattern` · `read_pointer_chain` · `read_string` · `memory_write`
+**Discovery + reference lifecycle** (a `handle` from `process/reference_by_*` is required for most tools below)
+`process/list` · `process/info_by_pid` · `process/info_by_name` · `process/reference_by_pid` · `process/reference_by_name` · `process/dereference` · `process/cleanup_references` · `process/list_references`
 
-**Analysis**
-`disassemble` · `struct_dump` · `find_xrefs` · `find_string_refs` · `find_function_bounds` · `analyze_function` · `trace_register` · `analyze_vtable` · `read_rtti` · `generate_signature` · `build_call_graph`
+**Memory I/O** (addresses + handles are hex strings — JSON numbers lose precision past 2^53)
+`process/read_virtual_memory` · `process/write_virtual_memory` · `process/is_valid_address` · `process/read_typed_value` · `process/write_typed_value` · `process/read_string` · `process/write_string` · `process/copy_memory` · `process/fill_memory` · `process/read_pointer_chain` · `process/disassemble`
 
-**Scanning**
-`scan_string` · `scan_wstring` · `scan_pointer_to` · `scan_value` · `scan_changed` · `diff_memory`
+**Modules / threads / PE**
+`process/get_modules` · `process/get_threads` · `process/get_module_by_name` · `process/get_export_address` · `process/get_import_address` · `process/get_module_imports` · `process/list_module_exports` · `process/get_module_sections` · `process/get_pe_header` · `process/get_module_strings` · `process/get_exception_table` · `process/get_data_directory`
 
-**Process Info**
-`list_processes` · `get_process_info` · `get_module_exports` · `get_module_imports`
+**Memory regions + allocation**
+`process/query_memory_region` · `process/enumerate_memory_regions` · `process/allocate_memory` · `process/free_memory`
 
-**Files & Scripts**
-`read_file` · `write_file` · `edit_file` · `search_text` · `find_references` · `check_script` · `validate_script` · `execute_script` · `get_script_api` · `web_search`
+**Pattern + scanner + xrefs + signature**
+`process/find_pattern` · `process/find_all_patterns` · `process/scan_value` · `process/scan_next` · `process/scan_string` · `process/scan_pointer_to` · `process/find_xrefs` · `process/find_string_refs` · `process/generate_signature` · `process/diff_memory`
+
+**Code analysis**
+`process/find_function_bounds` · `process/find_function_by_signature` · `process/analyze_vtable` · `process/read_rtti`
+
+**Symbol / function lookup**
+`process/lookup_symbol` · `process/find_function_by_name`
+
+**Handles**
+`process/enum_handles`
+
+**System / environment**
+`system/info` · `system/list_drivers` · `process/get_command_line` · `process/list_environment`
+
+**Enma scripting bridge** (no handle; run/validate a script with its own permissions)
+`script/get_context` · `script/validate` · `script/execute`
 
 </details>
 
