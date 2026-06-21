@@ -1,0 +1,20 @@
+# CODEOWNERS for pcx-ai-toolkit
+# Rules for routing pull request reviews to specific project area owners.
+
+# Default owner for everything
+* @VoidChecksum
+
+# Documentation changes
+/docs/ @VoidChecksum
+
+# Language Server Protocol (LSP) submodules and settings
+/lsp/ @VoidChecksum
+
+# Tools, helper scripts, and CLI code
+/tools/ @VoidChecksum
+
+# MCP servers and config
+/mcp/ @VoidChecksum
+
+# Rules and custom-instruction drop-ins
+/rules/ @VoidChecksum

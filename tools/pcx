@@ -1,115 +1,11 @@
 #!/usr/bin/env python3
-"""pcx — The command-line manager for the pcx-ai-toolkit.
-
-Exposes subcommands for setup, auto-updating, linting, counts generation,
-and drift/compatibility verification.
-
-Usage:
-    pcx setup          # compile LSP, sync skills, add to PATH
-    pcx update         # self-update, rebuild LSP, sync skills, check bundles
-    pcx lint [file]    # lint Enma (.em) script against the 12 guidelines
-    pcx check-drift    # check documentation drift against live upstream
-    pcx check-mcp      # verify MCP config is 100% in sync with mcp-api.md
-    pcx check-matrix   # advisory version-matrix vs changelogs sync check
-    pcx counts         # regenerate docs/COUNTS.json
-    pcx version        # print the toolkit version
-"""
-import argparse
-import os
-import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-VERSION_FILE = REPO_ROOT / "VERSION"
+# Add REPO_ROOT to sys.path so we can import tools package even when not installed
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-
-def get_version() -> str:
-    if VERSION_FILE.exists():
-        return VERSION_FILE.read_text(encoding="utf-8").strip()
-    return "unknown"
-
-
-def run_script(script_name: str, args: list[str]) -> int:
-    """Run a shell script (.sh) or PowerShell script (.ps1) based on OS."""
-    is_windows = os.name == "nt"
-    ext = "ps1" if is_windows else "sh"
-    script_path = REPO_ROOT / f"{script_name}.{ext}"
-
-    if not script_path.exists():
-        # Try finding in tools/ subdirectory if not in root
-        script_path = REPO_ROOT / "tools" / f"{script_name}.{ext}"
-        if not script_path.exists():
-            print(f"Error: Script {script_name}.{ext} not found.", file=sys.stderr)
-            return 2
-
-    if is_windows:
-        cmd = ["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", str(script_path)] + args
-    else:
-        cmd = ["bash", str(script_path)] + args
-
-    try:
-        res = subprocess.run(cmd)
-        return res.returncode
-    except Exception as e:
-        print(f"Error executing {script_path.name}: {e}", file=sys.stderr)
-        return 3
-
-
-def run_python_tool(tool_name: str, args: list[str]) -> int:
-    """Run a python tool in the tools/ subdirectory using the current interpreter."""
-    tool_path = REPO_ROOT / "tools" / f"{tool_name}.py"
-    if not tool_path.exists():
-        print(f"Error: Python tool {tool_name}.py not found.", file=sys.stderr)
-        return 2
-
-    cmd = [sys.executable, str(tool_path)] + args
-    try:
-        res = subprocess.run(cmd)
-        return res.returncode
-    except Exception as e:
-        print(f"Error executing {tool_name}.py: {e}", file=sys.stderr)
-        return 3
-
-
-def main() -> int:
-    desc = f"pcx-ai-toolkit manager CLI v{get_version()}"
-    ap = argparse.ArgumentParser(description=desc, usage="pcx <command> [args]")
-    ap.add_argument("command", help="Command to run (setup, update, lint, check-drift, check-mcp, check-matrix, counts, version)")
-    ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
-    args = ap.parse_args()
-
-    cmd = args.command.lower()
-    sub_args = args.args
-
-    if cmd == "version":
-        print(f"pcx-ai-toolkit v{get_version()}")
-        return 0
-
-    if cmd == "setup":
-        return run_script("setup", sub_args)
-
-    if cmd == "update":
-        return run_script("update-toolkit", sub_args)
-
-    if cmd == "lint":
-        return run_python_tool("script-linter", sub_args)
-
-    if cmd == "check-drift":
-        return run_python_tool("check-doc-drift", sub_args)
-
-    if cmd == "check-mcp":
-        return run_python_tool("check-mcp-config", sub_args)
-
-    if cmd == "check-matrix":
-        return run_python_tool("check-version-matrix", sub_args)
-
-    if cmd == "counts":
-        return run_python_tool("build-counts", sub_args)
-
-    print(f"Error: Unknown command '{cmd}'. Run 'pcx --help' or check usage.", file=sys.stderr)
-    return 1
-
+from tools.pcx import main
 
 if __name__ == "__main__":
     sys.exit(main())

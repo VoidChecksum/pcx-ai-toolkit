@@ -108,6 +108,9 @@ jobs:
       - name: Check docs/PROVENANCE.json in sync with the tree
         run: python3 tools/build-provenance.py --check
 
+      - name: Check doc drift (advisory)
+        run: python3 tools/check-doc-drift.py || true
+
       - name: Check MCP config in sync with mcp-api.md (compatibility gate)
         run: python3 tools/check-mcp-config.py --check
 

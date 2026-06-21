@@ -41,3 +41,18 @@ typeCheckingMode = "strict"
 useLibraryCodeForTypes = true
 reportMissingImports = "warning"
 reportMissingTypeStubs = false
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pcx-ai-toolkit"
+version = "0.1.0"
+description = "AI-powered scripting toolkit for Perception.cx"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+pcx = "tools.pcx:main"

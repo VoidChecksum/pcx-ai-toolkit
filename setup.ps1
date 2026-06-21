@@ -40,89 +40,18 @@ $nodeVer = (node --version)
 $npmVer  = (npm --version)
 Write-Host "[ok] node $nodeVer, npm $npmVer"
 
-# --- Clone + build an LSP server ---
-function Install-Lsp($name, $url, $outFile) {
-    $dir = Join-Path $ToolkitDir "lsp\$name"
-    if (-not (Test-Path (Join-Path $dir ".git"))) {
-        Write-Host "[..] Cloning $name..."
-        git clone --depth 1 $url $dir
-    } else {
-        Write-Host "[ok] $name already present"
-    }
-    Write-Host "[..] Building $name..."
-    Push-Location $dir
-    try {
-        # npm on Windows is npm.cmd; call via cmd to avoid PSReadLine quirks
-        & npm install 2>&1 | Out-Null
-        & npm run compile 2>&1 | Out-Null
-    } finally {
-        Pop-Location
-    }
-    $built = Join-Path $dir $outFile
-    if (Test-Path $built) {
-        Write-Host "[ok] $name built: $outFile"
-    } else {
-        Write-Host "[!!] $name build did not produce $outFile — run 'npm run compile' in $dir manually" -ForegroundColor Yellow
-    }
+# --- Run core setup logic via python ---
+$py = Get-Command python3, python -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $py) {
+    Write-Error "ERROR: Python 3.10+ is required but not found on PATH."
+    exit 1
 }
 
-Install-Lsp "enma-lsp"      "https://github.com/sinnafuls/enma-lsp.git"      "server\dist\server.js"
-Install-Lsp "angel-lsp-pcx" "https://github.com/sinnafuls/angel-lsp-pcx.git" "server\out\server.js"
-
-# --- Build Rust tools if cargo is available ---
-$cargo = Get-Command cargo -ErrorAction SilentlyContinue
-if ($cargo) {
-    Write-Host ""
-    Write-Host "[..] Building Rust core parser (pe-parser.exe)..."
-    $parserDir = Join-Path $ToolkitDir "tools\pe-parser"
-    $binDir = Join-Path $ToolkitDir "tools\bin"
-    Push-Location $parserDir
-    try {
-        & cargo build --release 2>&1 | Out-Null
-        New-Item -ItemType Directory -Force -Path $binDir | Out-Null
-        Copy-Item (Join-Path $parserDir "target\release\pe-parser.exe") (Join-Path $binDir "pe-parser.exe") -Force -ErrorAction SilentlyContinue
-        if (Test-Path (Join-Path $binDir "pe-parser.exe")) {
-            Write-Host "[ok] Rust core parser built: tools\bin\pe-parser.exe"
-        } else {
-            Write-Host "[!!] Rust core build failed — falling back to Python implementations" -ForegroundColor Yellow
-        }
-    } catch {
-        Write-Host "[!!] Rust core build failed — falling back to Python implementations" -ForegroundColor Yellow
-    } finally {
-        Pop-Location
-    }
-} else {
-    Write-Host ""
-    Write-Host "[--] Cargo not found — using Python implementations"
-}
-
-# --- Install skills to Claude Code if present ---
-$claudeDir = Join-Path $env:USERPROFILE ".claude"
-if (Test-Path $claudeDir) {
-    Write-Host ""
-    Write-Host "[..] Claude Code detected - installing skills..."
-    foreach ($skillDir in Get-ChildItem (Join-Path $ToolkitDir ".claude\skills") -Directory) {
-        $src = Join-Path $skillDir.FullName "SKILL.md"
-        if (-not (Test-Path $src)) { continue }
-        $dest = Join-Path $claudeDir "skills\$($skillDir.Name)"
-        New-Item -ItemType Directory -Force -Path $dest | Out-Null
-        Copy-Item $src $dest -Force
-    }
-    Write-Host "[ok] Skills installed to $claudeDir\skills\"
-} else {
-    Write-Host ""
-    Write-Host "[--] Claude Code not detected - skip skill install."
-    Write-Host "     Manual: copy .claude\skills\* to $claudeDir\skills\"
-}
-
-# --- Optional: copy CLAUDE.md to a project ---
+$coreScript = Join-Path $ToolkitDir "tools\setup-core.py"
 if ($Project -ne "") {
-    if (Test-Path $Project) {
-        Copy-Item (Join-Path $ToolkitDir "rules\CLAUDE.md") (Join-Path $Project "CLAUDE.md") -Force
-        Write-Host "[ok] Project rules copied to $Project\CLAUDE.md"
-    } else {
-        Write-Host "[!!] Project path not found: $Project" -ForegroundColor Yellow
-    }
+    & $py.Source $coreScript --project $Project
+} else {
+    & $py.Source $coreScript
 }
 
 # --- Add tools to PATH ---

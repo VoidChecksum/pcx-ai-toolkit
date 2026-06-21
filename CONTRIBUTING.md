@@ -42,3 +42,19 @@
 - API keys, tokens, or credentials
 - Copyrighted game assets
 - Offsets tied to a specific game version (these belong in your project, not the toolkit)
+
+## Good First Issues & Tasks
+
+If you are looking for somewhere to start, here are some recommended first contributions:
+
+### 1. Document additional PCX APIs
+Help expand documentation for less covered APIs. See `docs/` and look for any missing details or parameter explanations.
+
+### 2. Add new working patterns
+Add a recipe for common tasks (e.g., retrieving bones, configuring a customizable GUI color palette, or handling thread safety) in `knowledge/common-patterns.md`.
+
+### 3. Add game signature templates
+Create pattern signatures for a popular game engine (e.g., Unreal Engine 5 or Unity) under `signatures/`.
+
+### 4. Improve LSP configuration guides
+Help write or refine integration setups for other code editors (e.g., Emacs, Sublime Text, or Vim) in the `mcp/` folder.
