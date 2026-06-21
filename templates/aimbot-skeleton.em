@@ -133,7 +133,7 @@ void on_update(int64 data) {
     // Aim: hotkey held + locked target -> nudge the crosshair toward it.
     // mouse_move_relative (win-api.md, SendInput) is write-free — no memory
     // write, no .text patch (rule 9). Avoid wf32 to a view-angle address.
-    if (g_have_target && is_key_down(g_hotkey)) {
+    if (g_have_target && key_down(g_hotkey)) {
         float64 mdx = (g_target_screen.x - cx) / g_smoothing;
         float64 mdy = (g_target_screen.y - cy) / g_smoothing;
         mouse_move_relative(cast<int64>(mdx), cast<int64>(mdy));

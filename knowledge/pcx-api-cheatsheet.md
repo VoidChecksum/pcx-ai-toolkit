@@ -144,12 +144,25 @@ section_separator(sec);
 ## Input API
 
 ```cpp
-bool is_key_down(int32 vk);
-bool is_key_pressed(int32 vk);       // edge: just pressed
-bool is_key_released(int32 vk);      // edge: just released
-bool is_mouse_down(int32 button);    // 0=left, 1=right, 2=middle
-vec2 get_mouse_pos();
-vec2 get_mouse_delta();
+bool key_down       (int64 vk);      // host-debounced down state
+bool key_raw_down   (int64 vk);      // OS-level pressed state
+bool key_fired      (int64 vk);      // up->down this frame (one-shot)
+bool key_toggle     (int64 vk);      // caps-lock-style toggle
+bool key_singlepress(int64 vk);      // fired but suppressed if modifiers held
+bool key_prev_down  (int64 vk);      // down state from previous frame
+
+key_state_t  get_key_state(int64 vk); // atomic snapshot of all 6 flags
+array<int32> get_keys_down();         // virtual-key codes currently pressed
+string       get_recent_key_input();  // buffered text input (UTF-8)
+string       get_key_name(int64 vk);  // localized key name (e.g. "F1")
+
+vec2 get_mouse_pos();                 // render-window pixels
+vec2 get_mouse_pos_desktop();         // desktop pixels (full screen)
+vec2 get_mouse_delta();               // raw movement this frame
+vec2 get_mouse_delta_desktop();       // desktop-space delta this frame
+bool mouse_movement_received();       // any movement this frame
+bool is_hovered(vec2 pos, vec2 size); // mouse inside rect
+float64 get_scroll_delta();           // wheel ticks; positive = up
 ```
 
 ## CPU API

@@ -210,7 +210,7 @@ code on the way out. So persistence is triggered one of three ways:
 
 - **Save button** — `section_button(sec, "Save Config", cast<int64>(save_config))`.
   Explicit, zero overhead, what the scaffold uses.
-- **Save hotkey** — check `is_key_pressed(g_save_key)` in a routine, call
+- **Save hotkey** — check `key_fired(g_save_key)` in a routine, call
   `save_config()` on the edge. Convenient mid-game.
 - **Autosave on change** — diff GUI state in the update routine and save when it
   moves. Simplest to reason about, but it writes to disk during gameplay; gate it

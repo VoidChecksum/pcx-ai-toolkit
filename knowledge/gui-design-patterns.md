@@ -182,25 +182,24 @@ Every hotkey is exposed as a `section_keybind` widget so the user can rebind:
 
 ```cpp
 // RIGHT — hotkey is configurable
-int64 g_esp_hotkey = VK_F2;
+int64 g_esp_hotkey = vk::f2;
 section_keybind(sec, "ESP toggle", g_esp_hotkey);
 
 void on_update(int64 data) {
-    if (is_key_pressed(g_esp_hotkey)) {
+    if (key_fired(g_esp_hotkey)) {
         g_esp_enabled = !g_esp_enabled;
     }
 }
 
 // WRONG — hardcoded hotkey, user can't rebind
 void on_update(int64 data) {
-    if (is_key_pressed(VK_F2)) {
+    if (key_fired(vk::f2)) {
         g_esp_enabled = !g_esp_enabled;
     }
 }
 ```
 
-`is_key_pressed` is edge-triggered (true once per press); `is_key_down` is level-triggered (true while held). Toggles use pressed; hold-to-activate uses down.
-
+`key_fired` is edge-triggered (true once per press); `key_down` is level-triggered (true while held). Toggles use fired; hold-to-activate uses down.
 **Why:** Hotkey conflicts kill scripts. The user reports "the script doesn't work" — actually the script's `F` hotkey collides with the game's interact key, and pressing it both triggers the script and opens a door. Configurable hotkeys eliminate the entire class of report.
 
 ---

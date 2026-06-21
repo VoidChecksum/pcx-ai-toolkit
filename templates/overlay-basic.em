@@ -19,7 +19,7 @@ float64 g_fps     = 0.0;
 // Update routine: logic only, no drawing.
 void on_update(int64 data) {
     // Edge-triggered toggle so holding the key doesn't flicker.
-    if (is_key_pressed(g_toggle_key)) {
+    if (key_fired(g_toggle_key)) {
         g_visible = !g_visible;
     }
     g_fps = get_fps();

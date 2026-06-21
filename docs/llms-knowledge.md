@@ -3911,25 +3911,24 @@ Every hotkey is exposed as a `section_keybind` widget so the user can rebind:
 
 ```cpp
 // RIGHT — hotkey is configurable
-int64 g_esp_hotkey = VK_F2;
+int64 g_esp_hotkey = vk::f2;
 section_keybind(sec, "ESP toggle", g_esp_hotkey);
 
 void on_update(int64 data) {
-    if (is_key_pressed(g_esp_hotkey)) {
+    if (key_fired(g_esp_hotkey)) {
         g_esp_enabled = !g_esp_enabled;
     }
 }
 
 // WRONG — hardcoded hotkey, user can't rebind
 void on_update(int64 data) {
-    if (is_key_pressed(VK_F2)) {
+    if (key_fired(vk::f2)) {
         g_esp_enabled = !g_esp_enabled;
     }
 }
 ```
 
-`is_key_pressed` is edge-triggered (true once per press); `is_key_down` is level-triggered (true while held). Toggles use pressed; hold-to-activate uses down.
-
+`key_fired` is edge-triggered (true once per press); `key_down` is level-triggered (true while held). Toggles use fired; hold-to-activate uses down.
 **Why:** Hotkey conflicts kill scripts. The user reports "the script doesn't work" — actually the script's `F` hotkey collides with the game's interact key, and pressing it both triggers the script and opens a door. Configurable hotkeys eliminate the entire class of report.
 
 ---
@@ -5105,12 +5104,25 @@ section_separator(sec);
 ## Input API
 
 ```cpp
-bool is_key_down(int32 vk);
-bool is_key_pressed(int32 vk);       // edge: just pressed
-bool is_key_released(int32 vk);      // edge: just released
-bool is_mouse_down(int32 button);    // 0=left, 1=right, 2=middle
-vec2 get_mouse_pos();
-vec2 get_mouse_delta();
+bool key_down       (int64 vk);      // host-debounced down state
+bool key_raw_down   (int64 vk);      // OS-level pressed state
+bool key_fired      (int64 vk);      // up->down this frame (one-shot)
+bool key_toggle     (int64 vk);      // caps-lock-style toggle
+bool key_singlepress(int64 vk);      // fired but suppressed if modifiers held
+bool key_prev_down  (int64 vk);      // down state from previous frame
+
+key_state_t  get_key_state(int64 vk); // atomic snapshot of all 6 flags
+array<int32> get_keys_down();         // virtual-key codes currently pressed
+string       get_recent_key_input();  // buffered text input (UTF-8)
+string       get_key_name(int64 vk);  // localized key name (e.g. "F1")
+
+vec2 get_mouse_pos();                 // render-window pixels
+vec2 get_mouse_pos_desktop();         // desktop pixels (full screen)
+vec2 get_mouse_delta();               // raw movement this frame
+vec2 get_mouse_delta_desktop();       // desktop-space delta this frame
+bool mouse_movement_received();       // any movement this frame
+bool is_hovered(vec2 pos, vec2 size); // mouse inside rect
+float64 get_scroll_delta();           // wheel ticks; positive = up
 ```
 
 ## CPU API
@@ -5825,8 +5837,9 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 
 | API | Since | Notes | Deprecated/Removed In | Replacement |
 |-----|-------|-------|-----------------------|-------------|
-| `is_key_down`, `is_key_pressed`, `is_key_released` | `<= 2026-02-01` | Keyboard state (level + edge). `docs/perception/input-api.md`. | — | — |
-| `is_mouse_down`, `get_mouse_pos` | `<= 2026-02-01` | Mouse buttons (0=L/1=R/2=M) + position. | — | — |
+| `is_key_down`, `is_key_pressed`, `is_key_released` | `<= 2026-02-01` | Legacy keyboard state functions. | `2026-02-12` (deprecated) | `key_down` / `key_fired` / `key_toggle` |
+| `is_mouse_down` | `<= 2026-02-01` | Legacy mouse button check. | `2026-02-12` (deprecated) | `key_down` with `vk::lbutton` / `vk::rbutton` |
+| `key_down`, `key_fired`, `key_toggle`, `key_raw_down` | `2026-02-12` | Current unified keyboard and mouse button state queries. | — | — |
 | `get_mouse_delta` | `<= 2026-02-01` | Existed earlier; behavior fixed `2026-02-12` to return proper movement delta instead of screen-space delta (changelog `Feb 12 → Input System`). | — | — |
 | Controller keybinds (XINPUT) | `2026-02-12` | XINPUT controller keybind support added (changelog `Feb 12 → Input System`). | — | — |
 | `get_gui_position(float &out x, float &out y)`, `get_gui_size(float &out w, float &out h)` | `2026-02-12` | Added (changelog `Feb 12 → AngelScript`). | — | — |
@@ -6544,7 +6557,7 @@ code on the way out. So persistence is triggered one of three ways:
 
 - **Save button** — `section_button(sec, "Save Config", cast<int64>(save_config))`.
   Explicit, zero overhead, what the scaffold uses.
-- **Save hotkey** — check `is_key_pressed(g_save_key)` in a routine, call
+- **Save hotkey** — check `key_fired(g_save_key)` in a routine, call
   `save_config()` on the edge. Convenient mid-game.
 - **Autosave on change** — diff GUI state in the update routine and save when it
   moves. Simplest to reason about, but it writes to disk during gameplay; gate it

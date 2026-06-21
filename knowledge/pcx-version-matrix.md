@@ -176,8 +176,9 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 
 | API | Since | Notes | Deprecated/Removed In | Replacement |
 |-----|-------|-------|-----------------------|-------------|
-| `is_key_down`, `is_key_pressed`, `is_key_released` | `<= 2026-02-01` | Keyboard state (level + edge). `docs/perception/input-api.md`. | — | — |
-| `is_mouse_down`, `get_mouse_pos` | `<= 2026-02-01` | Mouse buttons (0=L/1=R/2=M) + position. | — | — |
+| `is_key_down`, `is_key_pressed`, `is_key_released` | `<= 2026-02-01` | Legacy keyboard state functions. | `2026-02-12` (deprecated) | `key_down` / `key_fired` / `key_toggle` |
+| `is_mouse_down` | `<= 2026-02-01` | Legacy mouse button check. | `2026-02-12` (deprecated) | `key_down` with `vk::lbutton` / `vk::rbutton` |
+| `key_down`, `key_fired`, `key_toggle`, `key_raw_down` | `2026-02-12` | Current unified keyboard and mouse button state queries. | — | — |
 | `get_mouse_delta` | `<= 2026-02-01` | Existed earlier; behavior fixed `2026-02-12` to return proper movement delta instead of screen-space delta (changelog `Feb 12 → Input System`). | — | — |
 | Controller keybinds (XINPUT) | `2026-02-12` | XINPUT controller keybind support added (changelog `Feb 12 → Input System`). | — | — |
 | `get_gui_position(float &out x, float &out y)`, `get_gui_size(float &out w, float &out h)` | `2026-02-12` | Added (changelog `Feb 12 → AngelScript`). | — | — |
