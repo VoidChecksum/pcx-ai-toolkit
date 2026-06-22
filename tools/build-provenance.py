@@ -44,7 +44,14 @@ COMMENT_RE = re.compile(r"<!--\s*Source:\s*(https?://\S+)")
 EXCLUDE_NAMES = {"INDEX.md"}
 EXCLUDE_PREFIX = ("llms-",)  # generated bundles under docs/
 
-
+# Upstream URLs that are known 404 / removed; keep them in provenance but
+# don't fail CI drift checks on them.
+SKIP_DRIFT_URLS = {
+    "https://docs.perception.cx/perception/angel-script/cs2-extended-api.md",
+    "https://docs.perception.cx/perception/angel-script/custom-draw-api.md",
+    "https://docs.perception.cx/perception/enma/custom-draw-api.md",
+    "https://docs.perception.cx/perception/lua-script/cs2-extended-api.md",
+}
 def is_source_doc(p: Path) -> bool:
     if p.name in EXCLUDE_NAMES:
         return False
@@ -89,7 +96,8 @@ def build() -> dict:
             files[rel] = {"source": "local", "url": None, "drift_check": False}
         else:
             # Only GitBook mirrors are byte-comparable (modulo link flattening).
-            drift = source == "gitbook"
+            # Some upstream pages are known 404; keep provenance but skip drift.
+            drift = source == "gitbook" and url not in SKIP_DRIFT_URLS
             files[rel] = {"source": source, "url": url, "drift_check": drift}
     return {
         "generated": datetime.date.today().isoformat(),

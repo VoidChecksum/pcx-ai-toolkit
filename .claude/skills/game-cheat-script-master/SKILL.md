@@ -233,8 +233,6 @@ See `knowledge/pcx-cross-language-bridge.md` for the full comparison.
 
 ---
 
-## Summary Checklist
-
 Before delivering any cheat script:
 
 1. [ ] Read the relevant docs (see "Read-First Docs" above).
@@ -246,4 +244,5 @@ Before delivering any cheat script:
 7. [ ] Bind every tunable to a GUI widget.
 8. [ ] Add `uint64` address checks, null checks, and `w > 0` guards.
 9. [ ] Confirm the work is for authorized/single-player/educational targets.
-10. [ ] Suggest `pcx lint <file>` and a diff review before running.
+10. [ ] Run `pcx verify <file>` and fix any `unknown_call` / `missing_import` findings.
+11. [ ] Suggest `pcx lint <file>` and a diff review before running.

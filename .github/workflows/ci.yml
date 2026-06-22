@@ -36,10 +36,13 @@ jobs:
 
       - name: Validate Python tools syntax
         run: |
-          for f in tools/*.py tools/lib/*.py; do
+          for f in tools/*.py tools/lib/*.py mcp/pcx-knowledge-mcp/server.py tests/*.py; do
             python3 -m py_compile "$f" || { echo "Syntax error: $f"; exit 1; }
           done
           echo "All Python tools valid"
+
+      - name: Check internal markdown links
+        run: python3 tools/check-internal-links.py
 
       - name: Install mypy and pyright
         run: pip install mypy pyright
@@ -108,14 +111,25 @@ jobs:
       - name: Check docs/PROVENANCE.json in sync with the tree
         run: python3 tools/build-provenance.py --check
 
-      - name: Check doc drift (advisory)
-        run: python3 tools/check-doc-drift.py || true
+      - name: Check doc drift (hard gate)
+        run: python3 tools/check-doc-drift.py --check
+
+      - name: Check API index in sync with docs
+        run: python3 tools/build-api-index.py --check
+
+      - name: Dogfood — symbol-check the toolkit's own templates
+        run: |
+          set -e
+          for f in templates/*.em templates/**/*.as templates/**/*.lua; do
+            [ -f "$f" ] || continue
+            python3 tools/symbol-check.py "$f"
+          done
+
+      - name: Run unittest regression tests
+        run: python3 -m unittest discover -s tests -v
 
       - name: Check MCP config in sync with mcp-api.md (compatibility gate)
         run: python3 tools/check-mcp-config.py --check
-
-      - name: Version-matrix drift advisory (changelogs vs pcx-version-matrix.md)
-        run: python3 tools/check-version-matrix.py || true   # advisory — prints WARN, never fails the build
 
       - name: Dogfood — lint the toolkit's own templates
         run: |

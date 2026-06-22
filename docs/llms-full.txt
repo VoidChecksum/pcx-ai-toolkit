@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 234**
+**Source files included: 236**
 
 ---
 
@@ -46067,8 +46067,6 @@ See `knowledge/pcx-cross-language-bridge.md` for the full comparison.
 
 ---
 
-## Summary Checklist
-
 Before delivering any cheat script:
 
 1. [ ] Read the relevant docs (see "Read-First Docs" above).
@@ -46080,7 +46078,8 @@ Before delivering any cheat script:
 7. [ ] Bind every tunable to a GUI widget.
 8. [ ] Add `uint64` address checks, null checks, and `w > 0` guards.
 9. [ ] Confirm the work is for authorized/single-player/educational targets.
-10. [ ] Suggest `pcx lint <file>` and a diff review before running.
+10. [ ] Run `pcx verify <file>` and fix any `unknown_call` / `missing_import` findings.
+11. [ ] Suggest `pcx lint <file>` and a diff review before running.
 
 ---
 
@@ -46108,12 +46107,23 @@ Perception platform.
 
 ## MANDATORY: Read Before Writing Code
 
-**You MUST read the relevant docs from `docs/` before writing ANY Enma, AngelScript,
-or PCX API code.** Do not write from memory. The docs are the source of truth.
+**The only authoritative sources for PCX API names are the two upstream docs:**
+
+1. `https://docs.perception.cx/perception/enma/overview` — Enma API surface
+2. `https://docs.perception.cx/perception/angel-script/overview` — AngelScript API surface
+
+Use the `.md` variant of any sub-page (e.g. `https://docs.perception.cx/perception/enma/proc-api.md`,
+`https://docs.perception.cx/perception/angel-script/render-api.md`) for structured markdown.
+The local `docs/` tree is a drift-checked mirror of these upstream pages; when in doubt, trust
+the live upstream version.
+
+You MUST read the relevant upstream doc before writing ANY Enma, AngelScript,
+or PCX API code. Do not write from memory. The docs are the source of truth.
 
 ### When writing Enma (.em) code — read these:
 
-**Language (always read `llms-language.md` first — it's the complete single-page reference):**
+**Language (always read `docs/enma/llms-language.md` first — it's the complete single-page reference):**
+
 | Doc | Path | Lines | Content |
 |-----|------|-------|---------|
 | **Complete language ref** | `docs/enma/llms-language.md` | 2861 | Every type, operator, control flow, struct, class, template, coroutine, exception, heap, FFI, annotation, module, addon |
@@ -46255,16 +46265,31 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 |-----|------|-------|
 | Overview | `docs/perception/lua/overview.md` | 59 |
 | All APIs | `docs/perception/lua/*.md` | 5779 total |
-
 ## How To Use These Docs
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
-2. **Before writing Enma code**: `read docs/enma/llms-language.md` (the single-page complete ref)
-3. **Before calling a PCX API**: `read docs/perception/<api-name>.md`
-4. **Before writing AngelScript**: `read docs/perception/angelscript/<api-name>.md`
-5. **If unsure about a type, function, or parameter**: read the doc, don't guess
-6. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
-7. **For a starting project scaffold**: use `templates/cheat-skeleton-em/` or `templates/cheat-skeleton-as/`
+2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/overview` and read the relevant `.md` sub-page
+3. **Before writing AngelScript code**: start from `https://docs.perception.cx/perception/angel-script/overview` and read the relevant `.md` sub-page
+4. **If unsure about a type, function, or parameter**: read the upstream doc, don't guess
+5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
+6. **For a starting project scaffold**: use `templates/cheat-skeleton-em/` or `templates/cheat-skeleton-as/`
+
+## Anti-Hallucination Rule
+
+You must NEVER invent a PCX or Enma/AngelScript/Lua API name. Every function,
+method, type, and import you use must come from one of:
+  - `https://docs.perception.cx/perception/enma/overview` and its sub-pages,
+  - `https://docs.perception.cx/perception/angel-script/overview` and its sub-pages,
+  - `knowledge/pcx-api-index.json` (via `pcx symbol-check` or the
+    `mcp:pcx-knowledge` `validate_code` tool),
+  - a user-defined function declared in the same script.
+
+Before delivering code, run `pcx verify <file>` (or `pcx symbol-check
+<file>` if `verify` is unavailable). If it reports an `unknown_call`,
+`unknown_type`, or `missing_import`, fix it by reading the correct upstream
+doc and using the real symbol. Do not silence the checker by renaming things.
+
+See `knowledge/pcx-doc-roots.md` for the full sourcing policy.
 
 ## Cheat-Script Scaffolds
 
@@ -48779,6 +48804,495 @@ Nothing found: `No deferred debt. Clean ledger.`
 
 Reads and reports only, changes nothing. To persist: ask, and it writes the
 ledger to `DEFER-LEDGER.md` at the project root. One-shot.
+
+---
+
+## Source: `.claude/skills/pcx-enma-discipline/SKILL.md`
+
+---
+name: pcx-enma-discipline
+description: >
+  Behavioral and syntactic rules for writing .em (Enma) scripts on Perception.cx.
+  Prevents AngelScript/Lua-reflex errors in the Enma API surface — method names,
+  parameter shapes, type system, and lifecycle differ from AS and Lua. Always
+  active when editing .em files.
+license: MIT
+---
+
+# Enma Discipline for Perception.cx
+
+Behavioral and syntactic rules for writing `.em` scripts on Perception.cx. Enma is the **primary** scripting language on PCX and has a distinct C++-like type system, RAII semantics, and value-type APIs that differ from AngelScript (handles, `register_callback`, `array<T>`) and Lua (tables, `on_frame`, `require`). The AI defaults to AS or Lua idioms when editing `.em` files and produces code that does not compile.
+
+**Always active when editing `.em` files.** These rules apply every time you write or edit a Perception.cx Enma script.
+
+**Prerequisite:** `game-cheat-guidelines` skill for the full doc index. **Read the relevant `docs/perception/enma/<file>.md` before writing any API call** — the Enma surface is not the AS surface, and method names, parameter shapes, and constants differ.
+
+---
+
+## Trigger
+
+`.em` file open, Enma syntax visible (`import`, `#pragma once`, `register_routine`, `println`, `color`/`vec2` value types, `cast<T>`), user mentions Enma / `proc_t` value semantics / PCX scripting in Enma context, any code referencing `docs/perception/enma/`.
+
+---
+
+## 1. Enma Is Not AngelScript or Lua — Don't Paste AS/Lua APIs
+
+**The PCX Enma API has different function names, different parameter shapes, and different idioms than AS and Lua. They look similar; they are not interchangeable.**
+
+The most common bug in AI-written `.em` scripts is pasting AS or Lua API calls verbatim. The script doesn't compile because Enma is a statically typed C++-like language with value semantics, not a garbage-collected handle system (AS) or a dynamic table language (Lua).
+
+| Enma | AngelScript | Lua |
+|---|---|---|
+| `register_routine(cast<int64>(on_render), 0)` | `register_callback(on_tick, 16, 0)` | `function on_frame()` — no registration |
+| `int64 main()` | `int main()` | `function main()` — returns number |
+| `void on_render(int64 data)` | `void on_tick(int id, int data_index)` | `function on_frame()` — no args |
+| `println(...)` | `log(...)` | `log(...)` |
+| `color(r,g,b,a)` then `draw_rect(vec2(pos), vec2(size), color, ...)` | `draw_rect_filled(x, y, w, h, r, g, b, a, rounding, flags)` | `draw_rect_filled(x, y, w, h, r, g, b, a, rounding, flags)` |
+| `get_view_width()` / `get_view_height()` | `get_view(vw, vh)` — out-param | `vw, vh = get_view()` — multi-return |
+| `proc_t g_proc;` (value, RAII) | `proc_t@ g_proc;` (handle, ref-counted) | `g_proc = ref_process(...)` — userdata |
+| `T[]` arrays with `.push()`, `.pop()` | `array<T>` with `.insertLast()`, `.removeLast()` | `{}` tables with `table.insert()` |
+| `map<K,V>` with `.set()`, `.get()` | `dictionary` with string keys only | `table` as map |
+| `cast<T>(x)` | `T(x)` or `float(x)` — C-style cast | `tonumber(x)` — no generic cast |
+| `#pragma once` + `import "module"` | `#pragma once` + `#include "module"` | No header guards; `require()` |
+
+```cpp
+// WRONG — AS idioms in an .em file
+int main() {
+    proc_t@ p = ref_process("game.exe");      // AS handle syntax
+    if (p is null) return 0;                  // AS null-check
+    register_callback(on_tick, 16, 0);        // AS registration
+    log("loaded");                            // AS log function
+    return 1;
+}
+
+// WRONG — Lua idioms in an .em file
+function main()
+    g_proc = ref_process("game.exe")          -- Lua assignment
+    if not g_proc then return 0 end           -- Lua nil-check
+    return 1
+end
+function on_frame() end                       -- Lua lifecycle
+
+// RIGHT — Enma syntax, Enma API, Enma lifecycle
+int64 main() {
+    proc_t p = ref_process("game.exe");       // value type, RAII
+    if (!p.alive()) { println("not found"); return 0; }
+    register_routine(cast<int64>(on_render), 0);
+    println("[main] loaded");
+    return 1;
+}
+
+void on_render(int64 data) {
+    float64 vw = get_view_width();
+    float64 vh = get_view_height();
+    draw_rect_filled(vec2(10, 10), vec2(100, 50),
+                     color(255, 100, 50, 200), 4.0, 15);
+}
+```
+
+**Why:** Enma is a separately compiled host language with its own type system and standard library. The AS and Lua bindings cover overlapping domains but the function signatures, type registrations, and constants are independent. Always confirm the call in `docs/perception/enma/<area>-api.md` before writing it.
+
+---
+
+## 2. Value Semantics — No Handles, No `@`, No `deref()`
+
+**Enma uses value semantics and RAII for `proc_t` and most PCX types. There are no reference handles (`@`), no `@=` rebinding, and no `deref()` call. The process reference is managed automatically.**
+
+```cpp
+// WRONG — AS handle syntax in Enma
+proc_t@ p = ref_process("game.exe");
+if (p is null) return 0;
+p.deref();
+
+// RIGHT — Enma value semantics
+proc_t p = ref_process("game.exe");
+if (!p.alive()) { println("not found"); return 0; }
+// p is cleaned up automatically when it leaves scope
+```
+
+`proc_t` in Enma is a value type that wraps an internal handle. Copying it (`proc_t copy = p;`) copies the internal reference, but RAII means destruction at end of scope — you do not call `deref()`. For global persistence, store the value directly; it will be destroyed when the script unloads.
+
+```cpp
+// Global state — no handle, no null, just a default-constructed proc_t
+proc_t g_proc;
+uint64 g_base = 0;
+
+int64 main() {
+    g_proc = ref_process("game.exe");
+    if (!g_proc.alive()) return 0;
+    g_base = g_proc.base_address();
+    return 1;
+}
+```
+
+**Why:** The AS handle system (ref-counted, manual `deref()`, `@` syntax) does not exist in Enma. Mixing the two produces compile errors on `@` or runtime leaks if you somehow port `deref()` as a no-op. Enma's RAII is simpler: acquire, use, let it die at scope end.
+
+---
+
+## 3. `float64` Is the Default Float; `float32` Is Explicit
+
+**Enma uses `float64` (double-precision) as its default floating-point type. `float32` is explicit. Literal `1.5` is `float64`. Render APIs and math use `float64` unless otherwise documented.**
+
+Unlike AngelScript where `float` means `float32` and `double` means `float64`, Enma's native float is `float64`. The `f` suffix does not exist in Enma — `1.5` is already `float64`.
+
+```cpp
+// Enma — float64 by default
+float64 smooth = 0.15;        // 0.15 is float64
+float32 fov = 30.0f;          // explicit f suffix for float32 ONLY if needed
+
+float64 cx = get_view_width() * 0.5;   // no promotion issues; 0.5 is float64
+
+// WRONG — AS-style float/double confusion
+double cx = get_view_width() * 0.5f;   // Enma has no 'double' keyword; use 'float64'
+float cx  = get_view_width() * 0.5;    // Enma has no 'float' keyword; use 'float32'
+```
+
+**Why:** Enma is closer to C++ than AS. `float64` / `float32` map directly to C++ `double` / `float`. Using `double` or `float` in Enma is a compile error — those keywords don't exist. The default `float64` eliminates the silent promotion issues that plague AS.
+
+---
+
+## 4. Arrays Use `T[]` Syntax — Not `array<T>`, Not Lua Tables
+
+**Enma's standard array is `T[]` with `.push()`, `.pop()`, `.insert()`, `.remove()`, `.length`, and `.contains()`. Do not use `array<T>` — that is AngelScript syntax.**
+
+```cpp
+// WRONG — AS syntax
+array<uint64> entities;
+entities.insertLast(0x12345);
+
+// WRONG — Lua syntax
+local entities = {}
+table.insert(entities, 0x12345)
+
+// RIGHT — Enma syntax
+uint64[] entities;
+entities.push(0x12345);
+uint64 count = entities.length;       // no () — property, not method
+for (uint64 i = 0; i < count; i++) {
+    println("ent " + i + " = " + formatInt(entities[i], "h"));
+}
+```
+
+Enma array methods: `push(v)`, `pop()`, `insert(idx, v)`, `remove(idx)`, `clear()`, `length` (property), `contains(v)`, `slice(start, end)`, `sort()`, `reverse()`. Methods match Enma's C++-like standard library, not AS's.
+
+**Why:** `array<T>` is a compile error in Enma. Even if you remember `T[]`, defaulting to AS method names (`insertLast`, `removeLast`) will fail. The property-vs-method distinction (`length` vs `length()`) also matters.
+
+---
+
+## 5. Maps Use `map<K,V>` — Not `dictionary`, Not Plain Lua Tables
+
+**Enma has a generic `map<K,V>` type with `.set(key, val)`, `.get(key)`, `.remove(key)`, `.contains(key)`, `.keys()`, `.values()`, and `.length`. There is no `dictionary` type (that's AS-only).**
+
+```cpp
+// WRONG — AS dictionary
+map<string, int32> counts;       // compile error: 'map' is not a type in AS
+// Actually AS uses 'dictionary'...
+
+// WRONG — AS dictionary pattern in Enma
+dictionary counts;               // compile error: no 'dictionary' in Enma
+
+// RIGHT — Enma map
+map<string, int64> offsets;
+offsets.set("local_player", 0x12345678);
+if (offsets.contains("local_player")) {
+    int64 off = offsets.get("local_player");
+    println("local_player = " + formatInt(off, "h"));
+}
+```
+
+Note: Enma's `map<K,V>` requires `K` to support `operator<` (ordered map) or hashing (unordered map). The exact constraints depend on the PCX Enma registration — verify in `docs/perception/enma/overview.md`.
+
+**Why:** AS's `dictionary` is a string-keyed boxed-value map. Enma's `map<K,V>` is closer to C++ `std::map` or `std::unordered_map` with typed keys and values. Using the wrong map type produces compile errors or runtime misbehavior.
+
+---
+
+## 6. Render API Takes `vec2`, `color`, and Other Value Types
+
+**The PCX Enma render API is struct-typed: pass `vec2` for positions/sizes, `color` for RGBA, and `float64` for scalars. Do not pass raw positional args the way AS and Lua do.**
+
+```cpp
+// WRONG — AS/Lua raw-positional style in Enma
+draw_rect_filled(10.0, 10.0, 100.0, 100.0,
+                 255, 100, 50, 200, 4.0, 15);
+
+// RIGHT — Enma value-type style
+color bg(30, 30, 40, 230);
+draw_rect_filled(vec2(10, 10), vec2(100, 50), bg, 4.0, 15);
+
+// Text — same pattern
+draw_text("HUD", vec2(20, 25),
+          color(255, 255, 255, 255), get_font20(),
+          TE_NONE, color(0, 0, 0, 0), 0.0);
+```
+
+Enma value types (`vec2`, `vec3`, `color`) are lightweight stack structs — copying them is cheap. You can construct them inline or cache them:
+
+```cpp
+// Named colors are fine in Enma
+color BG(30, 30, 40, 230);
+color FG(255, 200, 50, 255);
+
+void on_render(int64 data) {
+    float64 vw = get_view_width();
+    float64 vh = get_view_height();
+    draw_rect_filled(vec2(10, 10), vec2(200, 50), BG, 4.0, 15);
+    draw_text("HUD", vec2(20, 25), FG, get_font20(), TE_NONE, color(0,0,0,0), 0.0);
+}
+```
+
+**Why:** The Enma render API was designed around C++-style value semantics. Passing four separate integers for color and four separate floats for rectangle bounds is the AS/Lua binding choice to avoid marshaling structs across the language boundary. In Enma, the structs live on the native side and are passed by value efficiently.
+
+---
+
+## 7. `register_routine` — One-Argument Callback Signature, Data Payload Is `int64`
+
+**Callbacks registered with `register_routine(cast<int64>(fn), data)` are invoked with `void on_render(int64 data)`. The `data` parameter is the second arg you passed at registration.**
+
+```cpp
+// Two routines, same function, different data — common pattern
+int64 g_routine_update = 0;
+int64 g_routine_render = 0;
+
+int64 main() {
+    g_routine_update = register_routine(cast<int64>(on_tick), 0);   // data = 0
+    g_routine_render = register_routine(cast<int64>(on_tick), 1); // data = 1
+    return 1;
+}
+
+void on_tick(int64 data) {
+    if (data == 0) {
+        // update path — runs every frame
+        refresh_entity_cache();
+    } else if (data == 1) {
+        // render path — runs every frame
+        render_overlay();
+    }
+}
+```
+
+There is no explicit unregister in Enma — routines are tied to the script lifecycle and are cleaned up on unload. There is no `on_unload` hook in Enma (unlike AS and Lua); cleanup happens via RAII destructors.
+
+**Why:** Enma's `register_routine` takes a function pointer cast to `int64` (the underlying function address) plus an arbitrary `int64` payload. The engine calls the function with that payload. The cast is mandatory because Enma lacks implicit function-to-int conversion. Forgetting `cast<int64>` produces a type mismatch compile error.
+
+---
+
+## 8. Structs Can Have Default Member Initializers
+
+**Enma structs support default member initializers (`bool valid = false;`). Use them to avoid uninitialized garbage. AS does not support this; Lua doesn't have structs at all.**
+
+```cpp
+// Enma struct with defaults
+struct EntityInfo {
+    bool    valid   = false;
+    uint64  ptr     = 0;
+    int32   health  = 0;
+    int32   team    = 0;
+    vec3    pos     = vec3(0, 0, 0);
+    vec3    head    = vec3(0, 0, 0);
+};
+
+// Fixed-size array of structs — also Enma-specific
+const int32 MAX_ENTITIES = 64;
+EntityInfo g_entities[MAX_ENTITIES];
+
+void reset_entities() {
+    for (int32 i = 0; i < MAX_ENTITIES; i++) {
+        g_entities[i].valid = false;
+        g_entities[i].ptr = 0;
+    }
+}
+```
+
+**Why:** Enma's C++ heritage gives it default member initializers and fixed-size arrays. AS requires manual initialization in constructors (which may not even be registered for all types), and Lua uses tables. Leveraging Enma's features makes code cleaner and less error-prone.
+
+---
+
+## 9. Import System: `#pragma once` + `import "module"`
+
+**Enma uses `#pragma once` for header guards and `import "module"` for module imports. Do not use `#include` (C/C++) or `require()` (Lua).**
+
+```cpp
+// globals.em — shared header
+#pragma once
+
+import "proc";
+import "vec";
+import "math";
+import "color";
+
+const int32 MAX_ENTITIES = 64;
+
+struct EntityInfo {
+    bool    valid   = false;
+    uint64  ptr     = 0;
+    int32   health  = 0;
+    int32   team    = 0;
+    vec3    pos     = vec3(0, 0, 0);
+    vec3    head    = vec3(0, 0, 0);
+};
+
+// Fixed-size array declaration
+EntityInfo g_entities[MAX_ENTITIES];
+
+// Global state
+proc_t g_proc;
+uint64 g_base = 0;
+uint64 g_size = 0;
+```
+
+```cpp
+// main.em — entry point
+import "globals";
+import "offsets";
+import "utils";
+import "esp";
+
+const string TARGET_PROCESS = "game.exe";
+
+int64 main() {
+    g_proc = ref_process(TARGET_PROCESS);
+    if (!g_proc.alive()) {
+        println("[main] target not found: " + TARGET_PROCESS);
+        return 0;
+    }
+
+    g_base = g_proc.base_address();
+    g_size = g_proc.get_module_size(TARGET_PROCESS);
+    if (g_base == 0 || g_size == 0) {
+        println("[main] module not ready");
+        return 0;
+    }
+
+    if (!resolve_all()) {
+        println("[main] signature resolution failed");
+        return 0;
+    }
+
+    // Register update and render routines
+    register_routine(cast<int64>(esp_update), 0);
+    register_routine(cast<int64>(esp_render), 1);
+
+    println("[main] cheat skeleton loaded");
+    return 1;
+}
+```
+
+**Why:** Enma's module system is import-based with `#pragma once` guards. Each imported module is compiled once and shared. There is no preprocessor `#include` text inclusion — `import` resolves symbols through the module system. Using `#include` will either fail or produce multiple-definition errors.
+
+---
+
+## 10. Hot Reload — Globals Reset, No `on_unload` Hook
+
+**Enma scripts on PCX reload by tearing down the whole script context — globals reset, routines are released. The game process is untouched. There is no `on_unload` lifecycle hook in Enma; cleanup happens through RAII destructors.**
+
+What survives a reload:
+- The game process and its memory (re-attach via `ref_process`)
+- File-system state (if you persisted config to disk)
+- The PCX engine and its GUI state
+
+What does NOT survive a reload:
+- Global variables (reset to declaration default / struct initializers)
+- Registered routines (cleared; you must `register_routine` again in `main()`)
+- Cached pattern-scan results (re-resolve in `main()` or first routine)
+- GUI section state (reinitialized to defaults)
+
+```cpp
+// Typical hot-reload-safe persistent Enma script structure:
+proc_t  g_proc;
+uint64  g_entity_list = 0;
+
+int64 main() {
+    // Re-attach on every load
+    g_proc = ref_process("game.exe");
+    if (!g_proc.alive()) { return 0; }
+
+    // Re-resolve sigs on every load
+    uint64 base = g_proc.base_address();
+    uint64 size = g_proc.get_module_size("game.exe");
+    uint64 hit  = g_proc.find_code_pattern(base, size, SIG_ENTITY_LIST);
+    if (hit == 0) { return 0; }
+    g_entity_list = resolve_rip(hit, 3, 7);
+
+    // Register routines
+    register_routine(cast<int64>(on_render), 0);
+    return 1;
+}
+
+void on_render(int64 data) {
+    // Draw from cache — no proc reads here
+    if (g_entity_list == 0) return;
+    // ... render logic ...
+}
+```
+
+**Why:** Enma lacks `on_unload` because its RAII model means destructors run automatically. A script that assumes globals survive a reload will read stale or zero data on its first routine after reload. Treat `main()` as the authoritative initializer that runs from scratch every time.
+
+---
+
+## 11. Type Casting: Use `cast<T>(x)`, Not C-style or AS-Specific Syntax
+
+**Enma uses `cast<T>(expression)` for explicit type casting. Do not use C-style `(T)expr` or AngelScript's constructor-style `T(expr)` for cross-type casts.**
+
+```cpp
+// WRONG — C-style cast (may not be supported in all Enma versions)
+uint64 addr = (uint64)disp;
+
+// WRONG — AS constructor-style cast
+uint64 addr = uint64(disp);
+
+// RIGHT — Enma cast syntax
+uint64 addr = cast<uint64>(disp);
+int64 signed = cast<int64>(disp);
+float64 f = cast<float64>(i);
+```
+
+**Why:** Enma's type system is stricter than C. `cast<T>` is the idiomatic and guaranteed-safe way to convert between unrelated scalar types. Constructor-style casts work for some cases in Enma but `cast<T>` is the documented and preferred form.
+
+---
+
+## 12. Pointer Arithmetic Is Type-Scaled — Not Byte-Wise
+
+**Enma pointer arithmetic scales by the `sizeof(T)`, like C++. There is no `byte*` or `void*` with byte-wise arithmetic in Enma. Use `uint64` for raw byte offsets and cast at read time.**
+
+```cpp
+// WRONG — attempting byte-wise pointer arithmetic
+int32* p = cast<int32*>(base);
+int32 val = p[0x10];   // reads at base + sizeof(int32)*0x10, not base + 0x10!
+
+// RIGHT — uint64 base + offset, read via proc_t
+uint64 base = g_proc.base_address();
+int32 val = g_proc.r32(base + 0x10);   // exact byte offset
+
+// For struct traversal, keep offsets as uint64
+uint64 player = g_proc.ru64(g_entity_list + OFF_LOCAL);
+if (player == 0) return;
+int32 hp = g_proc.r32(player + OFF_HEALTH);
+```
+
+**Why:** Enma's type safety means `T* + n` advances by `n * sizeof(T)` bytes. When reverse-engineering, you operate in raw byte offsets. Keep addresses as `uint64`, add offsets as plain integers, and use `proc_t`'s typed read methods (`r32`, `r64`, `ru64`, `read_vec3`) to reinterpret bytes at the target location.
+
+---
+
+## Summary
+
+| # | Rule | One-liner |
+|---|---|---|
+| 1 | Enma is not AS/Lua | Look up every API in `docs/perception/enma/` before pasting |
+| 2 | Value semantics | `proc_t` is a value; no `@`, no `deref()`, no `is null` |
+| 3 | `float64` default | No `float`/`double` keywords; use `float64` / `float32` |
+| 4 | `T[]` arrays | `.push()`, `.pop()`; `length` is a property |
+| 5 | `map<K,V>` | Typed keys/values; `.set()`, `.get()`, `.contains()` |
+| 6 | Value-type render API | `vec2`, `color` structs; not raw positional args |
+| 7 | `register_routine` | `cast<int64>(fn)` + data payload; no unregister needed |
+| 8 | Struct defaults | `bool valid = false;` — use default initializers |
+| 9 | `import "module"` | `#pragma once` guards; no `#include`, no `require()` |
+| 10 | Hot-reload safety | Re-attach, re-resolve, re-register every `main()`; no `on_unload` |
+| 11 | `cast<T>(x)` | Explicit cast syntax; no C-style or AS-style |
+| 12 | Type-scaled pointers | Use `uint64` offsets + `proc_t` reads; never raw pointer arithmetic |
+
+**The 12 game-cheat-guidelines rules still apply** — this skill is the *Enma-flavored* version of those discipline rules. Address types are `uint64`, null-check every read, separate update from render, sigs over hardcodes, one feature per file, minimize writes, validate against the live binary. Read `skill://game-cheat-guidelines` for the full discipline.
+
+**Cross-references:** `skill://game-cheat-guidelines` (the 12 rules), `skill://game-hacking-pcx` (doc router), `skill://pcx-angelscript-discipline` (AS-specific gotchas, useful when porting), `skill://pcx-lua-discipline` (Lua-specific gotchas, useful when porting), `docs/perception/enma/overview.md` (registered modules and addons), `docs/perception/enma/proc-api.md`, `docs/perception/enma/render-api.md`, `docs/perception/enma/life-cycle.md`, `docs/perception/enma/gui-api.md`.
 
 ---
 
@@ -57471,6 +57985,51 @@ The recommendation against mixing languages in mid-size projects isn't arbitrary
 
 ---
 
+## Source: `knowledge/pcx-doc-roots.md`
+
+# PCX Documentation Roots
+
+The only authoritative sources for Perception.cx scripting APIs are these two
+documentation trees on `docs.perception.cx`:
+
+1. **Enma (Perception.cx Enma API)**  
+   Canonical entry point: `https://docs.perception.cx/perception/enma/overview`  
+   Markdown equivalent (when GitBook exposes it): `https://docs.perception.cx/perception/enma/readme.md`  
+   Sub-pages follow the convention: `https://docs.perception.cx/perception/enma/<page>.md`
+
+2. **AngelScript (Perception.cx AngelScript API)**  
+   Canonical entry point: `https://docs.perception.cx/perception/angel-script/overview`  
+   Markdown equivalent: `https://docs.perception.cx/perception/angel-script/overview.md`  
+   Sub-pages follow the convention: `https://docs.perception.cx/perception/angel-script/<page>.md`
+
+## What this means
+
+- Every PCX API symbol used in generated code must be traceable to one of these
+  two trees, or to the generated `knowledge/pcx-api-index.json` that is built
+  from those trees.
+- Do not use the local `docs/` copy as a primary authority; it is a drift-checked
+  mirror. If a local doc and the live upstream disagree, the live upstream wins.
+- The Enma *language* reference (grammar, types, addons) lives at
+  `https://enma-1.gitbook.io/enma/` and is referenced for language semantics,
+  but the PCX API surface itself comes only from the two roots above.
+
+## Navigating the trees
+
+GitBook exposes a structured index at `https://docs.perception.cx/perception/llms.txt`.
+Use it to discover the exact sub-page paths under each root. In code, prefer
+fetching the `.md` variant of any page so the model receives structured
+markdown rather than rendered HTML.
+
+## Generated index
+
+`knowledge/pcx-api-index.json` is derived by scanning the local mirrors of the
+pages under these two roots (plus the Enma addon docs that the Enma API
+references). It exists so tools like `pcx symbol-check` and the
+`mcp:pcx-knowledge` `validate_code` tool can catch invented API names without
+performing a live fetch on every keystroke.
+
+---
+
 ## Source: `knowledge/pcx-version-matrix.md`
 
 # PCX API Version Matrix
@@ -59110,8 +59669,26 @@ project/
 2. **Simplicity first** — ship the minimum feature; no speculative prediction, config, or framework.
 3. **Surgical changes** — one feature, one diff; don't churn working offsets or reformat unrelated files.
 4. **Goal-driven execution** — done = visible success criteria met on the live target, not "it compiles."
+## Anti-Hallucination Rule
 
-Detail: `skill://pcx-coding-discipline` (writing scripts) · `skill://pcx-re-discipline` (reverse engineering).
+Do not invent PCX, Enma, AngelScript, or Lua API names. Every function,
+method, type, and import must be traceable to one of these two upstream
+sources:
+
+1. `https://docs.perception.cx/perception/enma/overview` — Enma API surface
+2. `https://docs.perception.cx/perception/angel-script/overview` — AngelScript API surface
+
+Use the `.md` variant of any sub-page (e.g. `.../enma/proc-api.md`) for
+structured markdown. Prefer reading the live upstream doc over the local
+`docs/` mirror; the mirror is drift-checked, but the upstream is the authority.
+
+The generated `knowledge/pcx-api-index.json` is an acceptable shortcut once
+you have confirmed the symbol exists in the upstream docs. Before delivering
+code, run `pcx verify <file>`. Fix every `unknown_call`, `unknown_type`,
+and `missing_import` by reading the relevant upstream doc — do not rename
+symbols to silence the checker.
+
+See `knowledge/pcx-doc-roots.md` for the full sourcing policy.
 
 ## LSP Servers
 
@@ -60764,7 +61341,7 @@ void write_view_angles(const vec2&in angles) {
     // placeholder: clamp pitch to [-89, 89] and write to engine memory
 }
 
-void aimbot_update(int64 data) {
+void aimbot_update(int id, int data_index) {
     if (!g_aim_enabled || !g_initialized || !g_proc.alive()) return;
     if (!is_key_down(g_aim_key)) { g_aim_target.valid = false; return; }
 
@@ -60793,7 +61370,7 @@ void aimbot_update(int64 data) {
     g_aim_target = best;
 }
 
-void aimbot_render(int64 data) {
+void aimbot_render(int id, int data_index) {
     if (!g_aim_enabled || !g_aim_target.valid) return;
 
     vec3 local_pos = read_vec3(g_local_player + OFF_POS);
@@ -60822,7 +61399,7 @@ namespace Cheat {
 
 const double PLAYER_HEIGHT = 72.0;
 
-void esp_update(int64 data) {
+void esp_update(int id, int data_index) {
     if (!g_esp_enabled || !g_initialized || !g_proc.alive()) return;
 
     g_esp_count = 0;
@@ -60853,7 +61430,7 @@ void esp_update(int64 data) {
     }
 }
 
-void esp_render(int64 data) {
+void esp_render(int id, int data_index) {
     if (!g_esp_enabled || g_esp_count == 0) return;
 
     color enemy(255, 80, 80, 220);
@@ -60936,7 +61513,7 @@ class EntityInfo {
     vec3 head;
 };
 
-EntityInfo[] g_entities(MAX_ENTITIES);
+array<EntityInfo> g_entities(MAX_ENTITIES);
 int g_esp_count = 0;
 
 // Active aim target
@@ -60971,37 +61548,37 @@ const string TARGET_PROCESS = "game.exe"; // REPLACE WITH REAL TARGET
 int main() {
     @g_proc = ref_process(TARGET_PROCESS);
     if (!g_proc.alive()) {
-        println("[main] target not found: " + TARGET_PROCESS);
+        log("[main] target not found: " + TARGET_PROCESS);
         return 0;
     }
 
     g_base = g_proc.base_address();
     g_size = g_proc.get_module_size(TARGET_PROCESS);
     if (g_base == 0 || g_size == 0) {
-        println("[main] module not ready");
+        log("[main] module not ready");
         return 0;
     }
 
     if (!resolve_all()) {
-        println("[main] signature resolution failed");
+        log("[main] signature resolution failed");
         return 0;
     }
 
     g_initialized = true;
     setup_menu();
 
-    // Memory/update routines
-    register_routine(int64(esp_update), 0);
-    register_routine(int64(aimbot_update), 0);
-    register_routine(int64(triggerbot_update), 0);
+    // Memory/update routines (~60 Hz)
+    register_callback(@esp_update, 16, 0);
+    register_callback(@aimbot_update, 16, 0);
+    register_callback(@triggerbot_update, 16, 0);
 
-    // Render routines
-    register_routine(int64(esp_render), 1);
-    register_routine(int64(aimbot_render), 1);
-    register_routine(int64(triggerbot_render), 1);
-    register_routine(int64(radar_render), 1);
+    // Render routines (~120 Hz)
+    register_callback(@esp_render, 8, 1);
+    register_callback(@aimbot_render, 8, 1);
+    register_callback(@triggerbot_render, 8, 1);
+    register_callback(@radar_render, 8, 1);
 
-    println("[main] cheat skeleton loaded");
+    log("[main] cheat skeleton loaded");
     return 1;
 }
 
@@ -61078,15 +61655,15 @@ bool resolve_all() {
     if (!g_proc.alive() || g_base == 0 || g_size == 0) return false;
 
     uint64 hit_el = g_proc.find_code_pattern(g_base, g_size, SIG_ENTITY_LIST);
-    if (hit_el == 0) { println("[offsets] entity_list sig stale"); return false; }
+    if (hit_el == 0) { log("[offsets] entity_list sig stale"); return false; }
     g_entity_list = resolve_rip(hit_el, 3, 7);
 
     uint64 hit_lp = g_proc.find_code_pattern(g_base, g_size, SIG_LOCAL_PLAYER);
-    if (hit_lp == 0) { println("[offsets] local_player sig stale"); return false; }
+    if (hit_lp == 0) { log("[offsets] local_player sig stale"); return false; }
     g_local_player = resolve_rip(hit_lp, 3, 7);
 
     uint64 hit_vm = g_proc.find_code_pattern(g_base, g_size, SIG_VIEW_MATRIX);
-    if (hit_vm == 0) { println("[offsets] view_matrix sig stale"); return false; }
+    if (hit_vm == 0) { log("[offsets] view_matrix sig stale"); return false; }
     g_view_matrix = resolve_rip(hit_vm, 3, 7);
 
     return g_entity_list != 0 && g_local_player != 0 && g_view_matrix != 0;
@@ -61109,7 +61686,7 @@ bool world_to_map(const vec3&in world, vec2&out map) {
     return true;
 }
 
-void radar_render(int64 data) {
+void radar_render(int id, int data_index) {
     if (!g_radar_enabled || g_esp_count == 0) return;
 
     vec3 local_pos = read_vec3(g_local_player + OFF_POS);
@@ -61160,7 +61737,7 @@ EntityInfo get_entity_under_crosshair() {
     return empty; // replace with real logic
 }
 
-void triggerbot_update(int64 data) {
+void triggerbot_update(int id, int data_index) {
     if (!g_trigger_enabled || !g_initialized || !g_proc.alive()) return;
     if (!is_key_down(g_trigger_key)) return;
 
@@ -61175,7 +61752,7 @@ void triggerbot_update(int64 data) {
     press_mouse_left();
 }
 
-void triggerbot_render(int64 data) {
+void triggerbot_render(int id, int data_index) {
     // no rendering
 }
 
@@ -61202,7 +61779,7 @@ vec3 read_vec3(uint64 addr) {
 }
 
 // Pointer-chain reader.
-uint64 read_chain(uint64 base, const int[]&in offsets) {
+uint64 read_chain(uint64 base, const array<int> &in offsets) {
     uint64 addr = base;
     for (uint i = 0; i < offsets.length(); i++) {
         if (addr == 0) return 0;

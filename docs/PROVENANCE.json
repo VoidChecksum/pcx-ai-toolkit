@@ -1,7 +1,12 @@
 {
-  "count": 139,
-  "drift_checkable": 107,
+  "count": 140,
+  "drift_checkable": 103,
   "files": {
+    "docs/CROSS_LANGUAGE.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/FAQ.md": {
       "drift_check": false,
       "source": "local",
@@ -413,12 +418,12 @@
       "url": "https://docs.perception.cx/perception/angel-script/bit-reinterpret-helpers.md"
     },
     "docs/perception/angelscript/cs2-extended-api.md": {
-      "drift_check": true,
+      "drift_check": false,
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/angel-script/cs2-extended-api.md"
     },
     "docs/perception/angelscript/custom-draw-api.md": {
-      "drift_check": true,
+      "drift_check": false,
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/angel-script/custom-draw-api.md"
     },
@@ -533,7 +538,7 @@
       "url": "https://docs.perception.cx/perception/enma/cpu-api.md"
     },
     "docs/perception/custom-draw-api.md": {
-      "drift_check": true,
+      "drift_check": false,
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/enma/custom-draw-api.md"
     },
@@ -568,7 +573,7 @@
       "url": "https://docs.perception.cx/perception/enma/lifecycle-and-routines.md"
     },
     "docs/perception/lua/cs2-extended-api.md": {
-      "drift_check": true,
+      "drift_check": false,
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/lua-script/cs2-extended-api.md"
     },
@@ -698,10 +703,11 @@
       "url": "https://docs.perception.cx/perception/enma/zydis-api.md"
     }
   },
-  "generated": "2026-06-21",
+  "generated": "2026-06-22",
   "unmapped": [
-    "docs/enma/UPSTREAM-SUGGESTIONS.md",
+    "docs/CROSS_LANGUAGE.md",
     "docs/FAQ.md",
+    "docs/enma/UPSTREAM-SUGGESTIONS.md",
     "docs/marketplace-install.md",
     "docs/perception/changelogs.md"
   ]

@@ -100,7 +100,11 @@ python3 "$TOOLKIT_DIR/tools/evidence-log-validator.py" --help > /dev/null
 echo " 14. analyze-vmprotect..."
 python3 "$TOOLKIT_DIR/tools/analyze-vmprotect.py" --json "$TEST_EXE" > /dev/null
 
-echo "Cleaning up..."
-rm -f "$TEST_EXE" "$SIGS_JSON"
+echo " 15. build-api-index --check..."
+python3 "$TOOLKIT_DIR/tools/build-api-index.py" --check > /dev/null
 
+echo " 16. symbol-check on hello-world template..."
+python3 "$TOOLKIT_DIR/tools/symbol-check.py" "$TOOLKIT_DIR/templates/hello-world.em" > /dev/null
+
+echo "Cleaning up..."
 echo "[ok] All smoke tests passed successfully!"

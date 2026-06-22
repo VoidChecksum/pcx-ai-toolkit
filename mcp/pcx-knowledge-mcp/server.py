@@ -11,6 +11,8 @@ Tools exposed:
   - get_file(path)              : fetch full file content by repo-relative path
   - list_files(category=None)   : enumerate files, optionally filtered to a category
   - overview()                  : top-level summary of the toolkit's structure
+  - validate_code(code, language, source_path="")
+                                : check a code snippet against the PCX API index
 
 Resources exposed:
   - file://<repo-relative-path> : every file in the corpus, addressable by URI
@@ -45,9 +47,18 @@ except ImportError:
     )
     sys.exit(1)
 
-# ── Corpus scanning ──────────────────────────────────────────────────────────
-
+# Make the shared parser available to validate_code
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
+from pcx_parser import (  # noqa: E402
+    extract_calls,
+    extract_declarations,
+    extract_enma_imports,
+    extract_function_defs,
+)
+
+
+# ── Corpus scanning ──────────────────────────────────────────────────────────
 
 CATEGORIES = {
     'docs':       ['docs/**/*.md', 'docs/**/*.txt'],
@@ -176,7 +187,7 @@ class KeywordIndex:
 INDEX = KeywordIndex()
 
 
-# ── MCP server ───────────────────────────────────────────────────────────────
+# ── MCP server ─────────────────────────────────────────────────────────────────
 
 mcp = FastMCP("pcx-knowledge")
 
@@ -256,7 +267,117 @@ def overview() -> str:
     )
 
 
-# ── Resources: every file as a URI ───────────────────────────────────────────
+# ── Code validation helper ─────────────────────────────────────────────────────
+
+API_INDEX_FILE = REPO_ROOT / "knowledge" / "pcx-api-index.json"
+API_INDEX_CACHE: dict | None = None
+
+ENMA_IMPORT_REQUIRED_TYPES = {"vec2", "vec3", "vec4", "color", "quat", "mat4"}
+ENMA_MODULE_HINTS: dict[str, set[str]] = {
+    "vec": {"vec2", "vec3", "vec4"},
+    "color": {"color"},
+    "math3d": {"quat", "mat4"},
+}
+
+
+def _load_api_index() -> dict | None:
+    global API_INDEX_CACHE
+    if API_INDEX_CACHE is not None:
+        return API_INDEX_CACHE
+    if not API_INDEX_FILE.exists():
+        return None
+    data = json.loads(API_INDEX_FILE.read_text(encoding="utf-8"))
+    API_INDEX_CACHE = {
+        "functions": set(data.get("functions", {}).keys()),
+        "methods": set(data.get("methods", {}).keys()),
+        "types": set(data.get("types", [])),
+    }
+    return API_INDEX_CACHE
+
+
+def _base_type(t: str) -> str:
+    t = t.strip().rstrip("@").replace("&", "").replace("*", "").strip()
+    t = re.sub(r'<.*>', "", t)
+    t = re.sub(r'\[.*\]', "", t)
+    return t.strip()
+
+
+def _validate_code_impl(code: str, language: str) -> list[dict]:
+    findings: list[dict] = []
+    index = _load_api_index()
+    if index is None:
+        return [{"line": 0, "symbol": "", "kind": "index_missing",
+                 "message": f"API index not found at {API_INDEX_FILE}; run `pcx build-api-index`"}]
+
+    user_funcs = {name for name, _ in extract_function_defs(code, language)}
+
+    for name, line in extract_calls(code, language):
+        if name in index["functions"] or name in index["methods"] or name in user_funcs:
+            continue
+        if language == "enma" and name in {"main", "on_render", "on_update", "on_unload"}:
+            continue
+        if language == "angelscript" and name in {"main", "on_tick", "on_unload", "on_frame"}:
+            continue
+        if language == "lua" and name in {"main", "on_frame", "on_unload", "on_tick"}:
+            continue
+        findings.append({
+            "line": line,
+            "symbol": name,
+            "kind": "unknown_call",
+            "message": f"'{name}' is not a known PCX or Enma function/method",
+        })
+
+    if language in {"enma", "angelscript"}:
+        for type_part, name, line in extract_declarations(code, language):
+            base = _base_type(type_part)
+            if not base or base in index["types"] or base in user_funcs:
+                continue
+            if base[0].isupper():
+                continue
+            findings.append({
+                "line": line,
+                "symbol": base,
+                "kind": "unknown_type",
+                "message": f"'{base}' is not a known type (in declaration of '{name}')",
+            })
+
+    if language == "enma":
+        imports = set(extract_enma_imports(code))
+        used = {t for t in ENMA_IMPORT_REQUIRED_TYPES if re.search(r'\b' + re.escape(t) + r'\b', code)}
+        for t in used:
+            if any(t in names and mod in imports for mod, names in ENMA_MODULE_HINTS.items()):
+                continue
+            for mod, names in ENMA_MODULE_HINTS.items():
+                if t in names:
+                    findings.append({
+                        "line": 1,
+                        "symbol": t,
+                        "kind": "missing_import",
+                        "message": f"'{t}' requires `import \"{mod}\";`",
+                    })
+                    break
+
+    return findings
+
+
+@mcp.tool()
+def validate_code(code: str, language: str, source_path: str = "") -> str:
+    """Validate a snippet of Enma, AngelScript, or Lua code against the PCX API index.
+
+    Returns a JSON object with {findings: [...], ok: bool}. Each finding has:
+    line, symbol, kind, message. Kinds: unknown_call, unknown_type,
+    missing_import, index_missing. An empty findings list means no hallucinated
+    symbols were detected.
+
+    language must be one of: enma, angelscript, lua.
+    """
+    if language not in {"enma", "angelscript", "lua"}:
+        return json.dumps({"error": f"unsupported language: {language}"}, indent=2)
+    findings = _validate_code_impl(code, language)
+    return json.dumps({"findings": findings, "ok": not findings}, indent=2)
+
+
+# ── Resources: every file as a URI ─────────────────────────────────────────────
 
 @mcp.resource("file://{path}")
 def file_resource(path: str) -> str:

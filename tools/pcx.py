@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """pcx — The command-line manager for the pcx-ai-toolkit.
 
-Exposes subcommands for setup, auto-updating, linting, counts generation,
-drift/compatibility verification, health checks, and project scaffolding.
+Exposes subcommands for setup, auto-updating, linting, symbol validation,
+verification, counts generation, drift/compatibility verification, health
+checks, and project scaffolding.
 
 Usage:
     pcx setup          # compile LSP, sync skills, add to PATH
     pcx update         # self-update, rebuild LSP, sync skills, check bundles
     pcx lint [file]    # lint Enma (.em) script against the 12 guidelines
+    pcx symbol-check <file>   # catch hallucinated API names / missing imports
+    pcx build-api-index       # regenerate knowledge/pcx-api-index.json
+    pcx verify <file>         # lint + symbol-check + LSP diagnostics (when built)
     pcx check-drift    # check documentation drift against live upstream
     pcx check-mcp      # verify MCP config is 100% in sync with mcp-api.md
     pcx check-matrix   # advisory version-matrix vs changelogs sync check
@@ -58,7 +62,6 @@ def run_script(script_name: str, args: list[str]) -> int:
     script_path = REPO_ROOT / f"{script_name}.{ext}"
 
     if not script_path.exists():
-        # Try finding in tools/ subdirectory if not in root
         script_path = REPO_ROOT / "tools" / f"{script_name}.{ext}"
         if not script_path.exists():
             print(f"Error: Script {script_name}.{ext} not found.", file=sys.stderr)
@@ -94,12 +97,8 @@ def run_python_tool(tool_name: str, args: list[str]) -> int:
 
 
 def cmd_doctor() -> int:
-    """Run a health check across all toolkit components.
-
-    Checks: git, node, python version, LSP build artifacts, skills sync,
-    docs index, and MCP server presence. Prints [OK] / [FAIL] per check.
-    """
-    checks: list[tuple[str, bool, str]] = []  # (label, passed, hint)
+    """Run a health check across all toolkit components."""
+    checks: list[tuple[str, bool, str]] = []
 
     def _run(cmd: list[str]) -> bool:
         try:
@@ -108,7 +107,6 @@ def cmd_doctor() -> int:
         except Exception:
             return False
 
-    # --- Dependency checks ---
     checks.append(("git installed", _run(["git", "--version"]),
                    "Install git from https://git-scm.com/"))
 
@@ -130,7 +128,6 @@ def cmd_doctor() -> int:
     checks.append((f"python >= 3.10 ({py_ver})", py_ok,
                    "Upgrade Python to 3.10+ from https://python.org/"))
 
-    # --- LSP build artifacts ---
     enma_lsp = REPO_ROOT / "lsp" / "enma-lsp" / "server" / "dist" / "server.js"
     checks.append(("enma-lsp built (server.js exists)", enma_lsp.exists(),
                    "Run: pcx setup  (or: cd lsp/enma-lsp && npm install && npm run compile)"))
@@ -139,7 +136,6 @@ def cmd_doctor() -> int:
     checks.append(("angel-lsp-pcx built (server.js exists)", angel_lsp.exists(),
                    "Run: pcx setup  (or: cd lsp/angel-lsp-pcx && npm install && npm run compile)"))
 
-    # --- AI Skills sync ---
     local_skills = REPO_ROOT / ".claude" / "skills"
     installed_skills = Path.home() / ".claude" / "skills"
     all_skills_synced = installed_skills.is_dir()
@@ -151,22 +147,22 @@ def cmd_doctor() -> int:
     checks.append(("AI skills synced to ~/.claude/skills/", all_skills_synced,
                    "Run: pcx setup  to sync skills to ~/.claude/skills/"))
 
-    # --- pcx CLI on PATH ---
     pcx_on_path = bool(shutil.which("pcx"))
     checks.append(("pcx CLI on PATH", pcx_on_path,
                    "Run: pcx setup  (or add tools/ directory to your PATH manually)"))
 
-    # --- Docs index ---
     counts_json = REPO_ROOT / "docs" / "COUNTS.json"
     checks.append(("docs/COUNTS.json exists", counts_json.exists(),
                    "Run: pcx counts  to regenerate docs/COUNTS.json"))
 
-    # --- MCP server ---
+    api_index = REPO_ROOT / "knowledge" / "pcx-api-index.json"
+    checks.append(("knowledge/pcx-api-index.json exists", api_index.exists(),
+                   "Run: pcx build-api-index  to regenerate the API symbol index"))
+
     mcp_dir = REPO_ROOT / "mcp" / "pcx-knowledge-mcp"
     checks.append(("mcp/pcx-knowledge-mcp/ present", mcp_dir.is_dir(),
                    "Re-clone with: git clone --recursive ..."))
 
-    # --- Print results ---
     print(f"\npcx-ai-toolkit v{get_version()} - Doctor Report\n" + "-" * 50)
     passed = 0
     failed_checks: list[tuple[str, str]] = []
@@ -183,23 +179,17 @@ def cmd_doctor() -> int:
     if not failed_checks:
         print(f"{_GREEN}All {total} checks passed.{_RESET}\n")
         return 0
-    else:
-        print(f"{_RED}{len(failed_checks)}/{total} checks failed.{_RESET}\n")
-        print("Suggested fixes:")
-        for label, hint in failed_checks:
-            print(f"  - {label}")
-            print(f"    -> {_YELLOW}{hint}{_RESET}")
-        print()
-        return 1
+    print(f"{_RED}{len(failed_checks)}/{total} checks failed.{_RESET}\n")
+    print("Suggested fixes:")
+    for label, hint in failed_checks:
+        print(f"  - {label}")
+        print(f"    -> {_YELLOW}{hint}{_RESET}")
+    print()
+    return 1
 
 
 def cmd_new(args: list[str]) -> int:
-    """Scaffold a new PCX project from a template.
-
-    Usage:
-        pcx new <template>              # scaffold into current directory
-        pcx new <template> <output>     # scaffold into <output> directory
-    """
+    """Scaffold a new PCX project from a template."""
     templates_dir = REPO_ROOT / "templates"
 
     def list_templates() -> None:
@@ -223,7 +213,6 @@ def cmd_new(args: list[str]) -> int:
     template_name = args[0]
     output_dir = Path(args[1]) if len(args) > 1 else Path.cwd() / template_name
 
-    # Try directory template first
     template_path = templates_dir / template_name
     if template_path.is_dir():
         if output_dir.exists():
@@ -239,7 +228,6 @@ def cmd_new(args: list[str]) -> int:
         print("Next: open in your editor and run pcx lint <main.em> to validate.")
         return 0
 
-    # Try single-file template (.em)
     template_file = templates_dir / f"{template_name}.em"
     if template_file.exists():
         out_file = output_dir if str(output_dir).endswith(".em") else output_dir / f"{template_name}.em"
@@ -253,14 +241,43 @@ def cmd_new(args: list[str]) -> int:
     return 1
 
 
+def cmd_verify(args: list[str]) -> int:
+    """Run lint + symbol-check on one script.
+
+    Usage: pcx verify <file.em|.as|.lua>
+    """
+    if not args or any(a in ("-h", "--help") for a in args):
+        print("Usage: pcx verify <file.em|.as|.lua>")
+        return 0 if any(a in ("-h", "--help") for a in args) else 1
+
+    target = args[0]
+    path = Path(target)
+    if not path.exists():
+        print(f"Error: file not found: {target}", file=sys.stderr)
+        return 2
+
+    print(f"Verifying {target}...")
+    rc = run_python_tool("script-linter", ["--strict", target])
+    if rc != 0:
+        return rc
+
+    rc = run_python_tool("symbol-check", [target])
+    if rc != 0:
+        return rc
+
+    # LSP server diagnostics are not exposed through a CLI entry point yet.
+    # When available, this step will run them as a final compiler-grade check.
+    return 0
+
+
 def main() -> int:
     desc = f"pcx-ai-toolkit manager CLI v{get_version()}"
     ap = argparse.ArgumentParser(description=desc, usage="pcx <command> [args]")
     ap.add_argument("-V", "--version", action="version",
                     version=f"pcx-ai-toolkit v{get_version()}")
     ap.add_argument("command", nargs="?", help=(
-        "Command to run: setup, update, lint, check-drift, check-mcp, "
-        "check-matrix, counts, version, doctor, new, help"
+        "Command to run: setup, update, lint, symbol-check, build-api-index, "
+        "verify, check-drift, check-mcp, check-matrix, counts, version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
     args = ap.parse_args()
@@ -288,6 +305,15 @@ def main() -> int:
 
     if cmd == "lint":
         return run_python_tool("script-linter", sub_args)
+
+    if cmd == "symbol-check":
+        return run_python_tool("symbol-check", sub_args)
+
+    if cmd == "build-api-index":
+        return run_python_tool("build-api-index", sub_args)
+
+    if cmd == "verify":
+        return cmd_verify(sub_args)
 
     if cmd == "check-drift":
         return run_python_tool("check-doc-drift", sub_args)

@@ -14,6 +14,7 @@ The "indexed database all LLMs can query" half of the toolkit's LLM-knowledge st
 | `get_file(path)` | Fetch full content of any file by repo-relative path. |
 | `list_files(category="")` | Enumerate files, optionally filtered by category (`docs`, `skills`, `knowledge`, `rules`, `templates`, `tools`, `signatures`, `mcp`). |
 | `overview()` | Top-level toolkit summary with file counts per category and starting-point recommendations. |
+| `validate_code(code, language, source_path="")` | Check a code snippet against the PCX API index. Catches unknown functions, methods, types, and missing Enma imports. Returns `{findings, ok}`. |
 
 **Resources** (MCP-fetchable URIs):
 

@@ -14670,12 +14670,23 @@ Perception platform.
 
 ## MANDATORY: Read Before Writing Code
 
-**You MUST read the relevant docs from `docs/` before writing ANY Enma, AngelScript,
-or PCX API code.** Do not write from memory. The docs are the source of truth.
+**The only authoritative sources for PCX API names are the two upstream docs:**
+
+1. `https://docs.perception.cx/perception/enma/overview` — Enma API surface
+2. `https://docs.perception.cx/perception/angel-script/overview` — AngelScript API surface
+
+Use the `.md` variant of any sub-page (e.g. `https://docs.perception.cx/perception/enma/proc-api.md`,
+`https://docs.perception.cx/perception/angel-script/render-api.md`) for structured markdown.
+The local `docs/` tree is a drift-checked mirror of these upstream pages; when in doubt, trust
+the live upstream version.
+
+You MUST read the relevant upstream doc before writing ANY Enma, AngelScript,
+or PCX API code. Do not write from memory. The docs are the source of truth.
 
 ### When writing Enma (.em) code — read these:
 
-**Language (always read `llms-language.md` first — it's the complete single-page reference):**
+**Language (always read `docs/enma/llms-language.md` first — it's the complete single-page reference):**
+
 | Doc | Path | Lines | Content |
 |-----|------|-------|---------|
 | **Complete language ref** | `docs/enma/llms-language.md` | 2861 | Every type, operator, control flow, struct, class, template, coroutine, exception, heap, FFI, annotation, module, addon |
@@ -14817,16 +14828,31 @@ or PCX API code.** Do not write from memory. The docs are the source of truth.
 |-----|------|-------|
 | Overview | `docs/perception/lua/overview.md` | 59 |
 | All APIs | `docs/perception/lua/*.md` | 5779 total |
-
 ## How To Use These Docs
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
-2. **Before writing Enma code**: `read docs/enma/llms-language.md` (the single-page complete ref)
-3. **Before calling a PCX API**: `read docs/perception/<api-name>.md`
-4. **Before writing AngelScript**: `read docs/perception/angelscript/<api-name>.md`
-5. **If unsure about a type, function, or parameter**: read the doc, don't guess
-6. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
-7. **For a starting project scaffold**: use `templates/cheat-skeleton-em/` or `templates/cheat-skeleton-as/`
+2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/overview` and read the relevant `.md` sub-page
+3. **Before writing AngelScript code**: start from `https://docs.perception.cx/perception/angel-script/overview` and read the relevant `.md` sub-page
+4. **If unsure about a type, function, or parameter**: read the upstream doc, don't guess
+5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
+6. **For a starting project scaffold**: use `templates/cheat-skeleton-em/` or `templates/cheat-skeleton-as/`
+
+## Anti-Hallucination Rule
+
+You must NEVER invent a PCX or Enma/AngelScript/Lua API name. Every function,
+method, type, and import you use must come from one of:
+  - `https://docs.perception.cx/perception/enma/overview` and its sub-pages,
+  - `https://docs.perception.cx/perception/angel-script/overview` and its sub-pages,
+  - `knowledge/pcx-api-index.json` (via `pcx symbol-check` or the
+    `mcp:pcx-knowledge` `validate_code` tool),
+  - a user-defined function declared in the same script.
+
+Before delivering code, run `pcx verify <file>` (or `pcx symbol-check
+<file>` if `verify` is unavailable). If it reports an `unknown_call`,
+`unknown_type`, or `missing_import`, fix it by reading the correct upstream
+doc and using the real symbol. Do not silence the checker by renaming things.
+
+See `knowledge/pcx-doc-roots.md` for the full sourcing policy.
 
 ## Cheat-Script Scaffolds
 

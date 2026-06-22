@@ -61,8 +61,26 @@ project/
 2. **Simplicity first** — ship the minimum feature; no speculative prediction, config, or framework.
 3. **Surgical changes** — one feature, one diff; don't churn working offsets or reformat unrelated files.
 4. **Goal-driven execution** — done = visible success criteria met on the live target, not "it compiles."
+## Anti-Hallucination Rule
 
-Detail: `skill://pcx-coding-discipline` (writing scripts) · `skill://pcx-re-discipline` (reverse engineering).
+Do not invent PCX, Enma, AngelScript, or Lua API names. Every function,
+method, type, and import must be traceable to one of these two upstream
+sources:
+
+1. `https://docs.perception.cx/perception/enma/overview` — Enma API surface
+2. `https://docs.perception.cx/perception/angel-script/overview` — AngelScript API surface
+
+Use the `.md` variant of any sub-page (e.g. `.../enma/proc-api.md`) for
+structured markdown. Prefer reading the live upstream doc over the local
+`docs/` mirror; the mirror is drift-checked, but the upstream is the authority.
+
+The generated `knowledge/pcx-api-index.json` is an acceptable shortcut once
+you have confirmed the symbol exists in the upstream docs. Before delivering
+code, run `pcx verify <file>`. Fix every `unknown_call`, `unknown_type`,
+and `missing_import` by reading the relevant upstream doc — do not rename
+symbols to silence the checker.
+
+See `knowledge/pcx-doc-roots.md` for the full sourcing policy.
 
 ## LSP Servers
 

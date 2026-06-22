@@ -60,11 +60,13 @@ Result:  Compiles. Runs. Correct API calls.
 
 ### Unified CLI Manager (`pcx`)
 
-The toolkit installs a unified CLI tool (`pcx`) directly to your system `PATH`. Manage compilation, synchronization, linting, and auto-updating with simple commands from any folder:
+The toolkit installs a unified CLI tool (`pcx`) directly to your system `PATH`. Manage compilation, synchronization, linting, symbol validation, and auto-updating with simple commands from any folder:
+
 - `pcx lint <script.em>` – Lints Enma scripts against the 12 guidelines.
+- `pcx symbol-check <script.em|as|lua>` – Catches hallucinated API names and missing imports against `knowledge/pcx-api-index.json`.
+- `pcx verify <script.em|as|lua>` – Runs `lint` + `symbol-check` in one pass.
 - `pcx update` – Self-updates the toolkit from git, syncs skills, and rebuilds LSP.
 - `pcx setup` – Re-runs LSP compilation, rebuilds core parser, and syncs AI skills.
-
 ## Scope
 
 This toolkit is purpose-built for **authorized game-cheat script making** and
@@ -139,10 +141,12 @@ pcx update
 ```
 
 You can also run other helper tools via the `pcx` CLI from anywhere:
-
 ```bash
 pcx setup          # re-run LSP build and skill sync
 pcx lint [file]    # lint Enma (.em) script against the 12 guidelines
+pcx symbol-check <file>  # catch hallucinated API names / missing imports
+pcx verify <file>        # lint + symbol-check in one pass
+pcx build-api-index      # regenerate knowledge/pcx-api-index.json
 pcx check-drift    # check documentation drift against live upstream
 pcx check-mcp      # verify MCP config is 100% in sync with mcp-api.md
 pcx check-matrix   # advisory version-matrix vs changelogs sync check
