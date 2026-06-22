@@ -322,7 +322,7 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [Section names strongly associated with VMProtect](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/analyze-vmprotect.py): VMPSECTIONS = (b'.vmp0', b'.vmp1', b'.vmp2', b'.vmp3', b'.vmp4')
 - [── Detection tables ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/anti-debug-scanner.py): DIRECTCHECKIMPORTS = {
 - [.text classifier thresholds (block-level identical %, raw-size delta %).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/binary-diff-summary.py): RECOMPILEMINSAME = 70.0
-- [── Hard-wired addon maps from docs/enma/addon-*.md ──────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-api-index.py): ENMAMODULETYPES: dict[str, set[str]] = {
+- [── Upstream endpoints ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-api-index.py): ENMAROOTURL = "https://docs.perception.cx/perception/enma/readme.md"
 - [Exclude only the generated bundles sitting directly under docs/.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-counts.py): if p.parent == (REPOROOT / "docs") and p.name.startswith("llms-"):
 - [── Repo layout ──────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-llms-index.py): REPOROOT = Path(file).resolve().parent.parent
 - [Files / dirs that are generated or local-only — never a drift source.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-provenance.py): EXCLUDENAMES = {"INDEX.md"}

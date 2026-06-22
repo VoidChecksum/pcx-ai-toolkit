@@ -114,9 +114,12 @@ def check_file(path: Path, index: dict, language: str | None = None) -> list[dic
     user_funcs = {name for name, _ in extract_function_defs(text, language)}
 
     # ── Unknown calls ─────────────────────────────────────────────────────────
+    known_types = set(index.get("types", []))
     for name, line in extract_calls(text, language):
         if name in index["functions"] or name in index["methods"] or name in user_funcs:
             continue
+        if name in known_types:
+            continue  # constructor call, e.g. color(...) or vec2(...)
         if language == "enma" and name in {"main", "on_render", "on_update", "on_unload"}:
             continue
         if language == "angelscript" and name in {"main", "on_tick", "on_unload", "on_frame"}:

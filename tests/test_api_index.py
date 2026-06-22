@@ -26,13 +26,12 @@ class ApiIndexTest(unittest.TestCase):
 
         required_functions = {
             "draw_rect", "draw_text", "register_routine", "ref_process",
-            "get_fps", "key_fired", "create_section", "section_checkbox",
-            "format", "sqrt", "clamp", "vec2", "color", "main",
+            "get_fps", "key_fired", "main",
         }
         self.assertTrue(required_functions.issubset(funcs),
                         f"missing functions: {required_functions - funcs}")
 
-        required_methods = {"ru64", "ru32", "length", "normalize", "distance", "dot"}
+        required_methods = {"base_address", "add_item", "alive", "attach"}
         self.assertTrue(required_methods.issubset(methods),
                         f"missing methods: {required_methods - methods}")
 

@@ -311,9 +311,12 @@ def _validate_code_impl(code: str, language: str) -> list[dict]:
 
     user_funcs = {name for name, _ in extract_function_defs(code, language)}
 
+    known_types = index["types"]
     for name, line in extract_calls(code, language):
         if name in index["functions"] or name in index["methods"] or name in user_funcs:
             continue
+        if name in known_types:
+            continue  # constructor call, e.g. color(...) or vec2(...)
         if language == "enma" and name in {"main", "on_render", "on_update", "on_unload"}:
             continue
         if language == "angelscript" and name in {"main", "on_tick", "on_unload", "on_frame"}:
