@@ -9,7 +9,7 @@ bool world_to_map(const vec3&in world, vec2&out map) {
     return true;
 }
 
-void radar_render(int64 data) {
+void radar_render(int id, int data_index) {
     if (!g_radar_enabled || g_esp_count == 0) return;
 
     vec3 local_pos = read_vec3(g_local_player + OFF_POS);

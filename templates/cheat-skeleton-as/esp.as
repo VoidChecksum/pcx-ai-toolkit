@@ -3,7 +3,7 @@ namespace Cheat {
 
 const double PLAYER_HEIGHT = 72.0;
 
-void esp_update(int64 data) {
+void esp_update(int id, int data_index) {
     if (!g_esp_enabled || !g_initialized || !g_proc.alive()) return;
 
     g_esp_count = 0;
@@ -34,7 +34,7 @@ void esp_update(int64 data) {
     }
 }
 
-void esp_render(int64 data) {
+void esp_render(int id, int data_index) {
     if (!g_esp_enabled || g_esp_count == 0) return;
 
     color enemy(255, 80, 80, 220);

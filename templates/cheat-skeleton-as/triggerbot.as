@@ -8,7 +8,7 @@ EntityInfo get_entity_under_crosshair() {
     return empty; // replace with real logic
 }
 
-void triggerbot_update(int64 data) {
+void triggerbot_update(int id, int data_index) {
     if (!g_trigger_enabled || !g_initialized || !g_proc.alive()) return;
     if (!is_key_down(g_trigger_key)) return;
 
@@ -23,7 +23,7 @@ void triggerbot_update(int64 data) {
     press_mouse_left();
 }
 
-void triggerbot_render(int64 data) {
+void triggerbot_render(int id, int data_index) {
     // no rendering
 }
 

@@ -11,7 +11,7 @@ void write_view_angles(const vec2&in angles) {
     // placeholder: clamp pitch to [-89, 89] and write to engine memory
 }
 
-void aimbot_update(int64 data) {
+void aimbot_update(int id, int data_index) {
     if (!g_aim_enabled || !g_initialized || !g_proc.alive()) return;
     if (!is_key_down(g_aim_key)) { g_aim_target.valid = false; return; }
 
@@ -40,7 +40,7 @@ void aimbot_update(int64 data) {
     g_aim_target = best;
 }
 
-void aimbot_render(int64 data) {
+void aimbot_render(int id, int data_index) {
     if (!g_aim_enabled || !g_aim_target.valid) return;
 
     vec3 local_pos = read_vec3(g_local_player + OFF_POS);

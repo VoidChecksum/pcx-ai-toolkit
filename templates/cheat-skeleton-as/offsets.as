@@ -18,15 +18,15 @@ bool resolve_all() {
     if (!g_proc.alive() || g_base == 0 || g_size == 0) return false;
 
     uint64 hit_el = g_proc.find_code_pattern(g_base, g_size, SIG_ENTITY_LIST);
-    if (hit_el == 0) { println("[offsets] entity_list sig stale"); return false; }
+    if (hit_el == 0) { log("[offsets] entity_list sig stale"); return false; }
     g_entity_list = resolve_rip(hit_el, 3, 7);
 
     uint64 hit_lp = g_proc.find_code_pattern(g_base, g_size, SIG_LOCAL_PLAYER);
-    if (hit_lp == 0) { println("[offsets] local_player sig stale"); return false; }
+    if (hit_lp == 0) { log("[offsets] local_player sig stale"); return false; }
     g_local_player = resolve_rip(hit_lp, 3, 7);
 
     uint64 hit_vm = g_proc.find_code_pattern(g_base, g_size, SIG_VIEW_MATRIX);
-    if (hit_vm == 0) { println("[offsets] view_matrix sig stale"); return false; }
+    if (hit_vm == 0) { log("[offsets] view_matrix sig stale"); return false; }
     g_view_matrix = resolve_rip(hit_vm, 3, 7);
 
     return g_entity_list != 0 && g_local_player != 0 && g_view_matrix != 0;

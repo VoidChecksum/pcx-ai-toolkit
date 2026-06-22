@@ -15,7 +15,7 @@ vec3 read_vec3(uint64 addr) {
 }
 
 // Pointer-chain reader.
-uint64 read_chain(uint64 base, const int[]&in offsets) {
+uint64 read_chain(uint64 base, const array<int> &in offsets) {
     uint64 addr = base;
     for (uint i = 0; i < offsets.length(); i++) {
         if (addr == 0) return 0;

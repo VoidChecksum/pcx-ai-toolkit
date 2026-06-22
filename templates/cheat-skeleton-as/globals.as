@@ -43,7 +43,7 @@ class EntityInfo {
     vec3 head;
 };
 
-EntityInfo[] g_entities(MAX_ENTITIES);
+array<EntityInfo> g_entities(MAX_ENTITIES);
 int g_esp_count = 0;
 
 // Active aim target
