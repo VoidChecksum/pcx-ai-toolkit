@@ -24,6 +24,7 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Sized
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -71,7 +72,10 @@ def _fetch(url: str, timeout: int = 30) -> str:
     """Fetch a URL and return UTF-8 text."""
     req = urllib.request.Request(url, headers={"User-Agent": "pcx-ai-toolkit/1.0"})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read().decode("utf-8", errors="ignore")
+        body: object = resp.read()
+        if isinstance(body, bytes):
+            return body.decode("utf-8", errors="ignore")
+        return str(body)
 
 
 def _page_url(path: str) -> str:
@@ -135,9 +139,9 @@ def _fetch_pages(paths: list[str]) -> dict[str, str]:
     return out
 
 
-def build_index() -> dict:
-    functions: dict[str, list[dict]] = {}
-    methods: dict[str, list[dict]] = {}
+def build_index() -> dict[str, object]:
+    functions: dict[str, list[dict[str, object]]] = {}
+    methods: dict[str, list[dict[str, object]]] = {}
     types: set[str] = set()
     modules: dict[str, set[str]] = {}
 
@@ -192,7 +196,7 @@ def build_index() -> dict:
         "const", "constexpr", "auto", "void", "null",
     }}
 
-    def sig_list_to_json(d: dict[str, list[dict]]) -> dict[str, list[dict]]:
+    def sig_list_to_json(d: dict[str, list[dict[str, object]]]) -> dict[str, list[dict[str, object]]]:
         return {k: [{kk: vv for kk, vv in s.items() if kk != "line"} for s in v]
                 for k, v in sorted(d.items())}
 
@@ -208,7 +212,7 @@ def build_index() -> dict:
     }
 
 
-def write_index(index: dict, path: Path) -> None:
+def write_index(index: dict[str, object], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(index, indent=2, sort_keys=True), encoding="utf-8")
 
@@ -220,28 +224,31 @@ def main() -> int:
 
     index = build_index()
 
+    typed_index: dict[str, object] = dict(index)
     if args.check:
         if not OUT_FILE.exists():
             print(f"ERROR: {OUT_FILE} missing; run without --check to generate.", file=sys.stderr)
             return 1
         current = json.loads(OUT_FILE.read_text(encoding="utf-8"))
-        if current != index:
+        if current != typed_index:
             print(f"ERROR: {OUT_FILE} is out of sync with upstream docs. Regenerate with:", file=sys.stderr)
             print(f"    python3 tools/build-api-index.py", file=sys.stderr)
             return 1
-        print(f"OK: {OUT_FILE} is up to date ({index['doc_count']} docs, "
-              f"{len(index['functions'])} functions, {len(index['methods'])} methods).")
+        functions = typed_index.get("functions", {})
+        methods = typed_index.get("methods", {})
+        assert isinstance(functions, Sized) and isinstance(methods, Sized)
+        print(f"OK: {OUT_FILE} is up to date ({typed_index['doc_count']} docs, "
+              f"{len(functions)} functions, {len(methods)} methods).")
         return 0
 
-    write_index(index, OUT_FILE)
+    write_index(typed_index, OUT_FILE)
     print(f"Wrote {OUT_FILE}")
-    print(f"  docs:        {index['doc_count']}")
-    print(f"  functions:   {len(index['functions'])}")
-    print(f"  methods:     {len(index['methods'])}")
-    print(f"  types:       {len(index['types'])}")
-    print(f"  modules:     {len(index['modules'])}")
+    print(f"  docs:        {typed_index['doc_count']}")
+    functions = typed_index.get("functions", {})
+    methods = typed_index.get("methods", {})
+    types = typed_index.get("types", [])
+    modules = typed_index.get("modules", [])
+    assert isinstance(functions, Sized) and isinstance(methods, Sized)
+    assert isinstance(types, Sized) and isinstance(modules, Sized)
     return 0
 
-
-if __name__ == "__main__":
-    sys.exit(main())

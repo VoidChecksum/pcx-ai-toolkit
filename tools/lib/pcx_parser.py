@@ -367,9 +367,9 @@ def _base_type(t: str) -> str:
     return t.strip()
 
 
-def extract_api_signatures(text: str, language: str, source: str):
+def extract_api_signatures(text: str, language: str, source: str) -> list[dict[str, object]]:
     """Yield signature dicts from a markdown code fence body."""
-    found: list[dict] = []
+    found: list[dict[str, object]] = []
     for lineno, line in enumerate(text.splitlines(), 1):
         mm = SIG_METHOD_RE.match(line)
         if mm:

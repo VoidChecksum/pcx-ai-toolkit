@@ -57,7 +57,7 @@ ENMA_MODULE_HINTS: dict[str, set[str]] = {
 }
 
 
-def load_index(path: Path) -> dict:
+def load_index(path: Path) -> dict[str, set[str]]:
     if not path.exists():
         raise FileNotFoundError(
             f"{path} not found. Build it first:\n  python3 tools/build-api-index.py"
@@ -105,8 +105,8 @@ def _type_first_line(text: str, t: str) -> int:
     return text[:m.start()].count("\n") + 1 if m else 1
 
 
-def check_file(path: Path, index: dict, language: str | None = None) -> list[dict]:
-    findings: list[dict] = []
+def check_file(path: Path, index: dict[str, set[str]], language: str | None = None) -> list[dict[str, object]]:
+    findings: list[dict[str, object]] = []
     text = path.read_text(encoding="utf-8", errors="ignore")
     if language is None:
         language = detect_language(path)
@@ -172,19 +172,19 @@ def check_file(path: Path, index: dict, language: str | None = None) -> list[dic
     return findings
 
 
-def print_findings(findings: list[dict], json_mode: bool) -> None:
+def print_findings(findings: list[dict[str, object]], json_mode: bool) -> None:
     if json_mode:
         print(json.dumps(findings, indent=2))
         return
     if not findings:
         print("clean: no unknown symbols")
         return
-    by_file: dict[str, list[dict]] = {}
+    by_file: dict[str, list[dict[str, object]]] = {}
     for f in findings:
-        by_file.setdefault(f["file"], []).append(f)
+        by_file.setdefault(str(f["file"]), []).append(f)
     for file_path, items in by_file.items():
         print(f"\n{file_path}")
-        for it in sorted(items, key=lambda x: x["line"]):
+        for it in sorted(items, key=lambda x: int(str(x["line"]))):
             print(f"  {it['line']}: [{it['kind']}] {it['message']}")
 
 
@@ -206,7 +206,7 @@ def main() -> int:
         print(f"ERROR: not found: {target}", file=sys.stderr)
         return 2
 
-    all_findings: list[dict] = []
+    all_findings: list[dict[str, object]] = []
     for path in collect_files(target):
         all_findings.extend(check_file(path, index, args.lang))
 
