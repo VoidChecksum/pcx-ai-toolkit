@@ -144,7 +144,6 @@ separate from the memory reads.
 ## Working with PCX MCP Tools
 
 Aider does not speak MCP. The Perception MCP server (`mcp/perception-mcp-config.json`)
-and the binary-analysis MCP server are for MCP-aware clients. Two ways to combine them:
 
 ### Option A — split the work (recommended)
 
@@ -173,7 +172,6 @@ standalone analysis tools are pure-stdlib CLIs built for exactly this:
 Aider then sees the protector/section report and can reason about it while editing.
 
 For live IDA-backed analysis, install a legitimately-licensed IDA yourself and wire up
-the binary-analysis MCP server (see [`binary-analysis-setup.md`](binary-analysis-setup.md)).
 Note that `idalib-mcp` is a **stdio MCP server**, not a one-shot CLI — it is meant for the MCP clients in Option A,
 not for `/run`. For Aider, prefer the standalone Python tools above; keep `idalib-mcp` as
 the handoff target for the IDE chat.

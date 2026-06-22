@@ -2,9 +2,7 @@
 #
 # pre-ship-check.sh — pre-release hygiene checklist for PCX scripting projects.
 #
-# Implements the checklist from .claude/skills/script-bundler/SKILL.md section 4.
 # Pure bash + grep + find. No Python, no new dependencies.
-#
 # Usage:
 #   bash tools/pre-ship-check.sh [project-dir]
 #   bash tools/pre-ship-check.sh --strict [project-dir]
