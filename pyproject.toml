@@ -10,17 +10,26 @@ strict = true
 
 [[tool.mypy.overrides]]
 module = [
-    "tools.build-api-index",
+    "tools.anti-debug-scanner",
+    "tools.binary-diff-summary",
     "tools.build-counts",
     "tools.build-llms-index",
     "tools.build-provenance",
     "tools.check-doc-drift",
-    "tools.check-internal-links",
     "tools.check-mcp-config",
     "tools.check-version-matrix",
+    "tools.dump-strings-xor",
+    "tools.dumper-to-enma",
+    "tools.evidence-log-validator",
+    "tools.identify-protector",
+    "tools.module-export-mapper",
+    "tools.offset-diff",
+    "tools.pattern-format-converter",
     "tools.pcx",
+    "tools.pe-section-analyzer",
+    "tools.resolve-api-hashes",
     "tools.script-linter",
-    "tools.symbol-check",
+    "tools.sig-uniqueness-checker"
 ]
 ignore_errors = true
 

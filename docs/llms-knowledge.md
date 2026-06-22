@@ -4,7 +4,838 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 10**
+**Source files included: 26**
+
+---
+
+## Source: `knowledge/aimbot-math.md`
+
+# Aimbot Math Reference
+
+> **Scope:** Educational math reference for PCX cheat development. Authorized targets only.
+
+This is the math companion to [`common-patterns.md`](common-patterns.md). That file
+covers the *render* half — world-to-screen, boxes, snaplines, radar — plus a single
+`calc_angle` / `smooth_angle` teaser. The README promises "angle calc, smooth interp"
+for the aim half; this file is where that math actually lives. Everything below builds
+on the Enma idioms already established in `common-patterns.md`: `uint64` addresses,
+`proc_t` reads, `vec3` field access (`.x` / `.y` / `.z`, no getter parens), and the
+`(180.0 / PI)` degree conversion used by `calc_angle`.
+
+Code blocks honor the 12 [`game-cheat-guidelines`](../.claude/skills/game-cheat-guidelines/SKILL.md):
+`uint64` addresses, caller null-guards every read, scan stays out of render, and the one
+feature that writes memory (no-recoil, angle writeback) writes the minimum bytes. Offsets
+appear as bare symbolic identifiers (`OFF_VELOCITY`, resolved in `offsets.em`) exactly as
+`common-patterns.md` does — never a version-specific hex literal.
+
+```cpp
+// Shared throughout this reference. Matches common-patterns.md calc_angle.
+const float64 PI = 3.14159265358979;
+const float64 RAD2DEG = 180.0 / PI;
+const float64 DEG2RAD = PI / 180.0;
+```
+
+## Angles: yaw and pitch from two world points
+
+The aimbot's core question — "what view angles point my camera at that target?" — answers with
+two `atan2` calls. This is `calc_angle` from `common-patterns.md`, restated with the convention
+spelled out:
+
+```cpp
+// Returns (pitch, yaw) in degrees. Source-engine convention (z = up).
+vec2 calc_angle(vec3 src, vec3 dst) {
+    vec3 delta = dst.sub(src);                          // dst - src
+    float64 dist_xy = sqrt(delta.x * delta.x + delta.y * delta.y);
+    float64 pitch = atan2(-delta.z, dist_xy) * RAD2DEG; // up = negative pitch
+    float64 yaw   = atan2(delta.y, delta.x) * RAD2DEG;
+    return vec2(pitch, yaw);                             // vec2.x = pitch, vec2.y = yaw
+}
+```
+
+**Output range.** `atan2` returns `(-PI, PI]`, so pitch and yaw come out in `(-180, 180]` — the
+range Source-family games store. If your engine stores yaw in `[0, 360)`, normalize *on
+writeback*, not here; the delta math below wraps either input correctly.
+
+**Pitch sign is engine-specific and trips everyone.** `atan2(-delta.z, dist_xy)` produces
+a *negative* pitch when the target is above you (`delta.z > 0`). That matches Source, where
+looking up is negative pitch. Other engines flip this:
+
+| Engine          | Angle storage           | Up is...        | Yaw zero axis | Handedness |
+| --------------- | ----------------------- | --------------- | ------------- | ---------- |
+| Source / Source2| `QAngle{pitch,yaw,roll}`, degrees | negative pitch | +X | left, z-up |
+| Unreal (UE4/5)  | `FRotator{Pitch,Yaw,Roll}`, degrees | positive pitch | +X | left, z-up |
+| Unity           | Euler degrees / quaternion | positive pitch | +Z | left, y-up |
+
+For Unreal, drop the negation: `pitch = atan2(delta.z, dist_xy) * RAD2DEG`. For Unity the "up"
+axis is `y`, so `dist_xy` is the XZ-plane distance and pitch keys off `delta.y`.
+
+## Angle deltas — the wrap-around trap
+
+You never write absolute angles into a smoothing loop; you work with the *delta* from your
+current view to the target. Subtracting two angles naively breaks at the seam where the
+range wraps.
+
+Suppose your current yaw is `350°` and the target is at `10°`. The shortest turn is `+20°`
+(swing right through `360°/0°`). But `target - current = 10 - 350 = -340°` tells the
+aimbot to spin almost all the way around the other direction. Symmetrically, current `10°`
+to target `350°` should be `-20°`, not `+340°`.
+
+The fix maps any delta into `[-180, 180)`:
+
+```cpp
+// Normalize an angle delta (degrees) to the shortest signed path in [-180, 180).
+float64 normalize_delta(float64 delta) {
+    return fmod(delta + 540.0, 360.0) - 180.0;
+}
+```
+
+**Why `+540`, not `+180`?** `540 = 360 + 180`. Enma's `fmod` follows C semantics: the
+result takes the sign of the dividend, so `fmod(-340.0, 360.0)` is a *negative* `-340`, not
+`20`. Offsetting by `540` guarantees the argument is positive for any delta in `[-360, 360]`
+(`delta + 540` lands in `[180, 900]`), so `fmod` stays positive, and the trailing `- 180`
+re-centers it. Verify:
+
+```
+normalize_delta(-340) = fmod(200, 360) - 180 = 200 - 180 = +20   // 350 -> 10, correct
+normalize_delta(+340) = fmod(880, 360) - 180 = 160 - 180 = -20   // 10 -> 350, correct
+normalize_delta(+10)  = fmod(550, 360) - 180 = 190 - 180 = +10   // no wrap, unchanged
+```
+
+Apply it to yaw on every frame. Pitch does **not** wrap (it is clamped to roughly
+`[-89, 89]`), so clamp pitch instead of wrapping it:
+
+```cpp
+vec2 angle_delta(vec2 current, vec2 target) {
+    float64 dp = fclamp(target.x - current.x, -89.0, 89.0);  // pitch: clamp, no wrap
+    float64 dy = normalize_delta(target.y - current.y);      // yaw: wrap
+    return vec2(dp, dy);
+}
+```
+
+## FOV cone check — "is the target in screen FOV"
+
+Two formulations. They answer slightly different questions; pick by what you already have.
+
+**3D angle cone (dot product).** Use this when you have view angles and world positions and
+have *not* run world-to-screen yet (cheaper — no matrix multiply). Build the view-forward
+unit vector from your angles, build the unit direction to the target, and compare their dot
+product against `cos(fov)`:
+
+```cpp
+// Forward unit vector from Source-convention view angles (degrees).
+vec3 angles_to_forward(float64 pitch_deg, float64 yaw_deg) {
+    float64 p = pitch_deg * DEG2RAD;
+    float64 y = yaw_deg * DEG2RAD;
+    float64 cp = cos(p);
+    return vec3(cp * cos(y), cp * sin(y), -sin(p));  // -sin(p): up = negative pitch
+}
+
+// True if target sits within `fov_deg` half-angle of where the camera looks.
+bool in_fov_cone(vec3 eye, vec2 view_angles, vec3 target, float64 fov_deg) {
+    vec3 fwd = angles_to_forward(view_angles.x, view_angles.y);  // already unit length
+    vec3 dir = target.sub(eye).normalize();
+    float64 cos_limit = cos(fov_deg * DEG2RAD);
+    return fwd.dot(dir) >= cos_limit;   // larger dot = smaller angle = inside cone
+}
+```
+
+The dot of two unit vectors is `cos(angle_between)`. A wider FOV means a *smaller*
+`cos_limit`, so the `>=` test loosens as `fov_deg` grows — exactly what you want.
+
+**2D screen-space (pixel radius).** Use this when you already projected the target with
+`world_to_screen` (from `common-patterns.md`). FOV becomes a pixel circle around the
+crosshair (screen center):
+
+```cpp
+// True if the projected target is within `radius_px` of the crosshair.
+bool in_fov_screen(vec2 target_screen, float64 radius_px) {
+    float64 cx = get_view_width()  * 0.5;
+    float64 cy = get_view_height() * 0.5;
+    float64 dx = target_screen.x - cx;
+    float64 dy = target_screen.y - cy;
+    return (dx * dx + dy * dy) <= (radius_px * radius_px);  // squared: no sqrt needed
+}
+```
+
+**Which to use.** The screen form is intuitive (a circle the user tunes in pixels) and honors
+the game's real FOV/zoom for free since the projection already did. The 3D cone needs no
+projection and works for off-screen targets, so it is the better gate for a closest-target
+search over the full entity list. Many aimbots use the cone to *select* and the circle to
+*display* the FOV ring.
+
+## Closest target selection
+
+Once the FOV gate passes, rank the survivors and pick one. Four metrics, increasing cost
+and increasing "feel":
+
+**By screen distance (2D).** Pixels from crosshair. Cheapest after projection; matches what
+the player sees. This is what most "FOV aimbots" use:
+
+```cpp
+float64 score_screen(vec2 target_screen) {
+    float64 dx = target_screen.x - get_view_width()  * 0.5;
+    float64 dy = target_screen.y - get_view_height() * 0.5;
+    return dx * dx + dy * dy;   // squared px; smaller = closer to crosshair
+}
+```
+
+**By angular distance (3D).** The turn the aimbot must make, in degrees. Independent of FOV
+zoom and screen resolution. Reuse `angle_delta`:
+
+```cpp
+float64 score_angular(vec2 view_angles, vec2 target_angles) {
+    vec2 d = angle_delta(view_angles, target_angles);
+    return sqrt(d.x * d.x + d.y * d.y);   // degrees of correction needed
+}
+```
+
+**By world distance.** Closest in meters (`distance_3d` from `common-patterns.md`). Useful for
+melee/shotgun logic, but a distant target dead-center beats a close one at the screen edge, so
+world distance alone aims poorly.
+
+**Hybrid weighted.** Prefer targets both near the crosshair *and* close. Normalize each term to
+`[0, 1]` against its max, then weight:
+
+```cpp
+// Lower score wins. ang_w + dist_w should sum to 1.0.
+float64 score_hybrid(float64 ang_deg, float64 max_ang,
+                     float64 world_dist, float64 max_dist,
+                     float64 ang_w, float64 dist_w) {
+    float64 ang_n  = fclamp(ang_deg    / max_ang,  0.0, 1.0);
+    float64 dist_n = fclamp(world_dist / max_dist, 0.0, 1.0);
+    return ang_w * ang_n + dist_w * dist_n;
+}
+```
+
+Worked example (`ang_w=0.7`, `dist_w=0.3`, `max_ang=30°`, `max_dist=3000`): target A (`5°` at
+`2500`) → `0.7*(5/30)+0.3*(2500/3000)=0.367`; target B (`15°` at `400`) → `0.390`. A wins, the
+smaller turn dominates. Bias toward angle for twitchy aim, toward distance to lock the nearest.
+
+Selection loop picks the minimum score over the validated, in-FOV set:
+
+```cpp
+int32 best = -1;
+float64 best_score = 1.0e30;
+for (int32 i = 0; i < g_candidates.length(); i++) {
+    float64 s = score_hybrid(g_ang[i], 30.0, g_dist[i], 3000.0, 0.7, 0.3);
+    if (s < best_score) { best_score = s; best = i; }
+}
+```
+
+## Target validation gate
+
+Selecting a target is worthless if it is dead, friendly, or behind a wall. Run an **ordered**
+checklist — cheap field reads first, the expensive line-of-sight trace last — and bail at the
+first failure so you never trace a target you already rejected. (Separate scan from render:
+this runs in `on_update`, not `on_render`.)
+
+```cpp
+bool is_valid_target(proc_t& p, uint64 ent, vec3 eye, vec3 target_pos,
+                     int32 local_team, float64 max_dist) {
+    // 1. Alive (one int read — cheapest).
+    if (p.r32(ent + OFF_HEALTH) <= 0) return false;
+
+    // 2. Enemy team (one int read).
+    if (p.r32(ent + OFF_TEAM) == local_team) return false;
+
+    // 3. In range (no read; pure math on cached positions).
+    if (target_pos.distance(eye) > max_dist) return false;
+
+    // 4. Not smoked / flag-gated (one read; engine-specific flags).
+    if ((p.ru32(ent + OFF_FLAGS) & FLAG_BLOCKED) != 0) return false;
+
+    // 5. Visible — line of sight. The expensive check goes LAST.
+    //    Prefer the engine's per-bone visible flag when it exists (one read);
+    //    fall back to a ray trace only when it doesn't.
+    if (p.r32(ent + OFF_VISIBLE) == 0) return false;
+
+    return true;
+}
+```
+
+**Ordering rationale.** Checks 1-4 are single integer reads or cached-position math —
+nanoseconds. A visibility *trace* (casting a ray through the game's collision world, or
+calling its `TraceLine`) is orders of magnitude more expensive and may require a write to set
+up trace parameters. Gate it behind everything cheaper. If the engine exposes a
+`m_bSpotted` / visible-bone bitmask (a plain read), prefer that over a trace entirely — it is
+both cheaper and quieter. Offsets shown (`OFF_HEALTH`, `OFF_TEAM`, `OFF_FLAGS`, `OFF_VISIBLE`)
+resolve in `offsets.em`; mark any you guessed `// UNVERIFIED` per guideline 12.
+
+## Prediction — basic linear
+
+Bullets are not hitscan in most games; they take time to arrive, and the target keeps moving.
+Linear prediction extrapolates the target along its velocity by the bullet's travel time:
+
+```
+predicted = target_pos + target_vel * t,   where t = distance / bullet_speed
+```
+
+The catch: `distance` depends on where you aim, which depends on `t`, which depends on
+`distance`. Solve it with a couple of fixed-point iterations — each pass refines `t` using
+the previous pass's aim point. Two or three iterations converge for any reasonable speed:
+
+```cpp
+vec3 predict_linear(proc_t& p, uint64 ent, vec3 eye, vec3 target_pos, float64 bullet_speed) {
+    vec3 vel = p.read_vec3_fl32(ent + OFF_VELOCITY);   // units/sec; read once
+    vec3 aim = target_pos;
+    for (int32 i = 0; i < 3; i++) {
+        float64 t = aim.distance(eye) / bullet_speed;  // bullet flight time
+        aim = target_pos.add(vel.scale(t));            // target_pos + vel*t
+    }
+    return aim;
+}
+```
+
+**Getting bullet speed is game-dependent.** It is not a universal constant — it is per-weapon
+muzzle velocity, often stored on the active weapon entity or a weapon-data table:
+
+- **Source / Source2:** weapon script `CSWeaponData` / `WeaponInfo` exposes a projectile or
+  muzzle speed; some weapons are hitscan (treat `t = 0`). Read the active weapon, then its
+  data pointer.
+- **Unreal:** the projectile class's `InitialSpeed` on `ProjectileMovementComponent`.
+- **Generic:** if you cannot find a field, measure it — fire once at a wall a known distance
+  away and time the impact, then hardcode per-weapon (and re-measure after patches).
+
+Velocity itself comes from the target's movement field (`OFF_VELOCITY`, frequently
+`m_vecVelocity`). If the game only stores positions, derive velocity as
+`(pos_this_frame - pos_last_frame) / frametime` in `on_update`.
+
+## Prediction — gravity-aware
+
+When the projectile arcs (grenades, arrows, tank shells, Apex sniper drop), linear prediction
+under-aims: you must both *lead* the moving target and *raise* the aim to fight gravity.
+
+**Step 1 — intercept time against a moving target.** Treat the projectile as traveling at
+constant speed `s` (handle the arc as a separate vertical correction). Let `pRel =
+target_pos - shooter_pos` and `vt = target_vel`. The projectile reaches the target when the
+straight-line distance it has flown equals the moving target's distance:
+
+```
+|pRel + vt*t| = s*t
+```
+
+Square both sides and group by powers of `t`:
+
+```
+(vt·vt - s²) t² + 2(pRel·vt) t + (pRel·pRel) = 0
+       a              b               c
+```
+
+A standard quadratic. Take the **smallest positive** root (earliest interception):
+
+```cpp
+// Returns intercept time t > 0, or -1.0 if no real solution (target outruns projectile).
+float64 intercept_time(vec3 p_rel, vec3 vt, float64 s) {
+    float64 a = vt.dot(vt) - s * s;
+    float64 b = 2.0 * p_rel.dot(vt);
+    float64 c = p_rel.dot(p_rel);
+
+    if (fabs(a) < 0.0001) {                 // target speed == projectile speed: linear
+        if (fabs(b) < 0.0001) return -1.0;
+        float64 t = -c / b;
+        return t > 0.0 ? t : -1.0;
+    }
+
+    float64 disc = b * b - 4.0 * a * c;
+    if (disc < 0.0) return -1.0;            // unreachable
+    float64 sq = sqrt(disc);
+    float64 t1 = (-b - sq) / (2.0 * a);
+    float64 t2 = (-b + sq) / (2.0 * a);
+
+    // Smallest strictly-positive root.
+    float64 best = -1.0;
+    if (t1 > 0.0) best = t1;
+    if (t2 > 0.0 && (best < 0.0 || t2 < best)) best = t2;
+    return best;
+}
+```
+
+**Step 2 — gravity drop.** With the intercept time known, the lead point is
+`target_pos + vt*t`. Gravity pulls the projectile down by `0.5 * g * t²` over that flight, so
+aim that much *higher* (z is up in Source). `g` is the game's projectile gravity (often the
+world gravity scaled by a per-projectile multiplier — read it, don't assume `9.8`):
+
+```cpp
+// Full gravity-aware aim point. Returns target_pos if unreachable.
+vec3 predict_gravity(vec3 shooter, vec3 target_pos, vec3 target_vel,
+                     float64 proj_speed, float64 gravity) {
+    vec3 p_rel = target_pos.sub(shooter);
+    float64 t = intercept_time(p_rel, target_vel, proj_speed);
+    if (t < 0.0) return target_pos;                 // no firing solution; caller skips shot
+
+    vec3 lead = target_pos.add(target_vel.scale(t)); // lead the motion
+    lead.z = lead.z + 0.5 * gravity * t * t;         // raise to fight the drop
+    return lead;
+}
+```
+
+Feed `lead` into `calc_angle(eye, lead)` to get the firing angles. The drop term assumes z-up;
+for a y-up engine (Unity) adjust `lead.y` instead. If `intercept_time` returns `-1`, there is
+no firing solution — the target is faster than the projectile or out of range — so withhold
+the shot rather than aiming at a garbage point.
+
+## Recoil compensation (no-recoil)
+
+A recoil pattern is a per-shot kick table: each consecutive round adds a known offset to the
+view angles (a "spray pattern"). The game tracks how many rounds you have fired and the
+accumulated punch, then offsets your aim by it. No-recoil cancels that offset.
+
+Two approaches, cheapest first:
+
+**Read and subtract the punch (read-mostly).** Most engines expose the accumulated aim punch
+as a vector (`m_aimPunchAngle` in Source) and a shot counter (`m_iShotsFired`). Read the punch
+and subtract it from your view angles when you write them back. This is the quiet path — you
+only ever write the view-angle field you were going to write anyway for aim:
+
+```cpp
+// Returns view angles with the current recoil punch removed.
+// OFF_PUNCH / OFF_VIEW_ANGLES resolve in offsets.em; UNVERIFIED until checked against binary.
+vec2 compensate_recoil(proc_t& p, uint64 local, vec2 desired_angles) {
+    vec3 punch = p.read_vec3_fl32(local + OFF_PUNCH);  // (pitch, yaw, roll) punch in degrees
+    // Source scales stored punch by 2.0 for the actual view offset; verify per engine.
+    return vec2(desired_angles.x - punch.x * 2.0,
+                desired_angles.y - punch.y * 2.0);
+}
+```
+
+**Patch the punch source (write, heavier footprint).** Some scripts zero the recoil-spread
+float in game memory so the gun never kicks. Per guideline 9, write the single float, never a
+NOP sled over the recoil code:
+
+```cpp
+// WRONG — nop-patching the recoil routine (16 bytes in .text, integrity-checked).
+// RIGHT — zero the spread float that the routine reads.
+if (g_norecoil) p.wf32(local + OFF_RECOIL_SPREAD, 0.0f);
+```
+
+Prefer the read-and-subtract path: it leaves zero write footprint on the recoil system and
+folds cleanly into the angle you already plan to write. Reading the shot index (`m_iShotsFired`)
+lets you ramp compensation in only while a spray is active, so single taps stay untouched.
+
+## Smoothing — why and how
+
+Snapping the view instantly onto a target is the loudest aim-detection signal: human aim has a
+measurable acceleration curve and overshoot, a teleport does not, and behavioral anti-cheats
+flag the zero-frame angle jump directly. Smoothing spreads the correction over several frames.
+Always smooth the *delta* (wrapped via `normalize_delta`), never raw absolute angles, or the
+yaw seam will make the view spin.
+
+**Linear (divide).** Move a fixed fraction of the remaining delta each frame. This is
+`smooth_angle` from `common-patterns.md`. Simple, but the speed decays as you close in, giving
+a soft ease-out:
+
+```cpp
+vec2 smooth_linear(vec2 view, vec2 target, float64 smooth_factor) {
+    vec2 d = angle_delta(view, target);                 // wrapped pitch+yaw delta
+    return vec2(view.x + d.x / smooth_factor,           // larger factor = slower
+                view.y + d.y / smooth_factor);
+}
+```
+
+**Exponential (frame-rate independent).** The divide form above is tied to frame rate —
+faster FPS means more steps means snappier aim. Decouple it from frame rate by deriving the
+blend factor from elapsed time:
+
+```cpp
+vec2 smooth_exp(vec2 view, vec2 target, float64 rate, float64 dt) {
+    float64 a = 1.0 - exp(-rate * dt);   // dt = 1.0 / get_fps(); a in (0,1)
+    vec2 d = angle_delta(view, target);
+    return vec2(view.x + d.x * a, view.y + d.y * a);
+}
+```
+
+**Spring-damped (SmoothDamp).** Tracks angular velocity so the view *accelerates* into the turn
+and eases out without overshoot — the most human-looking profile. `smooth_time` is the
+approximate seconds to converge. It returns the new angle *and* the new velocity packed in a
+`vec2`; persist `.y` per axis and feed it back next frame:
+
+```cpp
+// Critically-damped smoothing for one axis. Returns vec2(new_angle, new_velocity).
+vec2 smooth_damp(float64 cur, float64 target, float64 vel, float64 smooth_time, float64 dt) {
+    float64 omega = 2.0 / smooth_time;
+    float64 x = omega * dt;
+    float64 decay = 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x);
+    float64 change = cur - target;
+    float64 temp = (vel + omega * change) * dt;
+    float64 new_vel = (vel - omega * temp) * decay;
+    return vec2(target + (change + temp) * decay, new_vel);
+}
+```
+
+| Method        | Feel               | State | Frame-rate safe | Cost |
+| ------------- | ------------------ | ----- | --------------- | ---- |
+| Linear divide | ease-out only      | none  | no              | tiny |
+| Exponential   | ease-out, smooth   | none  | yes (uses `dt`) | tiny |
+| Spring-damped | ease-in + ease-out | per-axis velocity | yes | small |
+
+**Sample-rate considerations.** Any tuning constant that is not time-based drifts with frame
+rate — feed `dt = 1.0 / get_fps()` into the exponential and spring forms. The linear divide
+form has no `dt`, so its effective speed differs between 60 and 240 FPS; document the slider as
+frame-rate dependent or convert it to the exponential form.
+
+## Mouse input writeback paths
+
+Computed angles have to *become* aim somehow. Two routes, with very different detection
+surfaces.
+
+**Synthetic mouse input (`SendInput`).** Convert the angle delta to mouse counts and feed it
+through the OS input stack via the Win API. The game sees ordinary mouse movement and applies
+its own sensitivity, so the conversion needs the game's yaw/pitch-per-count factor:
+
+```cpp
+// Convert a view-angle delta (degrees) to relative mouse counts and send it.
+// `counts_per_deg` is game sensitivity dependent — derive or measure it; UNVERIFIED.
+void writeback_sendinput(vec2 angle_delta_deg, float64 counts_per_deg) {
+    int64 dx = cast<int64>(angle_delta_deg.y * counts_per_deg);   // yaw  -> horizontal
+    int64 dy = cast<int64>(angle_delta_deg.x * counts_per_deg);   // pitch -> vertical
+    mouse_move_relative(dx, dy);   // or send_mouse_input(dx, dy, MOUSEEVENTF_MOVE, 0)
+}
+```
+
+- *Pros:* no game-memory write at all — the cleanest footprint against memory-integrity
+  checks; the movement rides the input path the game already trusts.
+- *Cons:* synthetic input is itself detectable (injected-input flags, delta-timing analysis)
+  and needs the sensitivity conversion, which shifts with the player's sens and zoom.
+
+**Direct view-angle write.** Write the computed angles straight into the game's view-angle
+field:
+
+```cpp
+void writeback_angles(proc_t& p, uint64 local, vec2 angles) {
+    // OFF_VIEW_ANGLES resolves in offsets.em. One vec write per active frame, no more.
+    p.write_vec3_fl32(local + OFF_VIEW_ANGLES, vec3(angles.x, angles.y, 0.0));
+}
+```
+
+- *Pros:* exact — no sensitivity math, the view lands precisely where you computed.
+- *Cons:* it is a memory write to a contested gameplay field; anti-cheat can monitor the
+  field for writes that did not originate from the input path, and on a contested field the
+  game may revert it (read back to confirm, per guideline 9).
+
+**Respect guideline 9 either way.** Whichever path, write only while the aim key is held and
+only the minimum needed — one relative move or one `write_vec3_fl32` per active frame, gated
+on a GUI keybind. Never write every frame unconditionally:
+
+```cpp
+void on_update(int64 data) {
+    if (!g_aim_enabled) return;
+    if (!key_down(vk::xbutton2)) return;   // hold-to-aim; no key, no write
+    // ... select + validate + predict + smooth, then a single writeback ...
+}
+```
+
+## Common pitfalls
+
+**Radians vs degrees — the silent 57× bug.** `atan2` and all Enma trig work in radians; most
+view-angle fields store degrees, some store radians. The classic failure: read a radian-stored
+angle, treat it as degrees, then write your degree result back into a radian field — everything
+is off by `180/PI ≈ 57.3×` and the aim flicks to nonsense. Convert at *every* boundary
+(`* RAD2DEG` after a trig call, `* DEG2RAD` before one) and confirm the field's unit by reading
+it while looking at a known angle in-game.
+
+**Pitch sign convention.** Source uses up = *negative* pitch; Unreal and Unity use up =
+*positive* pitch. Backwards, and the aimbot pulls *down* onto targets above you and the spray
+compensation fights the recoil instead of canceling it. Verify by reading the field while
+aiming straight up.
+
+**Left- vs right-handed coordinates.** Source/Unreal are left-handed z-up; Unity left-handed
+y-up; many math libraries and custom W2S assume right-handed. A mismatch flips a yaw or
+cross-product sign, so left-side targets read as right-side. If lead prediction consistently
+aims to the wrong side, suspect a flipped axis before the velocity read.
+
+**Wrong "up" axis in pitch math.** `calc_angle` uses `dist_xy` (XY-plane) because Source is
+z-up. On a y-up engine the planar distance is over XZ and pitch keys off `delta.y`. Reusing the
+z-up form on Unity makes pitch track horizontal distance — aim drifts vertically as the target
+strafes.
+
+## See also
+
+- [`common-patterns.md`](common-patterns.md) — the render half (W2S, boxes, radar) and the
+  `calc_angle` / `smooth_angle` this file extends.
+- [`offset-methodology.md`](offset-methodology.md) — resolving `OFF_VELOCITY`, `OFF_VIEW_ANGLES`,
+  `OFF_PUNCH` with sigs instead of hardcodes.
+- [`anti-cheat-architecture.md`](anti-cheat-architecture.md) — why instant snaps and memory
+  writes are detection surfaces; informs the smoothing and writeback choices above.
+- [`pcx-api-cheatsheet.md`](pcx-api-cheatsheet.md) — quick reference for the natives used here.
+- [`game-cheat-guidelines`](../.claude/skills/game-cheat-guidelines/SKILL.md) — the 12 rules;
+  9 (minimize writes) and 10 (W2S) govern this file directly.
+- Perception API: [`proc-api`](../docs/perception/proc-api.md),
+  [`render-api`](../docs/perception/render-api.md),
+  [`input-api`](../docs/perception/input-api.md),
+  [`win-api`](../docs/perception/win-api.md); Enma math:
+  [`addon-vec`](../docs/enma/addon-vec.md), [`addon-math`](../docs/enma/addon-math.md).
+
+---
+
+## Source: `knowledge/anti-cheat-architecture.md`
+
+# Kernel Anti-Cheat Architecture Reference
+
+Architecture, components, and detection techniques for major kernel-level anti-cheat systems. Read this before starting AC analysis — it tells you what you're looking at and what each AC is known to monitor.
+
+> **Scope:** Authorized security research only. See `skill://authorized-security-research` before interacting with any live AC system.
+
+---
+
+## Architecture Overview
+
+Every kernel anti-cheat follows the same layered model, with variation in which layers each AC implements:
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                     Backend Servers                       │
+│  (detection rules, telemetry collection, ban decisions)  │
+└─────────────────────────┬────────────────────────────────┘
+                          │ HTTPS / custom protocol
+┌─────────────────────────▼────────────────────────────────┐
+│                   AC User-Mode Service                    │
+│  (EasyAntiCheat.exe / BEService.exe / vgc.exe)           │
+│  Manages driver lifecycle, relays telemetry, heartbeat   │
+└──────┬──────────────────┬────────────────────────────────┘
+       │ IOCTL / shared   │ injection / pipe
+       │ memory / events  │
+┌──────▼──────────┐ ┌─────▼─────────────────────────────┐
+│  Kernel Driver   │ │  Game-Injected Module              │
+│  (.sys)          │ │  (DLL in game process)             │
+│  Ring 0          │ │  User-mode integrity, screenshots, │
+│  Callbacks,      │ │  in-process scans, heartbeat       │
+│  handle strip,   │ └───────────────────────────────────┘
+│  system scans    │
+└──────────────────┘
+```
+
+---
+
+## Per-AC Architecture
+
+### EAC (Easy Anti-Cheat / EOS Anti-Cheat)
+
+| Property | Detail |
+|----------|--------|
+| **Publisher** | Epic Games (acquired from Kamu, 2018) |
+| **Games** | Fortnite, Apex Legends, Rust, Dead by Daylight, The Finals, Hunt: Showdown, Halo MCC, Dark and Darker, many more |
+| **User-mode service** | `EasyAntiCheat.exe` (legacy) or `EasyAntiCheat_EOS.exe` (EOS platform) |
+| **Game-injected module** | Loaded into game process; performs in-process scans |
+| **Kernel driver** | `EasyAntiCheat.sys` or `EasyAntiCheat_EOS.sys` — loaded on demand when game launches, unloaded on exit |
+| **Communication** | IOCTL between driver ↔ service; encrypted heartbeat between service ↔ game module; heartbeat failure = game termination |
+| **Update mechanism** | Driver is signed; user-mode module updates with game patches; cloud-based detection rules push without client update |
+| **Boot behavior** | Loads with the game, not at boot |
+
+**Known driver callbacks:**
+- `ObRegisterCallbacks` — strips `PROCESS_VM_READ`/`PROCESS_VM_WRITE` from external handles to the game
+- `PsSetCreateProcessNotifyRoutineEx` — monitors process creation
+- `PsSetCreateThreadNotifyRoutineEx` — monitors thread creation (injection detection)
+- `PsSetLoadImageNotifyRoutine` — monitors module loading
+- Minifilter registration — file system monitoring
+
+**Known detection vectors:**
+- External process handle with VM access to game
+- Module injection into game process (unsigned DLLs)
+- Unsigned kernel driver loading
+- Hypervisor presence (CPUID checks)
+- Debug registers set on game memory
+- Code integrity — `.text` section hashing
+- Stack anomalies — return addresses outside loaded modules
+- Window class/title scanning for known cheat UIs
+
+---
+
+### BattlEye
+
+| Property | Detail |
+|----------|--------|
+| **Publisher** | BattlEye Innovations (Germany) |
+| **Games** | PUBG, R6 Siege, DayZ, Arma 3, Escape from Tarkov, Destiny 2, Fortnite (previously) |
+| **User-mode service** | `BEService.exe` — runs as a Windows service |
+| **Game-injected module** | `BEClient.dll` / `BEClient_x64.dll` — injected into game process |
+| **Kernel driver** | `BEDaisy.sys` — loaded via SCM when game launches |
+| **Communication** | Named pipe between service ↔ driver; `BEClient.dll` ↔ `BEService.exe` over local IPC; service ↔ BattlEye backend over HTTPS |
+| **Unique** | **BEClient.dll receives shellcode from BattlEye servers at runtime** — detection logic is streamed, not static. This makes static analysis of detection rules nearly impossible. The shellcode runs in the game process context. |
+| **Boot behavior** | Loads with the game, not at boot |
+
+**Known driver callbacks:**
+- `ObRegisterCallbacks` — handle stripping
+- Process, thread, image notification callbacks
+- System thread creation for periodic background scans
+
+**Known detection vectors:**
+- All of EAC's vectors, plus:
+- Window enumeration (`FindWindow` / `EnumWindows` for known cheat tool class names)
+- Process name scanning (checks running process names against a list)
+- Memory pattern scans inside the game address space (streamed via shellcode)
+- Registry key checks for known cheat tool installations
+- Driver signing enforcement monitoring
+
+**Analysis difficulty:** HIGH — the streamed shellcode means detection logic changes server-side without any client update. You must capture and analyze the shellcode during a live session.
+
+---
+
+### Vanguard (Riot Games)
+
+| Property | Detail |
+|----------|--------|
+| **Publisher** | Riot Games |
+| **Games** | Valorant, League of Legends (optional) |
+| **Kernel driver** | `vgk.sys` — **always-on, loads at boot** |
+| **User-mode client** | `vgc.exe` |
+| **System tray** | `vgtray.exe` |
+| **Boot mechanism** | ELAM (Early Launch Anti-Malware) — loads before third-party drivers, sees everything that loads after it |
+| **Requirements** | TPM 2.0, Secure Boot enabled (enforced) |
+| **Communication** | Shared memory + fast mutex between `vgk.sys` ↔ `vgc.exe` |
+| **Always-on** | Unlike EAC/BE which load with the game, Vanguard runs from boot until manually disabled. Controversial but effective — detects cheat drivers that load before the game. |
+
+**Known driver capabilities:**
+- All standard kernel callbacks (process, thread, image, registry, handle)
+- Boot-time driver load monitoring (sees every driver that loads)
+- Secure Boot chain validation
+- TPM attestation
+- Hypervisor-level integrity checks
+- System integrity verification before allowing game launch
+
+**Analysis difficulty:** VERY HIGH — boot-time loading means snapshot-before-install VM workflow is essential. The ELAM driver loads before most debugging infrastructure.
+
+---
+
+### nProtect GameGuard
+
+| Property | Detail |
+|----------|--------|
+| **Publisher** | INCA Internet (South Korea) |
+| **Games** | MapleStory, Lineage 2, Aion, Black Desert Online, Lost Ark, many Asian MMOs |
+| **Components** | GameGuard service, kernel driver (`GameGuard.des` / `GameMon.des` / `GameMon64.des`), game module |
+| **Known for** | Aggressive rootkit-like behavior in older versions — SSDT hooks, process hiding, API interception |
+| **Legacy behavior** | Older versions hooked the SSDT (System Service Descriptor Table) directly — pre-PatchGuard technique. Modern versions use standard callbacks. |
+| **Detection** | Heavy user-mode API hooking in addition to kernel callbacks; monitors clipboard, screenshots, window messages |
+
+---
+
+### XIGNCODE3
+
+| Property | Detail |
+|----------|--------|
+| **Publisher** | Wellbia.com (South Korea) |
+| **Games** | PUBG Mobile (PC emulator), various Asian MMOs and mobile games |
+| **Components** | User-mode module + kernel driver |
+| **Known for** | Kernel driver + heavy code obfuscation (VMProtect on critical sections), anti-VM checks, timing-based detection |
+| **Obfuscation** | Critical driver sections are virtualized with VMProtect — significantly increases analysis difficulty |
+
+---
+
+### Theia (Embark Studios)
+
+| Property | Detail |
+|----------|--------|
+| **Publisher** | Embark Studios |
+| **Games** | The Finals (alongside EAC) |
+| **Architecture** | Primarily **server-side** — AI-based behavioral analysis |
+| **Components** | Minimal client-side component; heavy server-side telemetry analysis, screenshot capture and AI analysis |
+| **Unique** | Focuses on behavioral detection rather than system-level monitoring; runs alongside a traditional AC (EAC) for the system-level layer |
+
+---
+
+## Detection Technique Matrix
+
+Which AC uses which technique (based on public research and analysis):
+
+| Detection Technique | EAC | BattlEye | Vanguard | GameGuard | XIGNCODE3 |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Handle stripping** (ObRegisterCallbacks) | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Process creation notify** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Thread creation notify** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Image load notify** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Registry callbacks** | ✓ | ✓ | ✓ | ✓ | — |
+| **Minifilter (file system)** | ✓ | — | ✓ | ✓ | — |
+| **ETW Threat Intelligence** | ✓ | — | ✓ | — | — |
+| **Code integrity hashing** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Stack walking** | ✓ | ✓ | ✓ | — | — |
+| **Hypervisor detection** | ✓ | ✓ | ✓ | — | ✓ |
+| **DMA/IOMMU detection** | ✓ | — | ✓ | — | — |
+| **RDTSC timing checks** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Debug register checks** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Module scanning (in-process)** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Window enumeration** | — | ✓ | ✓ | ✓ | — |
+| **Streamed detection code** | — | ✓ | — | — | — |
+| **Boot-time monitoring** | — | — | ✓ | — | — |
+| **TPM / Secure Boot** | — | — | ✓ | — | — |
+| **SSDT hooks** (legacy) | — | — | — | ✓ | — |
+| **Unsigned driver detection** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Server-side AI analysis** | — | — | — | — | — |
+
+> *Theia omitted — its detection is primarily server-side and not comparable to kernel techniques.*
+
+---
+
+## Anti-Cheat by Game (PCX-Supported Titles)
+
+| Game | Primary AC | Secondary AC | Notes |
+|------|-----------|-------------|-------|
+| Counter-Strike 2 | VAC | — | Server-side + user-mode; no kernel driver |
+| Apex Legends | EAC | — | EOS variant |
+| Fortnite | EAC | — | EOS variant |
+| PUBG (Steam) | BattlEye | — | `BEDaisy.sys` |
+| Escape from Tarkov | BattlEye | — | `BEDaisy.sys` |
+| Rainbow Six Siege | BattlEye | — | `BEDaisy.sys` |
+| Valorant | Vanguard | — | Boot-time `vgk.sys` |
+| The Finals | EAC | Theia | EAC for system-level, Theia for behavioral |
+| Dead by Daylight | EAC | — | EOS variant |
+| DayZ | BattlEye | — | `BEDaisy.sys` |
+| Rust | EAC | — | EOS variant |
+| Hunt: Showdown 1896 | EAC | — | EOS variant |
+| COD: BO7 / Warzone | RICOCHET | — | Activision's custom kernel AC |
+| Overwatch 2 | Custom | — | Blizzard proprietary |
+| Deadlock | VAC | — | Server-side |
+| Arena Breakout Infinite | EAC | — | EOS variant |
+| Marvel Rivals | EAC | — | — |
+| Roblox | Byfron (Hyperion) | — | Custom kernel AC (acquired 2022) |
+
+> Games not listed here either use no kernel AC (VAC/server-side only) or use a proprietary solution not publicly documented.
+
+---
+
+## Key Structures Reference
+
+Frequently referenced Windows kernel structures in AC analysis:
+
+```c
+// Handle stripping callback context
+typedef struct _OB_PRE_OPERATION_INFORMATION {
+    OB_OPERATION           Operation;       // OB_OPERATION_HANDLE_CREATE or _DUPLICATE
+    union {
+        ULONG Flags;
+        struct { ULONG KernelHandle:1; ULONG Reserved:31; };
+    };
+    PVOID                  Object;          // the process/thread being opened
+    POBJECT_TYPE           ObjectType;
+    PVOID                  CallContext;
+    POB_PRE_OPERATION_PARAMETERS Parameters; // contains DesiredAccess to modify
+} OB_PRE_OPERATION_INFORMATION;
+
+// The AC's PreOperation callback does:
+//   if (target_is_game_process && !opener_is_ac_service)
+//       info->Parameters->CreateHandleInformation.DesiredAccess &=
+//           ~(PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION);
+```
+
+```c
+// Driver callback arrays in ntoskrnl (symbols):
+// PspCreateProcessNotifyRoutine  — array of EX_CALLBACK_ROUTINE_BLOCK pointers
+// PspCreateThreadNotifyRoutine   — same
+// PspLoadImageNotifyRoutine      — same
+// PspCreateProcessNotifyRoutineCount/ExCount — counts
+//
+// Each entry: pointer with low 4 bits as flags.
+// Clear low bits to get the EX_CALLBACK_ROUTINE_BLOCK, then read .Function.
+```
+
+---
+
+## Practical Workflow
+
+1. **Identify the AC** — check `game-targets.md` or `system/list_drivers` for known driver names
+2. **Read this doc** — understand the AC's known architecture and detection vectors
+3. **Follow `skill://anti-cheat-re`** — the six-step methodology
+4. **Use `skill://kernel-analysis`** — technical patterns for driver reversing
+5. **Refer to `knowledge/kernel-re-tools.md`** — tooling for each workflow stage
 
 ---
 
@@ -854,6 +1685,345 @@ int64 main() {
 
 ---
 
+## Source: `knowledge/community-tools.md`
+
+# Community Tools & MCP Servers
+
+Third-party tools, MCP servers, VS Code extensions, and utilities built by the Perception.cx community.
+
+---
+
+## MCP Servers
+
+### perception-mcp — by mx13
+
+Full-featured MCP server connecting Claude Code to Perception's RE tools via AngelScript.
+
+**Tools (35+):**
+- Memory read/write (typed values, structs, pointer chains, hex dumps)
+- IDA-style pattern scanning
+- Zydis disassembly
+- Function analysis, RTTI, vtable walking
+- Full-process value and pointer scanning
+- Cross-reference search
+- Memory snapshots and diffing
+- Unicorn x86_64 emulation
+- CS2 interface and schema tools
+
+**Setup:**
+```bash
+git clone https://github.com/verifizieren/perception-mcp
+cd perception-mcp
+npm install && npm run build
+```
+
+Load `re_server.as` in Perception IDE — it runs in the background and auto-connects.
+
+**MCP Config:**
+```json
+{
+  "mcpServers": {
+    "perception-re": {
+      "command": "node",
+      "args": ["<path-to>/perception-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+**Source:** [github.com/verifizieren/perception-mcp](https://github.com/verifizieren/perception-mcp)
+
+---
+
+### claude-ception — by aewu
+
+Claude Code × Perception MCP bridge for AI-driven live-memory reverse engineering.
+Built on ReClass/PerceptionClassEx by segfault and hantschuh.
+
+**Features:**
+- Value scans with next-scan filtering
+- Pointer-path solving
+- Cross-reference sweeps
+- Region enumeration and struct reconstruction
+- x64 disassembly
+- Signature scanning and world-to-screen validation
+- AngelScript overlay code generation
+
+**Architecture:**
+- `127.0.0.1:9002` — MCP TCP (bridge ↔ plugin, native scans)
+- `127.0.0.1:9001` — WebSocket memory reads via Perception
+
+**Setup:**
+```
+perception-claude-bundle/
+├─ README-BUNDLE.md     - quick start
+├─ system-prompt.md     - RE system prompt
+├─ pclaude.cmd          - launches Claude Code with prompt
+├─ .mcp.json            - MCP server registration
+├─ reclass-mcp/         - MCP bridge (Node.js)
+├─ PCX-runtime/         - ready-to-run exe + plugin + .as script
+└─ PCX-src/             - full source (editor + plugin)
+```
+
+**Requirements:** Node.js 18+, Claude Code CLI.
+
+**Source:** Available on perception.cx forums (Learning & Research section).
+
+---
+
+### reclass-mcp — by hantschuh
+
+The original ReClass MCP bridge for Claude Code — the foundation claude-ception builds on.
+
+**Features:**
+- Memory read/write through PerceptionClassEx
+- Pattern scanning
+- Struct reconstruction
+- Pointer chain resolution
+
+**Source:** Available on perception.cx forums.
+
+---
+
+### Unreal Engine Documentation MCP — by jozkah
+
+MCP server providing direct access to official Unreal Engine documentation with version selection (UE 4.27 — 5.7).
+
+**Tools:**
+- `search` — keyword search across all UE docs
+- `read_page` — fetch any doc page as clean markdown
+- `browse_categories` — list top-level doc sections
+- `cpp_api_lookup` — look up classes, structs, functions (AActor, FVector, UObject, etc.)
+
+**Setup:**
+```bash
+git clone https://github.com/Jozkah/Unreal-Engine-Documentation-MCP.git
+cd Unreal-Engine-Documentation-MCP
+npm install && npm run build
+```
+
+**MCP Config (VS Code):**
+```json
+{
+  "servers": {
+    "unreal-engine-docs": {
+      "command": "node",
+      "args": ["<path>/Unreal-Engine-Documentation-MCP/dist/index.js"]
+    }
+  }
+}
+```
+
+No API keys needed — reads public documentation. MIT licensed.
+
+**Source:** [github.com/Jozkah/Unreal-Engine-Documentation-MCP](https://github.com/Jozkah/Unreal-Engine-Documentation-MCP)
+
+---
+
+### Context7 Integration
+
+Hosted MCP server (by Upstash) that indexes official documentation for thousands of libraries with version pinning.
+
+**Relevant Indexed Content:**
+- Unreal Engine 5.7 — 80,411 code snippets
+- Unity Manual — 47,581 snippets
+- Godot Engine 4.5/4.6 — ~20k snippets each
+- Ghidra API — 80,664 snippets
+- IDA SDK — 535 snippets
+
+**Setup:**
+```bash
+npx ctx7 setup --claude     # Claude Code
+npx ctx7 setup --cursor     # Cursor
+```
+
+**Manual MCP Config:**
+```json
+{
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": { "CONTEXT7_API_KEY": "your-key-here" }
+    }
+  }
+}
+```
+
+Free tier available (rate-limited). Get an API key at `context7.com/dashboard`.
+
+**Source:** [context7.com](https://context7.com)
+
+---
+
+## VS Code Extensions
+
+### Enma LSP — by sin (sinnafuls)
+
+Full-featured VS Code extension for Enma scripting with Perception integration.
+
+**Features:**
+- **IntelliSense** — autocompletion for all Perception globals, classes, structs, methods, and Enma stdlib
+- **Hover docs** — signatures and descriptions for every function
+- **Parameter hints** — active parameter highlighting
+- **Go-to-definition** — `Ctrl+Click` any symbol
+- **Find references** — across entire project (including f-string interpolations)
+- **Safe rename** — across all files
+- **Workspace symbol search** — `Ctrl+T`
+- **Type-mismatch diagnostics** — real-time error checking
+- **Quick-fix imports** — auto-insert missing `import "vec"` etc.
+
+**Bundler:**
+- `Ctrl+Alt+B` — bundle `#include`-split project into single `.em`
+- `Ctrl+Alt+Shift+B` — bundle and strip comments
+- Auto-rebundle on save (configurable)
+- Multi-project support
+
+**Engine MCP Client:**
+- Run script via MCP (`script/execute`)
+- Validate on save (`script/validate`)
+- Configurable endpoint (default `http://127.0.0.1:9077/mcp`)
+
+**DAP Debugger:**
+- Attach to running Enma DAP server (`F5`, default `localhost:27979`)
+- Breakpoints in `.em` files
+
+**Project Commands:**
+- `Enma: Initialize Project` — scaffold `source/main.em` + tasks.json
+- `Enma: Scaffold From Template…` — `perception-minimal` or `perception-multi`
+- `Enma: Generate CI Workflow` — `.github/workflows/enma.yml`
+
+**Install:** Download `.vsix` from [GitHub Releases](https://github.com/sinnafuls/enma-lsp/releases), then `Ctrl+Shift+P` → "Extensions: Install from VSIX…"
+
+**Source:** [github.com/sinnafuls/enma-lsp](https://github.com/sinnafuls/enma-lsp)
+
+---
+
+### AngelScript LSP + Bundler — by Shadow / sin
+
+AngelScript language server with Perception-specific extensions.
+
+**Features:**
+- Syntax highlighting and diagnostics
+- IntelliSense for PCX AngelScript API
+- Script bundling and validation
+
+---
+
+### VS Perception Extension — by banjo
+
+VS Code extension for Perception development workflow.
+
+---
+
+## Utilities
+
+### Claude Proxy — by sin (sinistercodes)
+
+Proxy server that routes Claude API requests to Perception's IDE chatbot.
+
+**Setup:**
+```bash
+git clone https://github.com/sinistercodes/claude-proxy
+cd claude-proxy
+npm install
+cp .env.example .env  # configure model/thinking budget
+node --env-file=.env server.js
+```
+
+**Perception IDE Config:**
+- Base URL: `http://localhost:4001/v1/chat/completions`
+- API key: any string
+- Model: sonnet, opus, or haiku
+
+**Source:** [github.com/sinistercodes/claude-proxy](https://github.com/sinistercodes/claude-proxy)
+
+---
+
+### AngelScript Custom GUI + Base — by underscore
+
+Open-source full GUI system and script base for AngelScript.
+
+**Includes:**
+- Full custom menu/GUI — windows, tabs, containers
+- All widget types: checkboxes, sliders, keybinds, dropdowns, multi-selects, color pickers, list boxes, text inputs, tooltips, labels, buttons
+- Config & theme systems with save/load
+- Notifications and draggable HUD widgets
+- Attachment system — process memory I/O, pattern scanning, UE FString/FText/vector/matrix/quaternion helpers
+- Threading/callback system with perf timing
+
+Full API docs in the README. Fork and build on top of it.
+
+**Source:** Available on perception.cx forums (Learning & Research section).
+
+---
+
+### dumpception — by sin
+
+SDK/offset dumping utility for Perception.
+
+---
+
+### Universal Offset Scanner — by ItachiValor
+
+Automated offset discovery tool (private beta).
+
+Available on perception.cx Script Market.
+
+---
+
+## Kernel RE & Anti-Cheat Analysis Tools
+
+Tools for kernel driver analysis and anti-cheat reverse engineering. Full reference with platform matrix and workflow: `knowledge/kernel-re-tools.md`.
+
+### HyperDbg
+
+Hypervisor-level debugger — sits below the OS, invisible to kernel anti-debug. Stealth breakpoints, EPT hooks, syscall interception. The only debugger an AC's kernel-mode anti-debug can't detect via standard means.
+
+**Source:** [github.com/HyperDbg/HyperDbg](https://github.com/HyperDbg/HyperDbg)
+
+---
+
+### Volatility 3
+
+Memory forensics framework. Analyze physical memory dumps: driver lists (`windows.driverscan`), callback arrays (`windows.callbacks`), handle tables, process trees. Essential for offline AC driver analysis.
+
+**Install:** `pip install volatility3`
+**Source:** [github.com/volatilityfoundation/volatility3](https://github.com/volatilityfoundation/volatility3)
+
+---
+
+### MemProcFS
+
+Mount a physical memory dump (or live DMA feed via PCILeech) as a virtual filesystem. Browse processes, modules, registry, network connections as files. Integrates with PCILeech for live DMA-based analysis invisible to software ACs.
+
+**Source:** [github.com/ufrisk/MemProcFS](https://github.com/ufrisk/MemProcFS)
+
+---
+
+### IRPMon
+
+Intercepts IRP (I/O Request Packets) to/from kernel drivers. Capture IOCTL traffic between the AC user-mode service and kernel driver — see the protocol in real time.
+
+**Source:** [github.com/MartinDrab/IRPMon](https://github.com/MartinDrab/IRPMon)
+
+---
+
+### VirtualKD-Redux
+
+Patches the VM's `kdcom.dll` to use a fast pipe instead of serial — 10–40× faster kernel debugging in VMware/VirtualBox. Use with WinDbg for practical-speed kernel debug sessions.
+
+**Source:** [github.com/4d61726b/VirtualKD-Redux](https://github.com/4d61726b/VirtualKD-Redux)
+
+---
+
+### PCILeech
+
+DMA-based memory acquisition via FPGA or Thunderbolt. Reads physical memory without software on the target — completely invisible to software-based ACs. Requires FPGA hardware (Screamer, LambdaConcept) or Thunderbolt access.
+
+**Source:** [github.com/ufrisk/pcileech](https://github.com/ufrisk/pcileech)
+
+---
+
 ## Source: `knowledge/custom-draw-patterns.md`
 
 # Custom Draw API Patterns for Perception.cx
@@ -1340,6 +2510,1465 @@ void cd_draw_dynamic(float4x4 ortho, float64 x, float64 y) {
 
 ---
 
+## Source: `knowledge/deobfuscation-tools.md`
+
+# Deobfuscation Tools Reference
+
+Tools for defeating binary protection: devirtualizers, unpackers, symbolic execution engines, anti-debug bypass, string extraction, and CFG recovery. Organized by the obfuscation layer they target.
+
+> **Scope:** Authorized security research only. These tools are for analyzing binaries you own, are authorized to test, or are studying in a research/CTF context. See `skill://authorized-security-research`.
+
+---
+
+## Devirtualizers (VM → native/IR)
+
+| Tool | Target VM | Output | Status |
+|------|-----------|--------|--------|
+| **backengineering/vmp2** (`vmemu` / `vmdevirt` / `vmprofiler`) | VMProtect 2.x | Unpacked memory / lifted IR / handler stats | Active; full VMP 2.x research toolchain |
+| **NoVmp** | VMProtect 3.x | LLVM IR → x86 | Active; best open-source VMP 3.x devirtualizer |
+| **VMHunt** | VMProtect | Expression trees | Research; trace-based handler semantic extraction |
+| **vtil** (Virtual-machine Translation IL) | VMProtect, generic | VTIL IR → optimized | Active; VTIL is a dedicated IR for VM lifting |
+| **Oreans UnVirtualizer** | Themida/CV (older) | x86 | Limited on newer versions |
+| **Devirtualize** (can1357) | VMProtect 2.x | Lifted IR | Older; VMP 2.x only |
+| **VMPAttack** | VMProtect 3.x | Trace analysis | Trace + symbolic; less automated than NoVmp |
+
+### NoVmp — VMProtect Devirtualizer
+
+**What:** Static devirtualizer for VMProtect. Analyzes the VM dispatcher and handler table, identifies the VM architecture, lifts the bytecode to LLVM IR, optimizes it, and optionally recompiles to x86.
+
+**Install:**
+```bash
+git clone https://github.com/can1357/NoVmp.git
+cd NoVmp && mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release
+```
+
+**Usage:**
+```bash
+# Lift a VMP-protected function at RVA 0x1234
+novmp --input protected.exe --rva 0x1234 --output lifted.ll
+# The output is LLVM IR — readable with llvm-dis or optimizable with opt
+opt -O2 lifted.ll -o optimized.ll
+```
+
+**Source:** [github.com/can1357/NoVmp](https://github.com/can1357/NoVmp)
+
+---
+
+### backengineering/vmp2 — VMProtect 2.x Research Suite
+
+**What:** A complete open-source research toolchain for VMProtect 2.x. `vmemu`
+unpacks the protected binary by emulating the VM runtime; `vmdevirt` lifts the
+VM bytecode closer to native code; `vmprofiler`/`vmprofiler-cli` profile
+handler coverage; `vmhook` captures bytecode streams at runtime; `vmassembler`
+assembles/disassembles VMP bytecode.
+
+**Install:**
+```bash
+git clone https://github.com/backengineering/vmp2.git
+cd vmp2
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
+
+**Usage:**
+```bash
+# Unpack to an image
+vmemu --bin target.exe --unpack --out unpacked.bin
+
+# Lift a VM bytecode region
+vmdevirt --input target.exe --bytecode-rva 0x12345 --output lifted.asm
+
+# Profile handler coverage
+vmprofiler-cli --input target.exe --trace trace.txt --output report.json
+```
+
+**Workflow:** see `knowledge/vmprotect2-analysis.md` for the full
+identify → bypass anti-debug → unpack → lift → validate workflow.
+
+**Source:** [github.com/backengineering/vmp2](https://github.com/backengineering/vmp2)
+
+---
+
+### vtil — VM Translation IL
+
+**What:** A dedicated intermediate language and optimizer for representing VM-lifted code. Designed specifically for the operations VMs perform (push/pop, handler dispatch, virtual register access). More appropriate than LLVM IR for VM analysis because it preserves VM semantics during optimization.
+
+**Source:** [github.com/vtil-project/VTIL-Core](https://github.com/vtil-project/VTIL-Core)
+
+---
+
+## Symbolic Execution Engines
+
+| Tool | Language | Best For |
+|------|----------|----------|
+| **Triton** | C++ / Python bindings | Precise symbolic execution, constraint solving, taint analysis |
+| **Miasm** | Python | IR lifting, symbolic execution, code emulation, CFG recovery |
+| **angr** | Python | Full binary analysis framework; symbolic execution + CFG recovery |
+| **Unicorn Engine** | C / Python | CPU emulation (not symbolic); trace concrete execution |
+| **Qiling** | Python | Higher-level emulation framework built on Unicorn; OS emulation |
+
+### Triton — Dynamic Symbolic Execution
+
+**What:** Pin-based dynamic symbolic execution engine. Hooks instruction execution, builds symbolic expressions for each operation, and can solve constraints (via Z3) to find inputs that reach specific code paths.
+
+**Use for:**
+- Evaluating opaque predicates (prove a branch is always-true/always-false)
+- Simplifying MBA expressions (`(x ^ y) + 2*(x & y)` → `x + y`)
+- Tracing VM handler semantics symbolically
+- Deobfuscating control flow by resolving indirect branches
+
+**Install:**
+```bash
+pip install triton-library
+# Or build from source for Pin integration:
+git clone https://github.com/JonathanSalwan/Triton.git
+```
+
+**Source:** [github.com/JonathanSalwan/Triton](https://github.com/JonathanSalwan/Triton)
+
+---
+
+### Miasm — Reverse Engineering Framework
+
+**What:** Full RE framework with its own IR (Miasm IR), symbolic execution, code emulation, and binary analysis. Particularly strong at lifting x86 to IR and performing transformations (dead code elimination, constant propagation).
+
+**Use for:**
+- Lifting x86 instruction traces to a clean IR
+- Dead code / junk code elimination via dataflow analysis
+- Automated deobfuscation pipelines (script a chain: lift → simplify → emit)
+- Handling self-modifying code (emulate the modification, then analyze the result)
+
+**Install:**
+```bash
+pip install miasm
+```
+
+**Source:** [github.com/cea-sec/miasm](https://github.com/cea-sec/miasm)
+
+---
+
+## IDA Pro Plugins
+
+### D-810 — Deobfuscation Plugin
+
+**What:** IDA plugin for deobfuscating code at the microcode level. Handles CFF recovery, opaque predicate removal, MBA simplification, and dead code elimination. Works on IDA's internal microcode representation, so results appear directly in the decompiler output.
+
+**Handles:**
+- OLLVM/Hikari control flow flattening
+- Opaque predicates (constant-condition branches)
+- Instruction substitution patterns
+- MBA (Mixed Boolean-Arithmetic) expression simplification
+- Dead code paths
+
+**Install:** Copy plugin to IDA plugins directory. Requires IDA 7.4+ with Hex-Rays decompiler.
+
+**Source:** [github.com/joydo/d-810](https://github.com/joydo/d-810)
+
+---
+
+### hrtng — Deobfuscation & Decryption (already installed)
+
+2024 Hex-Rays Plugin Contest winner. Handles string decryption, control flow unflattening, vtable resolution. Already in `re-tools/ida-plugins/hrtng/`.
+
+---
+
+### HashDB — API Hash Resolver
+
+**What:** Resolves API hashes used by malware and protectors for dynamic import resolution. Supports 50+ hash algorithms (ROR13+ADD, CRC32, DJB2, FNV-1a, MurmurHash, etc.). Identifies the algorithm and resolves the hash to the API name.
+
+**Source:** [github.com/OALabs/hashdb-ida](https://github.com/OALabs/hashdb-ida)
+
+---
+
+## Binary Ninja Plugins
+
+### deflat — CFF Recovery
+
+**What:** Symbolic execution-based control flow flattening recovery for Binary Ninja. Identifies the dispatcher, traces state transitions, and rebuilds the original control flow graph.
+
+**Source:** [github.com/cq674350529/deflat](https://github.com/cq674350529/deflat)
+
+---
+
+## Unpacking & Anti-Debug
+
+### ScyllaHide — Anti-Debug Bypass
+
+**What:** Advanced anti-anti-debug plugin for x64dbg, IDA, and OllyDbg. Hooks all known anti-debug APIs and PEB fields to hide the debugger from the target process.
+
+**Bypasses:**
+- `IsDebuggerPresent`, `CheckRemoteDebuggerPresent`
+- `NtQueryInformationProcess` (ProcessDebugPort, ProcessDebugFlags, ProcessDebugObjectHandle)
+- `NtSetInformationThread` (ThreadHideFromDebugger)
+- PEB flags: `BeingDebugged`, `NtGlobalFlag`, heap flags
+- `NtQuerySystemInformation` (SystemKernelDebuggerInformation)
+- Hardware breakpoint detection via `GetThreadContext`
+- `OutputDebugString` exception handling
+- `int 2d` / `int 3` SEH-based checks
+- Timing checks (partial — patches `GetTickCount`/`QueryPerformanceCounter`)
+
+**Install:** x64dbg: download from releases, copy to `plugins/`. IDA: copy to IDA plugins.
+
+**Source:** [github.com/x64dbg/ScyllaHide](https://github.com/x64dbg/ScyllaHide)
+
+---
+
+### Scylla — IAT Reconstruction & Dumping
+
+**What:** Import reconstruction tool. After unpacking a protected binary in memory, Scylla scans for the original import address table, resolves all imports, and produces a clean PE with a valid IAT.
+
+**Use for:** Fixing the import table after dumping a packed/protected binary. The packer redirects imports through stubs — Scylla resolves them back to the real DLL functions.
+
+**Source:** [github.com/NtQuery/Scylla](https://github.com/NtQuery/Scylla)
+
+---
+
+### pe-sieve — Process Hollowing Detector
+
+**What:** Scans a running process for in-memory modifications: hollowed sections, injected code, hooked imports, replaced modules. Dumps the modified regions for analysis.
+
+**Use for:** Detecting what a protector has modified in memory compared to the on-disk PE. Identifies unpacked/decrypted code regions.
+
+**Source:** [github.com/hasherezade/pe-sieve](https://github.com/hasherezade/pe-sieve)
+
+---
+
+## String Extraction
+
+### FLOSS — Obfuscated String Solver
+
+**What:** FireEye Labs Obfuscated String Solver. Extracts strings from binaries even when they're constructed on the stack, XOR-encrypted, or dynamically generated. Uses emulation to execute string-construction routines and capture the cleartext.
+
+**Extracts:**
+- Stack strings (character-by-character construction)
+- XOR-encrypted strings
+- Base64-encoded strings
+- Dynamically generated strings (via emulation)
+
+**Install:**
+```bash
+pip install floss
+```
+
+**Source:** [github.com/mandiant/flare-floss](https://github.com/mandiant/flare-floss)
+
+---
+
+## Tracing & Instrumentation
+
+### Intel PIN — Dynamic Instrumentation
+
+**What:** Binary instrumentation framework. Injects analysis code into a running process at the instruction level. Used by Triton for symbolic execution and by custom trace tools.
+
+**Use for:** Building custom VM tracers — instrument the dispatcher to log handler index + operands at every VM cycle.
+
+**Source:** [intel.com/pin](https://www.intel.com/content/www/us/en/developer/articles/tool/pin-a-dynamic-binary-instrumentation-tool.html)
+
+---
+
+### Frida — Dynamic Instrumentation Toolkit
+
+**What:** JavaScript-based dynamic instrumentation. Inject scripts into running processes to hook functions, trace calls, modify behavior. Works on Windows, Linux, macOS, iOS, Android.
+
+**Use for:** Quick API hooking (hook `VirtualProtect` to log unpacking), VM handler tracing (hook the dispatcher), import resolution (hook `GetProcAddress`).
+
+**Install:**
+```bash
+pip install frida-tools
+```
+
+**Source:** [frida.re](https://frida.re/)
+
+---
+
+### DynamoRIO — Dynamic Instrumentation
+
+**What:** Runtime code manipulation framework. Intercepts instruction execution for analysis, profiling, and modification. More performant than PIN for heavy instrumentation.
+
+**Source:** [dynamorio.org](https://dynamorio.org/)
+
+---
+
+## Recommended Workflow by Protector
+
+| Protector | Tool Chain |
+|-----------|-----------|
+| **VMProtect** | DIE (identify) → ScyllaHide (anti-debug) → NoVmp (devirtualize) → IDA (analyze) |
+| **Themida (FISH/TIGER)** | DIE → ScyllaHide → x64dbg trace → handler mapping → manual lift |
+| **Themida (EAGLE/SHARK)** | DIE → ScyllaHide → Triton (symbolic trace) → manual analysis |
+| **OLLVM CFF** | D-810 (IDA) or deflat (BN) → automatic recovery |
+| **OLLVM MBA** | Triton (simplification) or SSPAM → algebraic reduction |
+| **Generic packer** | x64dbg → VirtualProtect bp → Scylla dump + IAT fix |
+| **API hashing** | HashDB (IDA) → resolve all hashes in one pass |
+| **Stack strings** | FLOSS → automated extraction |
+| **Custom VM** | x64dbg/HyperDbg trace → Triton/Miasm lift → manual handler mapping |
+
+---
+
+## Source: `knowledge/engine-cryengine.md`
+
+# CryEngine Reverse Engineering Reference
+
+Engine-specific RE notes for the CryEngine family and its derivatives (Lumberyard / Open 3D Engine, Dunia, Star Citizen's "StarEngine" fork). Read this before attaching to a CryEngine title — the global-environment anchor, entity system, and camera math differ enough from Unreal/Unity/Source that the generic dumper workflow does not apply. This fills the gap left by `signatures/unreal-engine/` and `signatures/source2-engine/`, which say nothing about Crytek's `gEnv`-centric architecture.
+
+> **Read this before** doing memory analysis on any CryEngine title, and read `skill://authorized-security-research` before pointing any tool at a live multiplayer build (Hunt: Showdown and Star Citizen both ship kernel anti-cheat).
+
+---
+
+## Engine Overview
+
+CryEngine is Crytek's in-house C++ engine. There is no public offset dumper equivalent to Dumper-7 — you anchor everything from one global and walk pointer chains by hand.
+
+| Generation | Era | Representative titles |
+|------------|-----|-----------------------|
+| CryEngine 1 | 2004 | Far Cry (original) |
+| CryEngine 2 | 2007 | Crysis |
+| CryEngine 3 | 2009–2013 | Crysis 2/3, Ryse, MechWarrior Online |
+| CryEngine V (5.x) | 2015–present | Hunt: Showdown, Kingdom Come: Deliverance, Crysis Remastered trilogy |
+
+**Architecture summary:**
+
+- **Custom renderer.** D3D11 / D3D12 / Vulkan backends behind `IRenderer`. The engine owns its own deferred renderer; there is no third-party rendering middleware to anchor on.
+- **Entity-Component model.** The world is a set of `IEntity` objects managed by `IEntitySystem`. Entities are addressed by a numeric `EntityId` and carry components (`IEntityComponent` in CryEngine V; the older proxy model in CE3). Gameplay code lives in `CryAction` (the game framework) on top of `CrySystem`.
+- **In-house scripting / visual scripting.** Older titles embed **Lua** (the `IScriptSystem` surface). CryEngine V adds **Schematyc** (component-graph scripting) and the legacy **Flowgraph** node editor. These leave recognizable artifacts: Lua VM strings, Schematyc GUID tables, and Flowgraph node-name strings are excellent xref anchors.
+- **Module split.** Functionality is spread across DLLs: `CrySystem.dll`, `CryEntitySystem.dll`, `CryAction.dll`, `Cry3DEngine.dll`, `CryRenderD3D11.dll`/`D3D12`, plus a per-game game DLL. Identify the module that owns the global before scanning it.
+
+**Notable quirks:**
+
+- The whole engine hangs off one global environment struct, `SSystemGlobalEnvironment`, reached through the `gEnv` pointer. Find `gEnv` and you reach the entity system, renderer, 3D engine, timer, and console from a single root.
+- World space is **right-handed, Z-up** (Z is vertical). This is the opposite vertical axis from Y-up engines — bone/position math that assumes Y-up will be wrong here.
+- Transforms are stored as CryEngine `Matrix34` (a 3×4 affine matrix, row-major in memory) and `Matrix44`. The camera exposes a `CCamera` with view and projection matrices; world-to-screen goes through these rather than a single packed view-projection global as on Source.
+
+---
+
+## Games Using This Engine
+
+Grounded in commonly-known facts; treat anti-cheat and SDK columns as "what is publicly associated with the title," not a guarantee for the build in front of you.
+
+| Game | Engine version | Notes | Anti-Cheat | Community SDK / dumper |
+|------|----------------|-------|-----------|------------------------|
+| Hunt: Showdown 1896 | CryEngine V | PvP extraction shooter; `gEnv`-rooted entity walk | EAC (EOS) | Forum-distributed offset tables; no public dumper |
+| Star Citizen | Heavily forked CryEngine → Lumberyard ("StarEngine") | Diverged far from stock CryEngine; bespoke zone/entity system | EAC | Community ReClass dumps |
+| Kingdom Come: Deliverance / KCD2 | CryEngine V | Single-player RPG; loose anti-tamper | None (SP) | CryEngine SDK as structural reference |
+| Crysis Remastered (1/2/3) | CryEngine V (re-engineered) | Single-player | None (SP) | Original CryEngine 2/3 SDK headers |
+| Ryse: Son of Rome | CryEngine 3 | Single-player | None (SP) | — |
+| MechWarrior Online | CryEngine 3 | Online; per-build pattern scans | Server-side | — |
+
+> Star Citizen's fork has drifted so far from stock CryEngine that generic CryEngine struct knowledge is only a starting hypothesis — confirm every offset against the live build.
+
+---
+
+## Memory Layout Patterns
+
+Typical shapes to expect. **All struct offsets vary per build** — these describe the *kind* of layout, never a number to hardcode.
+
+- **`gEnv` (the master anchor).** A pointer to `SSystemGlobalEnvironment` living in a data section of `CrySystem.dll` (sometimes the game DLL). The struct is a flat table of subsystem pointers:
+
+```cpp
+// SSystemGlobalEnvironment — field order varies by version, treat as illustrative
+struct SSystemGlobalEnvironment {
+    void*            pNetwork;
+    IRenderer*       pRenderer;        // renderer + camera access
+    void*            pPhysicalWorld;
+    IEntitySystem*   pEntitySystem;    // entity enumeration root
+    void*            pTimer;
+    IScriptSystem*   pScriptSystem;    // Lua VM (older titles)
+    I3DEngine*       p3DEngine;
+    void*            pGameFramework;   // CryAction
+    // ... many more subsystem pointers
+};
+```
+
+- **Entity system.** `IEntitySystem` owns the live entity set. Internally it keeps an array/map of `CEntity*` indexed by `EntityId`. The iteration entry point is an `IEntityIt` (entity iterator) or a direct array base — both are reachable from the `pEntitySystem` pointer. Each `CEntity` carries its name, flags, world transform (`Matrix34`), and component list.
+
+- **Entity world position.** Stored on the entity's transform as a `Vec3` of `float32` (`read_vec3_fl32`), Z-up. Larger maps may keep a world-segment offset; confirm whether positions are absolute or segment-relative.
+
+- **Local player / camera.** Reached through the game framework (`CryAction`) actor system: `IActorSystem → local actor → entity`. The renderable camera is a `CCamera` exposed by the renderer/view system; it holds the view matrix, projection matrix, position, and FOV used for projection.
+
+- **View / projection matrices.** CryEngine uses `Matrix44` for projection and a `Matrix34` view, row-major. There is generally **no single packed 4×4 view-projection global** to scan for as on Source — build the VP yourself from the camera matrices, or locate the per-frame composed matrix the renderer caches.
+
+---
+
+## Common Sigs and RIP Patterns
+
+Illustrative shapes only — same construction and resolution rules as `signatures/source-engine/common-sigs.md` and `signatures/unreal-engine/ue-reversal-guide.md`. Wildcard the 4-byte RIP displacement, then `resolve_rip(hit, disp_offset, insn_len)`. Re-derive every byte against your target; verify exactly one hit.
+
+```
+gEnv pointer
+Description: MOV reg, [rip+????] loading the global environment pointer,
+             referenced everywhere the engine touches a subsystem.
+Sig shape:   48 8B 05 ?? ?? ?? ?? 48 8B 88        (MOV RAX, [rip+????])
+Resolution:  resolve_rip(hit, disp_offset=3, insn_len=7) → SSystemGlobalEnvironment*
+Anchor tip:  xref a CrySystem console-variable string ("sys_") or an engine
+             init string; the init path stores gEnv.
+```
+
+```
+Entity system access
+Description: LEA/MOV that loads gEnv->pEntitySystem before an entity call.
+Sig shape:   48 8B 0D ?? ?? ?? ?? 48 8B 01 FF 50  (MOV RCX, [rip+????]; call vtable)
+Resolution:  resolve_rip(hit, disp_offset=3, insn_len=7); often easier to read the
+             field offset off gEnv than to scan separately.
+```
+
+```
+Lua VM / script system (older CE titles)
+Description: reference to the global lua_State the engine spins up.
+Anchor tip:  xref Lua error strings ("attempt to index", "PANIC") or registered
+             function-name strings to reach the script system pointer.
+```
+
+**Anchor-string strategy (most reliable on CryEngine):** the engine ships thousands of stable strings — CVar names (`"sv_"`, `"sys_"`, `"r_"`, `"e_"`), Flowgraph node names, Schematyc type names, and `.cry`/`.pak` asset paths. Xref a stable string → reach the function that uses the global → copy the load instruction. This beats blind opcode scanning because the recompiled game DLL moves code but keeps the strings.
+
+---
+
+### Verifying and Maintaining Sigs
+
+Every sig must produce exactly one hit in its owning module, or the resolved address is meaningless. Scan, count, and extend:
+
+```cpp
+// Confirm a sig is unique before trusting its RIP resolution.
+array<uint64> hits = p.find_all_code_patterns(g_base, g_size, sig);
+if (hits.length() != 1) {
+    println(format("WARNING: sig has {d} hits, expected 1", hits.length()));
+    // > 1: extend the sig with more surrounding bytes until unique.
+    // 0  : the function was recompiled — re-derive from a fresh string xref.
+}
+```
+
+On CryEngine the cheapest re-derivation path after a patch is the **string-xref anchor**, not blind opcode search: the CVar / Flowgraph / Schematyc strings survive recompiles even when the surrounding code bytes move, so they regenerate the `gEnv` and subsystem sigs reliably. Keep the anchor string recorded alongside each sig so the offset-maintainer can rebuild it.
+
+## Reversal Workflow
+
+Recommended first 60 minutes on an unknown CryEngine build:
+
+1. **Identify the module that owns `gEnv`.** Enumerate modules (`p.get_module_list()`): `CrySystem.dll`, `CryEntitySystem.dll`, `CryAction.dll`, `Cry3DEngine.dll`, and the per-game DLL confirm CryEngine. Star Citizen ships its fork under different module names — confirm via the renderer DLL and string content.
+2. **Find `gEnv` first — everything else hangs off it.** Use the CVar/init-string xref anchor. Resolve it, dereference, and sanity-check that the subsequent pointers land in valid module/heap ranges (`p.is_valid_address`).
+3. **Walk to `pEntitySystem`** off `gEnv`, then dump the entity iterator/array. Read a handful of entities' name strings to confirm you have the right field — entity names are the cheapest correctness check on this engine.
+4. **Walk to the local actor** through `pGameFramework` (CryAction) → actor system → local actor → entity, and to the **camera** through the renderer/view. Confirm Z-up by reading your own position and moving in-game.
+5. **Tooling.** IDA + Ghidra both decompile CryEngine cleanly (it is straightforward C++ with RTTI). Use `analyze_vtable` / `read_rtti` on `IEntitySystem` and `CCamera` — Crytek leaves RTTI in many builds, which names the classes for you. Schematyc/Flowgraph strings give you a second, independent anchor when a CVar sig is ambiguous.
+6. **Confirm before hardcoding.** Pattern-scan `gEnv`; resolve subsystem pointers as field reads off it (not separate scans); treat struct field offsets as per-build and re-verify each patch.
+
+---
+
+## Anti-Cheat Considerations
+
+Cross-reference `knowledge/anti-cheat-architecture.md` for AC internals. Guidance level only.
+
+- **Hunt: Showdown 1896 → EAC (EOS).** Full kernel anti-cheat: handle stripping, module/integrity scans, hypervisor checks. Treat exactly as the EAC profile in `anti-cheat-architecture.md`. The single-`gEnv` anchor does nothing to reduce AC exposure — reading still happens against a protected process.
+- **Star Citizen → EAC.** Same EAC kernel surface; the engine fork does not change the AC model.
+- **Single-player titles (Kingdom Come, Crysis Remastered, Ryse) → no anti-cheat.** Anti-tamper is loose to absent, which is why CryEngine SDK headers and reversed offsets circulate freely for these — but that freedom is specific to the SP titles, not the engine.
+- **Engine-specific detection surface:** the Lua/Schematyc scripting layer is an in-process attack surface; titles that expose modding lock it down, and AC builds watch for foreign script registration. Do not assume the scripting hooks that work on KCD work on Hunt.
+
+---
+
+## Community Tools and Resources
+
+Refer to categories by name and search for the current source yourself — no live cheat-distribution links here.
+
+- **CryEngine SDK / CryEngine V launcher source** — the official engine source and headers are the authoritative structural reference for stock CryEngine. Single best resource for class layouts (`IEntity`, `IEntitySystem`, `CCamera`, `SSystemGlobalEnvironment`).
+- **CryEngine 2 / 3 leaked or licensee SDK headers** — structural reference for older Crysis-era titles.
+- **Star Citizen community reversing groups** — ReClass dumps and forum offset threads for the StarEngine fork.
+- **Forum offset tables** ("CryEngine offsets" threads on the usual RE/game-hacking forums) — per-build entity-list and camera offsets; always stale after a patch.
+- **RTTI/vtable dumpers** (generic) — because Crytek ships RTTI, a vtable/RTTI dumper recovers class names directly from the binary.
+
+---
+
+## Coordinate System and World-to-Screen
+
+CryEngine world space is **right-handed, Z-up**: X/Y are the ground plane, Z is vertical. Any math copied from a Y-up engine (most Unity/UE bone code) has the vertical axis wrong and must be remapped.
+
+There is generally no single packed view-projection global to scan for. Build the projection from the `CCamera`'s view and projection matrices (or locate the per-frame composed matrix the renderer caches), then project. The matrix-major order must be confirmed by reading it out and projecting a known point — do not assume Source's row-major layout.
+
+```cpp
+// Sketch — project a world point through a cached VP matrix (Enma-style).
+// OFF_* are resolved via sig/struct_dump per build, never hardcoded here.
+// Follows the W2S discipline: read once, w > 0.001 guard, vecs built per frame.
+bool world_to_screen(proc_t& p, uint64 vp_addr, vec3 world, vec2& screen) {
+    // Read the matrix once; verify row vs column major against your build first.
+    float64 w = p.rf32(vp_addr + 12) * world.x
+              + p.rf32(vp_addr + 28) * world.y
+              + p.rf32(vp_addr + 44) * world.z   // Z is vertical on CryEngine
+              + p.rf32(vp_addr + 60);
+    if (w < 0.001) return false;                 // behind camera (guideline 10)
+    float64 inv_w = 1.0 / w;
+    float64 nx = (p.rf32(vp_addr + 0) * world.x + p.rf32(vp_addr + 16) * world.y
+               +  p.rf32(vp_addr + 32) * world.z + p.rf32(vp_addr + 48)) * inv_w;
+    float64 ny = (p.rf32(vp_addr + 4) * world.x + p.rf32(vp_addr + 20) * world.y
+               +  p.rf32(vp_addr + 36) * world.z + p.rf32(vp_addr + 52)) * inv_w;
+    float64 vw = get_view_width();
+    float64 vh = get_view_height();
+    screen = vec2((vw * 0.5) + (nx * vw * 0.5), (vh * 0.5) - (ny * vh * 0.5));
+    return true;
+}
+```
+
+> UNVERIFIED for any specific build — confirm the matrix layout and column/row offsets against your target before trusting projected coordinates.
+
+## Offset Stability Reference
+
+Where the key values typically live and how stable each is. "Stability" is about the *resolution method*, not a number — the address changes every build; a good sig does not.
+
+| Value | Reached via | Stability | Notes |
+|-------|-------------|-----------|-------|
+| `gEnv` | Module data section, sig + RIP | None (address) / High (sig) | Master anchor; one pointer to all subsystems |
+| `gEnv->pEntitySystem` | Field read off `gEnv` | High | Entity enumeration root |
+| `gEnv->pRenderer` | Field read off `gEnv` | High | Camera / `CCamera` access |
+| `gEnv->p3DEngine` | Field read off `gEnv` | High | World / scene queries |
+| `gEnv->pGameFramework` | Field read off `gEnv` | High | CryAction; actor system → local actor |
+| `gEnv->pScriptSystem` | Field read off `gEnv` | High | Lua VM (older titles) |
+| Entity array / iterator | Off `pEntitySystem` | Medium | Layout varies; confirm via entity-name read |
+| `CEntity` world transform | Per-entity offset | Medium | `Matrix34`, Z-up; position is `Vec3` float32 |
+| Local actor / pawn | Actor system → local actor → entity | Medium | Game-specific gameplay fields |
+| `CCamera` view / projection | Renderer / view system | Medium | Build VP from these; verify major order |
+
+**Rules of thumb:**
+- `gEnv` is a pointer in the module image → pattern-scan + RIP-resolve, never hardcode the address.
+- Prefer **field reads off `gEnv`** over separate scans for each subsystem — one stable anchor beats five fragile ones.
+- Everything below `CEntity` is game-specific; re-derive per build with `struct_dump` and an entity-name correctness check.
+
+## Engine / Build Identification
+
+Confirm you are on CryEngine (and which fork) before applying any of the above:
+
+- **Module list** (`p.get_module_list()`): `CrySystem.dll`, `CryEntitySystem.dll`, `CryAction.dll`, `Cry3DEngine.dll`, `CryRenderD3D11.dll`/`D3D12`, plus a per-game DLL.
+- **String markers:** CVar prefixes (`sys_`, `r_`, `e_`, `sv_`), Flowgraph node names, Schematyc type names, `.pak`/`.cry` asset paths.
+- **Fork detection:** Star Citizen's StarEngine renames/repackages modules and diverges heavily — confirm via renderer DLL and string content, and treat stock CryEngine struct knowledge as a hypothesis only.
+- **Version:** the engine version string (often near init/log strings) tells you CE3 vs CE V; the entity-component model (CE V) vs entity-proxy model (CE3) changes the component-walk shape.
+
+## Common Pitfalls
+
+- **Assuming Y-up.** CryEngine is Z-up. Bone/position math ported from a Y-up engine swaps the wrong axis and puts ESP boxes on their side — the most common first-attempt failure here.
+- **Scanning each subsystem separately.** Five fragile sigs (one per subsystem) break independently every patch. Resolve `gEnv` once and read subsystems as field offsets — one anchor to maintain.
+- **Hardcoding the entity-array layout.** The entity container shape varies (array vs iterator) across CE3 and CE V. Always confirm with an entity-name read before trusting the iteration.
+- **Trusting RTTI on stripped builds.** Crytek leaves RTTI in many builds but not all; when `read_rtti` returns nothing, fall back to string-xref anchors rather than assuming the class is gone.
+- **Star Citizen ≠ stock CryEngine.** The StarEngine fork diverges enough that stock struct knowledge is a hypothesis, not a map. Re-derive everything.
+- **Forgetting the renderer caches no single VP global.** Build the view-projection from `CCamera`, or find the per-frame composed matrix; do not waste time scanning for a Source-style packed VP that is not there.
+- **Reading positions as segment-relative when they are absolute (or vice versa).** Large maps may offset positions by a world segment; verify by comparing a read against your in-game coordinates.
+
+## Cross-References
+
+- `knowledge/anti-cheat-architecture.md` — EAC architecture and detection vectors (Hunt, Star Citizen).
+- `knowledge/game-targets.md` — Hunt: Showdown listed under Tactical/Team; engine column = CryEngine.
+- `knowledge/offset-methodology.md` — RIP resolution, `struct_dump`, sig-vs-hardcode discipline.
+- `knowledge/common-patterns.md` — entity-iteration, world-to-screen, and GUI patterns to wire resolved offsets into a script.
+- `signatures/source-engine/common-sigs.md` — `resolve_rip` helper and uniqueness verification (same technique).
+- `knowledge/pcx-api-cheatsheet.md` — `read_vec3_fl32`, `read_mat4_fl32`, `find_code_pattern`, `analyze_vtable`/`read_rtti` for class recovery.
+- `skill://anti-cheat-re` — six-step AC methodology for the EAC-protected titles.
+- `skill://authorized-security-research` — scope/authorization before touching a live protected build.
+- If you derive stable patterns, drop a stub under `signatures/cryengine/` mirroring the `signatures/unreal-engine/` layout.
+
+---
+
+## Source: `knowledge/engine-frostbite.md`
+
+# Frostbite Reverse Engineering Reference
+
+Engine-specific RE notes for DICE/EA's Frostbite engine (Battlefield, Battlefront, FIFA / EA Sports FC, Dragon Age, Mass Effect Andromeda, Anthem, Need for Speed, Madden). Read this before attaching to a Frostbite title — its data-driven entity bus, manager-chain layout, and `RenderView` camera model are unlike Unreal/Unity/Source, and there is no managed runtime to dump from. This fills the gap left by the existing UE/Unity/Source signature guides.
+
+> **Read this before** doing memory analysis on any Frostbite title, and read `skill://authorized-security-research` first — modern Battlefield and FC titles ship EA AntiCheat (EAAC), a kernel-mode anti-cheat.
+
+---
+
+## Engine Overview
+
+Frostbite is a closed, in-house C++ engine. There is no public SDK and no dumper; the community reverses it by hand, and the canonical entity/manager chain has been stable enough across titles that the *shape* (not the offsets) is well understood.
+
+| Generation | Era | Representative titles |
+|------------|-----|-----------------------|
+| Frostbite 1 | 2008 | Battlefield: Bad Company |
+| Frostbite 2 | 2011 | Battlefield 3 / 4, Need for Speed |
+| Frostbite 3 (later just "Frostbite") | 2013–present | Battlefield 1 / V / 2042, Battlefront I / II, Dragon Age: Inquisition / Veilguard, Mass Effect Andromeda, Anthem, FIFA / EA Sports FC, Madden, Plants vs. Zombies |
+
+**Architecture summary:**
+
+- **Custom deferred renderer.** D3D11 / D3D12 backends. The render path exposes a `GameRenderer` → `RenderView`, where `RenderView` carries the view/projection transform used for projection.
+- **Data-driven Entity Bus ("EBX").** Frostbite is built around a typed, data-driven asset/object model. Runtime objects derive from a reflected type system; gameplay is assembled from EBX asset data rather than hand-written per-actor C++. There is **no exposed managed scripting layer** (no Mono/IL2CPP, no Lua surface to enumerate) — this is pure native C++ with a custom reflection system, so you reverse it like any C++ binary.
+- **Manager-chain object model.** The community-stable access pattern is a chain of singleton managers: `ClientGameContext` → `ClientPlayerManager` → player array → `ClientPlayer` → `ClientSoldierEntity` (the controllable body) → component pointers (health, transform, weapon). Spectator/local input flows through a `BorderInputNode`-style local-player node.
+- **DICE C++ with symbols-friendly structure.** Frostbite binaries are large, optimized C++ but FLIRT/IDA signatures and RTTI-style class identification work well — this is one of the more tractable proprietary engines to reverse statically.
+
+**Notable quirks:**
+
+- The local player and the entity list are reached through **different chains** off `ClientGameContext` — one via `ClientPlayerManager`, one via the player array. Don't assume a single root array like Source.
+- World-space convention is title-dependent. Frostbite has historically used a **Y-up** world with the renderer composing a view-projection in `RenderView`; whether the cached matrix is row- or column-major has varied across titles — **read it out and verify empirically** before committing W2S math. Do not assume the Source row-major layout.
+
+---
+
+## Games Using This Engine
+
+Grounded in commonly-known facts. Treat the anti-cheat column as "publicly associated with the title," and note EA migrated titles from PunkBuster → FairFight → EA AntiCheat over time.
+
+| Game | Engine | Notes | Anti-Cheat | Community SDK / dumper |
+|------|--------|-------|-----------|------------------------|
+| Battlefield 2042 | Frostbite | Manager-chain entity walk | EA AntiCheat (EAAC, kernel) | Forum ReClass dumps |
+| Battlefield V / 1 | Frostbite | Per-build pattern scans | EAAC (later builds); FairFight (server) | Forum offset tables |
+| Battlefield 4 / 3 | Frostbite 2/3 | Most-documented community target | PunkBuster (PB) + FairFight historically | Extensive forum class dumps |
+| Star Wars Battlefront II | Frostbite | Similar soldier-entity layout | EAAC / FairFight | — |
+| EA Sports FC / FIFA | Frostbite | Sports title; different gameplay objects | EAAC | — |
+| Dragon Age: Inquisition / Veilguard | Frostbite | Single-player RPG | None / DRM only (SP) | — |
+| Mass Effect: Andromeda | Frostbite | Single-player | None (SP) | — |
+| Anthem | Frostbite | Online looter-shooter | EAAC / server-side | — |
+| Need for Speed (Frostbite era) | Frostbite | Racing | EAAC (online) | — |
+
+> AC association is era-dependent: a title shipped under PunkBuster years ago may now enforce EAAC. Confirm the loaded AC driver/service at runtime rather than trusting this table for a current build.
+
+---
+
+## Memory Layout Patterns
+
+Typical shapes. **All offsets vary per build** — these describe the layout *kind*, never a number to hardcode.
+
+- **`ClientGameContext` (the manager root).** A global singleton pointer in the game module's data section. From it you reach the player manager, the entity/game-world references, and the level state:
+
+```cpp
+// Illustrative — community-stable shape, field offsets per build
+struct ClientGameContext {
+    ClientPlayerManager* playerManager;   // local + remote players
+    void*                gameWorld;        // world / level state
+    void*                levelManager;
+    // ... additional manager pointers
+};
+```
+
+- **Player enumeration.** `ClientPlayerManager` holds the local player pointer and an array of `ClientPlayer*` (remote players). Each `ClientPlayer` references its controlled `ClientSoldierEntity`:
+
+```cpp
+struct ClientPlayerManager {
+    ClientPlayer*  localPlayer;
+    ClientPlayer** players;       // array of remote players
+    int32          maxPlayers;    // iteration bound
+};
+
+struct ClientPlayer {
+    ClientSoldierEntity* controlledControllable;  // the soldier body, null when dead/spectating
+    int32                teamId;
+    // name, ping, score elsewhere in the struct
+};
+```
+
+- **`ClientSoldierEntity` (the body).** Carries the component pointers cheats read: a health component, a soldier-prediction/transform source for world position (`Vec3`/`Vec4` of `float32`, Y-up), and the weapon/aim components. Position is frequently read off the prediction component or the entity transform — confirm which is authoritative per build.
+
+- **Camera / `RenderView`.** Reached through `GameRenderer` → `RenderView`. `RenderView` holds the view transform, projection, FOV, and camera position. World-to-screen multiplies world position through the `RenderView` matrix — **verify matrix-major order by reading the matrix and projecting a known point**, do not copy Source's layout blindly.
+
+---
+
+## Common Sigs and RIP Patterns
+
+Illustrative shapes only — same construction and resolution rules as `signatures/source-engine/common-sigs.md`. Wildcard the 4-byte RIP displacement, then `resolve_rip(hit, disp_offset, insn_len)`; re-derive per build; verify exactly one hit.
+
+```
+ClientGameContext singleton
+Description: MOV reg, [rip+????] loading the game-context singleton pointer,
+             referenced anywhere gameplay touches the player manager.
+Sig shape:   48 8B 05 ?? ?? ?? ?? 48 8B 88        (MOV RAX, [rip+????])
+Resolution:  resolve_rip(hit, disp_offset=3, insn_len=7) → ClientGameContext*
+Anchor tip:  xref a Frostbite gameplay/CVar string or a render-pass name string;
+             EBX type-name strings also anchor reliably.
+```
+
+```
+GameRenderer / RenderView
+Description: LEA/MOV loading the renderer singleton before composing RenderView.
+Sig shape:   48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B   (LEA RCX, [rip+????])
+Resolution:  resolve_rip(hit, disp_offset=3, insn_len=7) → GameRenderer*
+Anchor tip:  xref render-pass / pipeline name strings; the renderer init stores it.
+```
+
+**Anchor-string strategy (most reliable on Frostbite):** Frostbite ships stable EBX type names, render-pass names, and gameplay strings. Xref a stable string → reach the function using the manager → copy the load instruction. Because DICE C++ keeps RTTI-style structure, `analyze_vtable` / `read_rtti` on the manager and renderer classes often names them outright, which is a stronger anchor than opcode scanning.
+
+---
+
+```
+ClientPlayerManager / local player
+Description: access to the player manager and the local-player slot, reached
+             off ClientGameContext or via its own load instruction.
+Sig shape:   48 8B 0D ?? ?? ?? ?? 48 8B 81 ?? ?? ?? ?? 48 85 C0  (MOV RCX, [rip+????])
+Resolution:  resolve_rip(hit, disp_offset=3, insn_len=7); prefer reading the
+             manager as a field off ClientGameContext once that is anchored.
+Anchor tip:  xref a player/spawn gameplay string near the manager init.
+```
+
+### Verifying and Maintaining Sigs
+
+Every sig must produce exactly one hit in its owning module, or the resolved address is meaningless. Scan, count, and extend:
+
+```cpp
+// Confirm a sig is unique before trusting its RIP resolution.
+array<uint64> hits = p.find_all_code_patterns(g_base, g_size, sig);
+if (hits.length() != 1) {
+    println(format("WARNING: sig has {d} hits, expected 1", hits.length()));
+    // > 1: extend the sig with more surrounding bytes until unique.
+    // 0  : the function was recompiled — re-derive from a fresh string xref.
+}
+```
+
+Frostbite's large optimized binary tends to repeat short opcode sequences, so raw byte patterns often start non-unique — expect to extend them with several surrounding bytes. The **EBX type-name / render-pass string anchors** are the durable re-derivation path after a patch; because Frostbite keeps RTTI-style structure, `read_rtti` on the manager and renderer classes is often a faster relocate than re-scanning. Record the anchor string and class name with each sig.
+
+## Reversal Workflow
+
+Recommended first 60 minutes on an unknown Frostbite build:
+
+1. **Confirm it is Frostbite.** Module list shows a single large game executable plus Frostbite-characteristic DLLs; render-pass and EBX type strings in the binary confirm it. No `GameAssembly.dll` / `mono*.dll` (not Unity), no `*-Win64-Shipping.exe` UE marker.
+2. **Find `ClientGameContext` first.** It is the root of the manager chain — resolve it via the gameplay/EBX string xref anchor, dereference, and sanity-check that `playerManager` lands in a valid range.
+3. **Walk to the local player and player array** via `ClientPlayerManager`. Read team IDs and player names early — they are the cheapest correctness check that you have the right offsets.
+4. **Walk to `ClientSoldierEntity`** via `controlledControllable`; null it out gracefully (it is null when dead/spectating). Read your own position and health to confirm the transform/health components.
+5. **Find `GameRenderer` → `RenderView`** and read the view matrix. **Project a known world point and verify on screen** before trusting matrix-major order or axis convention.
+6. **Tooling.** IDA + FLIRT signatures and Ghidra both excel here — Frostbite is large but clean DICE C++. Use `analyze_vtable`/`read_rtti` to name manager and renderer classes. Confirm before hardcoding; treat every offset as patch-volatile.
+
+---
+
+## Anti-Cheat Considerations
+
+Cross-reference `knowledge/anti-cheat-architecture.md`. Guidance level only.
+
+- **Modern Battlefield / Battlefront / FC / Anthem → EA AntiCheat (EAAC).** EA's in-house kernel-mode anti-cheat (`EAAntiCheat.GameService` service + kernel driver). Treat it as a full kernel AC: handle stripping, module/integrity scans, and the usual ring-0 callback surface described for EAC/BattlEye in `anti-cheat-architecture.md`. It loads with the protected title.
+- **Legacy / server-side layers.** Older Battlefield titles shipped **PunkBuster (PB)** (user-mode, screenshot + scan) and EA's server-side **FairFight (FF)** statistical/behavioral detection. FairFight runs server-side and is independent of how you read memory. Many titles now run EAAC *plus* FairFight.
+- **Single-player titles (Dragon Age, Mass Effect Andromeda) → no anti-cheat,** DRM only. The manager-chain knowledge that circulates for these is SP-specific; do not assume it transfers to a protected multiplayer build untouched.
+- **Engine-specific note:** Frostbite ships EAAC integration in the online titles, so the foreign-module and handle-access detection applies the moment you attach. The lack of a managed runtime means there is no script-layer detection surface (unlike RE Engine / Unity), but also no managed metadata to lean on — everything is native.
+
+---
+
+## Community Tools and Resources
+
+Refer to categories by name; search for current sources yourself. No live cheat-distribution links.
+
+- **Battlefield reversing threads** (the usual game-hacking / RE forums) — the most-documented community target is the BF3/BF4 era, where `ClientGameContext`/`ClientPlayerManager`/`ClientSoldierEntity`/`RenderView` class layouts were dumped and re-dumped. Use those as the structural template; offsets are stale.
+- **ReClass.NET project files** for Frostbite titles — community-maintained struct definitions you import into ReClass to navigate live memory.
+- **Forum offset tables** — per-build entity-array, local-player, and `RenderView` offsets; always re-verify after a patch.
+- **IDA / Ghidra + RTTI dumpers** — because Frostbite is clean C++ with RTTI structure, generic vtable/RTTI tooling recovers class names directly.
+
+---
+
+## Coordinate System and World-to-Screen
+
+Frostbite's world convention is title-dependent and historically **Y-up**, with the renderer composing a view-projection into `RenderView`. Crucially, whether the cached matrix is row- or column-major **has varied across Frostbite titles** — this is the single most common source of broken W2S on this engine. Read the matrix out and project a known point before committing.
+
+```cpp
+// Sketch — project through the RenderView view-projection matrix (Enma-style).
+// OFF_* resolved via sig/struct_dump per build. Verify matrix-major order FIRST.
+bool world_to_screen(proc_t& p, uint64 vp_addr, vec3 world, vec2& screen) {
+    float64 w = p.rf32(vp_addr + 12) * world.x
+              + p.rf32(vp_addr + 28) * world.y
+              + p.rf32(vp_addr + 44) * world.z
+              + p.rf32(vp_addr + 60);
+    if (w < 0.001) return false;                 // behind camera (guideline 10)
+    float64 inv_w = 1.0 / w;
+    float64 nx = (p.rf32(vp_addr + 0) * world.x + p.rf32(vp_addr + 16) * world.y
+               +  p.rf32(vp_addr + 32) * world.z + p.rf32(vp_addr + 48)) * inv_w;
+    float64 ny = (p.rf32(vp_addr + 4) * world.x + p.rf32(vp_addr + 20) * world.y
+               +  p.rf32(vp_addr + 36) * world.z + p.rf32(vp_addr + 52)) * inv_w;
+    float64 vw = get_view_width();
+    float64 vh = get_view_height();
+    screen = vec2((vw * 0.5) + (nx * vw * 0.5), (vh * 0.5) - (ny * vh * 0.5));
+    return true;
+}
+```
+
+> UNVERIFIED for any specific build. If projected points mirror or invert, your matrix-major assumption is wrong — transpose the index mapping and re-test before touching anything else.
+
+## Offset Stability Reference
+
+Where the key values typically live and how stable each is. "Stability" describes the resolution method, not a number.
+
+| Value | Reached via | Stability | Notes |
+|-------|-------------|-----------|-------|
+| `ClientGameContext` | Module data section, sig + RIP | None (address) / High (sig) | Manager-chain root |
+| `ClientPlayerManager` | Field off `ClientGameContext` | Medium | Local player + remote array |
+| Local player | Field off `ClientPlayerManager` | Medium | Distinct from the remote array |
+| Remote player array + count | Off `ClientPlayerManager` | Medium | Iterate to `maxPlayers` |
+| `ClientPlayer::controlledControllable` | Per-player offset | Medium | Null when dead/spectating |
+| `ClientSoldierEntity` position | Transform / prediction component | Medium | `Vec3`/`Vec4` float32, Y-up |
+| `ClientSoldierEntity` health | Health component | Medium | Confirm authoritative source |
+| `GameRenderer` | Module data section, sig + RIP | None / High | Renderer singleton |
+| `RenderView` view-projection | Off `GameRenderer` | Medium | Verify major order before W2S |
+
+**Rules of thumb:**
+- The two singletons (`ClientGameContext`, `GameRenderer`) are pointers in the image → sig + RIP, never hardcode.
+- Local player and entity list are **separate chains** off the context — resolve both, do not assume one array.
+- All `Client*Entity` gameplay fields are per-build → `struct_dump` + a team-ID/name correctness check; re-derive each patch.
+
+## Engine / Build Identification
+
+Confirm you are on Frostbite before applying any of the above:
+
+- **Module list** (`p.get_module_list()`): a single large game executable; **no** `GameAssembly.dll`/`mono*.dll` (rules out Unity) and **no** `*-Win64-Shipping.exe` (rules out UE).
+- **String markers:** EBX type names, render-pass / pipeline names, and DICE gameplay strings in the binary.
+- **AC markers:** an `EAAntiCheat.GameService` service / EAAC driver indicates a current protected build regardless of the title's launch-era anti-cheat.
+- **Era matters for layout:** BF3/BF4-era class layouts are the most-documented community template, but field offsets and even the chain shape drift across Frostbite generations — use the era closest to your target as the starting hypothesis only.
+
+## Common Pitfalls
+
+- **Wrong matrix-major order in `RenderView`.** The single most common Frostbite W2S failure: the cached view-projection has varied between row- and column-major across titles. If points mirror or invert, transpose the index mapping before changing anything else.
+- **Treating local player and entity list as one root.** They live on separate chains off `ClientGameContext` (player manager vs player array). Resolve both.
+- **Not null-checking `controlledControllable`.** It is null whenever the player is dead or spectating; dereferencing it unguarded crashes the loop on the first downed player.
+- **Porting BF3/BF4 offsets directly.** Those are the best-documented layouts but field offsets drift across Frostbite generations; use them as a starting hypothesis, then `struct_dump` and verify.
+- **Reading position from the wrong component.** Position may live on a prediction component or the entity transform; pick the authoritative one for the build, or your ESP lags or jitters.
+- **Assuming no EAAC because an old guide says PunkBuster.** AC is era-dependent; a title patched onto EAAC is a kernel-AC target now regardless of what shipped at launch. Check the loaded driver/service.
+- **Looking for a managed runtime.** There is none — no Mono/IL2CPP, no Lua surface to enumerate. Everything is native C++; reverse it as such.
+
+## Cross-References
+
+- `knowledge/anti-cheat-architecture.md` — EAC/BattlEye kernel model; apply the same lens to EAAC.
+- `knowledge/game-targets.md` — engine-by-game table for cross-checking AC associations.
+- `knowledge/offset-methodology.md` — RIP resolution, `struct_dump`, sig-vs-hardcode discipline.
+- `knowledge/common-patterns.md` — entity-iteration, world-to-screen, GUI patterns for wiring resolved offsets into a script.
+- `signatures/source-engine/common-sigs.md` — `resolve_rip` helper and uniqueness verification.
+- `knowledge/pcx-api-cheatsheet.md` — `read_vec3_fl32`, `read_mat4_fl32`, `find_code_pattern`, `analyze_vtable`/`read_rtti`.
+- `skill://anti-cheat-re` — six-step AC methodology for EAAC-protected titles.
+- `skill://authorized-security-research` — scope/authorization before touching a live protected build.
+- If you derive stable patterns, add a stub under `signatures/frostbite/` mirroring `signatures/unreal-engine/`.
+
+---
+
+## Source: `knowledge/engine-godot.md`
+
+# Godot Reverse Engineering Reference
+
+Engine-specific notes for Godot Engine titles (Godot 3.x C++ core, Godot 4.x rewritten core with Vulkan and dual GDScript/C# support). Read this before attaching to a Godot title — the node-tree architecture, the `ObjectDB` indirection, and the embedded-script `.pck` payload differ enough from Unreal/Unity/Source that the generic dumper workflow does not apply. This fills the gap left by the other engine references (CryEngine, Frostbite, RE Engine, REDengine, Source, Unreal, Unity).
+
+> **Read this before** doing memory analysis on any Godot title. Godot is open-source — pull the matching engine version from `github.com/godotengine/godot` and grep the actual headers; this is a fundamental RE advantage no closed-source engine offers.
+
+> **Scope:** Educational reference. See `skill://authorized-security-research` before pointing any offensive tool at a live multiplayer build.
+
+---
+
+## Engine Overview
+
+Godot ships as a single self-contained executable that embeds the GDScript bytecode, scenes, and resources inside a PCK archive appended to (or alongside) the engine binary. The user runs `MyGame.exe`; the engine code, the game's compiled scripts, and the assets all live in or beside that one file.
+
+Two distinct lineages:
+
+- **Godot 3.x** — C++ core, GLES2/GLES3 renderer, GDScript 1.0. Long-tail of shipped titles. Smaller binary, simpler RE target.
+- **Godot 4.x** — rewritten core, Vulkan/D3D12/Metal renderers, GDScript 2.0 (typed, partially compiled), first-class C# (Mono) support. Larger binary, more API surface, the current default for new projects.
+
+Both share architectural primitives:
+
+- **Node tree** — every game-world object is a `Node`; the running game is a `SceneTree` whose root node has the current scene attached. Almost every gameplay query starts at `SceneTree::get_root()` and walks children.
+- **Object / RefCounted / Resource** — three lifetime models. `Object` is manually managed; `RefCounted` (Godot 4) / `Reference` (Godot 3) is refcounted; `Resource` is refcounted + serializable. Knowing which one a class inherits from tells you how to keep a pointer alive across frames.
+- **ObjectDB** — every `Object` registers in a global hash table keyed by a 64-bit `ObjectID`. To find any object from outside the engine, you walk this table. `ObjectDB::instances` is the global symbol.
+- **RID system** — the rendering server, physics server, and audio server allocate opaque `RID` handles (64-bit integers) for GPU resources, physics bodies, etc. The mapping from `RID` → underlying allocation is per-server.
+- **Singletons** — `Engine`, `OS`, `SceneTree`, `RenderingServer`, `PhysicsServer3D`, `Input`, `ResourceLoader`. Each is accessible via `get_singleton()` and is the entry point to its subsystem.
+
+---
+
+## Games Using This Engine
+
+| Game | Godot Version | Notes | Anti-Cheat |
+|---|---|---|---|
+| Brotato | 4.x | Bullet-heaven roguelite; widely studied for mods | None (single-player) |
+| Cassette Beasts | 4.x | Open-world monster-collector | None (single-player) |
+| Halls of Torment | 4.x | Diablo-meets-Vampire-Survivors | None (single-player) |
+| Endoparasitic | 4.x | Single-player horror; small surface | None |
+| Buckshot Roulette | 4.x | Single-player; later online expansion via separate mod | None on the base game |
+| Slay the Princess | 4.x | Visual-novel hybrid | None |
+| Dome Keeper | 3.x | Tower-defense hybrid | None (mostly single-player) |
+| The Case of the Golden Idol | 3.x | Detective puzzle | None |
+| Cruelty Squad | 3.x | First-person shooter | None |
+| Cassette Beasts: Pier of the Unknown | 4.x | DLC | None |
+
+The export-template trick: when Godot builds a release, it appends the project's compiled `.pck` (containing every script, scene, image, sound) to the end of the engine executable. The footer carries a magic header `GDPC`, a version byte, and an index. Any change to scripts changes the binary hash — a soft tamper-detect that some titles cross-reference against an online manifest.
+
+Multiplayer Godot titles are rare and almost always lean on authoritative server logic or third-party validation; client-side enforcement is the exception.
+
+---
+
+## Memory Layout Patterns
+
+The patterns to find first when attaching to a Godot binary:
+
+- **`OS::get_singleton()`** — the OS singleton is the gateway to almost everything. Its static slot is referenced by literally every singleton accessor; find the slot, you've found a Rosetta Stone.
+- **`SceneTree` root** — accessible via `OS::get_singleton()->get_main_loop()` (returns a `MainLoop*` which is the `SceneTree*` in a running game). From the root, walk children to find the active scene, then game-specific nodes by their assigned name strings (`Player`, `Enemy`, etc.).
+- **`ObjectDB::instances` hash table** — a flat hash map of `ObjectID` → `Object*`. The table size is power-of-two; entries are tombstone-deletable. To enumerate every live object: walk the table, skip tombstones, deref the `Object*`. Then read `Object::_class_name` (a string ID) to figure out what each one is.
+- **`ClassDB` registered classes** — the class-registration table is built at startup and never grows after engine init. A pointer scan for the string `"Object"` lands you in or near the `ClassDB` entry table; from there, walk to find every registered class name, its parent, its method table.
+- **Active camera** — `RenderingServer` holds the active camera RID; resolve via `RenderingServer::camera_get_*` accessors. The camera's transform is a `Transform3D` (a 4x3 affine: 3x3 basis + 3-component origin), NOT a 4x4 view matrix — derive the view matrix yourself or use the inverse of the camera transform.
+- **GDScript bytecode** — instances of `GDScript` (a `Resource`) carry their compiled bytecode in a flat `Vector<uint8_t>`. The instruction format is in `core/object/script_language.h` + `modules/gdscript/gdscript.h` upstream. For reversal of game logic, decompiling the bytecode (see Community Tools below) is faster than reading the running VM state.
+
+Coordinate convention: Godot 4 uses **Y-up, right-handed** by default. Godot 3 also Y-up. Most games keep the default, but check the project settings (embedded in the PCK) before assuming.
+
+---
+
+## Common Sigs and RIP Patterns
+
+Illustrative byte-pattern *shapes* to look for. Do not commit to specific byte sequences — they change between Godot versions and compiler builds. The shape is stable; the bytes are not.
+
+- **Singleton accessor pattern** — `MOV rax, [rip+disp32]; TEST rax, rax; JNZ ...; CALL _init; MOV [rip+disp32], rax`. This is the lazy-init pattern for `OS::get_singleton()`, `Engine::get_singleton()`, etc. The first `MOV` reads the static slot; the slot address is what you want.
+- **`ObjectDB::instances` access** — `LEA rcx, [rip+disp32]` where `rip+disp32` is the static instances-table address; followed by a hash-and-probe loop. Find the `ClassDB` init function for a reliable xref into this region.
+- **`SceneTree::process` tick** — the main game loop calls `SceneTree::process(float delta)` every frame. This is one of the longer functions in the binary and contains string references to "process", "_process", "physics_process". String xref → function → top of frame.
+- **GDScript VM dispatch** — a giant switch / computed-goto on opcode bytes. The dispatcher reads from the `GDScript`'s bytecode `Vector<uint8_t>`; the opcode table size matches `GDScriptFunction::Opcode` enum in the upstream source.
+
+Always cross-reference candidate sigs against the open-source headers from the matching Godot release tag. If a sig matches no instruction the upstream source describes, you've either got the version wrong or the title has a modified engine fork.
+
+---
+
+## Reversal Workflow
+
+The recommended first 60 minutes on a fresh Godot binary:
+
+1. **Identify the version.** The engine writes a `"Godot Engine v<X.Y.Z>"` string at startup. ASCII string scan in `.rdata` finds it instantly. Note both major.minor (e.g. `4.2`) and the patch (e.g. `4.2.1.stable`).
+2. **Pull the matching headers.** `git clone github.com/godotengine/godot && git checkout <X.Y.Z>-stable`. You now have the actual `Object`, `Node`, `SceneTree`, `RenderingServer`, `GDScriptFunction` definitions the binary was compiled from. This is the open-source RE advantage; use it before anything else.
+3. **Locate `OS::get_singleton()`.** String xref on `"OS"` won't help (too many matches); instead, find a known accessor like `MainLoop *OS::get_main_loop()` by its symbol name in the GitHub source, find its call sites, and the slot it reads is `OS::singleton`.
+4. **Enumerate `ClassDB`.** Once you have `OS`, the `ClassDB::class_list` member is reachable; walk it and dump the per-class name + parent + method table. This gives you a full class hierarchy as a starting map.
+5. **Find `SceneTree::get_root()`.** From `OS::get_main_loop()`, follow to `SceneTree`; the `root` field is a `Window*` (Godot 4) or `Viewport*` (Godot 3). Walk children from there into game-specific scene structure.
+6. **Locate the active camera.** Either via `RenderingServer::camera_get_current()` or by walking the scene tree looking for the `Camera3D` node. Once found, the view matrix (or its derivation) is yours.
+7. **Identify gameplay nodes by string.** Most games name their player node literally `"Player"` and enemies `"Enemy"` or specific subclasses. Walk the scene tree, match by name, then read the relevant `_class_name` to know what struct to read against.
+
+The `.pck` payload is its own RE target: use a `.pck` extractor (see Community Tools) to pull out every script, scene, and resource as readable files. For Godot 3, scripts decompile cleanly; for Godot 4, the bytecode is more compressed and decompilers may produce partial output.
+
+---
+
+## Anti-Cheat Considerations
+
+Most Godot titles ship no anti-cheat. The indie norm. When AC is present, it's typically:
+
+- **Steam-side**: VAC for Steam-released multiplayer titles. Detection is server-coordinated; the client has no AC driver.
+- **Server-authoritative**: the server holds the authoritative state; client memory tampering does not affect the actual game outcome. Slay The Spire / Vampire Survivors style.
+- **Soft-tamper-detect via PCK hash**: the engine checks if the embedded `.pck` has been modified; some titles cross-reference against an online manifest. Cosmetic, not enforced.
+
+The export-template-modification path (changing the engine binary itself, repacking the `.pck`) is the most common modding path and is sometimes blocked by manifest checks. Memory-resident-only changes leave no trace on disk and are not caught by hash checks.
+
+Cross-reference `knowledge/anti-cheat-architecture.md` for the AC ecosystem at large; Godot titles rarely appear there because they rarely ship kernel-level AC.
+
+---
+
+## Community Tools and Resources
+
+Categories (no live URLs — search the named project):
+
+- **gdsdecomp** — community GDScript bytecode decompiler; works well on Godot 3, partial on Godot 4. The standard tool for recovering script source from a compiled PCK.
+- **godot-pck-explorer** — extract files from an embedded or standalone `.pck` archive (file-listing, single-file extract, full unpack).
+- **Godot RE Tools (GodotREEngine)** — combined PCK extraction + GDScript decompilation in one project.
+- **godot-cpp / GDExtension** — the official native-extension SDK. Useful for RE both as a *reference implementation* (how does the engine call into native code?) and as a *target* for writing your own integration (an in-game injected DLL that talks to the running engine).
+- **Open-source upstream** — the largest resource. `github.com/godotengine/godot` tagged by version. Search the headers for any struct/function name you're reversing; the actual implementation is usually a few clicks away.
+- **Godot debugger protocol** — Godot 4 supports remote debugging over TCP on port 6007 by default; the protocol is documented in the engine source. A live game launched with `--debug --remote-debug tcp://...` exposes the script-VM state for inspection.
+
+---
+
+## Cross-References
+
+- `skill://anti-cheat-re` — kernel AC methodology (rarely needed for Godot titles, included for completeness)
+- `skill://pcx-re-discipline` — RE discipline that applies to any binary
+- `knowledge/anti-cheat-architecture.md` — broader AC reference (Godot rarely appears here)
+- `knowledge/common-patterns.md` — Enma scripting patterns once you have the offsets you need
+- `knowledge/offset-methodology.md` — sig derivation and validation
+- `signatures/` — sig collections for other engines (no Godot subdirectory; the open-source headers serve that role)
+
+---
+
+## Source: `knowledge/engine-re-engine.md`
+
+# RE Engine Reverse Engineering Reference
+
+Engine-specific RE notes for Capcom's RE Engine (Resident Evil 2/3/4 remakes, RE7, RE Village, Devil May Cry 5, Monster Hunter Rise / Wilds, Street Fighter 6, Dragon's Dogma 2, Onimusha, Pragmata). Read this before attaching to an RE Engine title — the engine ships a reflected `via.*` type system with a managed-object layer that the community framework (REFramework) parses, which changes the workflow completely versus the pattern-scan grind of Frostbite or CryEngine. This fills the gap left by the UE/Unity/Source guides.
+
+> **Read this before** doing memory analysis on any RE Engine title, and read `skill://authorized-security-research` first — Street Fighter 6 ships kernel-level anti-cheat and several titles ship Denuvo anti-tamper.
+
+---
+
+## Engine Overview
+
+RE Engine is Capcom's in-house C++ engine and successor to MT Framework. Its defining feature is a built-in **reflection system** over a `via.*` type namespace, with a managed-object / singleton layer. The open-source **REFramework** hooks this reflection system and exposes it (plus a Lua scripting surface), which makes RE Engine the best-documented of the proprietary engines in this set — you can often query type and field layout from the engine itself rather than reverse it cold.
+
+| Era | Representative titles |
+|-----|-----------------------|
+| 2017 | Resident Evil 7 |
+| 2019 | RE2 Remake, Devil May Cry 5 |
+| 2020–2021 | RE3 Remake, RE Village (RE8), Monster Hunter Rise |
+| 2023–2024 | Street Fighter 6, RE4 Remake, Dragon's Dogma 2 |
+| 2025+ | Monster Hunter Wilds, Onimusha: Way of the Sword, Pragmata, Kunitsu-Gami |
+
+**Architecture summary:**
+
+- **Custom renderer.** D3D11 / D3D12 backends. Camera and view live behind `via.Camera` / scene-view types.
+- **GameObject-Component model with reflection.** The world is a `via.Scene` of `via.GameObject`s, each holding `via.Component`s. The spatial component is `via.Transform` (position / rotation / scale). Every type is described by a **reflection database** (TDB / type-definition table) — class names, field names, field offsets, and method signatures are all queryable at runtime.
+- **Managed-object / singleton layer.** Gameplay systems are exposed as managed singletons (REFramework's `sdk.get_managed_singleton("app.…")` pattern). This is the access root: you fetch a system singleton, then walk its reflected fields.
+- **Lua via REFramework, not native.** The engine itself is native C++; the Lua scripting surface is provided by REFramework's hook, not shipped by Capcom. The native reflection metadata, however, *is* Capcom's and is the thing REFramework reads.
+
+**Notable quirks:**
+
+- The **type database (TDB)** is the killer feature: instead of `struct_dump`-guessing field offsets, you can resolve a field by name through the reflection system. Find the TDB and field discovery becomes lookup, not search.
+- Coordinate convention is commonly **Y-up** with `via.vec3` / `via.mat4` (column-major math in the engine's math types) — but axis handedness and matrix-major order **must be verified empirically** per title; do not assume.
+- Many titles ship a **community modding base** (REFramework + EMV/Enhanced Model Viewer Lua mods), so the loose-anti-tamper single-player titles are heavily documented.
+
+---
+
+## Games Using This Engine
+
+Grounded in commonly-known facts. Anti-cheat / anti-tamper column is "publicly associated with the title," generalize where uncertain.
+
+| Game | Notes | Anti-Cheat / Anti-Tamper | Community SDK / modding base |
+|------|-------|--------------------------|------------------------------|
+| RE2 Remake | Single-player; heavily modded | Denuvo (early), Capcom anti-tamper | REFramework + EMV Engine |
+| RE3 Remake | Single-player | Denuvo / Capcom anti-tamper | REFramework |
+| RE4 Remake | Single-player + Mercenaries | Denuvo / Capcom anti-tamper | REFramework |
+| RE Village (RE8) | Single-player | Denuvo + Capcom DRM (notable stutter) | REFramework |
+| RE7 | Single-player | Denuvo | REFramework |
+| Devil May Cry 5 | Single-player | Denuvo (early) | REFramework |
+| Monster Hunter Rise | Co-op; loose anti-tamper | Denuvo (early) / server checks | REFramework |
+| Monster Hunter Wilds | Co-op multiplayer | Server-side + anti-tamper | REFramework (community) |
+| Street Fighter 6 | Competitive multiplayer | Kernel-level anti-cheat | Limited (AC restricts) |
+| Dragon's Dogma 2 | Single-player | Denuvo / Capcom anti-tamper | REFramework |
+
+> The pattern: **single-player RE Engine titles have loose anti-tamper and rich REFramework modding**; competitive/online titles (Street Fighter 6) lock down hard. Confirm what is actually loaded for your build.
+
+---
+
+## Memory Layout Patterns
+
+Typical shapes. **All offsets vary per build** — the reflection database is precisely how you avoid hardcoding them.
+
+- **Reflection / Type Database (TDB) — the master anchor.** A global structure cataloguing every reflected type: name, parent, fields (name + type + offset), and methods. Resolving "the position field of the player transform" becomes: find the type by name → find the field by name → read its offset. This is what REFramework exposes; reversing it once gives you a name-based field resolver for the whole game.
+
+- **Managed singletons.** Gameplay systems are reachable as named managed singletons (`app.*` types). The singleton table is itself reflected. From a system singleton you walk reflected fields to reach the player, the enemy list, etc.
+
+- **Scene / GameObject / Component.**
+
+```cpp
+// Illustrative — resolve real offsets via the TDB, never hardcode
+struct via_Scene {
+    // holds the active GameObject set for the level
+};
+struct via_GameObject {
+    // name, folder, component list; Transform is a component
+};
+struct via_Transform {       // via.Transform component
+    // world position (via.vec3 / via.mat4), rotation (quat), scale
+};
+```
+
+- **Player / enemy access.** Through an `app.*` gameplay system singleton → player GameObject → `via.Transform` for position, plus title-specific components for health/state. Enemy/NPC lists hang off the relevant manager singleton. Names of all of these come from the TDB.
+
+- **Camera.** `via.Camera` / scene main-view exposes the view and projection matrices and FOV used for world-to-screen. Read the matrix and verify major order/axis before projecting.
+
+---
+
+## Common Sigs and RIP Patterns
+
+Illustrative shapes only — same construction and resolution rules as `signatures/source-engine/common-sigs.md`. Wildcard the 4-byte RIP displacement, then `resolve_rip(hit, disp_offset, insn_len)`; re-derive per build; verify exactly one hit. On RE Engine you typically need **far fewer raw sigs** than on other engines because the TDB resolves most fields by name.
+
+```
+Type Database (TDB) pointer
+Description: MOV/LEA reg, [rip+????] loading the global reflection database,
+             referenced by every reflected type/field lookup.
+Sig shape:   48 8B 0D ?? ?? ?? ?? 48 8B 01        (MOV RCX, [rip+????])
+Resolution:  resolve_rip(hit, disp_offset=3, insn_len=7) → TDB root
+Anchor tip:  xref reflected-type name strings ("via.", "app.") or the
+             reflection init path; REFramework's TDB-locate logic documents the
+             anchor shape for the current engine revision.
+```
+
+```
+Managed singleton table
+Description: LEA reg, [rip+????] loading the singleton container before a
+             get-managed-singleton style lookup.
+Sig shape:   48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B    (LEA RCX, [rip+????])
+Resolution:  resolve_rip(hit, disp_offset=3, insn_len=7)
+```
+
+```
+Scene / main camera
+Description: reference to the scene-manager / main-view singleton.
+Anchor tip:  xref "via.Scene" / "via.Camera" type strings to the manager that
+             owns the active scene and main camera.
+```
+
+**Anchor-string strategy (uniquely strong on RE Engine):** the engine literally ships its reflected type names (`via.Transform`, `app.PlayerManager`, etc.) as strings the reflection system uses. Xref those strings to reach the TDB and singleton machinery — then let the reflection system hand you field offsets by name instead of scanning for each one.
+
+---
+
+Once the TDB is anchored, the productive primitive is a **name→offset lookup**, not another byte scan. Conceptually: walk the TDB type list to the type whose name matches (`app.PlayerManager`, `via.Transform`, …), then walk its field list to the field whose name matches, and read the field's stored offset. REFramework implements exactly this; reproducing its TDB-walk for the current engine revision gives you the resolver everything downstream depends on.
+
+### Verifying and Maintaining Sigs
+
+Every sig must produce exactly one hit in its owning module, or the resolved address is meaningless. Scan, count, and extend:
+
+```cpp
+// Confirm a sig is unique before trusting its RIP resolution.
+array<uint64> hits = p.find_all_code_patterns(g_base, g_size, sig);
+if (hits.length() != 1) {
+    println(format("WARNING: sig has {d} hits, expected 1", hits.length()));
+    // > 1: extend the sig with more surrounding bytes until unique.
+    // 0  : the function was recompiled — re-derive from a fresh string xref.
+}
+```
+
+On RE Engine you maintain **far fewer sigs than on other engines** — typically just the TDB-locate and singleton-table patterns. Once those resolve, field discovery is a TDB name lookup that does not depend on any byte pattern, so a patch that moves code rarely breaks downstream field access. Keep the two structural sigs anchored to `via.`/`app.` type-name strings, and let REFramework's per-revision TDB handling be your reference when the engine version changes.
+
+## Reversal Workflow
+
+Recommended first 60 minutes on an unknown RE Engine build:
+
+1. **Confirm it is RE Engine.** `via.*` / `app.*` type strings in the binary, a single game executable, and the characteristic reflection-init code path confirm it. REFramework loading cleanly is also a strong signal.
+2. **Locate the Type Database (TDB) first.** Everything else is a name-lookup once you have it. Use the reflected-type-name xref anchor; REFramework's open source is the reference for the current TDB layout/version.
+3. **Enumerate managed singletons** and read their type names from the TDB — this maps the gameplay systems (player manager, enemy manager, camera) by name.
+4. **Resolve the player Transform by field name** through the TDB rather than `struct_dump`-guessing. Read your own position to confirm.
+5. **Find `via.Camera`** and read the view/projection matrix; **project a known point and verify on screen** before trusting axis/major order.
+6. **Tooling.** REFramework first — it exposes the reflection system live and is the fastest path to field layout. IDA/Ghidra for the TDB/singleton machinery and for anything REFramework cannot reach. The TDB makes RE Engine the one engine here where name-based resolution largely replaces opcode sigs.
+
+---
+
+## Anti-Cheat Considerations
+
+Cross-reference `knowledge/anti-cheat-architecture.md`. Guidance level only.
+
+- **Street Fighter 6 → kernel-level anti-cheat.** A competitive title with a ring-0 anti-cheat component; treat it with the same caution as the kernel ACs in `anti-cheat-architecture.md` (foreign-module, integrity, and handle scanning). REFramework-style in-process hooking is the wrong tool against a protected competitive title.
+- **RE2/3/4 Remake, RE Village, RE7 → Denuvo + Capcom anti-tamper.** Denuvo is **DRM/anti-tamper, not anti-cheat** — it resists static patching and unpacking, not memory reads from an authorized session. RE Village's DRM stack was notable for performance impact. These are single-player; there is no kernel AC watching memory access.
+- **Monster Hunter Rise / Wilds → server-side checks + anti-tamper,** not a kernel AC of the EAC/BattlEye class on PC in the general case. Co-op state is server-authoritative.
+- **Engine-specific surface:** the reflection/managed layer is an in-process attack surface. The very thing that makes single-player RE Engine titles easy to mod (loose anti-tamper + REFramework hooking the reflection system) is exactly what a hardened competitive title (SF6) shuts down. Never assume the REFramework approach that works on RE4 works on SF6.
+
+---
+
+## Community Tools and Resources
+
+Refer to categories by name; search for current sources yourself. No live cheat-distribution links.
+
+- **REFramework** (praydog, open source) — the central modding/RE base for RE Engine. Hooks the engine, exposes the reflection system and a Lua scripting surface, and documents TDB/singleton layout per engine revision. Single best resource for this engine.
+- **EMV Engine** (Enhanced Model Viewer) — REFramework Lua mod that surfaces GameObjects, components, and field values live; effectively a runtime struct browser.
+- **RE Engine modding communities** — REFramework script repositories and modding wikis documenting `app.*` system names per title.
+- **TDB dumpers** — community tools that dump the full type database (types, fields, offsets) for a build, giving you a name→offset table.
+- **IDA / Ghidra** — for the TDB and singleton machinery and anything outside REFramework's reach.
+
+---
+
+## Coordinate System and World-to-Screen
+
+RE Engine math uses `via.vec3` / `via.mat4`; the convention is commonly **Y-up** with column-major math in the engine's math types. As everywhere, confirm axis handedness and matrix-major order empirically — read the `via.Camera` matrix and project a known point first.
+
+```cpp
+// Sketch — project through the via.Camera view-projection (Enma-style).
+// Resolve the matrix field by NAME via the TDB rather than a raw offset where possible.
+bool world_to_screen(proc_t& p, uint64 vp_addr, vec3 world, vec2& screen) {
+    float64 w = p.rf32(vp_addr + 12) * world.x
+              + p.rf32(vp_addr + 28) * world.y
+              + p.rf32(vp_addr + 44) * world.z
+              + p.rf32(vp_addr + 60);
+    if (w < 0.001) return false;                 // behind camera (guideline 10)
+    float64 inv_w = 1.0 / w;
+    float64 nx = (p.rf32(vp_addr + 0) * world.x + p.rf32(vp_addr + 16) * world.y
+               +  p.rf32(vp_addr + 32) * world.z + p.rf32(vp_addr + 48)) * inv_w;
+    float64 ny = (p.rf32(vp_addr + 4) * world.x + p.rf32(vp_addr + 20) * world.y
+               +  p.rf32(vp_addr + 36) * world.z + p.rf32(vp_addr + 52)) * inv_w;
+    float64 vw = get_view_width();
+    float64 vh = get_view_height();
+    screen = vec2((vw * 0.5) + (nx * vw * 0.5), (vh * 0.5) - (ny * vh * 0.5));
+    return true;
+}
+```
+
+> UNVERIFIED for any specific build. RE Engine's column-major math may require transposing the index mapping above — verify against your target.
+
+## Offset Stability Reference
+
+Where the key values typically live. On RE Engine, the reflection database makes most of these **name-resolvable**, which is far more stable than any raw offset.
+
+| Value | Reached via | Stability | Notes |
+|-------|-------------|-----------|-------|
+| Type Database (TDB) | Module data section, sig + RIP | None (address) / High (sig) | Master anchor; name→offset resolver |
+| Managed singleton table | Sig + RIP / off TDB machinery | High | `app.*` system enumeration |
+| `app.*` gameplay system | Singleton by name | High (by name) | Player / enemy managers |
+| `via.Scene` | Scene-manager singleton | High (by name) | Active GameObject set |
+| `via.GameObject` component list | Per-object, name-resolved | High (by name) | Find `via.Transform` here |
+| `via.Transform` position | TDB field lookup by name | High (by name) | `via.vec3`, Y-up |
+| Player / enemy state fields | TDB field lookup by name | High (by name) | Title-specific components |
+| `via.Camera` view / projection | Scene main-view | Medium | Verify major order before W2S |
+
+**Rules of thumb:**
+- Find the **TDB first**; after that, resolve fields by name, not by hardcoded offset — this survives patches that a numeric offset would not.
+- Only the TDB-locate and singleton-table sigs need raw pattern scanning; everything downstream is a name lookup.
+- Cross-check field names against REFramework's known type list for the engine revision.
+
+## Engine / Build Identification
+
+Confirm you are on RE Engine before applying any of the above:
+
+- **Module list** (`p.get_module_list()`): a single game executable; REFramework loading cleanly is a strong positive signal.
+- **String markers:** reflected type names with `via.` and `app.` prefixes (`via.Transform`, `via.Scene`, `app.PlayerManager`-style) are unique to RE Engine and are also your TDB anchors.
+- **Engine revision:** the TDB layout/version changes across titles (RE2 Remake vs Dragon's Dogma 2 vs Monster Hunter Wilds) — match REFramework's per-title TDB handling to your build.
+- **AC posture tells you the approach:** a single-player title (loose anti-tamper + REFramework) is name-resolvable live; a competitive title (Street Fighter 6, kernel AC) is not — identify the title's posture before choosing tooling.
+
+## Common Pitfalls
+
+- **Reversing fields cold instead of using the TDB.** The whole point of RE Engine is name-based resolution. `struct_dump`-guessing field offsets when the reflection database can hand you the offset by name is wasted effort that also breaks every patch.
+- **Hardcoding offsets the TDB would resolve.** A numeric offset dies on the next update; a TDB name lookup survives it. Hardcode nothing the reflection system can name.
+- **Assuming column-major math is fine in a row-major projection.** RE Engine's `via.mat4` is column-major; if you copy a row-major W2S and points are wrong, transpose the index mapping.
+- **Treating Denuvo as anti-cheat.** Denuvo on the RE remakes is anti-tamper/DRM — it resists static patching, not authorized-session memory reads. It is not a reason in itself that a memory approach fails.
+- **Carrying the REFramework approach to Street Fighter 6.** SF6 ships kernel anti-cheat; the in-process reflection hooking that works on single-player titles is the wrong tool against a protected competitive game.
+- **Mismatching the TDB version.** The type-database layout changes across titles (RE2 Remake vs Dragon's Dogma 2 vs Monster Hunter Wilds). Use the REFramework handling for *your* build's engine revision.
+- **Skipping the position correctness check.** After resolving `via.Transform` position by name, read your own position and move in-game to confirm axis mapping before trusting it.
+
+## Cross-References
+
+- `knowledge/anti-cheat-architecture.md` — kernel-AC model to apply to Street Fighter 6.
+- `knowledge/game-targets.md` — engine-by-game cross-reference style.
+- `knowledge/offset-methodology.md` — RIP resolution and the sig-vs-hardcode discipline; note the TDB lets you prefer name-based resolution here.
+- `knowledge/common-patterns.md` — entity-iteration, world-to-screen, GUI patterns for wiring resolved fields into a script.
+- `signatures/source-engine/common-sigs.md` — `resolve_rip` helper and uniqueness verification.
+- `knowledge/pcx-api-cheatsheet.md` — `read_vec3_fl32`, `read_quat_fl32`, `read_mat4_fl32`, `find_code_pattern`, `rs`/`rws` for reading TDB type-name strings.
+- `skill://anti-cheat-re` — six-step AC methodology for Street Fighter 6.
+- `skill://authorized-security-research` — scope/authorization before touching a protected build.
+- If you derive stable patterns or a TDB-locate sig, add a stub under `signatures/re-engine/` mirroring `signatures/unreal-engine/`.
+
+---
+
+## Source: `knowledge/engine-redengine.md`
+
+# REDengine Reverse Engineering Reference
+
+Engine-specific RE notes for CD Projekt Red's REDengine (Cyberpunk 2077 on REDengine 4, The Witcher 3 on REDengine 3). Read this before attaching to a REDengine title — its RTTI/reflection system, REDscript gameplay VM, and fixed-point world-coordinate quirk differ from Unreal/Unity/Source, and the community framework (RED4ext / Cyber Engine Tweaks) exposes the engine's reflection much like REFramework does for RE Engine. This fills the gap left by the UE/Unity/Source guides.
+
+> **Read this before** doing memory analysis on a REDengine title. **Note:** CDPR's future games (The Witcher 4, "Project Polaris") move to **Unreal Engine 5** — for those, use `signatures/unreal-engine/ue-reversal-guide.md`, not this file. REDengine knowledge applies to Cyberpunk 2077 and Witcher 3 only.
+
+---
+
+## Engine Overview
+
+REDengine is CD Projekt Red's in-house C++ engine. Like RE Engine, it ships an **RTTI / reflection system** describing game classes, fields, and methods, plus a gameplay **scripting VM**. The community framework **RED4ext** hooks the engine and **Cyber Engine Tweaks (CET)** exposes the reflection system over Lua — so, as with RE Engine, you can often query type/field layout from the engine rather than reverse it cold. Both titles are single-player, which keeps anti-tamper loose and documentation rich.
+
+| Generation | Era | Title |
+|------------|-----|-------|
+| REDengine 1 | 2011 | The Witcher 2 |
+| REDengine 3 | 2015 | The Witcher 3: Wild Hunt |
+| REDengine 4 | 2020 | Cyberpunk 2077 |
+| (successor) | future | **Witcher 4 / Project Polaris → Unreal Engine 5** (not REDengine) |
+
+**Architecture summary:**
+
+- **Custom renderer.** D3D12 (Cyberpunk) with a deferred path; camera/view exposed through the engine's camera system.
+- **RTTI / reflection system.** REDengine describes its classes through an RTTI database (class names, field names + offsets, method signatures). CET reads this to expose game classes by name — the same name-based-resolution advantage RE Engine's TDB gives.
+- **Gameplay scripting VM.** The Witcher 3 uses **WitcherScript** (`.ws`); Cyberpunk 2077 uses **REDscript** plus a quest/scene scripting layer. Cyberpunk's gameplay objects are reached through a `GameInstance` and a set of game systems (`gamePlayerSystem`, scripting-exposed systems). RED4ext hooks the native side; redscript compiles to the gameplay VM.
+- **Entity / world model.** `GameInstance` → game systems → the local player puppet (the controlled `gameObject`/`Entity`), with the world's NPC/entity set reachable through the relevant game system. Names of these come from the reflection database / CET.
+
+**Notable quirks:**
+
+- **Fixed-point world coordinates.** Cyberpunk's open world uses a high-precision world-position representation (an integer/fractional `WorldPosition`-style encoding) in places to avoid float drift over a large map. Do not assume a plain `float32` `Vec3` everywhere — confirm whether a given position field is float or the fixed-point world type before doing math on it.
+- **Coordinate convention** is commonly **Z-up, right-handed** for Cyberpunk's world space (vehicles, navigation, world geometry are Z-up). Verify axis and matrix-major order empirically per build before committing world-to-screen math.
+- **Reflection-first, like RE Engine.** Prefer resolving fields by name through the RTTI database (via CET / RED4ext knowledge) over `struct_dump`-guessing.
+
+---
+
+## Games Using This Engine
+
+Grounded in commonly-known facts. Both shipped titles are single-player.
+
+| Game | Engine | Notes | Anti-Cheat / Anti-Tamper | Community SDK / modding base |
+|------|--------|-------|--------------------------|------------------------------|
+| Cyberpunk 2077 | REDengine 4 | Single-player; reflection + REDscript | None (SP); Denuvo dropped post-launch on some platforms | RED4ext, redscript, Cyber Engine Tweaks (CET), TweakXL, ArchiveXL |
+| The Witcher 3: Wild Hunt | REDengine 3 | Single-player; WitcherScript | None (SP); GOG/Steam DRM only | Modding community (script + WolvenKit-era tools) |
+| The Witcher 2 | REDengine 1 | Single-player; legacy | None (SP) | — |
+| Witcher 4 / Project Polaris | **Unreal Engine 5** | Future titles; not REDengine | — | Use the UE guide |
+
+> Because both shipped REDengine titles are single-player with no anti-cheat, REDengine is the loosest anti-tamper of the four engines in this coverage pack — which is why the RED4ext/CET modding ecosystem is so mature. None of that freedom transfers to the UE5 successors.
+
+---
+
+## Memory Layout Patterns
+
+Typical shapes. **All offsets vary per build** — the RTTI/reflection database is how you avoid hardcoding them.
+
+- **RTTI / reflection database — the master anchor.** A global structure cataloguing reflected classes: name, parent, fields (name + type + offset), methods. Locating it gives you a name→offset resolver for the whole game, exactly as CET uses. This is the highest-value first target.
+
+- **`GameInstance` and game systems.** The gameplay root. From `GameInstance` you reach game systems (e.g. a player system) by type; the player system hands you the local player puppet:
+
+```cpp
+// Illustrative — resolve real offsets via the reflection DB, never hardcode
+struct GameInstance {
+    // holds/owns the registered game systems
+};
+struct gamePlayerSystem {
+    // local player puppet accessor: GetLocalPlayerControlledGameObject()-style
+};
+struct gameObject_Entity {
+    // components: transform/placement (position), health/stats, etc.
+};
+```
+
+- **Local player position.** Read off the player puppet's placement/transform component. **Check whether the field is a `float32` Vec3 or the fixed-point `WorldPosition` type** — Cyberpunk mixes both depending on the system. Convert the fixed-point form to world units before projecting.
+
+- **NPC / entity enumeration.** Through the relevant world/entity game system rather than a single flat array. Names of the system and its container come from the reflection database / CET dumps.
+
+- **Camera.** The engine's camera system exposes the view and projection used for world-to-screen. Read the matrix and verify major order / Z-up handedness before projecting.
+
+---
+
+## Common Sigs and RIP Patterns
+
+Illustrative shapes only — same construction and resolution rules as `signatures/source-engine/common-sigs.md`. Wildcard the 4-byte RIP displacement, then `resolve_rip(hit, disp_offset, insn_len)`; re-derive per build; verify exactly one hit. As on RE Engine, the reflection DB resolves most fields by name, so you need fewer raw sigs.
+
+```
+RTTI / reflection database
+Description: MOV/LEA reg, [rip+????] loading the reflection database root,
+             referenced by every reflected class/field lookup.
+Sig shape:   48 8B 0D ?? ?? ?? ?? 48 8B 01        (MOV RCX, [rip+????])
+Resolution:  resolve_rip(hit, disp_offset=3, insn_len=7) → reflection DB root
+Anchor tip:  xref reflected class-name strings ("game", "ent", "world" prefixes)
+             or the RTTI init path; RED4ext's open source documents the anchor
+             shape for the current game version.
+```
+
+```
+GameInstance / game-systems container
+Description: LEA reg, [rip+????] loading the GameInstance before a
+             get-game-system style lookup.
+Sig shape:   48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B   (LEA RCX, [rip+????])
+Resolution:  resolve_rip(hit, disp_offset=3, insn_len=7)
+```
+
+```
+Player system / local puppet
+Description: reference to the player system that resolves the controlled puppet.
+Anchor tip:  xref player-system / "GetLocalPlayerControlledGameObject" style
+             reflected method-name strings to reach the accessor.
+```
+
+```
+Camera / view system
+Description: reference to the camera system exposing the active view + projection.
+Anchor tip:  xref camera-system reflected type/method names to reach the matrix
+             the renderer composes per frame; read it out and verify Z-up /
+             major order before projecting.
+```
+
+**Anchor-string strategy:** REDengine ships its reflected class and method names as strings the RTTI system consumes. Xref those to reach the reflection DB and `GameInstance`, then resolve fields by name. RED4ext / CET open source is the authoritative reference for the current game version's anchors — lean on it rather than blind opcode scanning.
+
+---
+
+Once the reflection DB is anchored, the productive primitive is a **name→offset lookup** rather than another byte scan: walk the reflected class list to the class whose name matches (e.g. the player puppet type), then its property list to the named field, and read the stored offset. CET exposes this live over Lua and RED4ext implements the native walk — reproducing it for the current build gives you the resolver the rest of the workflow depends on. This is also where you classify a position property as `float32` versus fixed-point `WorldPosition` from its reflected type.
+
+### Verifying and Maintaining Sigs
+
+Every sig must produce exactly one hit in its owning module, or the resolved address is meaningless. Scan, count, and extend:
+
+```cpp
+// Confirm a sig is unique before trusting its RIP resolution.
+array<uint64> hits = p.find_all_code_patterns(g_base, g_size, sig);
+if (hits.length() != 1) {
+    println(format("WARNING: sig has {d} hits, expected 1", hits.length()));
+    // > 1: extend the sig with more surrounding bytes until unique.
+    // 0  : the function was recompiled — re-derive from a fresh string xref.
+}
+```
+
+As on RE Engine, you maintain **only a couple of structural sigs** — the reflection-DB-locate and `GameInstance` patterns. Downstream field access is name resolution through the reflection database, so it largely survives code-moving patches. RED4ext/CET track the current build's anchors; keep your two sigs recorded against their `game`/`ent`/`world` class-name string anchors so the offset-maintainer can rebuild them after an update.
+
+## Reversal Workflow
+
+Recommended first 60 minutes on a REDengine build (Cyberpunk 2077 / Witcher 3):
+
+1. **Confirm it is REDengine — and not a UE5 successor.** Cyberpunk ships a single `Cyberpunk2077.exe` with reflected `game*`/`ent*`/`world*` class strings and the REDscript/quest VM. If you are on a future CDPR title, check for UE markers (`*-Win64-Shipping.exe`, `GObjects` machinery) and switch to the UE guide.
+2. **Locate the RTTI / reflection database first.** It turns field discovery into name lookup. Use the class-name xref anchor; RED4ext source is the reference for the current layout.
+3. **Reach `GameInstance` and enumerate game systems** by name from the reflection DB — this maps player, world, and camera systems.
+4. **Resolve the local player puppet** via the player system, then its placement/transform. **Determine float vs. fixed-point `WorldPosition`** before doing position math; read your own position to confirm.
+5. **Find the camera** and read view/projection; **project a known world point and verify on screen** before trusting axis/major order.
+6. **Tooling.** RED4ext + CET first — CET exposes the reflection system live (browse classes/fields/methods by name) and is the fastest path to layout. IDA/Ghidra for the reflection DB and `GameInstance` machinery and anything the frameworks cannot reach. Name-based resolution largely replaces opcode sigs here.
+
+---
+
+## Anti-Cheat Considerations
+
+Cross-reference `knowledge/anti-cheat-architecture.md`. Guidance level only.
+
+- **Cyberpunk 2077 and The Witcher 3 → no anti-cheat.** Both are single-player. Cyberpunk shipped with Denuvo on some storefronts and later dropped it; Denuvo is **DRM/anti-tamper, not anti-cheat** — it resists static patching, not memory reads from an authorized session. There is no kernel AC monitoring memory access on these titles.
+- **Loose anti-tamper → mature modding.** The absence of anti-cheat is precisely why RED4ext/CET can hook the engine in-process and expose the reflection system. This is engine-and-title-specific freedom.
+- **Future UE5 titles will differ.** CDPR's Witcher 4 / Project Polaris move to Unreal Engine 5; if any future title is multiplayer it will ship its own anti-cheat. Do not carry REDengine assumptions forward — treat the UE5 successors as standard UE targets under whatever AC they ship.
+- **Engine-specific surface:** the REDscript/quest VM and the reflection system are in-process surfaces that the modding frameworks use; on a single-player title there is no AC watching them, but that is a property of the title, not a guarantee.
+
+---
+
+## Community Tools and Resources
+
+Refer to categories by name; search for current sources yourself. No live cheat-distribution links.
+
+- **RED4ext** (open source) — the native hooking framework for Cyberpunk 2077; the RE Engine of CDPR's world. Documents reflection-DB and `GameInstance` layout per game version.
+- **Cyber Engine Tweaks (CET)** — exposes the reflection system over Lua: browse and call reflected classes/methods/fields by name live. Effectively a runtime type/field browser, the fastest layout-discovery tool for Cyberpunk.
+- **redscript / WitcherScript tooling** — gameplay-script compilers/decompilers; useful for understanding which systems own which state.
+- **WolvenKit** — modding toolkit for REDengine asset/archive editing; structural reference for the engine's data model (asset side, not memory).
+- **TweakXL / ArchiveXL** — data/record extension frameworks; reference for how game records and systems are named.
+- **IDA / Ghidra** — for the reflection DB and `GameInstance` machinery and anything outside the frameworks.
+
+---
+
+## Coordinate System and World-to-Screen
+
+Cyberpunk's world space is commonly **Z-up, right-handed**. The defining hazard is the **fixed-point `WorldPosition` encoding** used to keep precision across a large open world: a position field may be a plain `float32` `Vec3` *or* an integer/fractional world type. Decode the fixed-point form to world units before any projection math, and verify axis/major order by reading the camera matrix and projecting a known point.
+
+```cpp
+// Sketch — project through the camera view-projection (Enma-style).
+// Resolve fields by NAME via the reflection DB where possible. Confirm the
+// position field is float32 vs fixed-point BEFORE calling this.
+bool world_to_screen(proc_t& p, uint64 vp_addr, vec3 world, vec2& screen) {
+    float64 w = p.rf32(vp_addr + 12) * world.x
+              + p.rf32(vp_addr + 28) * world.y
+              + p.rf32(vp_addr + 44) * world.z   // Z is vertical on REDengine
+              + p.rf32(vp_addr + 60);
+    if (w < 0.001) return false;                 // behind camera (guideline 10)
+    float64 inv_w = 1.0 / w;
+    float64 nx = (p.rf32(vp_addr + 0) * world.x + p.rf32(vp_addr + 16) * world.y
+               +  p.rf32(vp_addr + 32) * world.z + p.rf32(vp_addr + 48)) * inv_w;
+    float64 ny = (p.rf32(vp_addr + 4) * world.x + p.rf32(vp_addr + 20) * world.y
+               +  p.rf32(vp_addr + 36) * world.z + p.rf32(vp_addr + 52)) * inv_w;
+    float64 vw = get_view_width();
+    float64 vh = get_view_height();
+    screen = vec2((vw * 0.5) + (nx * vw * 0.5), (vh * 0.5) - (ny * vh * 0.5));
+    return true;
+}
+```
+
+> UNVERIFIED for any specific build. If world positions are stored fixed-point, feeding them raw into this projection produces garbage — decode first.
+
+## Offset Stability Reference
+
+Where the key values typically live. As on RE Engine, the reflection database makes most of these **name-resolvable**, which beats any raw offset for patch survival.
+
+| Value | Reached via | Stability | Notes |
+|-------|-------------|-----------|-------|
+| RTTI / reflection DB | Module data section, sig + RIP | None (address) / High (sig) | Master anchor; name→offset resolver |
+| `GameInstance` | Sig + RIP / off reflection machinery | High | Game-systems container |
+| Player system (`gamePlayerSystem`) | Game system by name | High (by name) | Resolves local puppet |
+| Local player puppet | Player-system accessor | High (by name) | `gameObject`/`Entity` |
+| Puppet placement / transform | Reflection field by name | Medium | Float32 `Vec3` **or** fixed-point `WorldPosition` |
+| Puppet stats / health | Reflection field by name | High (by name) | Stat-pool component |
+| NPC / entity set | World/entity game system | Medium | Not a single flat array |
+| Camera view / projection | Camera system | Medium | Verify Z-up / major order before W2S |
+
+**Rules of thumb:**
+- Find the **reflection DB first**; resolve downstream fields by name. RED4ext/CET source documents the current build's anchors.
+- Only the reflection-DB-locate and `GameInstance` sigs need raw pattern scanning.
+- Always classify a position field (float vs fixed-point) before doing distance/W2S math — this is the REDengine-specific footgun.
+
+## Engine / Build Identification
+
+Confirm you are on REDengine — **and not a UE5 successor** — before applying any of the above:
+
+- **Module list** (`p.get_module_list()`): `Cyberpunk2077.exe` (a single large executable); RED4ext/CET loading cleanly is a strong positive signal. If you see `*-Win64-Shipping.exe` or UE `GObjects` machinery, you are on a UE5 title → use the UE guide.
+- **String markers:** reflected class names with `game`, `ent`, `world` prefixes, REDscript/quest-VM strings, and CET-known method names.
+- **Title:** only Cyberpunk 2077 (REDengine 4) and Witcher 3 (REDengine 3) apply here; Witcher 4 / Project Polaris are Unreal Engine 5.
+- **AC posture:** both shipped titles are single-player with no anti-cheat, so in-process reflection access (CET/RED4ext) is viable — a property of the title, not transferable to any future protected build.
+
+## Common Pitfalls
+
+- **Feeding fixed-point `WorldPosition` into float math.** The defining REDengine footgun: a position field may be integer/fractional fixed-point, not a `float32` `Vec3`. Classify every position field and decode the fixed-point form to world units before distance or W2S math.
+- **Reversing fields cold instead of using the reflection DB.** Like RE Engine, REDengine is name-resolvable via RTTI. CET/RED4ext expose classes/fields/methods by name — use them rather than `struct_dump`-guessing offsets that die each patch.
+- **Mistaking a UE5 successor for REDengine.** Witcher 4 / Project Polaris are Unreal Engine 5. Confirm the executable and reflection strings; if you see UE `GObjects` machinery, switch to the UE guide entirely.
+- **Assuming Y-up.** Cyberpunk world space is Z-up; ported Y-up math swaps the wrong axis.
+- **Expecting an anti-cheat that is not there (or assuming one never will be).** The shipped titles are single-player with no AC — but that freedom is title-specific and does not carry to any future protected CDPR build.
+- **Treating Denuvo as a memory-access blocker.** Where present, Denuvo is anti-tamper/DRM; some Cyberpunk versions dropped it entirely. It does not stop authorized-session reads.
+- **Skipping the position correctness check.** After resolving the puppet placement by name, read your own position and move in-game to confirm both the axis mapping and the float-vs-fixed-point classification.
+
+## Cross-References
+
+- `signatures/unreal-engine/ue-reversal-guide.md` — **use this for CDPR's future UE5 titles**, not the REDengine notes here.
+- `knowledge/anti-cheat-architecture.md` — AC model for any future multiplayer CDPR title.
+- `knowledge/game-targets.md` — engine-by-game cross-reference style.
+- `knowledge/offset-methodology.md` — RIP resolution and sig-vs-hardcode discipline; prefer name-based resolution via the reflection DB here.
+- `knowledge/common-patterns.md` — entity-iteration, world-to-screen, GUI patterns for wiring resolved fields into a script.
+- `signatures/source-engine/common-sigs.md` — `resolve_rip` helper and uniqueness verification.
+- `knowledge/pcx-api-cheatsheet.md` — `read_vec3_fl32`, `read_mat4_fl32`, `find_code_pattern`, `rs`/`rws` for reading reflected class-name strings; note the fixed-point `WorldPosition` needs manual decode, not a typed read.
+- `skill://authorized-security-research` — scope/authorization (relevant for any future protected CDPR title).
+- If you derive stable patterns or a reflection-DB-locate sig, add a stub under `signatures/redengine/` mirroring `signatures/unreal-engine/`.
+
+---
+
 ## Source: `knowledge/enma-cheatsheet.md`
 
 # Enma Language Quick Reference
@@ -1506,6 +4135,131 @@ using namespace MyLib;            // bring names into scope
 [[noopt]] void sensitive() { }                      // skip optimization
 [[export]] void api_func() { }                      // visible to host
 ```
+
+---
+
+## Source: `knowledge/game-targets.md`
+
+# Perception.cx Game Support Reference
+
+Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. Scripting language is **AngelScript** (`AS`) across the board; CS2 additionally exposes a **Lua** surface.
+
+> Counts are minimums (`N+`) — they reflect publicly listed market entries, not private/loader-only scripts.
+
+## FPS / Battle Royale
+
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| Counter-Strike 2 | Source 2 | 10+ | VAC | Official + community suite | AS, Lua |
+| Apex Legends | Source (Respawn) | 5+ | EAC (EOS) | UFOHOOK, ATLAS, ARIEngine | AS |
+| COD: Black Ops 7 / Warzone | IW Engine | 2+ | RICOCHET | — | AS |
+| Fortnite | Unreal Engine | 1+ | EAC (EOS) | — | AS |
+| PUBG (Steam) | Unreal Engine | 2+ | BattlEye | — | AS |
+| Overwatch / Overwatch 2 | Custom | 3+ | Custom (Blizzard) | — | AS |
+| The Finals | Embark / Theia | 2+ | EAC + Theia | — | AS |
+| Deadlock | Source 2 | 2+ | VAC | — | AS |
+| Arena Breakout Infinite | Unity | 3+ | EAC (EOS) | — | AS |
+| BloodStrike | Unreal Engine | 1+ | EAC | — | AS |
+| Farlight 84 | Unreal Engine | 1+ | EAC | — | AS |
+
+## Survival / Open World
+
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| Escape from Tarkov | Unity | 1+ | BattlEye | Official | AS |
+| Rust | Unity | 2+ | EAC (EOS) | — | AS |
+| DayZ | Enfusion | 1+ | BattlEye | — | AS |
+| Scum | Unreal Engine | 1+ | EAC | — | AS |
+| Ark: Survival Evolved | Unreal Engine | 1+ | BattlEye | — | AS |
+| The Isle: Evrima | Unreal Engine | 1+ | EAC | — | AS |
+| Dark and Darker | Unreal Engine | SDK | EAC (EOS) | SDK available | AS |
+
+## Tactical / Team
+
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| Rainbow Six Siege | AnvilNext | 1+ | BattlEye | Private | AS |
+| Hunt: Showdown 1896 | CryEngine | 2+ | EAC (EOS) | — | AS |
+| Marvel Rivals | Unreal Engine | 2+ | EAC (EOS) | — | AS |
+| The Division 2 | Snowdrop | 1+ | EAC | — | AS |
+
+## Horror / Other
+
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| Dead by Daylight | Unreal Engine | 1+ | EAC (EOS) | Official, Featured | AS |
+| Chivalry 2 | Unreal Engine | 1+ | EAC | — | AS |
+| Far Far West | Unknown | 1+ | Unknown | — | AS |
+| KovaaK's | Unreal Engine | 1+ | None | Aim trainer | AS |
+| GeoGuessr | Web / Steam | 1+ | None | — | AS |
+
+## Modded / Custom Clients
+
+| Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
+|------|--------|---------|-----------|---------|------|
+| GTA V (RAGE:MP / ALT:V) | RAGE | 1+ | None (mod client) | Multiplayer mods | AS |
+| Roblox | Custom | 1+ | Byfron (Hyperion) | Official | AS |
+
+**Total: 29 supported games.**
+
+## Engine Summary
+
+| Engine | Games |
+|--------|-------|
+| Source 2 | CS2, Deadlock |
+| Source (Respawn) | Apex Legends |
+| Unreal Engine | Fortnite, PUBG, Dead by Daylight, Marvel Rivals, Arena Breakout Infinite, Scum, The Isle, Dark and Darker, Ark, Chivalry 2, KovaaK's, BloodStrike, Farlight 84 |
+| IW Engine | COD: Black Ops 7 / Warzone |
+| Unity | Escape from Tarkov, Rust, Arena Breakout Infinite |
+| CryEngine | Hunt: Showdown 1896 |
+| Enfusion | DayZ |
+| AnvilNext | Rainbow Six Siege |
+| Snowdrop | The Division 2 |
+| Embark / Theia | The Finals |
+| RAGE | GTA V |
+| Custom / Other | Overwatch, Roblox, GeoGuessr, Far Far West |
+
+> Arena Breakout Infinite appears under both Unreal Engine and Unity in market metadata; treat its engine as version-dependent and confirm at runtime via the module list.
+
+## Engine-Specific Considerations
+
+### Unreal Engine
+- **Dumper required.** Object/name resolution goes through `GObjects` and `GNames`. Use an offset dumper (e.g. Dumper-7 / UE4SS output) and feed the resulting struct offsets into your script; do not hardcode across patches.
+- **GWorld → GameInstance → PersistentLevel → Actors** is the canonical entity walk. Cache `GWorld` once per frame, then iterate the actor array.
+- **FName** decoding needs the name pool. Resolve via `GNames` chunked array; class names come from `UObject::ClassPrivate->Name`.
+- Coordinates are typically `FVector` (3×`float32`) — read with `read_vec3_fl32`. World-to-screen needs the camera `POV` (location + rotation + FOV) from the local player controller.
+
+### Source 2 (CS2, Deadlock)
+- **Schema system.** Field offsets are not static — they live in the runtime schema. Resolve member offsets via the `SchemaSystem` / `client.dll` schema classes (e.g. `C_CSPlayerPawn`) rather than fixed numbers.
+- Entity list via `entity_list` / `CGameEntitySystem`; iterate identity chunks.
+- View matrix is exposed in `client.dll` — pattern-scan for the `view_matrix` global; W2S is a straight `mat4` multiply (`read_mat4_fl32`).
+
+### Source (Respawn — Apex)
+- Heavily modified Source; entity walk differs from Valve Source. Use community offset tables; highlight pointers and entity list are pattern-scanned per build.
+
+### Unity (Tarkov, Rust, ABI)
+- **IL2CPP.** Managed code is AOT-compiled; use `il2cpp_dump` / Il2CppDumper to recover class and field metadata, then resolve via `GameAssembly.dll` + `global-metadata.dat`.
+- Mono (legacy) builds expose typedefs directly via the Mono API; check which backend the title ships.
+- Static fields are reached through the IL2CPP class' static field pointer; instance offsets come from the dumped metadata.
+
+### IW Engine (COD)
+- Aggressive anti-tamper and frequently rotating offsets; entity/bone access usually requires per-build pattern scans. Treat all offsets as volatile.
+
+### CryEngine (Hunt) / Enfusion (DayZ) / AnvilNext (R6) / Snowdrop (Division 2)
+- Proprietary entity systems with no public dumper. Rely on pattern scanning to anchor the entity list and local player, then map structs manually per build.
+
+### RAGE (GTA V)
+- Targeted via multiplayer mod frameworks (RAGE:MP, ALT:V). Entity pools (`CPed`, `CVehicle`) are reached through the replay/pool managers; scope is mod-client memory, not the base game.
+
+### Custom / Web (Overwatch, Roblox, GeoGuessr)
+- No shared tooling. Overwatch uses a bespoke engine (pattern-scan everything). Roblox runs its own VM — official script handles the surface. GeoGuessr is web/Steam wrapper, DOM/state-driven rather than classic memory ESP.
+
+## Practical Workflow
+
+1. **Identify the engine** — `p.get_module_list()` reveals the giveaways: `UnrealEditor`/`*-Win64-Shipping.exe` (UE), `client.dll` + `engine2.dll` (Source 2), `GameAssembly.dll` (Unity IL2CPP), `mono-2.0-bdwgc.dll` (Unity Mono).
+2. **Get offsets** — dumper for UE/Unity, schema resolution for Source 2, pattern scans for proprietary engines.
+3. **Anchor per frame** — cache the world/entity-list root once, then iterate; never re-scan inside the actor loop.
+4. **Treat every offset as patch-volatile** — prefer schema/dumper resolution over literals so a game update doesn't silently corrupt reads.
 
 ---
 
@@ -1963,6 +4717,780 @@ Flat list — each is a real failure mode that ships in scripts and gets reporte
 - `.claude/skills/game-cheat-guidelines/SKILL.md` rules #6 (one feature per file) and #11 (GUI for every tunable)
 - `.claude/skills/script-bundler/SKILL.md` — the pre-ship hygiene checklist that includes "sensible GUI defaults"
 - `.claude/skills/ai-pair-programming/SKILL.md` — technique #6 for diff-reviewing AI-generated GUI code
+
+---
+
+## Source: `knowledge/kernel-re-tools.md`
+
+# Kernel-Level Reverse Engineering Tools
+
+Tools for reversing kernel drivers, analyzing anti-cheat systems, and inspecting kernel state. Organized by workflow stage.
+
+> **Scope:** Authorized security research only. See `skill://authorized-security-research` before pointing any tool at a live system. AC driver analysis should happen in an isolated VM, never on a production box.
+
+---
+
+## Static Analysis (Driver Binaries)
+
+| Tool | What It Does | Platform | Notes |
+|------|-------------|----------|-------|
+| **IDA Pro** | Disassembler + decompiler. The standard for driver reversing — FLIRT sigs for ntoskrnl, WDK type libraries, Hex-Rays decompiler. | Win/Linux/macOS | `idalib` MCP wired in this toolkit (`mcp/binary-analysis-setup.md`) |
+| **Ghidra** | Free decompiler. Supports PE drivers, PDB loading, WDK headers via GDT. Slower than IDA but scriptable (Java/Python). | Cross-platform | Ghidra MCP available (`ghidra` server) |
+| **radare2 / rizin** | CLI disassembler. Fast triage: `r2 -AA driver.sys` → `afl` (function list), `pdf @ sym.DriverEntry` (disasm entry). | Cross-platform | `radare2` MCP wired in this toolkit |
+| **Binary Ninja** | Interactive disassembler with IL (BNIL). Good for automated analysis via Python API. | Win/Linux/macOS | — |
+| **CFF Explorer** | PE header viewer. Quick check: driver subsystem (NATIVE), imports, sections, certificate chain. | Windows | — |
+| **PE-bear** | PE parser. Shows imports, relocations, resources, overlay. | Cross-platform | — |
+
+## Kernel Debugging
+
+| Tool | What It Does | Platform | Notes |
+|------|-------------|----------|-------|
+| **WinDbg** | Microsoft kernel debugger. The only way to single-step kernel code, inspect EPROCESS/ETHREAD, walk callback arrays. Requires a debug target (VM or serial/net). | Windows | Essential for AC analysis |
+| **WinDbg Preview** | Modern UI wrapper for the same engine. Same commands, better UX. | Windows | From Microsoft Store |
+| **VirtualKD-Redux** | Patches the VM's `kdcom.dll` to use a fast pipe instead of serial — 10–40× faster kernel debugging in VMware/VirtualBox. | Windows (host+guest) | Use with WinDbg |
+| **KD (kd.exe)** | Console-mode kernel debugger. Same engine as WinDbg, scriptable. | Windows | `kd -k net:port=50000,key=...` |
+| **HyperDbg** | Hypervisor-level debugger. Sits *below* the OS — invisible to kernel anti-debug. Supports stealth breakpoints, EPT hooks, syscall interception. | Windows | Runs as a custom hypervisor; the AC cannot detect it via standard means |
+| **QEMU + GDB** | GDB stub for kernel debugging Linux/Windows guests. `-s -S` flags expose a GDB server on port 1234. | Cross-platform | `target remote :1234` in GDB |
+
+## Memory Forensics (Offline Analysis)
+
+| Tool | What It Does | Platform | Notes |
+|------|-------------|----------|-------|
+| **Volatility 3** | Memory forensics framework. Analyze memory dumps: driver lists, callback arrays, SSDT, IDT, process trees, handle tables. | Cross-platform (Python) | `vol -f dump.raw windows.driverscan`, `windows.callbacks` |
+| **Rekall** | Alternative memory forensics. Similar to Volatility, different plugin architecture. | Cross-platform (Python) | Less actively maintained |
+| **WinPmem** | Memory acquisition driver. Dumps physical RAM to a file for offline analysis. | Windows | Requires admin; the AC may detect the acquisition driver |
+| **PCILeech** | DMA-based memory acquisition via FPGA or Thunderbolt. Reads physical memory without software on the target — invisible to kernel ACs. | Hardware + host | Requires FPGA board (e.g., Screamer, LambdaConcept) or Thunderbolt access |
+| **MemProcFS** | Virtual file system for physical memory analysis. Mount a memory dump (or live DMA feed) as a filesystem and browse processes, modules, registry. | Windows/Linux | Works with PCILeech for live analysis |
+
+## Runtime Monitoring
+
+| Tool | What It Does | Platform | Notes |
+|------|-------------|----------|-------|
+| **Process Monitor** | Real-time file, registry, process, network, and thread activity. Filter by `driver.sys` to see what the AC touches at load time. | Windows | Sysinternals |
+| **Process Explorer** | Enhanced task manager. Shows DLLs, handles, GPU, threads. Check what the AC injects and what handles it opens. | Windows | Sysinternals |
+| **IRPMon** | Intercepts IRPs (I/O Request Packets) to/from drivers. Use to capture IOCTL traffic between AC user-mode and kernel components. | Windows | Open source; AC may detect it |
+| **API Monitor** | Hooks Win32/NT API calls. Capture `DeviceIoControl` calls, `NtQuerySystemInformation`, `NtOpenProcess` from the AC user-mode module. | Windows | Heavy but detailed |
+| **DebugView++** | Captures `DbgPrint` / `OutputDebugString` output from drivers and user-mode. | Windows | Sysinternals successor |
+| **OSR Device Monitor** | Legacy IOCTL monitor. Simpler than IRPMon for basic IOCTL capture. | Windows | — |
+
+## Driver Development / Testing
+
+| Tool | What It Does | Platform | Notes |
+|------|-------------|----------|-------|
+| **WDK (Windows Driver Kit)** | Headers, libs, build tools for kernel development. Essential for understanding AC driver structures — the headers define every callback type, IRP structure, and IOCTL macro. | Windows | Free from Microsoft |
+| **OSR Driver Loader** | Loads unsigned drivers for testing (requires test-signing mode). | Windows | — |
+| **kdmapper** | Manual-maps a driver into kernel without loading via SCM — no entry in PsLoadedModuleList. Educational: understand how cheat drivers avoid detection. | Windows | Research only |
+| **EfiGuard** | Disables DSE (Driver Signature Enforcement) and PatchGuard from the UEFI bootloader. Research tool for understanding boot-time security. | UEFI | Research only — pre-boot |
+
+## Perception.cx Integration
+
+| Tool | Surface | What It Does |
+|------|---------|-------------|
+| `system/list_drivers` | MCP | Enumerate loaded kernel modules (gated: `kernel_rw_access`) |
+| `get_eprocess` | `proc_t` (Enma/AS/Lua) | Get target's EPROCESS kernel address (gated: `kernel_rw_access`) |
+| `ru64` / `ru32` / `read_struct` (kernel range) | `proc_t` (Enma/AS/Lua) | Read kernel memory when `kernel_rw_access` is granted |
+| `find_code_pattern` | `proc_t` (Enma/AS/Lua) | Pattern-scan driver `.text` sections |
+| `struct_dump` | Perception IDE AI tool | Heuristically dump + classify a driver data structure at an address |
+| `process/disassemble` | MCP | Disassemble driver code at kernel addresses |
+| `process/analyze_vtable` | MCP | Walk vtables in kernel objects |
+| `process/find_xrefs` | MCP | Find code references into driver `.text` |
+
+## Recommended Analysis Environment
+
+```
+┌─────────────────────────────────────┐
+│  Host (Linux/macOS)                 │
+│  ├── IDA Pro / Ghidra / r2          │  ← Static analysis of driver binaries
+│  ├── Volatility 3                   │  ← Offline analysis of VM snapshots
+│  └── WinDbg via network KD          │  ← Kernel debug the VM
+│                                     │
+│  ┌──────────────────────────────┐   │
+│  │  VM (Windows — test-signing) │   │
+│  │  ├── Game + anti-cheat       │   │  ← Target
+│  │  ├── Process Monitor         │   │  ← Runtime monitoring
+│  │  ├── IRPMon                  │   │  ← IOCTL capture
+│  │  └── Debug serial/net to host│   │  ← KD pipe to host WinDbg
+│  └──────────────────────────────┘   │
+└─────────────────────────────────────┘
+```
+
+**Key rule:** Never analyze from the same OS instance the AC is running on. The AC monitors for debugger artifacts, analysis tools, and VM-escape attempts. Use a VM with snapshots — snapshot before installing the AC, so you can revert cleanly.
+
+---
+
+## Source: `knowledge/network-protocol-re.md`
+
+# Network Protocol Reverse Engineering Reference
+
+How to reverse-engineer a game's network protocol — capture, dissect, identify message boundaries, decode payloads. The defensive / educational half of network RE; pairs with the engine-RE references for the on-disk and in-memory sides. Useful for understanding what a game tells the server (anti-cheat telemetry shape, replay format design, server-message bus structure), for protocol documentation, and for legitimate research on private/community-run servers.
+
+> **Scope:** Educational reference for authorized targets only. Network RE against live commercial servers may violate the game's Terms of Service or local computer-misuse statutes; see `skill://authorized-security-research` before pointing tooling at any non-owned endpoint. Private servers, your own development environment, packet captures from your own machine, and protocol research published by the game's own developers are the normal authorized scope.
+
+---
+
+## What This File Covers
+
+- The packet-capture toolchain (Wireshark, tshark, mitmproxy, eBPF-tracing alternatives) and when to use which
+- Identifying message-boundary patterns in TCP / UDP / WebSocket / QUIC game protocols
+- Common encoding schemes games use (length-prefixed, type-tagged, varint-encoded, protobuf-shaped, FlatBuffers-shaped, custom-shaped)
+- Encryption recognition — what TLS / DTLS / custom XOR / custom block-cipher looks like at the wire level
+- Cross-referencing wire data to in-memory structures (the "this packet field is the same as the entity struct's m_iHealth" link)
+- What to do when the protocol is over QUIC / HTTP3 (most modern AAA titles have moved here)
+
+What this file does NOT cover:
+
+- Server-side server-emulator authoring (out of scope; see project-specific server-emulator communities)
+- Live MITM against production servers (not legal in most jurisdictions; not described here)
+- Protocol cracking for the purpose of bypassing server-side validation (an exploit category outside this toolkit's scope)
+
+---
+
+## Capture Toolchain
+
+Pick the tool by what you're capturing:
+
+| Tool | Best for | Notes |
+|---|---|---|
+| **Wireshark** (GUI) | Interactive dissection, custom Lua dissectors, named TCP/UDP streams | The default. Filter syntax (`tcp.port == 27015 && data.len > 8`) is the productive surface. |
+| **tshark** (CLI) | Scripted captures, batch processing, pcap-to-text pipelines | Same engine as Wireshark; CLI lets you grep raw payload bytes. |
+| **mitmproxy / mitmweb** | HTTP / HTTPS / WebSocket traffic (with cert injection) | Useful for the increasing number of games that use HTTPS endpoints for matchmaking / inventory / telemetry. Requires the game to trust the mitmproxy CA. |
+| **dumpcap** (Wireshark backend) | Long-running unattended captures, headless servers | Lighter-weight than full Wireshark; saves to `.pcap` / `.pcapng`. |
+| **tcpdump** | Quick captures on Linux / macOS; minimal install | Older but ubiquitous. Output goes to `.pcap` for offline analysis. |
+| **bpftrace / eBPF** | In-kernel filtering of high-volume traffic, custom sampling | Modern alternative when packet rates exceed userspace capture. |
+| **PCAP-NG with comment annotations** | Persisted analysis context | Annotate packets with notes; survives reopening. |
+
+For QUIC / HTTP3 (the increasing default for modern AAA titles): regular `.pcap` capture works at the IP/UDP level, but you need the connection's TLS keys to see inside. Browsers can dump these to `SSLKEYLOGFILE`; games typically don't. Without the keys, you see encrypted blobs and per-packet timing only.
+
+The recommended starter setup: Wireshark with a Lua dissector for the game (described below), capturing the game's process traffic via the right interface (loopback if you're running a local server; the LAN interface if you're inspecting traffic to a remote server).
+
+---
+
+## Identifying Message Boundaries
+
+Game protocols universally have a structure on top of TCP/UDP for delimiting application-level messages. Identifying that structure is step one of any dissection.
+
+### TCP-based protocols
+
+TCP is a byte stream; the game has to delimit its own messages on top. The three common patterns:
+
+**Length-prefixed** — the most common modern pattern. Each message starts with N bytes encoding the rest of the message's length:
+
+```
+[ 2-byte length ] [ N-byte payload ]
+or
+[ 4-byte length ] [ N-byte payload ]
+or
+[ varint length ] [ N-byte payload ]
+```
+
+Recognize by: opening a Wireshark stream, looking at the first 2-4 bytes of each `tcp.stream` flow; the small integer value (matching the rest of the payload's byte count) is the length field.
+
+**Type-tagged** — message starts with a type byte, then a per-type fixed or known-shape payload:
+
+```
+[ 1-byte type ] [ type-specific payload ]
+```
+
+Recognize by: the same byte value (e.g. `0x07`) appearing at regular intervals; the bytes following it have a stable shape for that type.
+
+**Self-describing (rare in games, common in protobuf RPC)** — each message carries its own wire format hints:
+
+```
+[ varint tag ] [ varint length ] [ payload ] [ varint tag ] [ varint length ] [ payload ] ...
+```
+
+Recognize by: byte values 0x08-0x7F appearing as type tags, with varint length following.
+
+### UDP-based protocols
+
+UDP datagrams are inherently message-bounded — one datagram = one application message (or a fragment, if the game does its own fragmentation). The patterns:
+
+- **Sequence-numbered** — header carries sequence + ack info for reliability layering. Quake/Source-engine style.
+- **Type-prefixed** — same as TCP type-tagged but at datagram start.
+- **Encrypted-blob** — datagram is opaque; key is exchanged during the initial handshake (often DTLS or a custom equivalent).
+
+### Worked example: a length-prefixed TCP protocol
+
+Suppose Wireshark shows you a TCP stream with payload starting:
+
+```
+0c 00 07 00 14 00 41 6c 69 63 65 00
+0e 00 09 00 26 00 42 6f 62 73 31 32 33 00
+05 00 12 00
+```
+
+Pattern recognition:
+- Byte 0-1: `0c 00` = 12 (little-endian uint16) — and the payload after the length is exactly 12 bytes (`07 00 14 00 41 6c 69 63 65 00` is 10, plus the next 2 bytes... wait, count: 0c 00 means 12 bytes follow). Re-checking: 12 bytes after position 2 = positions 2..13. That includes `07 00 14 00 41 6c 69 63 65 00` (10 bytes) + 2 more. Yes, 12.
+- Byte 14-15: `0e 00` = 14 (uint16 LE). 14 bytes follow.
+- Byte 30-31: `05 00` = 5. 5 bytes follow.
+
+The protocol shape:
+```
+struct Message {
+    uint16_t length;          // little-endian
+    uint8_t  type;            // example: 0x07 = login, 0x12 = heartbeat
+    uint8_t  reserved;        // padding or flags
+    uint16_t subtype_or_seq;  // 0x0014 / 0x0009 / etc
+    // ... type-specific payload, ending with a null-terminated string in cases
+}
+```
+
+Once you've identified the boundary mechanism, you can write a Wireshark dissector that splits the stream correctly.
+
+---
+
+## Wireshark Lua Dissector — the Productive Surface
+
+Wireshark's Lua dissector API turns "raw byte stream" into "annotated tree of named fields" in the packet view. For any game you'll spend more than a few sessions reversing, the dissector is worth writing.
+
+Minimal example for the length-prefixed protocol above:
+
+```lua
+-- mygame.lua — save in ~/.config/wireshark/plugins/ (Linux/macOS)
+--                          or %APPDATA%\Wireshark\plugins\ (Windows)
+
+local mygame_proto = Proto("mygame", "MyGame Protocol")
+
+local f_length  = ProtoField.uint16("mygame.length",  "Length",  base.DEC)
+local f_type    = ProtoField.uint8 ("mygame.type",    "Type",    base.HEX)
+local f_subtype = ProtoField.uint16("mygame.subtype", "Subtype", base.HEX)
+local f_payload = ProtoField.bytes ("mygame.payload", "Payload")
+
+mygame_proto.fields = { f_length, f_type, f_subtype, f_payload }
+
+function mygame_proto.dissector(tvbuf, pktinfo, root)
+    pktinfo.cols.protocol = "MyGame"
+    local subtree = root:add(mygame_proto, tvbuf())
+
+    subtree:add_le(f_length,  tvbuf(0, 2))
+    subtree:add   (f_type,    tvbuf(2, 1))
+    subtree:add_le(f_subtype, tvbuf(4, 2))
+    subtree:add   (f_payload, tvbuf(6))
+
+    -- Optional: per-type sub-dissection
+    local t = tvbuf(2, 1):uint()
+    if t == 0x07 then
+        pktinfo.cols.info = "LOGIN  " .. tvbuf(6):string()
+    elseif t == 0x12 then
+        pktinfo.cols.info = "HEARTBEAT"
+    end
+end
+
+-- Register on the game's TCP port (replace with the actual port)
+DissectorTable.get("tcp.port"):add(27015, mygame_proto)
+```
+
+Reload Wireshark; reopen the pcap; messages now show as MyGame instead of raw bytes. Iteratively add types as you identify them.
+
+The dissector becomes the documentation of the protocol — sharing the `.lua` file is sharing the spec.
+
+---
+
+## Common Encoding Schemes
+
+Game protocols converge on a handful of payload-encoding strategies:
+
+### Plain-old struct dump
+
+Fields written in declaration order, native byte order (usually little-endian on x86 / x64 games). The simplest case; recognize by per-field alignment matching a known struct.
+
+### Length-prefixed strings
+
+A length byte (or short) followed by N characters. Sometimes UTF-8, sometimes UTF-16LE (Windows-influenced engines), sometimes the game's own encoding for known character set restrictions (e.g. ASCII-only for usernames).
+
+### Varint encoding (protobuf-style)
+
+Each byte's high bit indicates "more to follow"; the low 7 bits accumulate into the integer. Recognize: bytes in range `0x80-0xFF` followed eventually by a byte `< 0x80`. Used by Protocol Buffers, FlatBuffers' varint helpers, and many custom encodings inspired by protobuf.
+
+### Protobuf-shaped payloads
+
+If the game uses Protocol Buffers (common for Google-stack games and many modern titles), the wire format is well-documented (https://protobuf.dev/programming-guides/encoding/). Per field: varint tag (combining field number and wire type), then payload (varint / fixed64 / length-delimited / start-group / end-group / fixed32). With the `.proto` schema (sometimes leaked, sometimes inferrable), the data decodes cleanly.
+
+Even without the schema, you can identify protobuf by the tag byte pattern: low 3 bits encode wire type (0-5), upper 5+ bits the field number. Field 1, wire-type 0 (varint) = tag byte `0x08`. Field 1, length-delimited = `0x0A`. Field 2, length-delimited = `0x12`. Lots of `0x08`, `0x0A`, `0x10`, `0x12` etc. at message starts = protobuf.
+
+### FlatBuffers-shaped payloads
+
+Random-access binary format from Google. Recognize by the file/message header carrying a root-table offset, vtable indirection inside tables. More complex to decode without the schema; less common in games than protobuf.
+
+### Custom-shaped — bit-packed fields
+
+Some performance-sensitive game protocols (especially older Quake-derived ones) pack fields into bits to save bandwidth. Recognize by: byte values that don't decode cleanly as bytes; field boundaries that don't align to byte boundaries. Requires bit-level analysis.
+
+### Compressed payloads
+
+Larger payloads are often compressed before the wire — zlib / LZ4 / Zstd / LZF / Snappy. Recognize by: payload starting with a known magic number (`78 9C` for zlib default level, `78 DA` for max, `04 22 4D 18` for LZ4 frame, `28 B5 2F FD` for Zstd) or by entropy that's near uniform (compressed data looks like noise).
+
+Decompress before dissecting the inner payload.
+
+---
+
+## Encryption Recognition
+
+Games are increasingly TLS-wrapped, but not all. Identifying whether (and how) a stream is encrypted is step one of any deeper analysis.
+
+### TLS / SSL on TCP
+
+Recognize by:
+- Stream starts with the TLS handshake (`16 03 01` for TLS 1.0 ClientHello, `16 03 03` for TLS 1.2)
+- Wireshark identifies it as `tls` protocol automatically
+- Application data records have header `17 03 03 <len-16>`
+
+To see inside: you need the session keys. Browsers and many tools dump these to a file pointed at by `SSLKEYLOGFILE`; games rarely do. Without keys, you see encrypted blobs only.
+
+### DTLS on UDP
+
+The UDP equivalent of TLS. Recognize by similar handshake bytes at datagram start (`16 fe ff` ClientHello, etc.) and the `dtls` protocol detection in Wireshark.
+
+### Custom XOR / stream cipher
+
+Older / simpler games sometimes apply a per-byte XOR with a static or short-rotating key. Recognize by:
+- Entropy is higher than plain text but lower than CSPRNG output (encrypted "looks like noise but not quite as noisy as TLS")
+- Same byte positions across many messages have a repeating value-distribution (a fixed key betrays itself)
+- The XOR key sometimes leaks via the game binary (search `tools/dump-strings-xor.py` for the key recovery angle on the on-disk side)
+
+### Custom block cipher (AES / similar)
+
+The game may apply AES-CBC or AES-GCM with a key negotiated in a custom handshake. Recognize by: 16-byte-aligned payload chunks (block boundary), high entropy throughout, deterministic-looking IV/nonce field at message start.
+
+Without the key, indistinguishable from random; recover the key by reversing the game's handshake code on the binary side.
+
+### Compression + obfuscation combo
+
+Some games compress then XOR (or vice versa). Decompress first if you can identify the compression magic; XOR-recover then.
+
+---
+
+## Cross-Referencing Wire Data to In-Memory Structures
+
+The synthesis step: wire-format field X corresponds to in-memory struct field Y. Once you have this, the game's protocol becomes a window into the game's state.
+
+The workflow:
+
+1. **Identify a known field in memory.** E.g. `m_iHealth` at offset 0x40 of the entity struct, value 100, observed via PCX's `mcp:struct_dump`.
+2. **Take an in-game action that changes that field.** Take damage; health drops to 87.
+3. **Capture the network traffic around the action.** Wireshark or tshark with a tight time filter.
+4. **Find the byte pattern that changed correspondingly.** A 4-byte field that was `64 00 00 00` (100 LE) in a pre-action packet, now `57 00 00 00` (87 LE) in a post-action packet.
+5. **Confirm with a second action.** Take more damage; verify the wire field tracks.
+
+Once you've mapped one field, the same packet's neighboring bytes are candidates for other fields. Build the mapping incrementally; document in the dissector.
+
+The cross-reference is bidirectional:
+- Wire → memory: "this server-sent field updates the in-memory health field"
+- Memory → wire: "this in-memory field is sent at this byte position in this message type"
+
+Both directions are useful: the first for understanding what the server tells the client; the second for understanding what the client tells the server (which is the more interesting half for anti-cheat-telemetry research and replay-format work).
+
+---
+
+## When the Protocol Is QUIC / HTTP3
+
+Increasing fraction of modern AAA titles use QUIC (HTTP/3) for matchmaking, telemetry, and sometimes game traffic. QUIC is UDP-based and encrypted by default; capture without keys shows you UDP datagrams with QUIC-protocol headers but no payload visibility.
+
+Options:
+
+- **Connection-side key dump.** If you control either endpoint (your own game client running in a dev environment, or a private-server target you own), tools like `keylogger.so` or `SSLKEYLOGFILE` (where supported by the QUIC library) dump the session keys. Wireshark + the keylog file decrypts the QUIC stream.
+- **Process-side hooking.** Hook the game's QUIC library (msquic, quiche, ngtcp2, the game's own custom QUIC implementation) before encryption to capture cleartext. This is much more invasive (DLL injection or LD_PRELOAD on the client) and only legal on systems you own.
+- **Endpoint observation, not wire observation.** Use the game's own logs / debug builds / leaked SDK to see what *would* be sent at the application layer, even without decrypting the wire. Often easier than full QUIC decryption.
+
+QUIC's encryption-by-default has made wire-level RE materially harder than it was during the TCP-with-optional-TLS era; expect to pair wire analysis with binary-side analysis to a much greater extent for modern titles.
+
+---
+
+## Replay Files — the Persisted Cousin
+
+Many games persist game state in a `.dem` / `.replay` / `.rec` file. The replay format is often a *recording of the network protocol* — the server-to-client message stream, written to disk verbatim plus a header. If so, decoding the replay file is the same problem as decoding the network protocol.
+
+For Source-engine games, `.dem` files are well-documented community-side; for modern titles, the format is typically reverse-engineered per-game by community replay-parser projects.
+
+The dissector you wrote for the network protocol is usually directly reusable for the replay file — point it at the `.dem` instead of a `.pcap`. This makes replay-based RE much cheaper than live capture (no game required, no server required, deterministic for repeated analysis).
+
+---
+
+## Cross-References
+
+- `skill://authorized-security-research` — what's in scope for any network-side analysis
+- `knowledge/anti-cheat-architecture.md` — the AC side of network telemetry
+- `knowledge/kernel-re-tools.md` — the binary-side counterpart for understanding the game's network code
+- `knowledge/engine-cryengine.md` / `engine-frostbite.md` / etc. — engine-specific network architecture notes
+- `tools/dump-strings-xor.py` — recovers XOR keys from a game binary (the on-disk side of custom-XOR-encrypted protocols)
+- `tools/identify-protector.py` — flags binaries with anti-tamper layers that often also wrap the network code
+- `.claude/skills/re-evidence-log` — the per-binary evidence-citation discipline applies to wire-format field mappings the same way it applies to in-memory ones
+- Wireshark docs — https://www.wireshark.org/docs/ (the comprehensive reference for the toolchain)
+
+---
+
+## Source: `knowledge/obfuscation-taxonomy.md`
+
+# Obfuscation & Protector Taxonomy
+
+Architecture, VM internals, protection layers, and known weaknesses for every major commercial and open-source binary protector. Read this before starting deobfuscation — it tells you what you're fighting and where each protector is weakest.
+
+---
+
+## Commercial Protectors
+
+### Themida / WinLicense (Oreans Technologies)
+
+| Property | Detail |
+|----------|--------|
+| **Publisher** | Oreans Technologies |
+| **Products** | Themida (code protection), WinLicense (code + licensing), Code Virtualizer (VM-only) |
+| **Platforms** | Windows x86/x64, .NET |
+| **Protection layers** | Anti-debug, anti-dump, code mutation, import redirection, resource encryption, VM virtualization |
+| **VM architectures** | FISH, TIGER, DOLPHIN, EAGLE, SHARK (ascending strength) |
+
+**VM Architecture:**
+
+Each Themida VM is a register-based bytecode interpreter:
+
+| Component | Implementation |
+|-----------|---------------|
+| **Dispatcher** | Computed goto: `jmp [reg*8 + handler_table]` |
+| **Virtual PC** | Register (typically `RBX` or `R12`) pointing into bytecode stream |
+| **Virtual stack** | Real stack reused, or dedicated memory region |
+| **Virtual registers** | 8-16 virtual registers mapped to a stack-frame struct |
+| **Bytecode** | Stored in `.themida` or `.winlice` section; optionally encrypted |
+| **Handler count** | FISH: ~60, TIGER: ~100, DOLPHIN: ~140, EAGLE: ~180, SHARK: ~220+ |
+
+**Macro VM mode:** Instead of virtualizing whole functions, Themida virtualizes individual instruction sequences (3-10 instructions each). This creates many small VM entries scattered throughout the binary rather than one large VM call. Each entry uses the same VM dispatcher but has its own bytecode blob.
+
+**Known weaknesses:**
+- The handler dispatch pattern (`jmp [reg*scale + table]`) is recognizable and consistent across versions
+- FISH VM handlers map 1:1 to x86 instructions — nearly direct translation
+- Anti-dump can be bypassed with Scylla by dumping before the protection initializes
+- The watermark string "Themida" or "WinLicense" often remains in section names or PE overlay
+
+---
+
+### VMProtect (VMProtect Software)
+
+| Property | Detail |
+|----------|--------|
+| **Publisher** | VMProtect Software |
+| **Platforms** | Windows x86/x64, Linux x64, macOS x64/ARM64 |
+| **Protection layers** | Packing, import protection, code mutation, virtualization |
+| **VM variants** | Multiple per-binary; each function can use a different VM instance |
+| **Current version** | 3.8.x (2025-2026) |
+
+**VM Architecture:**
+
+VMProtect uses a **stack-based** bytecode interpreter (unlike Themida's register-based):
+
+| Component | Implementation |
+|-----------|---------------|
+| **Dispatcher** | Large switch or computed goto; typically the biggest function in the binary |
+| **Virtual PC (VIP)** | Register pointing into bytecode; incremented by handler |
+| **Virtual stack pointer (VSP)** | Register (often `RBP`) managing the operand stack |
+| **Virtual registers** | Memory slots on the real stack, addressed by VM bytecode operands |
+| **Bytecode** | Stored in `.vmp0` / `.vmp1` sections; rolling-XOR encrypted |
+| **Handler count** | 150-250+ handlers depending on complexity and mutation |
+
+**Handler mutation:** Each handler is code-mutated — the same semantic operation (e.g., "add two stack values") is encoded with different instruction sequences across handlers. This breaks pattern-based handler identification.
+
+**Bytecode encryption:** The bytecode stream is encrypted with a rolling key. The VM entry stub decrypts the bytecode at runtime before the dispatcher loop. The key is derived from the function's entry address.
+
+**Ultra mode:** Nested virtualization — a VM's handlers are themselves virtualized by another VM instance. Two-layer trace required.
+
+**Known weaknesses:**
+- Stack-based architecture means every operation goes through push/pop → traces are verbose but regular
+- NoVmp (open source) handles VMP 3.x; lifts to LLVM IR
+- The VM entry point is always a `push <key>; call vmenter` pattern
+- VMP's import protection redirects through per-call stubs that can be traced to resolve the real import
+
+---
+
+### Code Virtualizer (Oreans Technologies)
+
+Same Oreans VM as Themida but sold as a standalone virtualizer without the packer/anti-debug layers. Same FISH/TIGER/DOLPHIN/EAGLE/SHARK VMs.
+
+**Difference from Themida:** No packing, no anti-debug, no import protection. Just the VM. Easier to analyze because you skip layers 0-2.
+
+---
+
+### Enigma Protector
+
+| Property | Detail |
+|----------|--------|
+| **Platforms** | Windows x86/x64 |
+| **Protection** | Packing, import redirection, code encryption, basic VM, registration system |
+| **Sections** | `.enigma1`, `.enigma2` |
+
+**Weakness:** The VM is simpler than Themida/VMP (~40 handlers). Unpack first (standard `VirtualProtect` OEP technique), then the VM is tractable with Triton or manual analysis.
+
+---
+
+### Obsidium
+
+| Property | Detail |
+|----------|--------|
+| **Platforms** | Windows x86/x64 |
+| **Protection** | Anti-debug, anti-dump, code encryption, import protection, basic VM |
+
+**Weakness:** Heavy anti-debug but weaker VM than Themida/VMP. ScyllaHide + standard unpacking usually sufficient.
+
+---
+
+## Compiler-Level Obfuscation
+
+### LLVM-Obfuscator (OLLVM)
+
+| Property | Detail |
+|----------|--------|
+| **Source** | Open-source (academic origin: University of Aix-Marseille) |
+| **Mechanism** | Custom LLVM passes applied at compile time |
+| **No protector to strip** — the obfuscation IS the compiled code |
+
+**Passes:**
+
+| Pass | What It Does | Counter |
+|------|-------------|---------|
+| **Bogus Control Flow (BCF)** | Inserts opaque predicates creating unreachable paths | Symbolic execution proves predicates constant → remove dead paths |
+| **Control Flow Flattening (CFF)** | Flattens all blocks into a dispatcher loop | D-810 (IDA), deflat (Binary Ninja), manual state tracing |
+| **Instruction Substitution (SUB)** | Replaces simple ops with algebraic equivalents | IDA optimizer, Miasm normalization, hrtng |
+| **String Encryption** | Encrypts string literals, decrypts at runtime | Break on decryption function, log cleartext |
+| **Indirect Branching** | Replaces direct jumps with pointer-based indirect jumps | Resolve targets via constant propagation or tracing |
+| **MBA (Mixed Boolean-Arithmetic)** | `x + y` → `(x ^ y) + 2*(x & y)` and worse | SSPAM, Triton simplification, algebraic pattern matching |
+
+---
+
+### Hikari
+
+Fork of OLLVM with additional passes: function call obfuscation, anti-class-dump (Objective-C), indirect global variable access. Same counter techniques as OLLVM.
+
+---
+
+### Pluto-Obfuscator
+
+Modern LLVM-based obfuscator with MBA, CFF, indirect branching, and trap-based opaque predicates. Similar to OLLVM but targets newer LLVM versions (14+).
+
+---
+
+## Runtime Obfuscation Techniques
+
+These are techniques used *by* protectors or *by* developers directly, independent of any specific product:
+
+### Metamorphic Code
+
+**What:** Code that rewrites itself into a functionally equivalent but syntactically different form at runtime. Each execution produces different instruction sequences.
+
+**Counter:** Snapshot the code at a stable point (after self-modification completes), then analyze the snapshot. Or: trace the execution and analyze the trace rather than the code.
+
+### Self-Modifying Code (SMC)
+
+**What:** Code that modifies its own instructions during execution — typically decrypting the next basic block, executing it, then re-encrypting it.
+
+**Counter:** Set hardware breakpoints (not software — int3 will be overwritten by SMC). Trace with HyperDbg or PIN. Dump pages at the moment they're executable.
+
+### API Hashing
+
+**What:** Instead of importing `CreateFileW` by name, the code hashes the name at runtime and walks the export table comparing hashes.
+
+**Counter:** Identify the hash algorithm (commonly ROR13+ADD, CRC32, DJB2, FNV-1a), then pre-compute hashes for all ntdll/kernel32/user32 exports and match. HashDB (IDA plugin) automates this for known hash algorithms.
+
+### Stack String Construction
+
+**What:** Strings built character-by-character on the stack (`mov [rsp], 'H'; mov [rsp+1], 'e'; ...`) to avoid string table detection.
+
+**Counter:** FLOSS (FireEye Labs Obfuscated String Solver) extracts stack strings automatically. Or: run the function and read the constructed string from the stack in the debugger.
+
+### Dynamic Code Generation
+
+**What:** The program generates code at runtime using `VirtualAlloc` + `memcpy` + `VirtualProtect(PAGE_EXECUTE_READWRITE)`. The generated code never exists on disk.
+
+**Counter:** Break on `VirtualProtect` transitions to `PAGE_EXECUTE*`. Dump the generated page. The code exists in memory at execution time — you just need to capture it.
+
+### Nanomites
+
+**What:** Critical instructions are replaced with `int 3` (breakpoint). A parent process catches the exceptions via debug API and executes the original instruction in the exception handler.
+
+**Counter:** Hook the exception handler to log what instruction it emulates, or patch the nanomites back to real instructions using the handler's logic as a guide.
+
+---
+
+## Kernel-Level Obfuscation
+
+### PatchGuard / Kernel Patch Protection (KPP)
+
+**What:** Windows kernel integrity monitor. Periodically checks critical kernel structures (SSDT, IDT, GDT, MSRs, critical function prologues) for unauthorized modifications. Triggers BSOD `CRITICAL_STRUCTURE_CORRUPTION` (0x109) on detection.
+
+**Relevant to:** Anti-cheat driver analysis — some cheat drivers attempt to bypass PatchGuard to hook kernel functions.
+
+**Key facts:**
+- Timer-based checks with randomized intervals (every 5-10 minutes, unpredictable)
+- The check context is obfuscated — it runs from a DPC, work item, or APC with an encrypted call chain
+- The KPP context itself is encrypted in memory and decrypted only during checks
+- KPP bypass is a moving target — Microsoft patches bypass techniques regularly
+
+### Driver Signature Enforcement (DSE)
+
+**What:** Windows only loads drivers with valid Microsoft-cross-signed certificates. Unsigned drivers get `STATUS_INVALID_IMAGE_HASH`.
+
+**Bypass methods (for understanding, not recommendation):**
+- Test-signing mode (`bcdedit /set testsigning on` — visible watermark)
+- EFI bootloader modification (EfiGuard, before DSE initializes)
+- Vulnerable signed driver exploitation (BYOVD — Bring Your Own Vulnerable Driver)
+
+### Hypervisor-Based Protection
+
+Some protectors (Denuvo, some anti-cheats) use a custom hypervisor:
+- EPT (Extended Page Tables) to hide code pages
+- VMFUNC for fast VM exits
+- Hypervisor hooks on critical instructions (CPUID, RDMSR)
+
+**Counter:** Nest inside another hypervisor (HyperDbg), or analyze from a hardware debugger / DMA where the hypervisor has no visibility.
+
+---
+
+## Quick Reference: Protector → Counter
+
+| Protector | Primary Technique | Best Counter | Automated Tool |
+|-----------|-------------------|-------------|----------------|
+| **VMProtect** | Stack-based VM | Trace + lift | NoVmp, VMHunt, vtil |
+| **Themida** (FISH) | Register-based VM (simple) | Handler mapping | Community scripts |
+| **Themida** (SHARK) | Register-based VM (complex) | Trace + lift | Manual + Triton |
+| **Code Virtualizer** | Same as Themida VM | Same as Themida | Same as Themida |
+| **OLLVM CFF** | Control flow flattening | CFG recovery | D-810, deflat |
+| **OLLVM MBA** | Algebraic obfuscation | Simplification | SSPAM, Triton |
+| **OLLVM SUB** | Instruction substitution | Optimization | IDA, hrtng |
+| **Enigma** | Packer + weak VM | Unpack + manual | Standard unpacking |
+| **Obsidium** | Anti-debug + encryption | ScyllaHide + dump | Scylla, pe-sieve |
+| **PatchGuard** | Kernel integrity | Analysis-only | Volatility, WinDbg |
+| **Custom VM** | Varies | Manual handler RE | Triton, Miasm |
+
+---
+
+## Source: `knowledge/offset-methodology.md`
+
+# Offset Finding and Maintenance Methodology
+
+## When to Pattern Scan vs Hardcode
+
+**Pattern scan** (preferred): any global pointer, vtable address, or function address that the compiler may relocate between builds. The instruction sequence referencing it is stable; the address it points to is not.
+
+**Hardcode** (acceptable): struct field offsets within a known type. `m_iHealth` at `+0x43E0` inside `CPlayer` changes only when Respawn reorders the class — which happens less often than code relocations. Still document the source.
+
+## Signature Construction
+
+1. Open the function in IDA/Ghidra. Find the instruction that loads/references the value you need.
+2. Copy the raw bytes of that instruction and 1-2 neighboring instructions for uniqueness.
+3. Replace **RIP-relative displacements** (4 bytes after the opcode) with `??` wildcards — these change every build.
+4. Replace **immediate addresses** and **jump targets** with `??` — also unstable.
+5. Keep **opcode bytes** and **register encodings** — these are stable unless the compiler changes register allocation.
+
+```
+Example instruction:  48 8B 05 [A0 B3 2A 01]  ← MOV RAX, [rip+0x12AB3A0]
+                      ^^^^^^^^ ^^^^^^^^^^^^^^
+                      opcode   RIP displacement (changes every build)
+
+Signature:           "48 8B 05 ?? ?? ?? ??"
+```
+
+Verify uniqueness: `find_all_code_patterns` should return exactly 1 hit. If multiple, extend the sig with more surrounding bytes.
+
+## RIP-Relative Address Resolution
+
+Most x64 instructions use RIP-relative addressing. The displacement is a **signed 32-bit integer** relative to the **end** of the instruction (i.e., the address of the next instruction).
+
+```
+hit        = address where the sig matched
+disp_off   = offset from hit to the displacement bytes (e.g., 3 for LEA reg,[rip+??])
+insn_len   = total instruction length (e.g., 7 for a 7-byte LEA)
+displacement = read_int32(hit + disp_off)      ← signed!
+resolved   = hit + insn_len + displacement
+```
+
+Common instruction shapes:
+
+| Pattern | Instruction | disp_off | insn_len |
+|---------|-------------|----------|----------|
+| `48 8B 05 ?? ?? ?? ??` | MOV RAX, [rip+disp] | 3 | 7 |
+| `48 8D 0D ?? ?? ?? ??` | LEA RCX, [rip+disp] | 3 | 7 |
+| `48 8B 0D ?? ?? ?? ??` | MOV RCX, [rip+disp] | 3 | 7 |
+| `E8 ?? ?? ?? ??` | CALL rel32 | 1 | 5 |
+| `E9 ?? ?? ?? ??` | JMP rel32 | 1 | 5 |
+
+## Pointer Chain Walking
+
+Game data is often behind multiple levels of indirection:
+
+```
+base_address → entity_list_ptr → entity_ptr → field
+```
+
+Strategy:
+1. Find the first pointer via sig scan + RIP resolution.
+2. Dereference each level with `ru64`, checking for 0 at every step.
+3. Document the full chain: `base + 0x... → deref → + 0x... → deref → + 0x...`
+4. The final offset into the struct is typically a hardcoded field offset.
+
+```cpp
+uint64 entity_list = resolve_sig(p, base, size, SIG_ENTITY_LIST);  // sig scan
+if (entity_list == 0) return;                                       // stale sig
+uint64 list_ptr = p.ru64(entity_list);                              // deref level 1
+if (list_ptr == 0) return;                                          // null
+uint64 entity = p.ru64(list_ptr + cast<uint64>(index) * 0x8);      // deref level 2
+if (entity == 0) return;                                            // null entry
+int32 health = p.r32(entity + 0x43E0);                             // struct field
+```
+
+## Using struct_dump for Discovery
+
+When you don't know a struct layout, read raw memory and classify fields:
+
+```cpp
+// In Perception IDE, the AI can use struct_dump tool:
+// struct_dump(addr, size=0x100)
+// Returns: offset, raw hex, heuristic type (pointer/vtable/float/int/null)
+```
+
+Look for:
+- **Pointers**: values in the `0x7FF...` range (usermode x64)
+- **VTable ptrs**: first 8 bytes of an object, pointing into .rdata
+- **Floats**: values like `100.0`, `0.0`, `-1.0` that make sense as game state
+- **Ints**: small values (health, ammo, team ID)
+
+## Cross-Referencing with IDA/Ghidra
+
+1. Find the ConVar or string that names the feature (e.g., `"cl_interp"`, `"m_iHealth"`).
+2. Xref the string → find the registration function → find the global variable or struct field.
+3. Verify the offset in the reversed SDK headers if available (e.g., `r5sdk/src/game/server/player.h`).
+4. Remember: SDK headers may be from an older game version. Always verify with a live read.
+
+## Offset Table Format
+
+Maintain a structured offset file:
+
+```cpp
+// offsets.em — auto-resolved via pattern scans
+// Last verified: 2025-06-15, game version 1.98
+
+const string SIG_ENTITY_LIST = "48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B D8";
+// LEA RCX, [rip+????] — loads CEntityList global
+// Source: sub_1400ABCDE in IDA, xref from "cl_entitylist"
+
+const string SIG_VIEW_MATRIX = "48 8D 05 ?? ?? ?? ?? 48 89 44 24 ?? F3 0F";
+// LEA RAX, [rip+????] — loads view-projection matrix (16 floats)
+
+const string SIG_LOCAL_PLAYER = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 ?? 48 8B 48";
+// MOV RAX, [rip+????] — loads local player pointer
+
+// Struct field offsets (hardcoded, verified against SDK)
+const uint64 OFF_HEALTH   = 0x43E0;   // CPlayer::m_iHealth (int32)
+const uint64 OFF_TEAM     = 0x0448;   // CBaseEntity::m_iTeamNum (int32)
+const uint64 OFF_POSITION = 0x014C;   // CBaseEntity::m_vecAbsOrigin (vec3 float32)
+const uint64 OFF_NAME     = 0x0589;   // CBaseEntity::m_iName (string ptr)
+```
+
+## What Breaks on Game Updates
+
+| What | Stability | Why |
+|------|-----------|-----|
+| Pattern signatures | **High** | Instruction sequences rarely change unless the function is rewritten |
+| RIP-relative resolved addresses | **None** | Absolute addresses change every build |
+| Struct field offsets | **Medium** | Change when devs add/remove/reorder fields |
+| VTable indices | **Medium** | Change when virtual functions are added/removed |
+| Function addresses | **None** | Change every build — always use sigs |
+| String literals | **High** | Rarely change — good anchor points for xrefs |
 
 ---
 
@@ -3102,6 +6630,303 @@ release carrying every API a script needs. Pure IDE/Analyzer/decompiler internal
 
 ---
 
+## Source: `knowledge/re-plugins-and-tools.md`
+
+# RE Plugins & Tools Reference
+
+IDA Pro plugins, Ghidra extensions, FLIRT signature databases, binary diffing tools, and debugger sync infrastructure for game binary reverse engineering. Every tool listed here is cloned, ready to build or install.
+
+> This is the **plugin and tool** reference — what to install and how to use it. For kernel-specific tools (WinDbg, HyperDbg, Volatility), see `knowledge/kernel-re-tools.md`. For anti-cheat methodology, see `skill://anti-cheat-re`.
+
+---
+
+## IDA Pro Plugins
+
+### hrtng — Deobfuscation & Decryption
+
+**What:** 2024 Hex-Rays Plugin Contest winner from Kaspersky. Automated string decryption, control flow unflattening, vtable resolution for complex inheritance, and data structure recovery. The single most impactful IDA plugin for obfuscated binaries.
+
+**Use for:** Anti-cheat driver deobfuscation, encrypted string recovery, flattened control flow restoration, complex C++ vtable resolution.
+
+**Install:** Build from source (needs IDA SDK ≥ 7.3 + Hex-Rays decompiler). Copy the compiled `.so`/`.dll` to IDA's `plugins/` directory.
+
+**Source:** [github.com/AandersonL/hrtng](https://github.com/AandersonL/hrtng) (Kaspersky fork)
+
+---
+
+### HexRaysCodeXplorer — C++ Virtual Call Analysis
+
+**What:** Hex-Rays decompiler plugin for C++ reverse engineering. Auto-reconstructs types from vtable references, navigates virtual function calls, provides an Object Explorer window for browsing all vtables.
+
+**Use for:** Any C++ game binary with RTTI — reconstructs class hierarchies, resolves virtual calls that IDA shows as indirect `call [rax+offset]`. Essential for Source Engine, Unreal Engine, Unity IL2CPP binaries.
+
+**Key features:**
+- Right-click in pseudocode → "Reconstruct Type" → generates C struct from vtable references
+- Object Explorer → browse all vtables with class names
+- Virtual call resolution → resolves `(**(code **)(*obj + 0x40))(obj)` to `CBaseEntity::Think()`
+
+**Install:** Copy compiled plugin to IDA's `plugins/` directory.
+
+**Source:** [github.com/REhints/HexRaysCodeXplorer](https://github.com/REhints/HexRaysCodeXplorer)
+
+---
+
+### ClassInformer — MSVC RTTI Scanner
+
+**What:** Scans the binary for MSVC RTTI (Run-Time Type Information) structures — `vftable`, `type_info`, `_RTTICompleteObjectLocator`, `_RTTIClassHierarchyDescriptor`. Builds a browsable list of all C++ classes with vtables.
+
+**Use for:** Any MSVC-compiled binary with RTTI not stripped (most game binaries, including Apex Legends, CS2, COD). First step after loading — gives you every class name the compiler embedded.
+
+**Usage:** Edit → Plugins → Class Informer → scan. Results appear in an IDA window — sortable by name, vtable address, hierarchy depth.
+
+**Source:** [github.com/nihilus/IDA_ClassInformer_PlugIn](https://github.com/nihilus/IDA_ClassInformer_PlugIn)
+
+---
+
+### SigMakerEx — Pattern Signature Generator
+
+**What:** Generates IDA-style byte-pattern signatures from selected code. Supports multiple output formats: IDA, x64dbg, `find_code_pattern` PCX format, raw hex.
+
+**Use for:** Generating sigs for `offsets.em` — select a unique instruction sequence, right-click → SigMaker → generate. Automatically wildcards relocatable bytes.
+
+**Usage:** Right-click on code → SigMaker → "Create IDA Sig" or "Create Code Sig". Options: auto-wildcard, minimum uniqueness check, copy to clipboard.
+
+**Key feature:** The "auto-wildcard" mode detects and masks RIP-relative displacements, absolute addresses, and other patch-volatile bytes — exactly what `game-cheat-guidelines` #5 (sigs over hardcodes) requires.
+
+**Source:** [github.com/A200K/IDA-Pro-SigMaker](https://github.com/A200K/IDA-Pro-SigMaker)
+
+---
+
+### FIRST — Community Function Fingerprints
+
+**What:** Cisco Talos Function Identification and Recovery Signature Tool. Free alternative to IDA's Lumina service. Matches unknown functions against a community database of identified functions using metadata hashing (not just bytes).
+
+**Use for:** Auto-naming standard library functions, crypto routines, and common utility functions that FLIRT signatures miss. Particularly useful for statically-linked libraries where FLIRT sigs may not cover the exact version.
+
+**Usage:** Edit → Plugins → FIRST → "Check All Functions". Functions with matches are renamed automatically. Review in FIRST's panel.
+
+**Install:** Copy `first_plugin_ida/` content to `~/.idapro/plugins/`. Requires FIRST server access (public instance available).
+
+**Source:** [github.com/ciscocsirt/FIRST-plugin-ida](https://github.com/ciscocsirt/FIRST-plugin-ida)
+
+---
+
+### RevEng.AI — Binary Similarity
+
+**What:** AI-powered binary similarity analysis. Identifies library code, matches functions across builds/platforms, suggests function names based on training corpus. Cloud-based analysis.
+
+**Use for:** Cross-version offset matching — when a game patches and functions move, RevEng.AI can match the old function to its new location by structural similarity rather than bytes.
+
+**Source:** [github.com/RevEngAI/reai-ida](https://github.com/RevEngAI/reai-ida)
+
+---
+
+## Ghidra Plugins
+
+### GhidrAssist — LLM-Powered RE Assistant
+
+**What:** Integrates Claude, GPT, or local Ollama models directly into Ghidra. Explains decompiled functions, suggests names, bulk-renames symbols, answers questions about the code in context.
+
+**Use for:** Rapid function triage on massive binaries — ask the LLM "what does this function do?" with the decompiled output as context. Bulk rename 1000+ functions in a session.
+
+**Source:** [github.com/jtang613/GhidrAssist](https://github.com/jtang613/GhidrAssist)
+
+---
+
+### BinDiffHelper — Cross-Version Comparison
+
+**What:** Integrates Google BinDiff into Ghidra's workflow. Export BinExport2 from Ghidra, diff two versions, import matched function names back.
+
+**Use for:** Post-patch offset recovery — diff the pre-patch and post-patch binaries, identify which functions moved, import the matches to propagate names.
+
+**Source:** [github.com/ubfx/BinDiffHelper](https://github.com/ubfx/BinDiffHelper)
+
+---
+
+### OOAnalyzer (Pharos) — Automated C++ Recovery
+
+**What:** Carnegie Mellon SEI's OOAnalyzer framework for Ghidra. Automated C++ class, method, and vtable recovery using Prolog-based reasoning over the binary.
+
+**Use for:** Large game binaries with complex C++ hierarchies where manual vtable reconstruction would take weeks. Runs as a Ghidra script and produces class definitions.
+
+**Source:** [github.com/cmu-sei/pharos](https://github.com/cmu-sei/pharos)
+
+---
+
+### RevEng.AI for Ghidra
+
+Same as the IDA plugin — AI binary similarity, function matching, and naming. Ghidra-native interface.
+
+**Source:** [github.com/RevEngAI/reai-ghidra](https://github.com/RevEngAI/reai-ghidra)
+
+---
+
+## FLIRT Signature Databases
+
+FLIRT (Fast Library Identification and Recognition Technology) signatures let IDA auto-name standard library functions. Critical for MSVC-compiled game binaries — without them, `memcpy`, `malloc`, `std::string::assign`, and thousands of CRT/STL functions appear as `sub_XXXXX`.
+
+### Pre-Selected Signatures (51 sigs)
+
+Priority order for game binaries compiled with MSVC v15 (Visual Studio 2017/2019):
+
+| Signature File | What It Names | Priority |
+|---|---|---|
+| `libvcruntime_15_msvc_x64.sig` | CRT basics (SEH, stack guards, type info) | 1 |
+| `libcmt_15_msvc_x64.sig` | C runtime (memcpy, malloc, printf, etc.) | 2 |
+| `libcpmt_15_msvc_64.sig` | C++ runtime (std::string, std::vector, std::map) | 3 |
+| `libcryptoMT_15_msvc_x64.sig` | OpenSSL crypto (AES, SHA, RSA) | 4 |
+| `libsslMT_15_msvc_x64.sig` | OpenSSL SSL/TLS | 5 |
+| `libcurl-vc-x64-*.sig` | libcurl HTTP client | 6 |
+| `libboost_*.sig` | Boost (filesystem, thread, regex, etc.) | 7 |
+
+**Apply in IDA:** `Shift+F5` → Apply new signature → select file. Apply in priority order — lower-priority sigs fill in what higher-priority ones missed.
+
+### Signature Databases
+
+| Database | Sigs | Coverage |
+|---|---|---|
+| **FLIRTDB** | 4000+ | Community collection covering MSVC, GCC, Clang, MinGW across many versions |
+| **sig-database** | 2000+ | Additional collection with emphasis on game middleware (Steam API, EAC SDK, etc.) |
+
+---
+
+## Binary Diffing Tools
+
+### Diaphora — IDA-Native Binary Diffing
+
+**What:** Python-based binary diffing that runs inside IDA. Exports IDB analysis to SQLite, then diffs two exports. More accurate than BinDiff for heavily optimized/obfuscated code because it uses IDA's deeper analysis data.
+
+**Use for:** Post-patch analysis — diff the pre-patch and post-patch game binary to find exactly what changed. Prioritize reviewing new/changed functions for updated offsets.
+
+**Usage:**
+```
+# In IDA with pre-patch binary:
+File → Script file → diaphora/diaphora.py → Export to SQLite
+
+# In IDA with post-patch binary:
+File → Script file → diaphora/diaphora.py → Export to SQLite
+
+# Then: Diff the two SQLite exports
+File → Script file → diaphora/diaphora.py → Diff
+```
+
+**Source:** [github.com/joxeankoret/diaphora](https://github.com/joxeankoret/diaphora)
+
+---
+
+### BinDiff — Structural CFG Comparison
+
+**What:** Google's binary diffing tool. Compares control flow graphs structurally — insensitive to register allocation and instruction scheduling changes. Industry standard for cross-version binary matching.
+
+**Use for:** Matching functions across game patches when Diaphora's byte-level diff is too noisy. BinDiff's CFG matching survives compiler flag changes and link-time optimization shuffles.
+
+**Usage:**
+```bash
+# Export from IDA: File → Produce file → Create BinExport2 file
+# Or from Ghidra: via BinDiffHelper extension
+bindiff old_version.BinExport new_version.BinExport
+# Opens BinDiff GUI with matched/unmatched function pairs
+```
+
+**Source:** [github.com/google/bindiff](https://github.com/google/bindiff)
+
+---
+
+## Debugger Sync — ret-sync
+
+**What:** Real-time synchronization between a debugger and IDA/Ghidra/Binary Ninja. When you step in the debugger, the disassembler view jumps to the same address. When you set a breakpoint in IDA, it's set in the debugger.
+
+**Supported debuggers:** WinDbg, x64dbg, GDB, LLDB, OllyDbg 1/2
+**Supported disassemblers:** IDA, Ghidra, Binary Ninja
+
+**Use for:** Live game analysis — attach x64dbg or WinDbg to the game process while IDA shows the decompiled view. Step through a function in the debugger and see the pseudocode update in real time.
+
+**Install:**
+- IDA: Copy `ext_ida/` to IDA plugins directory
+- Ghidra: Install `ext_ghidra/` as a Ghidra extension
+- x64dbg: Copy `ext_x64dbg/` DLL to x64dbg plugins directory
+- WinDbg: Load `ext_windbg/` extension
+
+**Source:** [github.com/bootleg/ret-sync](https://github.com/bootleg/ret-sync)
+
+---
+
+## SDK / Type Libraries
+
+### r5sdk — Reversed Apex Legends SDK
+
+**2,438 header files** reversed by the community (primarily Mauler125). Covers the entire Source Engine (Respawn fork) class hierarchy.
+
+| Directory | Headers | Coverage |
+|---|---|---|
+| `game/server/` | 79 | Player, entity, AI, weapons, physics |
+| `game/client/` | 35 | Client entities, HUD, viewrender |
+| `game/shared/` | 15 | Player vars, weapon data, melee |
+| `engine/` | 61 | Client/server engine, networking |
+| `public/` | 178 | Interfaces, tier0/1/2, vscript, vgui |
+| `rtech/` | 19 | Pak system, playlists, LiveAPI, Stryder |
+| `networksystem/` | 6 | Pylon, bans, host manager |
+| `thirdparty/` | ~300 | Boost, curl, protobuf, mbedtls, lz4, zstd |
+
+**Import into IDA:** File → Load file → Parse C header file → select the `.h` files you need. Key starting headers: `player.h`, `baseentity.h`, `convar.h`.
+
+**Import into Ghidra:** File → Parse C Source → add the header directories to the include path. Then apply types to decompiled functions.
+
+**Source:** [github.com/AyeZee/r5sdk](https://github.com/AyeZee/r5sdk) (community fork)
+
+---
+
+## Recommended Workflow
+
+### First Load (any game binary)
+
+```
+1. Load in IDA → let auto-analysis run
+2. Apply FLIRT sigs (Shift+F5) → names CRT/STL/crypto/network functions
+3. Run ClassInformer → scan RTTI → browse vtables
+4. Run HexRaysCodeXplorer → reconstruct key types from vtables
+5. Import SDK headers if available (r5sdk, UE SDK, etc.)
+6. Run FIRST → community function fingerprints for remaining unknowns
+```
+
+### Post-Patch Update
+
+```
+1. Load new binary in IDA → apply same FLIRT sigs
+2. Export both IDBs via Diaphora (or BinExport2 for BinDiff)
+3. Diff → identify moved/changed functions
+4. Import matched names into new IDB
+5. Update offset table — re-verify sigs that moved
+```
+
+### Live Analysis
+
+```
+1. Attach debugger (x64dbg/WinDbg) to game process
+2. Start ret-sync in both debugger and IDA/Ghidra
+3. Set breakpoints on functions of interest
+4. Step through execution → decompiler view follows in real time
+5. Inspect register/memory state at each step
+```
+
+---
+
+## MCP Integration
+
+These tools complement the Perception MCP server's RE tools:
+
+| Perception MCP Tool | Offline Equivalent | When to Use Which |
+|---|---|---|
+| `find_pattern` | SigMakerEx (generate) | SigMakerEx to create sigs; `find_pattern` to apply them live |
+| `struct_dump` | ClassInformer + CodeXplorer | ClassInformer for RTTI discovery; `struct_dump` for live memory layout verification |
+| `disassemble` | IDA/Ghidra decompiler | IDA for deep static analysis; `disassemble` for quick live checks |
+| `analyze_vtable` | ClassInformer | ClassInformer for full hierarchy; `analyze_vtable` for live vtable state |
+| `read_rtti` | ClassInformer | Same data source, different access — live vs. static |
+| `generate_signature` | SigMakerEx | Both generate sigs; SigMakerEx has more options for wildcarding |
+| `build_call_graph` | IDA xrefs | IDA xrefs are more complete; `build_call_graph` works on live memory |
+
+---
+
 ## Source: `knowledge/script-organization-patterns.md`
 
 # Script Organization Patterns
@@ -3653,3 +7478,216 @@ A flat list of organizational mistakes and the consequence each one buys you:
   JSON and sandboxed-filesystem APIs used by the config-persistence pattern.
 - `docs/perception/lifecycle-and-routines.md` — why there is no unload hook and
   how `register_routine` makes the load switch.
+
+---
+
+## Source: `knowledge/vmprotect2-analysis.md`
+
+# VMProtect 2.x Analysis with vmp2
+
+Practical guide for analyzing binaries protected by **VMProtect 2.x** using the
+open-source **backengineering/vmp2** toolchain, x64dbg VMProtect/ScyllaHide
+plugins, and the `tools/analyze-vmprotect.py` toolkit helper.
+
+> **Scope:** Authorized security research only. Use these tools on binaries you
+> own, have explicit permission to test, or are analyzing in a controlled CTF /
+> research environment. See `skill://authorized-security-research`.
+
+---
+
+## What is VMProtect 2.x?
+
+VMProtect 2.x virtualizes selected functions by translating x86/x64 machine code
+into a custom bytecode executed by a runtime interpreter (the *VM dispatcher*).
+Key artifacts:
+
+- **`.vmp0` / `.vmp1` / `.vmp2`** sections containing VM bytecode and metadata.
+- **VM entry stubs** at every protected function that push a key/bytecode
+  pointer, then `call` or `jmp` into `vmenter`.
+- **A dispatch loop** that reads an opcode, decrypts it with a rolling key,
+  and jumps through a handler table.
+- **Import protection**: each API call is redirected through a small stub that
+  resolves at runtime.
+- **Anti-debug layer**: `RDTSC`, `INT 2D`, `CPUID`, PEB checks, and
+  `NtQueryInformationProcess`/`NtSetInformationThread` tricks.
+
+The `backengineering/vmp2` suite (C++, LLVM/Qt/Unicorn) automates the heavy
+lifting:
+
+| Component | Purpose |
+|-----------|---------|
+| `vmemu` | Unpacks VMP-protected binaries by emulating execution until OEP. |
+| `vmdevirt` | Lifts VMP bytecode to a closer-to-native representation (experimental). |
+| `vmprofiler` | Profiles and visualizes VM handler coverage. |
+| `vmprofiler-cli` | Command-line access to `vmprofiler` analysis. |
+| `vmhook` | Hooks VM entry stubs to capture bytecode streams at runtime. |
+| `vmassembler` | Assembler/disassembler for VMP bytecode research. |
+
+Source: [github.com/backengineering/vmp2](https://github.com/backengineering/vmp2)
+
+---
+
+## Triage with `tools/analyze-vmprotect.py`
+
+The toolkit ships a stdlib-only Python script that detects VMP artifacts,
+suggests a tooling chain, and (optionally) shells out to an external `vmemu`
+binary for unpacking.
+
+```bash
+# Basic analysis (read-only)
+python3 tools/analyze-vmprotect.py target.exe
+
+# JSON output for further automation
+python3 tools/analyze-vmprotect.py --json target.exe
+
+# Optional: invoke external vmemu to dump unpacked memory
+python3 tools/analyze-vmprotect.py --run-vmemu --out unpacked.bin target.exe
+```
+
+The script reports:
+
+- VMP section presence and per-section entropy.
+- Estimated VMP version/variant.
+- VM entry stubs (`PUSH imm32; CALL/JMP rel32`).
+- Anti-debug indicators (`RDTSC`, `INT 2D`, PEB debug checks, `CPUID`).
+- Tool recommendations (`vmp2`, `x64dbg+ScyllaHide`, `NoVmp`, `VTIL-Core`).
+
+---
+
+## Workflow: VMP 2.x → Unpacked → Devirtualized
+
+### 1. Identify the Protector
+
+Check sections and strings:
+
+```bash
+r2 -nn target.exe
+iS
+iz~vmp|VMProtect|protect
+```
+
+Or use the toolkit script:
+
+```bash
+python3 tools/analyze-vmprotect.py --json target.exe | jq '.vmprotect_detected, .version_hint'
+```
+
+### 2. Bypass Anti-Debug (Live Debugging)
+
+Use x64dbg with the ScyllaHide plugin:
+
+1. Load target in x64dbg.
+2. Plugins → ScyllaHide → Options → check **all** anti-debug bypasses.
+3. Set breakpoints on `VirtualProtect` and `NtSetInformationThread`.
+4. Run; when `VirtualProtect` hits a large `PAGE_EXECUTE_READ` region on the
+   original `.text`, the protector has decrypted/unpacked code.
+5. Record the OEP and dump the process with Scylla.
+
+### 3. Unpack with `vmemu`
+
+If you have a legitimately obtained `vmemu` binary:
+
+```bash
+vmemu --bin target.exe --unpack --out unpacked.bin
+```
+
+This emulates the VMP runtime until the original entry point is reached and
+writes a dumped memory image. The toolkit wrapper can do this for you:
+
+```bash
+python3 tools/analyze-vmprotect.py --run-vmemu --out unpacked.bin target.exe
+```
+
+### 4. Find VM Bytecode Regions and Handlers
+
+After unpacking, locate the `.vmp2` bytecode and the dispatcher:
+
+```bash
+r2 -nn unpacked.bin
+s section..vmp2
+px 256             # inspect first bytes
+/V 0f b6 00        # search for dispatcher fetch: movzx eax, byte [rax]
+```
+
+Typical dispatcher shape:
+
+```asm
+movzx   eax, byte ptr [rcx]      ; fetch next opcode
+xor     al, <key_byte>            ; decrypt
+and     eax, 0xff
+mov     rdx, [handler_table]
+jmp     qword ptr [rdx + rax*8]  ; dispatch
+```
+
+### 5. Lift / Devirtualize
+
+For VMP 2.x, try `vmdevirt` first:
+
+```bash
+vmdevirt --input target.exe --bytecode-rva 0x12345 --output lifted.asm
+```
+
+For VMP 3.x, prefer `NoVmp` / `VTIL-Core`:
+
+```bash
+novmp --input target.exe --rva 0x12345 --output lifted.ll
+opt -O2 lifted.ll -o optimized.ll
+```
+
+### 6. Validate the Output
+
+- Compare lifted code against known native implementations of the same logic.
+- Re-run in a debugger and ensure function outputs match the original.
+- Look for missing side effects (VMP sometimes hides IAT writes or SEH setup).
+
+---
+
+## x64dbg VMProtect Plugin Workflow
+
+Some researchers use a dedicated x64dbg VMProtect plugin to speed up VMP work:
+
+1. **Install** the plugin into `x64dbg\x64\plugins`.
+2. **Enable ScyllaHide** to neutralize anti-debug.
+3. **Plugins → VMProtect → Trace VM entry** to log every `vmenter` call.
+4. **Dump bytecode** to a file for offline analysis with `vmassembler` or
+   `vmprofiler-cli`.
+5. **Set conditional breakpoints** on handler transitions to capture execution
+   traces.
+
+> The plugin interface is tool-specific; refer to its documentation for exact
+> menu names. The principle remains: bypass anti-debug → trace VM entries → dump
+> bytecode → lift/decode.
+
+---
+
+## Common Pitfalls
+
+| Pitfall | Fix |
+|---------|-----|
+| `vmemu` fails immediately | Anti-debug is still active; use ScyllaHide or HyperDbg. |
+| Dispatcher not found | VMP version may be 3.x; switch to `NoVmp` / `VTIL-Core`. |
+| Lifted output is incomplete | Provide the exact bytecode RVA and ensure the binary is unpacked first. |
+| Imports still broken after dump | Reconstruct IAT with Scylla before saving the final executable. |
+| Entropy low in `.vmp2` | The section may be uninitialized/padded, or the binary is packed differently. |
+
+---
+
+## Tool Matrix
+
+| Goal | Best Tool | Notes |
+|------|-----------|-------|
+| Detect / triage VMP | `tools/analyze-vmprotect.py` | Stdlib-only, safe, fast. |
+| Unpack VMP 2.x | `vmemu` (vmp2) | Requires built `vmp2` suite. |
+| Live anti-debug bypass | `x64dbg + ScyllaHide` | Easiest first step. |
+| Devirtualize VMP 3.x | `NoVmp` / `VTIL-Core` | Static lifting to LLVM/VTIL IR. |
+| VM handler profiling | `vmprofiler` / `vmprofiler-cli` | Coverage and handler statistics. |
+| Bytecode disassembly | `vmassembler` | VMP-specific opcodes. |
+
+---
+
+## See Also
+
+- `signatures/obfuscation/protector-patterns.md` — byte patterns for VMP entry, dispatcher, import stubs.
+- `knowledge/deobfuscation-tools.md` — broader deobfuscation tool reference.
+- `.claude/skills/deobfuscation/SKILL.md` — general deobfuscation methodology.
+- `skill://authorized-security-research` — legal/ethical scope.

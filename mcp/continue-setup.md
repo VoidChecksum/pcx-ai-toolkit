@@ -133,6 +133,7 @@ dropped into `.continue/mcpServers/` — so `mcp/perception-mcp-config.json` can
 there verbatim instead of translating it to YAML.
 
 For binary analysis backed by IDA, install a legitimately-licensed IDA yourself and wire
+up the binary-analysis MCP server (see [`binary-analysis-setup.md`](binary-analysis-setup.md)),
 then register its stdio MCP server alongside `perception` with `type: stdio`.
 
 ## Typical Workflow

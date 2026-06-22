@@ -70,14 +70,21 @@ does not provide, patch, or license IDA. With IDA present, activate the idalib b
 and register the MCP server:
 
 ```bash
+./mcp/setup-binary-analysis.sh                           # Linux / macOS / WSL
+./mcp/setup-binary-analysis.sh --skip-pkg                # already have ida-pro-mcp
+./mcp/setup-binary-analysis.sh --install-dir /your/path  # non-standard location
 ```
 ```powershell
+.\mcp\setup-binary-analysis.ps1
+.\mcp\setup-binary-analysis.ps1 -SkipPkg
+.\mcp\setup-binary-analysis.ps1 -InstallDir "D:\tools\ida"
 ```
 
 Both scripts write this entry to `~/.claude/mcp.json` automatically:
 ```json
 {
   "mcpServers": {
+    "binary-analysis": {
       "command": "uvx",
       "args": ["idalib-mcp", "--stdio"],
       "env": { "IDADIR": "/path/to/installation" }
@@ -87,3 +94,4 @@ Both scripts write this entry to `~/.claude/mcp.json` automatically:
 ```
 
 Restart Claude Code after running either script.
+Full reference: [`binary-analysis-setup.md`](binary-analysis-setup.md)

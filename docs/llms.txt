@@ -193,10 +193,15 @@ The core Lua 5.4 reference manual scraped from lua.org (Lua license).
 
 Behavioral / discipline skills loaded automatically by AI tools (Claude Code / OMC).
 
+- [AI Pair Programming — Driving Claude / Cursor / Cline / Aider Well on PCX Projects](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/ai-pair-programming/SKILL.md): The other skills cover what to write; this one covers how to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it 
+- [Anti-Cheat Reverse Engineering — Kernel-Level Game Protection Analysis](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/anti-cheat-re/SKILL.md): Methodology for reverse engineering kernel-level anti-cheat systems: EAC (Easy Anti-Cheat), BattlEye, Vanguard, GameGuard, XIGNCODE3, and similar kernel drivers that protect game processes. Covers the
+- [Deobfuscation — Reversing Protected Binaries](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/deobfuscation/SKILL.md): Methodology for reversing binaries protected by commercial obfuscators (Themida/WinLicense, VMProtect, Code Virtualizer), compiler-level obfuscation (LLVM-obfuscator, Hikari, OLLVM), and custom protec
 - [Perception.cx Game-Cheat Script Development Guidelines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-guidelines/SKILL.md): Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot,
 - [Game Cheat Script Master — Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-script-master/SKILL.md): This skill turns any LLM into a specialized Perception.cx cheat-script developer.
 - [Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-hacking-pcx/SKILL.md): Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
+- [Kernel Driver Analysis — Technical Patterns for AC Driver Reversing](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/kernel-analysis/SKILL.md): Technical patterns for reversing Windows kernel drivers: WDM/KMDF structure identification, IOCTL dispatch table extraction, kernel callback enumeration, integrity check routines, obfuscation layers, 
 - [Perception MCP Tool Routing — The Decision Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/mcp-tool-routing/SKILL.md): 59 tools across memory I/O, modules/threads/PE, memory regions, pattern/scanner/xrefs/signature, code analysis, symbol/function lookup, handles, system/environment, and the Enma scripting bridge. This
+- [Multi-Binary Targeting — One Script, N Game Versions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/multi-binary-targeting/SKILL.md): The pattern for supporting multiple binaries (game versions, architectures, storefront builds, beta channels) from one Enma codebase. A well-organized script can target v1.42.3 and v1.42.4, 32-bit and
 - [AngelScript Discipline for Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-angelscript-discipline/SKILL.md): Behavioral and syntactic rules for writing .as scripts on Perception.cx. The companion skill to game-cheat-guidelines (which is Enma-flavored): same domain, different language, different gotchas. Ange
 - [SKILL](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-bloat-audit/SKILL.md)
 - [SKILL](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-bloat-review/SKILL.md)
@@ -208,22 +213,43 @@ Behavioral / discipline skills loaded automatically by AI tools (Claude Code / O
 - [PCX Lua Discipline — Lua Idioms for Perception.cx Scripts](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-lua-discipline/SKILL.md): Lua-specific rules for writing Perception.cx scripts in Lua 5.4.6 (confirmed in docs/perception/lua/render-api.md). PCX exposes a third scripting surface alongside Enma and AngelScript; the host APIs 
 - [Patch Day Playbook — Recovering After a Game Update](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-patch-day-playbook/SKILL.md): The ordered triage workflow for when a game update lands and your Perception.cx script stops working. This is the single most painful recurring scenario in scripting work; the cost is dominated by not
 - [Performance Budget — Frame-Time Targets for PCX Scripts](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-perf-budget/SKILL.md): Turns game-cheat-guidelines rule #4 (separate update from render) into enforceable numeric budgets, so the question "is my script too slow?" gets answered with monous() measurements instead of vibes. 
+- [PCX Reverse-Engineering Discipline — Finding Offsets Without Fooling Yourself](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-re-discipline/SKILL.md): Workflow discipline for reverse engineering and offset maintenance: locating structs, generating signatures, resolving RIP-relative addresses, and keeping an offset table alive across game patches. De
 - [Streamproof Overlay — Capture Compatibility for PCX Renders](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-streamproof/SKILL.md): When PCX overlay output shows up in screen captures and when it doesn't, mapped per capture method (OBS, Discord, GeForce ShadowPlay, NVIDIA Highlights, PrintScreen, Steam screenshot, capture cards). 
+- [RE Evidence Log — Every Claim Cites Its Proof](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/re-evidence-log/SKILL.md): The discipline of recording why you trust each offset and sig in your project. The offset table is data; the evidence log is the proof behind it. Without the log, every patch day starts from zero on t
+- [Rust-Python Integration & Native Proxying Discipline](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/rust-python-integration/SKILL.md): Guidelines for designing, developing, and extending hybrid Rust-Python tools in the pcx-ai-toolkit environment.
+- [Script Bundler — Packaging and Shipping PCX Scripts](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/script-bundler/SKILL.md): The build and deployment workflow for PCX scripts: when to distribute raw .em source vs precompiled .emb, the bundle order that respects the module-import graph, what survives hot-reload, the pre-ship
+- [Test Discipline & Memory Verification](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/test-discipline/SKILL.md): Ensure every offset, pointer chain, and struct layout is verified with live memory reads BEFORE committing it to a production overlay or aimbot loop.
 
 ## Knowledge References
 
 Quick references for engines, anti-cheat architecture, patterns, methodology.
 
+- [Aimbot Math Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/aimbot-math.md): This is the math companion to common-patterns.md. That file
+- [Kernel Anti-Cheat Architecture Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/anti-cheat-architecture.md): Architecture, components, and detection techniques for major kernel-level anti-cheat systems. Read this before starting AC analysis — it tells you what you're looking at and what each AC is known to m
 - [Cheat Script Cookbook](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/cheat-script-cookbook.md): This file is the practical companion to game-cheat-guidelines and game-hacking-pcx.
 - [Common Enma Scripting Patterns for Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/common-patterns.md): proct gproc;
+- [Community Tools & MCP Servers](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/community-tools.md): Third-party tools, MCP servers, VS Code extensions, and utilities built by the Perception.cx community.
 - [Custom Draw API Patterns for Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/custom-draw-patterns.md): Direct D3D11 GPU access from AngelScript/Enma. Write HLSL shaders, create
+- [Deobfuscation Tools Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/deobfuscation-tools.md): Tools for defeating binary protection: devirtualizers, unpackers, symbolic execution engines, anti-debug bypass, string extraction, and CFG recovery. Organized by the obfuscation layer they target.
+- [CryEngine Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/engine-cryengine.md): Engine-specific RE notes for the CryEngine family and its derivatives (Lumberyard / Open 3D Engine, Dunia, Star Citizen's "StarEngine" fork). Read this before attaching to a CryEngine title — the glob
+- [Frostbite Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/engine-frostbite.md): Engine-specific RE notes for DICE/EA's Frostbite engine (Battlefield, Battlefront, FIFA / EA Sports FC, Dragon Age, Mass Effect Andromeda, Anthem, Need for Speed, Madden). Read this before attaching t
+- [Godot Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/engine-godot.md): Engine-specific notes for Godot Engine titles (Godot 3.x C++ core, Godot 4.x rewritten core with Vulkan and dual GDScript/C# support). Read this before attaching to a Godot title — the node-tree archi
+- [RE Engine Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/engine-re-engine.md): Engine-specific RE notes for Capcom's RE Engine (Resident Evil 2/3/4 remakes, RE7, RE Village, Devil May Cry 5, Monster Hunter Rise / Wilds, Street Fighter 6, Dragon's Dogma 2, Onimusha, Pragmata). Re
+- [REDengine Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/engine-redengine.md): Engine-specific RE notes for CD Projekt Red's REDengine (Cyberpunk 2077 on REDengine 4, The Witcher 3 on REDengine 3). Read this before attaching to a REDengine title — its RTTI/reflection system, RED
 - [Enma Language Quick Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/enma-cheatsheet.md): int32 x = 42;
+- [Perception.cx Game Support Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/game-targets.md): Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. Scripting language is AngelScript (AS) across the board; CS2 additionally exposes a Lua surf
 - [GUI Design Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/gui-design-patterns.md): The Perception.cx sidebar GUI is a fixed-width vertical strip. Good layouts make features discoverable, tunings easy to find, and state visible at a glance. The 12 game-cheat-guidelines say "GUI for e
+- [Kernel-Level Reverse Engineering Tools](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/kernel-re-tools.md): Tools for reversing kernel drivers, analyzing anti-cheat systems, and inspecting kernel state. Organized by workflow stage.
+- [Network Protocol Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/network-protocol-re.md): How to reverse-engineer a game's network protocol — capture, dissect, identify message boundaries, decode payloads. The defensive / educational half of network RE; pairs with the engine-RE references 
+- [Obfuscation & Protector Taxonomy](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/obfuscation-taxonomy.md): Architecture, VM internals, protection layers, and known weaknesses for every major commercial and open-source binary protector. Read this before starting deobfuscation — it tells you what you're figh
+- [Offset Finding and Maintenance Methodology](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/offset-methodology.md): 1. Open the function in IDA/Ghidra. Find the instruction that loads/references the value you need.
 - [Perception.cx Enma API Quick Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-api-cheatsheet.md): All natives are auto-registered. No import needed (except import "vec"; import "color"; for those types).
 - [PCX Cross-Language Bridge — Enma vs AngelScript vs Lua](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-cross-language-bridge.md): Perception.cx supports three scripting languages: Enma (the native one), AngelScript, and Lua. Each has a different API surface, different performance characteristics, and different ergonomic strength
 - [PCX Documentation Roots](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-doc-roots.md): The only authoritative sources for Perception.cx scripting APIs are these two
 - [PCX API Version Matrix](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-version-matrix.md): This file maps each PCX API addition / change / removal to the version it landed in, so scripts that target older PCX runtimes know what's safe. Drawn from docs/perception/changelogs.md.
+- [RE Plugins & Tools Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/re-plugins-and-tools.md): IDA Pro plugins, Ghidra extensions, FLIRT signature databases, binary diffing tools, and debugger sync infrastructure for game binary reverse engineering. Every tool listed here is cloned, ready to bu
 - [Script Organization Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/script-organization-patterns.md): How an Enma project on Perception.cx is laid out once it grows past a single
+- [VMProtect 2.x Analysis with vmp2](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/vmprotect2-analysis.md): Practical guide for analyzing binaries protected by VMProtect 2.x using the
 
 ## IDE Drop-Ins
 
@@ -241,13 +267,61 @@ Project-rules drop-ins for Claude Code / Cursor / Cline / Copilot / Aider / Zed 
 
 Starter scripts; copy and customize for your project.
 
+- [aimbot-skeleton](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/aimbot-skeleton.em)
+- [aim](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/aim.em)
+- [esp](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/esp.em)
+- [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/globals.em)
+- [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/main.em)
+- [menu](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/menu.em)
+- [offsets](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/offsets.em)
+- [radar](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/radar.em)
+- [triggerbot](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/triggerbot.em)
+- [utils](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-em/utils.em)
+- [feature](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project/feature.em)
+- [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project/globals.em)
+- [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project/main.em)
+- [menu](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project/menu.em)
+- [offsets](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project/offsets.em)
 - [hello-world](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/hello-world.em)
+- [minimap](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/minimap.em)
+- [overlay-basic](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/overlay-basic.em)
+
+## AngelScript Templates
+
+Starter AngelScript scaffolds.
+
+- [aim](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/aim.as)
+- [esp](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/esp.as)
+- [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/globals.as)
+- [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/main.as)
+- [menu](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/menu.as)
+- [offsets](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/offsets.as)
+- [radar](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/radar.as)
+- [triggerbot](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/triggerbot.as)
+- [utils](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/utils.as)
+- [feature](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project-as/feature.as)
+- [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project-as/globals.as)
+- [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project-as/main.as)
+
+## Signatures & RE Guides
+
+Engine-specific reversal guides (Source, UE, Unity IL2CPP, Source 2, anti-cheat, obfuscation).
+
+- [Anti-Cheat Driver Identification Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/anti-cheat/common-ac-patterns.md): Byte patterns and file signatures for identifying known anti-cheat drivers in memory or on disk. Use with findcodepattern or r2 / IDA pattern search.
+- [Protector Identification Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/obfuscation/protector-patterns.md): Byte patterns, section names, and behavioral signatures for identifying binary protectors. Use for triage — name the protector before starting analysis.
+- [Common Source Engine Signature Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/source-engine/common-sigs.md): 1. Find the function in IDA/Ghidra that accesses the global you need
+- [Source 2 Engine Reversal Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/source2-engine/source2-patterns.md): Pattern scanning, schema resolution, and struct access for Source 2 games: Counter-Strike 2, Deadlock.
+- [Unity IL2CPP Reversal Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/unity-il2cpp/il2cpp-patterns.md): Pattern scanning and struct resolution for Unity games compiled with IL2CPP (Ahead-Of-Time). Applies to: Escape from Tarkov, Rust, Arena Breakout Infinite, and any other Unity title using IL2CPP.
+- [Unreal Engine Reversal Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/unreal-engine/ue-reversal-guide.md): Source: Perception.cx Learning & Research forum (mk17, underscore).
 
 ## Standalone Tools
 
 Stdlib-only Python tools for binary RE / sig validation / dumper conversion / linting.
 
 - [pcx-ai-toolkit tools package](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/__init__.py)
+- [Section names strongly associated with VMProtect](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/analyze-vmprotect.py): VMPSECTIONS = (b'.vmp0', b'.vmp1', b'.vmp2', b'.vmp3', b'.vmp4')
+- [── Detection tables ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/anti-debug-scanner.py): DIRECTCHECKIMPORTS = {
+- [.text classifier thresholds (block-level identical %, raw-size delta %).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/binary-diff-summary.py): RECOMPILEMINSAME = 70.0
 - [── Upstream endpoints ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-api-index.py): ENMAROOTURL = "https://docs.perception.cx/perception/enma/readme.md"
 - [Exclude only the generated bundles sitting directly under docs/.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-counts.py): if p.parent == (REPOROOT / "docs") and p.name.startswith("llms-"):
 - [── Repo layout ──────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-llms-index.py): REPOROOT = Path(file).resolve().parent.parent
@@ -256,15 +330,26 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [check-internal-links](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-internal-links.py)
 - [Cut the "Agent Instructions" footer — it mentions urls, not tools.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-mcp-config.py): txt = re.split(r"\n#\sAgent Instructions\b", txt)[0]
 - [Scripting-API surface keywords that make a changelog release "API-relevant".](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-version-matrix.py): APIKEYWORDS = re.compile(
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dump-strings-xor.py): import os
+- [Internal representation: the parsed table is a list of (category, entries)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dumper-to-enma.py): # groups. category is None when the source has no natural grouping; otherwise
+- [── Parse rules (tolerant of formatting variation) ────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/evidence-log-validator.py): # const <type> OFFNAME ...   |   const string SIGNAME ...
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/identify-protector.py): import os
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/module-export-mapper.py): import os
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/offset-diff.py): import os
+- [A normalized pattern is a list where each element is an int byte (0-255)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pattern-format-converter.py): # or None for a wildcard. All parsing converts to this; all emitting reads it.
 - [ANSI colors (disabled on Windows if not supported)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pcx.py): def supportscolor() -> bool:
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pe-section-analyzer.py): import os
+- [── Hash algorithms ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/resolve-api-hashes.py): def ror13add(name: bytes) -> int:
 - [── Rule registry ─────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/script-linter.py): # rule number -> (severity, one-liner). Severity is fixed per rule, not per hit.
 - [1. Update submodules](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/setup-core.py): print("[..] Checking git submodules...")
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/sig-uniqueness-checker.py): import os
 - [Types that require an explicit module import in Enma.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/symbol-check.py): ENMAIMPORTREQUIREDTYPES = {
 
 ## Build Scripts
 
 Bash scripts for pre-ship hygiene checks and one-shot installers.
 
+- [Install reverse engineering plugins, deobfuscation tools, and Python packages.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/install-re-tools.sh): #
 - [pre-ship-check.sh — pre-release hygiene checklist for PCX scripting projects.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pre-ship-check.sh): #
-- [test-runner.sh — Smoke test the core PCX toolkit tools.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/test-runner.sh): #
+- [test-runner.sh — Smoke test all python tools against a mock PE binary.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/test-runner.sh): #
 - [update-toolkit.sh — Self-update pcx-ai-toolkit from its git remote.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/update-toolkit.sh): #
