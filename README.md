@@ -13,10 +13,11 @@
 [![Doc Lines](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.doc_lines&label=Doc%20Lines&color=22c55e)](#knowledge-surface)
 [![MCP Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.mcp_tools&label=MCP%20Tools&color=0ea5e9)](#mcp-integration)
 [![AI Skills](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.skills&label=AI%20Skills&color=eab308)](#ai-agent-stack)
+[![Native Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.native_tools&label=Native%20Tools&color=64748b)](#native-re-tools)
 
 **Make LLMs write Perception.cx code from verified Enma and AngelScript sources, not guessed APIs.**
 
-`llms.txt` context packs | source-backed API oracle | MCP tools | validators | templates | AI skills | VS Code and Visual Studio packages
+`llms.txt` context packs | source-backed API oracle | MCP tools | validators | native Rust RE tools | templates | AI skills | VS Code and Visual Studio packages
 
 [AI Start Here](#ai-start-here) | [Anti-Hallucination](#anti-hallucination-pipeline) | [Knowledge](#knowledge-surface) | [MCP](#mcp-integration) | [Editors](#editor-and-vsix-packages) | [Safety](#safety-and-scope)
 
@@ -162,9 +163,9 @@ validate_project(path)
 
 ## Knowledge Surface
 
-| Docs | Doc Lines | API Docs Indexed | API Functions | API Methods | Skills | Templates | MCP Tools |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 124 | 32,186 | 39 | 836 | 333 | 25 | 30 | 59 |
+| Docs | Doc Lines | API Docs Indexed | API Functions | API Methods | Skills | Templates | MCP Tools | Native Tools |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 124 | 32,186 | 39 | 836 | 333 | 25 | 30 | 59 | 4 |
 
 | Surface | Path | Best For |
 |---|---|---|
@@ -226,8 +227,30 @@ pcx verify-project ./my-esp --allow-placeholders --allow-unverified
 | [tools/check-doc-drift.py](tools/check-doc-drift.py) | Compare local docs against upstream |
 | [tools/regenerate-docs.py](tools/regenerate-docs.py) | Fetch drift-checkable upstream Markdown into `docs/` |
 | [tools/re-importer.py](tools/re-importer.py) | Convert IDA/Ghidra/Binja/ReClass exports into PCX offset/evidence seeds |
+| [tools/sig-uniqueness-checker.py](tools/sig-uniqueness-checker.py) | Validate byte signatures; proxies to native Rust when built |
+| [tools/binary-diff-summary.py](tools/binary-diff-summary.py) | Patch-day section diff and recompile/refactor/major-change classifier; proxies to native Rust when built |
+| [tools/offset-diff.py](tools/offset-diff.py) | Diff named direct/RIP signatures across binary versions; proxies to native Rust when built |
 | [tools/check-skill-contract.py](tools/check-skill-contract.py) | Reject stale or unsupported AI-skill contracts |
 | [tools/check-mcp-config.py](tools/check-mcp-config.py) | Keep runtime MCP config aligned with docs |
+
+## Native RE Tools
+
+The high-volume binary-analysis path is Rust-first with Python compatibility wrappers. Running `setup.sh`, `setup.ps1`, or CI builds these binaries into `tools/bin/`; if Cargo is unavailable, the same Python commands fall back automatically.
+
+```bash
+cargo build --release --manifest-path tools/pe-parser/Cargo.toml
+mkdir -p tools/bin
+cp tools/pe-parser/target/release/{pe-parser,sig-uniqueness-checker,binary-diff-summary,offset-diff} tools/bin/
+```
+
+| Native binary | Wrapper | Use |
+|---|---|---|
+| `pe-parser` | [tools/lib/pe_parse.py](tools/lib/pe_parse.py) | PE/ELF/Mach-O metadata extraction for all RE tools |
+| `sig-uniqueness-checker` | [tools/sig-uniqueness-checker.py](tools/sig-uniqueness-checker.py) | Unique/stale/ambiguous signature verdicts with near-miss support |
+| `binary-diff-summary` | [tools/binary-diff-summary.py](tools/binary-diff-summary.py) | Fast patch-day section survival summary |
+| `offset-diff` | [tools/offset-diff.py](tools/offset-diff.py) | Direct and RIP-relative offset movement report |
+
+Keep new binary-analysis tools in the same Cargo package under [tools/pe-parser](tools/pe-parser), then expose a small Python wrapper so existing agent commands do not change.
 
 ## AI Agent Stack
 
@@ -343,6 +366,7 @@ pcx-ai-toolkit/
 ├── knowledge/             API index, patterns, forum insights, RE references
 ├── templates/             Enma and AngelScript scaffolds
 ├── tools/                 CLI, validators, builders, RE helpers
+├── tools/pe-parser/       Rust-native parser, signature, diff, and offset tools
 ├── evals/                 Hallucination regression corpus
 ├── signatures/            Engine and protector reversal signature packs
 ├── mcp/                   Knowledge MCP and Perception MCP setup

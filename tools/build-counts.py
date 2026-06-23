@@ -15,6 +15,7 @@ Counts:
   knowledge   count of knowledge/*.md
   templates   count of supported starter scripts under templates/ (*.em, *.as + scaffold docs)
   tools       count of standalone tools/*.py + tools/*.sh (excludes lib/, pe-parser/)
+  native_tools count of compiled Rust CLI entry points under tools/pe-parser/src/
   signatures  count of signature files under signatures/**/*.md
   engines     count of knowledge/engine-*.md references
 
@@ -83,6 +84,10 @@ def build() -> dict:
     templates = sorted((REPO_ROOT / "templates").rglob("*"))
     templates = [p for p in templates if p.is_file() and p.suffix in {".em", ".as", ".md"} and p.name != "README.md"]
     tools = [p for p in (REPO_ROOT / "tools").iterdir() if p.is_file() and (p.suffix in {".py", ".sh"} or p.name == "pcx")]
+    native_tool_dir = REPO_ROOT / "tools" / "pe-parser" / "src"
+    native_tools = sorted((native_tool_dir / "bin").glob("*.rs"))
+    if (native_tool_dir / "main.rs").exists():
+        native_tools.append(native_tool_dir / "main.rs")
     sigs = sorted((REPO_ROOT / "signatures").rglob("*.md"))
     engines = sorted((REPO_ROOT / "knowledge").glob("engine-*.md"))
     return {
@@ -93,6 +98,7 @@ def build() -> dict:
         "knowledge": len(knowledge),
         "templates": len(templates),
         "tools": len(tools),
+        "native_tools": len(native_tools),
         "signatures": len(sigs),
         "engines": len(engines),
     }

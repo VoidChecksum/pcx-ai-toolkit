@@ -137,25 +137,33 @@ if (-not $SkipLsp) {
         }
     }
 }
-# -- post-update: rebuild Rust core parser -----------------------------------
+# -- post-update: rebuild Rust native tools ----------------------------------
 $cargo = Get-Command cargo -ErrorAction SilentlyContinue
 if (-not $SkipLsp -and $cargo) {
     Write-Host ""
-    Write-Host "Rebuilding Rust core parser (pe-parser.exe)..."
+    Write-Host "Rebuilding Rust native tools..."
     $parserDir = Join-Path $ToolkitDir "tools\pe-parser"
     $binDir = Join-Path $ToolkitDir "tools\bin"
+    $rustTools = @("pe-parser", "sig-uniqueness-checker", "binary-diff-summary", "offset-diff")
     Push-Location $parserDir
     try {
         & cargo build --release 2>&1 | Out-Null
         New-Item -ItemType Directory -Force -Path $binDir | Out-Null
-        Copy-Item (Join-Path $parserDir "target\release\pe-parser.exe") (Join-Path $binDir "pe-parser.exe") -Force -ErrorAction SilentlyContinue
-        if (Test-Path (Join-Path $binDir "pe-parser.exe")) {
-            Write-Host "  [ok] Rust core parser rebuilt: tools\bin\pe-parser.exe"
+        $copied = 0
+        foreach ($tool in $rustTools) {
+            $src = Join-Path $parserDir "target\release\$tool.exe"
+            if (Test-Path $src) {
+                Copy-Item $src (Join-Path $binDir "$tool.exe") -Force -ErrorAction SilentlyContinue
+                $copied++
+            }
+        }
+        if ($copied -gt 0) {
+            Write-Host "  [ok] Rust native tools rebuilt: $copied/$($rustTools.Count)"
         } else {
-            Write-Host "  [warn] Rust core build failed -- falling back to Python" -ForegroundColor Yellow
+            Write-Host "  [warn] Rust native tool build failed -- falling back to Python" -ForegroundColor Yellow
         }
     } catch {
-        Write-Host "  [warn] Rust core build failed -- falling back to Python" -ForegroundColor Yellow
+        Write-Host "  [warn] Rust native tool build failed -- falling back to Python" -ForegroundColor Yellow
     } finally {
         Pop-Location
     }
@@ -214,6 +222,6 @@ Write-Host "  Branch:   $currentBranch"
 if (-not $SkipLsp)     { Write-Host "  LSP:      rebuilt" }
 $binDir = Join-Path $ToolkitDir "tools\bin"
 $cargo = Get-Command cargo -ErrorAction SilentlyContinue
-if (-not $SkipLsp -and $cargo -and (Test-Path (Join-Path $binDir "pe-parser.exe"))) { Write-Host "  Rust:     rebuilt" }
+if (-not $SkipLsp -and $cargo -and (Test-Path (Join-Path $binDir "offset-diff.exe"))) { Write-Host "  Rust:     rebuilt" }
 if (-not $SkipSkills)   { Write-Host "  Skills:   refreshed" }
 if (-not $SkipBundles)  { Write-Host "  Bundles:  checked" }

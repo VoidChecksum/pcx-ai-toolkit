@@ -1,6 +1,6 @@
 use serde::Serialize;
-use std::io::Read;
 use std::fs::File;
+use std::io::Read;
 use std::path::Path;
 
 #[derive(Serialize, Clone)]
@@ -224,7 +224,11 @@ fn parse_mz_pe(data: &[u8]) -> Result<ParsedPE, String> {
                             if let Some(ibn_off) = rva_to_off(ibn_rva, &sections) {
                                 let func_name = read_cstr(data, ibn_off + 2, 256);
                                 if !func_name.is_empty() && !dll_name.is_empty() {
-                                    imports.push(format!("{}!{}", dll_name.to_lowercase(), func_name));
+                                    imports.push(format!(
+                                        "{}!{}",
+                                        dll_name.to_lowercase(),
+                                        func_name
+                                    ));
                                 }
                             }
                         }
@@ -280,7 +284,8 @@ fn parse_mz_pe(data: &[u8]) -> Result<ParsedPE, String> {
                             .cloned()
                             .unwrap_or_else(|| format!("Ordinal{}", ord_base + i as u32));
 
-                        let is_forwarder = func_rva >= export_dir.0 && func_rva < export_dir.0 + export_dir.1;
+                        let is_forwarder =
+                            func_rva >= export_dir.0 && func_rva < export_dir.0 + export_dir.1;
                         let forwarder = if is_forwarder {
                             rva_to_off(func_rva, &sections).map(|foff| read_cstr(data, foff, 512))
                         } else {
@@ -363,22 +368,54 @@ fn parse_elf(data: &[u8]) -> Result<ParsedPE, String> {
     let shstrtab_sec_off = shoff + shstrndx * shentsize;
     let (shstr_off, shstr_size) = if pe64 {
         if is_lsb {
-            let off = u64::from_le_bytes(data[shstrtab_sec_off + 24..shstrtab_sec_off + 32].try_into().unwrap()) as usize;
-            let sz = u64::from_le_bytes(data[shstrtab_sec_off + 32..shstrtab_sec_off + 40].try_into().unwrap()) as usize;
+            let off = u64::from_le_bytes(
+                data[shstrtab_sec_off + 24..shstrtab_sec_off + 32]
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
+            let sz = u64::from_le_bytes(
+                data[shstrtab_sec_off + 32..shstrtab_sec_off + 40]
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
             (off, sz)
         } else {
-            let off = u64::from_be_bytes(data[shstrtab_sec_off + 24..shstrtab_sec_off + 32].try_into().unwrap()) as usize;
-            let sz = u64::from_be_bytes(data[shstrtab_sec_off + 32..shstrtab_sec_off + 40].try_into().unwrap()) as usize;
+            let off = u64::from_be_bytes(
+                data[shstrtab_sec_off + 24..shstrtab_sec_off + 32]
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
+            let sz = u64::from_be_bytes(
+                data[shstrtab_sec_off + 32..shstrtab_sec_off + 40]
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
             (off, sz)
         }
     } else {
         if is_lsb {
-            let off = u32::from_le_bytes(data[shstrtab_sec_off + 16..shstrtab_sec_off + 20].try_into().unwrap()) as usize;
-            let sz = u32::from_le_bytes(data[shstrtab_sec_off + 20..shstrtab_sec_off + 24].try_into().unwrap()) as usize;
+            let off = u32::from_le_bytes(
+                data[shstrtab_sec_off + 16..shstrtab_sec_off + 20]
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
+            let sz = u32::from_le_bytes(
+                data[shstrtab_sec_off + 20..shstrtab_sec_off + 24]
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
             (off, sz)
         } else {
-            let off = u32::from_be_bytes(data[shstrtab_sec_off + 16..shstrtab_sec_off + 20].try_into().unwrap()) as usize;
-            let sz = u32::from_be_bytes(data[shstrtab_sec_off + 20..shstrtab_sec_off + 24].try_into().unwrap()) as usize;
+            let off = u32::from_be_bytes(
+                data[shstrtab_sec_off + 16..shstrtab_sec_off + 20]
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
+            let sz = u32::from_be_bytes(
+                data[shstrtab_sec_off + 20..shstrtab_sec_off + 24]
+                    .try_into()
+                    .unwrap(),
+            ) as usize;
             (off, sz)
         }
     };
@@ -396,38 +433,74 @@ fn parse_elf(data: &[u8]) -> Result<ParsedPE, String> {
         }
         let (sh_name_idx, sh_type, sh_flags, sh_addr, sh_offset, sh_size) = if pe64 {
             if is_lsb {
-                let name = u32::from_le_bytes(data[entry_off..entry_off+4].try_into().unwrap()) as usize;
-                let typ = u32::from_le_bytes(data[entry_off+4..entry_off+8].try_into().unwrap());
-                let flags = u64::from_le_bytes(data[entry_off+8..entry_off+16].try_into().unwrap());
-                let addr = u64::from_le_bytes(data[entry_off+16..entry_off+24].try_into().unwrap());
-                let offset = u64::from_le_bytes(data[entry_off+24..entry_off+32].try_into().unwrap()) as usize;
-                let size = u64::from_le_bytes(data[entry_off+32..entry_off+40].try_into().unwrap()) as usize;
+                let name =
+                    u32::from_le_bytes(data[entry_off..entry_off + 4].try_into().unwrap()) as usize;
+                let typ =
+                    u32::from_le_bytes(data[entry_off + 4..entry_off + 8].try_into().unwrap());
+                let flags =
+                    u64::from_le_bytes(data[entry_off + 8..entry_off + 16].try_into().unwrap());
+                let addr =
+                    u64::from_le_bytes(data[entry_off + 16..entry_off + 24].try_into().unwrap());
+                let offset =
+                    u64::from_le_bytes(data[entry_off + 24..entry_off + 32].try_into().unwrap())
+                        as usize;
+                let size =
+                    u64::from_le_bytes(data[entry_off + 32..entry_off + 40].try_into().unwrap())
+                        as usize;
                 (name, typ, flags, addr, offset, size)
             } else {
-                let name = u32::from_be_bytes(data[entry_off..entry_off+4].try_into().unwrap()) as usize;
-                let typ = u32::from_be_bytes(data[entry_off+4..entry_off+8].try_into().unwrap());
-                let flags = u64::from_be_bytes(data[entry_off+8..entry_off+16].try_into().unwrap());
-                let addr = u64::from_be_bytes(data[entry_off+16..entry_off+24].try_into().unwrap());
-                let offset = u64::from_be_bytes(data[entry_off+24..entry_off+32].try_into().unwrap()) as usize;
-                let size = u64::from_be_bytes(data[entry_off+32..entry_off+40].try_into().unwrap()) as usize;
+                let name =
+                    u32::from_be_bytes(data[entry_off..entry_off + 4].try_into().unwrap()) as usize;
+                let typ =
+                    u32::from_be_bytes(data[entry_off + 4..entry_off + 8].try_into().unwrap());
+                let flags =
+                    u64::from_be_bytes(data[entry_off + 8..entry_off + 16].try_into().unwrap());
+                let addr =
+                    u64::from_be_bytes(data[entry_off + 16..entry_off + 24].try_into().unwrap());
+                let offset =
+                    u64::from_be_bytes(data[entry_off + 24..entry_off + 32].try_into().unwrap())
+                        as usize;
+                let size =
+                    u64::from_be_bytes(data[entry_off + 32..entry_off + 40].try_into().unwrap())
+                        as usize;
                 (name, typ, flags, addr, offset, size)
             }
         } else {
             if is_lsb {
-                let name = u32::from_le_bytes(data[entry_off..entry_off+4].try_into().unwrap()) as usize;
-                let typ = u32::from_le_bytes(data[entry_off+4..entry_off+8].try_into().unwrap());
-                let flags = u32::from_le_bytes(data[entry_off+8..entry_off+12].try_into().unwrap()) as u64;
-                let addr = u32::from_le_bytes(data[entry_off+12..entry_off+16].try_into().unwrap()) as u64;
-                let offset = u32::from_le_bytes(data[entry_off+16..entry_off+20].try_into().unwrap()) as usize;
-                let size = u32::from_le_bytes(data[entry_off+20..entry_off+24].try_into().unwrap()) as usize;
+                let name =
+                    u32::from_le_bytes(data[entry_off..entry_off + 4].try_into().unwrap()) as usize;
+                let typ =
+                    u32::from_le_bytes(data[entry_off + 4..entry_off + 8].try_into().unwrap());
+                let flags =
+                    u32::from_le_bytes(data[entry_off + 8..entry_off + 12].try_into().unwrap())
+                        as u64;
+                let addr =
+                    u32::from_le_bytes(data[entry_off + 12..entry_off + 16].try_into().unwrap())
+                        as u64;
+                let offset =
+                    u32::from_le_bytes(data[entry_off + 16..entry_off + 20].try_into().unwrap())
+                        as usize;
+                let size =
+                    u32::from_le_bytes(data[entry_off + 20..entry_off + 24].try_into().unwrap())
+                        as usize;
                 (name, typ, flags, addr, offset, size)
             } else {
-                let name = u32::from_be_bytes(data[entry_off..entry_off+4].try_into().unwrap()) as usize;
-                let typ = u32::from_be_bytes(data[entry_off+4..entry_off+8].try_into().unwrap());
-                let flags = u32::from_be_bytes(data[entry_off+8..entry_off+12].try_into().unwrap()) as u64;
-                let addr = u32::from_be_bytes(data[entry_off+12..entry_off+16].try_into().unwrap()) as u64;
-                let offset = u32::from_be_bytes(data[entry_off+16..entry_off+20].try_into().unwrap()) as usize;
-                let size = u32::from_be_bytes(data[entry_off+20..entry_off+24].try_into().unwrap()) as usize;
+                let name =
+                    u32::from_be_bytes(data[entry_off..entry_off + 4].try_into().unwrap()) as usize;
+                let typ =
+                    u32::from_be_bytes(data[entry_off + 4..entry_off + 8].try_into().unwrap());
+                let flags =
+                    u32::from_be_bytes(data[entry_off + 8..entry_off + 12].try_into().unwrap())
+                        as u64;
+                let addr =
+                    u32::from_be_bytes(data[entry_off + 12..entry_off + 16].try_into().unwrap())
+                        as u64;
+                let offset =
+                    u32::from_be_bytes(data[entry_off + 16..entry_off + 20].try_into().unwrap())
+                        as usize;
+                let size =
+                    u32::from_be_bytes(data[entry_off + 20..entry_off + 24].try_into().unwrap())
+                        as usize;
                 (name, typ, flags, addr, offset, size)
             }
         };
@@ -482,7 +555,12 @@ fn parse_macho(data: &[u8]) -> Result<ParsedPE, String> {
 
     let read_u32_endian = |offset: usize| -> Option<u32> {
         if offset + 4 <= data.len() {
-            let b = [data[offset], data[offset+1], data[offset+2], data[offset+3]];
+            let b = [
+                data[offset],
+                data[offset + 1],
+                data[offset + 2],
+                data[offset + 3],
+            ];
             if is_lsb {
                 Some(u32::from_le_bytes(b))
             } else {
@@ -496,8 +574,14 @@ fn parse_macho(data: &[u8]) -> Result<ParsedPE, String> {
     let read_u64_endian = |offset: usize| -> Option<u64> {
         if offset + 8 <= data.len() {
             let b = [
-                data[offset], data[offset+1], data[offset+2], data[offset+3],
-                data[offset+4], data[offset+5], data[offset+6], data[offset+7]
+                data[offset],
+                data[offset + 1],
+                data[offset + 2],
+                data[offset + 3],
+                data[offset + 4],
+                data[offset + 5],
+                data[offset + 6],
+                data[offset + 7],
             ];
             if is_lsb {
                 Some(u64::from_le_bytes(b))
@@ -603,6 +687,88 @@ fn parse_macho(data: &[u8]) -> Result<ParsedPE, String> {
 pub fn load_binary_data(path: &Path) -> Result<Vec<u8>, String> {
     let mut file = File::open(path).map_err(|e| format!("Could not open file: {}", e))?;
     let mut data = Vec::new();
-    file.read_to_end(&mut data).map_err(|e| format!("Could not read file: {}", e))?;
+    file.read_to_end(&mut data)
+        .map_err(|e| format!("Could not read file: {}", e))?;
     Ok(data)
+}
+
+pub fn parse_byte_pattern(text: &str) -> Result<Vec<Option<u8>>, String> {
+    let mut out = Vec::new();
+    for tok in text.replace(',', " ").split_whitespace() {
+        if tok == "?" || tok == "??" {
+            out.push(None);
+            continue;
+        }
+        if tok.len() != 2 {
+            return Err(format!("invalid hex byte {tok:?}"));
+        }
+        let byte = u8::from_str_radix(tok, 16).map_err(|_| format!("invalid hex byte {tok:?}"))?;
+        out.push(Some(byte));
+    }
+    if out.is_empty() {
+        return Err("empty pattern".to_string());
+    }
+    Ok(out)
+}
+
+pub fn format_byte_pattern(pattern: &[Option<u8>]) -> String {
+    pattern
+        .iter()
+        .map(|b| match b {
+            Some(v) => format!("{v:02X}"),
+            None => "??".to_string(),
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+pub fn scan_pattern(buf: &[u8], pattern: &[Option<u8>]) -> Vec<usize> {
+    let n = buf.len();
+    let m = pattern.len();
+    if m == 0 || m > n {
+        return Vec::new();
+    }
+    let anchor = pattern.iter().position(|b| b.is_some());
+    if anchor.is_none() {
+        return (0..=n - m).collect();
+    }
+    let anchor = anchor.unwrap();
+    let anchor_byte = pattern[anchor].unwrap();
+    let fixed: Vec<(usize, u8)> = pattern
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, b)| b.map(|v| (idx, v)))
+        .collect();
+    let mut hits = Vec::new();
+    let mut pos = anchor;
+    while pos < n {
+        let rel = match buf[pos..].iter().position(|&b| b == anchor_byte) {
+            Some(p) => p,
+            None => break,
+        };
+        pos += rel;
+        if pos < anchor {
+            pos += 1;
+            continue;
+        }
+        let start = pos - anchor;
+        if start + m > n {
+            break;
+        }
+        if fixed.iter().all(|(idx, byte)| buf[start + idx] == *byte) {
+            hits.push(start);
+        }
+        pos += 1;
+    }
+    hits
+}
+
+pub fn section_data<'a>(data: &'a [u8], section: &Section) -> &'a [u8] {
+    let start = section.raddr as usize;
+    let end = start.saturating_add(section.rsize as usize).min(data.len());
+    if start >= data.len() || start >= end {
+        &[]
+    } else {
+        &data[start..end]
+    }
 }

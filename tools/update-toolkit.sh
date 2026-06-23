@@ -143,15 +143,27 @@ if [ "$SKIP_LSP" -eq 0 ]; then
     done
 fi
 
-# ── post-update: rebuild Rust core parser ───────────────────────────────────
+# ── post-update: rebuild Rust native tools ──────────────────────────────────
 if [ "$SKIP_LSP" -eq 0 ] && command -v cargo &>/dev/null; then
     echo ""
-    echo "Rebuilding Rust core parser (pe-parser)..."
-    ( cd "$TOOLKIT_DIR/tools/pe-parser" && cargo build --release && mkdir -p ../bin && cp target/release/pe-parser ../bin/pe-parser ) >/dev/null 2>&1 || true
-    if [ -f "$TOOLKIT_DIR/tools/bin/pe-parser" ]; then
-        echo "  [ok] Rust core parser rebuilt: tools/bin/pe-parser"
+    echo "Rebuilding Rust native tools..."
+    RUST_TOOLS=(pe-parser sig-uniqueness-checker binary-diff-summary offset-diff)
+    if ( cd "$TOOLKIT_DIR/tools/pe-parser" && cargo build --release ) >/dev/null 2>&1; then
+        mkdir -p "$TOOLKIT_DIR/tools/bin"
+        copied=0
+        for tool in "${RUST_TOOLS[@]}"; do
+            if [ -f "$TOOLKIT_DIR/tools/pe-parser/target/release/$tool" ]; then
+                cp "$TOOLKIT_DIR/tools/pe-parser/target/release/$tool" "$TOOLKIT_DIR/tools/bin/$tool"
+                copied=$((copied + 1))
+            fi
+        done
     else
-        echo "  [warn] Rust core build failed — falling back to Python"
+        copied=0
+    fi
+    if [ "$copied" -gt 0 ]; then
+        echo "  [ok] Rust native tools rebuilt: $copied/${#RUST_TOOLS[@]}"
+    else
+        echo "  [warn] Rust native tool build failed — falling back to Python"
     fi
 fi
 
@@ -200,6 +212,6 @@ echo "  Version:  $NEW_VERSION"
 echo "  Commit:   $NEW_REF"
 echo "  Branch:   $CURRENT_BRANCH"
 [ "$SKIP_LSP" -eq 0 ]    && echo "  LSP:      rebuilt"
-[ "$SKIP_LSP" -eq 0 ]    && command -v cargo &>/dev/null && [ -f "$TOOLKIT_DIR/tools/bin/pe-parser" ] && echo "  Rust:     rebuilt"
+[ "$SKIP_LSP" -eq 0 ]    && command -v cargo &>/dev/null && [ -f "$TOOLKIT_DIR/tools/bin/offset-diff" ] && echo "  Rust:     rebuilt"
 [ "$SKIP_SKILLS" -eq 0 ]  && echo "  Skills:   refreshed"
 [ "$SKIP_BUNDLES" -eq 0 ] && echo "  Bundles:  checked"

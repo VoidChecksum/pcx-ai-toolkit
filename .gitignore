@@ -14,6 +14,8 @@ lsp/cpp-language-server/
 # Visual Studio extension build outputs + staged server payloads
 packages/
 bin/
+!tools/pe-parser/src/bin/
+!tools/pe-parser/src/bin/**
 obj/
 visualstudio/*/Server/**
 !visualstudio/*/Server/.gitkeep

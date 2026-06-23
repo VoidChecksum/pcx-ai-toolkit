@@ -77,7 +77,9 @@ jobs:
         run: |
           cargo build --release
           mkdir -p ../bin
-          cp target/release/pe-parser ../bin/pe-parser
+          for tool in pe-parser sig-uniqueness-checker binary-diff-summary offset-diff; do
+            cp "target/release/$tool" "../bin/$tool"
+          done
 
       - name: Run smoke tests
         run: ./tools/test-runner.sh

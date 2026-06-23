@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Shared core setup logic for pcx-ai-toolkit.
 
-This script builds LSP servers, compiles the Rust pe-parser, installs Claude Code
+This script builds LSP servers, compiles the Rust native tools, installs Claude Code
 skills, and optionally copies project rules. It is designed to be invoked by both
 setup.sh and setup.ps1 thin wrappers.
 """
@@ -13,6 +13,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+RUST_TOOLS = ("pe-parser", "sig-uniqueness-checker", "binary-diff-summary", "offset-diff")
 
 
 class CmdResult:
@@ -72,7 +73,7 @@ def build_lsp(name: str, path: Path, out_file: str) -> None:
         print(f"[!!] {name} build did not produce {out_file}")
 
 
-def build_rust_parser() -> None:
+def build_rust_tools() -> None:
     parser_dir = REPO_ROOT / "tools" / "pe-parser"
     bin_dir = REPO_ROOT / "tools" / "bin"
 
@@ -80,25 +81,32 @@ def build_rust_parser() -> None:
         return
 
     if not shutil.which("cargo"):
-        print("\n[--] Cargo not found — using Python implementations of PE parser")
+        print("\n[--] Cargo not found — using Python implementations of binary tools")
         return
 
-    print("\n[..] Building Rust core parser (pe-parser)...")
+    print("\n[..] Building Rust native tools...")
     build = run_command(["cargo", "build", "--release"], parser_dir)
     if not build.ok:
-        print("[!!] Rust core build failed — falling back to Python implementations")
+        print("[!!] Rust native tool build failed — falling back to Python implementations")
         _print_failure(["cargo", "build", "--release"], build)
         return
 
     bin_dir.mkdir(parents=True, exist_ok=True)
     ext = ".exe" if os.name == "nt" else ""
-    src_bin = parser_dir / "target" / "release" / f"pe-parser{ext}"
-    dest_bin = bin_dir / f"pe-parser{ext}"
-    try:
-        shutil.copy2(src_bin, dest_bin)
-        print(f"[ok] Rust core parser built: tools/bin/pe-parser{ext}")
-    except Exception as e:
-        print(f"[!!] Failed to copy Rust binary: {e}")
+    copied: list[str] = []
+    for tool in RUST_TOOLS:
+        src_bin = parser_dir / "target" / "release" / f"{tool}{ext}"
+        dest_bin = bin_dir / f"{tool}{ext}"
+        if not src_bin.exists():
+            print(f"[!!] Rust build did not produce {src_bin.name}")
+            continue
+        try:
+            shutil.copy2(src_bin, dest_bin)
+            copied.append(f"tools/bin/{tool}{ext}")
+        except Exception as e:
+            print(f"[!!] Failed to copy Rust binary {src_bin.name}: {e}")
+    if copied:
+        print(f"[ok] Rust native tools built: {', '.join(copied)}")
 
 
 def sync_skills() -> None:
@@ -162,8 +170,8 @@ def main() -> int:
     build_lsp("enma-lsp", REPO_ROOT / "lsp" / "enma-lsp", "server/dist/server.js")
     build_lsp("angel-lsp-pcx", REPO_ROOT / "lsp" / "angel-lsp-pcx", "server/out/server.js")
 
-    # 3. Build Rust PE parser
-    build_rust_parser()
+    # 3. Build Rust native tools
+    build_rust_tools()
 
     # 4. Sync Claude Code skills
     sync_skills()

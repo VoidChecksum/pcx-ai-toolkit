@@ -1,6 +1,6 @@
+use pe_parser::{load_binary_data, parse_pe_bytes};
 use std::env;
 use std::path::Path;
-use pe_parser::{parse_pe_bytes, load_binary_data};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -20,16 +20,15 @@ fn main() {
     };
 
     match parse_pe_bytes(&data) {
-        Ok(parsed) => {
-            match serde_json::to_string_pretty(&parsed) {
-                Ok(json) => println!("{}", json),
-                Err(e) => {
-                    let err_json = serde_json::json!({ "error": format!("JSON serialization error: {}", e) });
-                    println!("{}", serde_json::to_string_pretty(&err_json).unwrap());
-                    std::process::exit(4);
-                }
+        Ok(parsed) => match serde_json::to_string_pretty(&parsed) {
+            Ok(json) => println!("{}", json),
+            Err(e) => {
+                let err_json =
+                    serde_json::json!({ "error": format!("JSON serialization error: {}", e) });
+                println!("{}", serde_json::to_string_pretty(&err_json).unwrap());
+                std::process::exit(4);
             }
-        }
+        },
         Err(e) => {
             let err_json = serde_json::json!({ "error": e });
             println!("{}", serde_json::to_string_pretty(&err_json).unwrap());

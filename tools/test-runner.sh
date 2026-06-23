@@ -84,6 +84,15 @@ python3 "$TOOLKIT_DIR/tools/binary-diff-summary.py" --json --old "$TEST_EXE" --n
 echo "  7. offset-diff..."
 python3 "$TOOLKIT_DIR/tools/offset-diff.py" --json --old "$TEST_EXE" --new "$TEST_EXE" --sigs "$SIGS_JSON" > /dev/null
 
+if [ -x "$TOOLKIT_DIR/tools/bin/sig-uniqueness-checker" ] \
+    && [ -x "$TOOLKIT_DIR/tools/bin/binary-diff-summary" ] \
+    && [ -x "$TOOLKIT_DIR/tools/bin/offset-diff" ]; then
+    echo "  7b. native Rust RE tools..."
+    "$TOOLKIT_DIR/tools/bin/sig-uniqueness-checker" --json --sig "65 48 8B 04 25 60 00 00 00" "$TEST_EXE" > /dev/null
+    "$TOOLKIT_DIR/tools/bin/binary-diff-summary" --json --old "$TEST_EXE" --new "$TEST_EXE" > /dev/null
+    "$TOOLKIT_DIR/tools/bin/offset-diff" --json --old "$TEST_EXE" --new "$TEST_EXE" --sigs "$SIGS_JSON" > /dev/null
+fi
+
 echo "  8. dump-strings-xor..."
 python3 "$TOOLKIT_DIR/tools/dump-strings-xor.py" --json "$TEST_EXE" > /dev/null
 

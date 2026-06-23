@@ -64,7 +64,7 @@ CATEGORIES = [
     ('templates/**/*.em',              'Enma Templates',         'Starter scripts; copy and customize for your project.'),
     ('templates/**/*.as',              'AngelScript Templates',  'Starter AngelScript scaffolds.'),
     ('signatures/*/*.md',              'Signatures & RE Guides', 'Engine-specific reversal guides (Source, UE, Unity IL2CPP, Source 2, anti-cheat, obfuscation).'),
-    ('tools/*.py',                     'Standalone Tools',       'Stdlib-only Python tools for binary RE / sig validation / dumper conversion / linting.'),
+    ('tools/*.py',                     'Standalone Tools',       'Python-facing CLI tools for validation, generation, and RE; hot binary-analysis paths proxy to Rust when built.'),
     ('tools/*.sh',                     'Build Scripts',          'Bash scripts for pre-ship hygiene checks and one-shot installers.'),
 ]
 
@@ -175,7 +175,7 @@ def build_llms_txt() -> str:
     out.append('')
     out.append('> AI-powered scripting toolkit for the Perception.cx game-hacking research platform. '
                'Ships behavioral skills, language and API references, reverse-engineering knowledge, '
-               'discipline rules, multi-IDE drop-ins, and stdlib-only Python tools. '
+               'discipline rules, multi-IDE drop-ins, Python-facing CLI tools, and Rust-native RE helpers. '
                'MIT-licensed and public.')
     out.append('')
     out.append('Repository: ' + REPO_URL)

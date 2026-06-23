@@ -1,6 +1,6 @@
 # pcx-ai-toolkit
 
-> AI-powered scripting toolkit for the Perception.cx game-hacking research platform. Ships behavioral skills, language and API references, reverse-engineering knowledge, discipline rules, multi-IDE drop-ins, and stdlib-only Python tools. MIT-licensed and public.
+> AI-powered scripting toolkit for the Perception.cx game-hacking research platform. Ships behavioral skills, language and API references, reverse-engineering knowledge, discipline rules, multi-IDE drop-ins, Python-facing CLI tools, and Rust-native RE helpers. MIT-licensed and public.
 
 Repository: https://github.com/VoidChecksum/pcx-ai-toolkit
 License: MIT
@@ -298,7 +298,7 @@ Engine-specific reversal guides (Source, UE, Unity IL2CPP, Source 2, anti-cheat,
 
 ## Standalone Tools
 
-Stdlib-only Python tools for binary RE / sig validation / dumper conversion / linting.
+Python-facing CLI tools for validation, generation, and RE; hot binary-analysis paths proxy to Rust when built.
 
 - [pcx-ai-toolkit tools package](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/__init__.py)
 - [Section names strongly associated with VMProtect](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/analyze-vmprotect.py): VMPSECTIONS = (b'.vmp0', b'.vmp1', b'.vmp2', b'.vmp3', b'.vmp4')
