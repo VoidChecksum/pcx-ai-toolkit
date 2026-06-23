@@ -285,7 +285,12 @@ Starter AngelScript scaffolds.
 Engine-specific reversal guides (Source, UE, Unity IL2CPP, Source 2, anti-cheat, obfuscation).
 
 - [Anti-Cheat Driver Identification Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/anti-cheat/common-ac-patterns.md): Byte patterns and file signatures for identifying known anti-cheat drivers in memory or on disk. Use with findcodepattern or r2 / IDA pattern search.
+- [CryEngine / Lumberyard / O3DE Reversal Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/cryengine/cryengine-patterns.md): CryEngine-family games usually expose high-value roots around gEnv, entity
+- [Frostbite Reversal Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/frostbite/frostbite-patterns.md): Frostbite titles vary heavily by generation and game branch. Use type info,
+- [Godot Reversal Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/godot/godot-patterns.md): Godot is open source, so the best signature is often a version-matched symbol,
 - [Protector Identification Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/obfuscation/protector-patterns.md): Byte patterns, section names, and behavioral signatures for identifying binary protectors. Use for triage — name the protector before starting analysis.
+- [RE Engine Reversal Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/re-engine/re-engine-patterns.md): Capcom RE Engine titles use a reflected via. runtime type system. Prefer
+- [REDengine Reversal Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/redengine/redengine-patterns.md): REDengine games expose useful anchors through RTTI, REDscript/CET ecosystems,
 - [Common Source Engine Signature Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/source-engine/common-sigs.md): 1. Find the function in IDA/Ghidra that accesses the global you need
 - [Source 2 Engine Reversal Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/source2-engine/source2-patterns.md): Pattern scanning, schema resolution, and struct access for Source 2 games: Counter-Strike 2, Deadlock.
 - [Unity IL2CPP Reversal Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/signatures/unity-il2cpp/il2cpp-patterns.md): Pattern scanning and struct resolution for Unity games compiled with IL2CPP (Ahead-Of-Time). Applies to: Escape from Tarkov, Rust, Arena Breakout Infinite, and any other Unity title using IL2CPP.
@@ -299,6 +304,7 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [Section names strongly associated with VMProtect](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/analyze-vmprotect.py): VMPSECTIONS = (b'.vmp0', b'.vmp1', b'.vmp2', b'.vmp3', b'.vmp4')
 - [── Detection tables ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/anti-debug-scanner.py): DIRECTCHECKIMPORTS = {
 - [api-lookup](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/api-lookup.py)
+- [as-linter](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/as-linter.py)
 - [.text classifier thresholds (block-level identical %, raw-size delta %).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/binary-diff-summary.py): RECOMPILEMINSAME = 70.0
 - [── Upstream endpoints ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-api-index.py): ENMAROOTURL = "https://docs.perception.cx/perception/enma/readme.md"
 - [Exclude only the generated bundles sitting directly under docs/.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-counts.py): if p.parent == (REPOROOT / "docs") and p.name.startswith("llms-"):
@@ -314,17 +320,21 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dump-strings-xor.py): import os
 - [Internal representation: the parsed table is a list of (category, entries)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dumper-to-enma.py): # groups. category is None when the source has no natural grouping; otherwise
 - [── Parse rules (tolerant of formatting variation) ────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/evidence-log-validator.py): # const <type> OFFNAME ...   |   const string SIGNAME ...
+- [hallucination-eval](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/hallucination-eval.py)
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/identify-protector.py): import os
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/module-export-mapper.py): import os
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/offset-diff.py): import os
 - [A normalized pattern is a list where each element is an int byte (0-255)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pattern-format-converter.py): # or None for a wildcard. All parsing converts to this; all emitting reads it.
 - [ANSI colors (disabled on Windows if not supported)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pcx.py): def supportscolor() -> bool:
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pe-section-analyzer.py): import os
+- [re-importer](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/re-importer.py)
+- [regenerate-docs](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/regenerate-docs.py)
 - [── Hash algorithms ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/resolve-api-hashes.py): def ror13add(name: bytes) -> int:
 - [── Rule registry ─────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/script-linter.py): # rule number -> (severity, one-liner). Severity is fixed per rule, not per hit.
 - [1. Update submodules](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/setup-core.py): print("[..] Checking git submodules...")
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/sig-uniqueness-checker.py): import os
 - [symbol-check](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/symbol-check.py)
+- [verify-project](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/verify-project.py)
 
 ## Build Scripts
 

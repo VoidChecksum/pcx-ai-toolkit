@@ -6,7 +6,7 @@ import "globals";
 
 // ── Signatures (EXAMPLES — replace with sigs for your target) ──
 // Document each: the instruction it matches, and what it loads.
-const string SIG_EXAMPLE_GLOBAL = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74";
+const string SIG_EXAMPLE_GLOBAL = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74"; // UNVERIFIED
 // MOV RAX, [rip+????] — loads some global pointer
 
 // ── Resolved addresses (filled by resolve_all) ──

@@ -1,0 +1,46 @@
+{
+  "schema": "pcx-hallucination-regression-v1",
+  "description": "Golden cases that prove PCX validators reject hallucinated Enma/AngelScript APIs and accept documented patterns.",
+  "cases": [
+    {
+      "name": "enma-clean-minimal-main",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": true,
+      "input": "int64 main() {\n    println(\"hello\");\n    return 1;\n}\n"
+    },
+    {
+      "name": "enma-rejects-invented-draw-esp",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "import \"vec\";\nimport \"color\";\nvoid r(int64 d) { draw_esp(vec2(0,0), color(255,0,0,255)); }\nint64 main() { register_routine(cast<int64>(r), 0); return 1; }\n"
+    },
+    {
+      "name": "enma-requires-math-import",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main() {\n    float64 a = atan2(1.0, 2.0);\n    return 1;\n}\n"
+    },
+    {
+      "name": "angelscript-rejects-enma-lifecycle",
+      "mode": "code",
+      "language": "angelscript",
+      "should_pass": false,
+      "input": "int main() {\n    register_routine(cast<int64>(on_render), 0);\n    return 1;\n}\nvoid on_render(int64 data) {}\n"
+    },
+    {
+      "name": "answer-fence-rejects-draw-texxt",
+      "mode": "answer",
+      "should_pass": false,
+      "input": "```enma\nvoid r(int64 d) {\n    draw_texxt(\"hi\");\n}\n```"
+    },
+    {
+      "name": "answer-fence-clean-enma",
+      "mode": "answer",
+      "should_pass": true,
+      "input": "```enma\nint64 main() {\n    println(\"hello\");\n    return 1;\n}\n```"
+    }
+  ]
+}

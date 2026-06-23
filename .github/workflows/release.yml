@@ -153,10 +153,18 @@ jobs:
       - name: List collected artifacts
         run: ls -lh release-artifacts/
 
+      - name: Generate artifact checksums
+        run: |
+          cd release-artifacts
+          sha256sum *.vsix > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
       - name: Create / update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-artifacts/*.vsix
+          files: |
+            release-artifacts/*.vsix
+            release-artifacts/SHA256SUMS.txt
           generate_release_notes: true
           body: |
             ## VS Code & Visual Studio Extensions

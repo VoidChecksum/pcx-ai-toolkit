@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 219**
+**Source files included: 224**
 
 ---
 
@@ -49115,7 +49115,7 @@ import "globals";
 
 // ── Signatures (EXAMPLES — replace with sigs for your target) ──
 // Document each: the instruction it matches, and what it loads.
-const string SIG_EXAMPLE_GLOBAL = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74";
+const string SIG_EXAMPLE_GLOBAL = "48 8B 05 ?? ?? ?? ?? 48 85 C0 74"; // UNVERIFIED
 // MOV RAX, [rip+????] — loads some global pointer
 
 // ── Resolved addresses (filled by resolve_all) ──
@@ -50419,6 +50419,153 @@ if (base != 0) {
 
 ---
 
+## Source: `signatures/cryengine/cryengine-patterns.md`
+
+# CryEngine / Lumberyard / O3DE Reversal Patterns
+
+CryEngine-family games usually expose high-value roots around `gEnv`, entity
+system accessors, renderer globals, and camera matrices.
+
+> These signatures are seeds. Rebuild and uniqueness-check them per game patch.
+
+## Primary Targets
+
+| Target | Purpose | Verification |
+|--------|---------|--------------|
+| `gEnv` | Root environment pointer | Dereference subsystems and validate vtables |
+| `IEntitySystem` | Entity iteration | Entity count matches visible/session state |
+| `IRenderer` / camera | View/projection data | Matrix changes with camera movement |
+| `ISystem` | Engine services | Stable vtable and subsystem links |
+
+## Pattern Seeds
+
+```json
+[
+  {
+    "name": "gEnv_global",
+    "pattern": "48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 01 FF 50 ??",
+    "kind": "rip",
+    "rip_offset": 3,
+    "insn_len": 7,
+    "note": "candidate gEnv load near subsystem virtual call"
+  },
+  {
+    "name": "entity_system_from_env",
+    "pattern": "48 8B 81 ?? ?? ?? ?? 48 85 C0 74 ?? 48 8B 10",
+    "kind": "direct",
+    "note": "candidate gEnv->pEntitySystem field access; derive field offset from displacement"
+  }
+]
+```
+
+## PCX Workflow
+
+1. Use `module-export-mapper.py` to find engine module exports first.
+2. Use string/xref anchors such as entity class names or console variables.
+3. Convert confirmed roots into `offsets.em` / `offsets.as`.
+4. Validate with `pcx verify-project --allow-unverified` while still scaffolding.
+
+---
+
+## Source: `signatures/frostbite/frostbite-patterns.md`
+
+# Frostbite Reversal Patterns
+
+Frostbite titles vary heavily by generation and game branch. Use type info,
+manager singletons, and data-driven entity systems instead of one-size offsets.
+
+> Treat these as research anchors. EAAC-protected live targets require strict
+> authorization and read-only workflows.
+
+## Primary Targets
+
+| Target | Purpose | Verification |
+|--------|---------|--------------|
+| TypeInfo / class registry | Runtime type names and layouts | Names match dumped SDK/classes |
+| ClientGameContext | Player/entity root | Local player pointer resolves during match |
+| GameRenderer | View/projection matrices | Matrix tracks camera movement |
+| EntityManager | Entity iteration | Entity count and class names are plausible |
+
+## Pattern Seeds
+
+```json
+[
+  {
+    "name": "client_game_context",
+    "pattern": "48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 01 FF 50 ??",
+    "kind": "rip",
+    "rip_offset": 3,
+    "insn_len": 7,
+    "note": "candidate singleton load; verify by local player chain"
+  },
+  {
+    "name": "game_renderer",
+    "pattern": "48 8B 05 ?? ?? ?? ?? 48 8B 88 ?? ?? ?? ?? 48 85 C9",
+    "kind": "rip",
+    "rip_offset": 3,
+    "insn_len": 7,
+    "note": "candidate renderer load; verify view/projection fields"
+  }
+]
+```
+
+## PCX Workflow
+
+- Build a per-build evidence log before script creation.
+- Use `tools/binary-diff-summary.py` before deciding whether old signatures are reusable.
+- Run `tools/offset-diff.py` on confirmed signatures after every patch.
+
+---
+
+## Source: `signatures/godot/godot-patterns.md`
+
+# Godot Reversal Patterns
+
+Godot is open source, so the best signature is often a version-matched symbol,
+source file, or structure definition. Reverse only what you cannot prove from
+the matching engine source and exported project data.
+
+## Primary Targets
+
+| Target | Purpose | Verification |
+|--------|---------|--------------|
+| `ObjectDB` | Live object registry | Object count and class names match scene |
+| `SceneTree` | Node traversal | Root viewport and child nodes resolve |
+| `Camera2D` / `Camera3D` | World-to-screen data | Transform follows camera movement |
+| `.pck` manifest | Assets/scripts | Hash against extracted package |
+
+## Pattern Seeds
+
+```json
+[
+  {
+    "name": "objectdb_instance",
+    "pattern": "48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 01",
+    "kind": "rip",
+    "rip_offset": 3,
+    "insn_len": 7,
+    "note": "candidate ObjectDB singleton; validate by object count"
+  },
+  {
+    "name": "scene_tree_singleton",
+    "pattern": "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 ?? 48 8B 88 ?? ?? ?? ??",
+    "kind": "rip",
+    "rip_offset": 3,
+    "insn_len": 7,
+    "note": "candidate SceneTree/root viewport path"
+  }
+]
+```
+
+## PCX Workflow
+
+1. Identify Godot major/minor from strings or package metadata.
+2. Pull matching Godot headers/source for struct names.
+3. Extract `.pck` with a trusted local tool and map script names to runtime objects.
+4. Use PCX scripts only after the source-level layout and live reads agree.
+
+---
+
 ## Source: `signatures/obfuscation/protector-patterns.md`
 
 # Protector Identification Patterns
@@ -50738,6 +50885,114 @@ if (vm_entry != 0) {
     p.disassemble(vm_entry, 16);
 }
 ```
+
+---
+
+## Source: `signatures/re-engine/re-engine-patterns.md`
+
+# RE Engine Reversal Patterns
+
+Capcom RE Engine titles use a reflected `via.*` runtime type system. Prefer
+runtime metadata and known plugin ecosystems over hardcoded one-build offsets.
+
+> These are workflow patterns, not copy-paste offsets. Verify every pattern per
+> target build and cite evidence IDs before shipping.
+
+## Primary Targets
+
+| Target | Purpose | Verification |
+|--------|---------|--------------|
+| `via.TypeInfo` table | Reflected class and field metadata | Cross-check names against REFramework/TDB output |
+| `via.SceneManager` | Scene graph and game object traversal | Validate object counts in a paused scene |
+| `via.Camera` / view globals | World-to-screen inputs | Compare matrix against visible camera movement |
+| `via.Transform` | Position/rotation/scale | Live read a known actor and move it |
+
+## Workflow
+
+1. Identify the exact game build and hash `.text`.
+2. Dump or load `TDB` metadata with REFramework-compatible tooling.
+3. Resolve class/field names from metadata before writing PCX offsets.
+4. Use `tools/re-importer.py --format reclass-json` for struct seeds.
+5. Add `E-NNN` citations for every class field used by an Enma/AS script.
+
+## Pattern Seeds
+
+```json
+[
+  {
+    "name": "via_typeinfo_registry",
+    "pattern": "48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 01 FF 50 ??",
+    "kind": "rip",
+    "rip_offset": 3,
+    "insn_len": 7,
+    "note": "candidate TypeInfo registry load; verify by walking reflected names"
+  },
+  {
+    "name": "scene_manager_singleton",
+    "pattern": "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 ?? 48 8B 88 ?? ?? ?? ??",
+    "kind": "rip",
+    "rip_offset": 3,
+    "insn_len": 7,
+    "note": "candidate singleton load; confirm by scene object enumeration"
+  }
+]
+```
+
+## PCX Notes
+
+- Keep reflected field names in comments next to generated constants.
+- Prefer metadata-derived offsets over pointer-chain folklore.
+- Treat plugin exports and community SDKs as evidence candidates, not authority.
+
+---
+
+## Source: `signatures/redengine/redengine-patterns.md`
+
+# REDengine Reversal Patterns
+
+REDengine games expose useful anchors through RTTI, REDscript/CET ecosystems,
+entity/component roots, and renderer/camera state.
+
+> Do not hardcode community offsets without local proof. Use them as import
+> candidates and cite live or binary evidence.
+
+## Primary Targets
+
+| Target | Purpose | Verification |
+|--------|---------|--------------|
+| RTTI/type registry | Class and component names | Names match RED4ext/CET dumps |
+| World / entity roots | Entity traversal | Known player/NPC pointers resolve |
+| Camera manager | W2S matrix inputs | Matrix follows camera movement |
+| Script VM roots | REDscript object relations | Cross-check with known script symbols |
+
+## Pattern Seeds
+
+```json
+[
+  {
+    "name": "rtti_registry",
+    "pattern": "48 8B 0D ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 01 FF 50 ??",
+    "kind": "rip",
+    "rip_offset": 3,
+    "insn_len": 7,
+    "note": "candidate runtime type registry reference"
+  },
+  {
+    "name": "camera_manager",
+    "pattern": "48 8B 05 ?? ?? ?? ?? F3 0F 10 88 ?? ?? ?? ??",
+    "kind": "rip",
+    "rip_offset": 3,
+    "insn_len": 7,
+    "note": "candidate camera/global load; verify with view changes"
+  }
+]
+```
+
+## Import Path
+
+Use `tools/re-importer.py --format ida-names --out-format enma-offsets` on named
+exports or labels from IDA/Ghidra/Binary Ninja, then replace every UNVERIFIED
+claim with evidence-backed `E-NNN` comments.
 
 ---
 

@@ -12,8 +12,10 @@ Usage:
     pcx symbol-check <file>   # catch hallucinated API names / missing imports
     pcx api <symbol>          # source-backed API lookup / typo suggestions
     pcx check-answer <file.md> # validate code blocks in an LLM answer
+    pcx create [options]  # guided Enma/AngelScript project scaffold
     pcx build-api-index       # regenerate knowledge/pcx-api-index.json
     pcx verify <file>         # lint + symbol-check + LSP diagnostics (when built)
+    pcx verify-project <dir>  # project-wide lint + symbol + hygiene verification
     pcx check-drift    # check documentation drift against live upstream
     pcx check-mcp      # verify MCP config is 100% in sync with mcp-api.md
     pcx check-matrix   # advisory version-matrix vs changelogs sync check
@@ -21,8 +23,10 @@ Usage:
     pcx version        # print the toolkit version
     pcx doctor         # health-check: verify all toolkit components are functional
     pcx new <template> [output_dir]  # scaffold a new project from a template
+    pcx new --wizard   # interactive alias for pcx create --wizard
 """
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -31,6 +35,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VERSION_FILE = REPO_ROOT / "VERSION"
+sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
+from pcx_scaffold import available_templates, build_project_plan, scaffold_project, slugify  # noqa: E402
 
 # ANSI colors (disabled on Windows if not supported)
 def _supports_color() -> bool:
@@ -192,6 +198,9 @@ def cmd_doctor() -> int:
 
 def cmd_new(args: list[str]) -> int:
     """Scaffold a new PCX project from a template."""
+    if args and args[0].startswith("--"):
+        return cmd_create(args)
+
     templates_dir = REPO_ROOT / "templates"
 
     def list_templates() -> None:
@@ -227,7 +236,7 @@ def cmd_new(args: list[str]) -> int:
             if f.is_file():
                 print(f"  {f.relative_to(output_dir)}")
         print(f"\nProject directory: {output_dir}")
-        print("Next: open in your editor and run pcx lint <main.em> to validate.")
+        print("Next: open in your editor and run pcx verify-project . to validate.")
         return 0
 
     template_file = templates_dir / f"{template_name}.em"
@@ -241,6 +250,85 @@ def cmd_new(args: list[str]) -> int:
     print(f"Error: Template '{template_name}' not found.\n", file=sys.stderr)
     list_templates()
     return 1
+
+
+def _choose(prompt: str, choices: list[str], default: str) -> str:
+    rendered = "/".join(choices)
+    raw = input(f"{prompt} ({rendered}) [{default}]: ").strip().lower()
+    value = raw or default
+    if value not in choices:
+        print(f"Invalid choice: {value}. Choices: {', '.join(choices)}", file=sys.stderr)
+        raise ValueError(value)
+    return value
+
+
+def cmd_create(args: list[str]) -> int:
+    """Create an Enma or AngelScript project scaffold."""
+    ap = argparse.ArgumentParser(description="Create a PCX Enma/AngelScript project scaffold")
+    ap.add_argument("--wizard", action="store_true", help="prompt interactively for missing values")
+    ap.add_argument("--name", default="", help="project name")
+    ap.add_argument("--language", "--lang", default="", help="enma or angelscript")
+    ap.add_argument("--kind", default="", help="template kind: full, cheat, overlay, aimbot, minimap, hello")
+    ap.add_argument("--target", default="game.exe", help="target process name to substitute into templates")
+    ap.add_argument("--engine", default="generic", help="engine profile label, e.g. source2, unreal, re-engine")
+    ap.add_argument("--output", "-o", default="", help="output directory")
+    ap.add_argument("--overwrite", action="store_true", help="allow writing into a non-empty output directory")
+    ap.add_argument("--plan", action="store_true", help="print JSON plan without writing files")
+    ap.add_argument("--list", action="store_true", help="list supported scaffold templates")
+    parsed = ap.parse_args(args)
+
+    if parsed.list:
+        try:
+            print(json.dumps(available_templates(parsed.language), indent=2))
+            return 0
+        except ValueError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+
+    try:
+        name = parsed.name
+        language = parsed.language
+        kind = parsed.kind
+        target = parsed.target
+        engine = parsed.engine
+
+        if parsed.wizard:
+            if not name:
+                name = input("Project name [pcx-project]: ").strip() or "pcx-project"
+            if not language:
+                language = _choose("Language", ["enma", "angelscript"], "enma")
+            if not kind:
+                choices = [item["kind"] for item in available_templates(language)]
+                kind = _choose("Template kind", choices, choices[0])
+            if target == "game.exe":
+                target = input("Target process [game.exe]: ").strip() or "game.exe"
+            if engine == "generic":
+                engine = input("Engine profile [generic]: ").strip() or "generic"
+
+        name = name or "pcx-project"
+        language = language or "enma"
+        kind = kind or "full"
+        output = Path(parsed.output) if parsed.output else Path.cwd() / slugify(name)
+        plan = build_project_plan(name, language, kind, target, engine)
+        if parsed.plan:
+            print(json.dumps(plan, indent=2))
+            return 0
+        result = scaffold_project(name, language, kind, output, target, engine, parsed.overwrite)
+    except (FileExistsError, FileNotFoundError, ValueError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    print(f"{_GREEN}Created PCX project:{_RESET} {result['project_dir']}")
+    print(f"  language: {result['plan']['language']}")
+    print(f"  template: {result['plan']['template']}")
+    print(f"  target:   {result['plan']['target_process']}")
+    print("Files:")
+    for file in result["files"]:
+        print(f"  {file}")
+    print("\nNext:")
+    print("  cd " + result["project_dir"])
+    print("  pcx verify-project . --allow-placeholders --allow-unverified")
+    return 0
 
 
 def cmd_verify(args: list[str]) -> int:
@@ -259,7 +347,10 @@ def cmd_verify(args: list[str]) -> int:
         return 2
 
     print(f"Verifying {target}...")
-    rc = run_python_tool("script-linter", ["--strict", target])
+    if path.suffix.lower() == ".as":
+        rc = run_python_tool("as-linter", ["--strict", target])
+    else:
+        rc = run_python_tool("script-linter", ["--strict", target])
     if rc != 0:
         return rc
 
@@ -279,8 +370,8 @@ def main() -> int:
                     version=f"pcx-ai-toolkit v{get_version()}")
     ap.add_argument("command", nargs="?", help=(
         "Command to run: setup, update, lint, symbol-check, api, check-answer, "
-        "build-api-index, verify, check-drift, check-mcp, check-matrix, counts, "
-        "version, doctor, new, help"
+        "create, build-api-index, verify, verify-project, check-drift, check-mcp, "
+        "check-matrix, counts, version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
     args = ap.parse_args()
@@ -318,11 +409,17 @@ def main() -> int:
     if cmd in ("check-answer", "answer-check"):
         return run_python_tool("check-llm-answer", sub_args)
 
+    if cmd == "create":
+        return cmd_create(sub_args)
+
     if cmd == "build-api-index":
         return run_python_tool("build-api-index", sub_args)
 
     if cmd == "verify":
         return cmd_verify(sub_args)
+
+    if cmd in ("verify-project", "project-check"):
+        return run_python_tool("verify-project", sub_args)
 
     if cmd == "check-drift":
         return run_python_tool("check-doc-drift", sub_args)

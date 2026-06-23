@@ -12,7 +12,7 @@ The "indexed database all LLMs can query" half of the toolkit's LLM-knowledge st
 |---|---|
 | `search(query, limit=10)` | Keyword search across the entire corpus. Returns ranked `{path, score, snippet}` JSON. |
 | `get_file(path)` | Fetch full content of any file by repo-relative path. |
-| `list_files(category="")` | Enumerate files, optionally filtered by category (`docs`, `skills`, `knowledge`, `rules`, `templates`, `tools`, `signatures`, `mcp`). |
+| `list_files(category="")` | Enumerate files, optionally filtered by category (`docs`, `skills`, `knowledge`, `rules`, `templates`, `tools`, `signatures`, `mcp`, `evals`). |
 | `overview()` | Top-level toolkit summary with file counts per category and starting-point recommendations. |
 | `list_skills()` | Enumerate bundled AI skills by stable name, path, and description. |
 | `get_skill(name)` | Fetch one bundled skill by name, e.g. `pcx-enma-discipline`. |
@@ -20,6 +20,13 @@ The "indexed database all LLMs can query" half of the toolkit's LLM-knowledge st
 | `api_lookup(symbol, language="")` | Exact source-backed lookup for a function, method, or type. Returns signatures, language availability, official source URLs, and typo suggestions. |
 | `validate_code(code, language, source_path="")` | Check a code snippet against the PCX API index. Catches unknown functions, wrong-language symbols, unknown types, and missing Enma imports. Returns `{findings, ok}` with source-backed repair context. |
 | `validate_answer(answer, source_path="answer.md")` | Validate fenced Enma/AngelScript code blocks inside a generated Markdown answer before copying it into a project. |
+| `list_project_templates(language="")` | List supported Enma/AngelScript scaffold kinds. |
+| `generate_script_plan(task, language, kind, target_process, engine)` | Return docs, skills, commands, and scaffold choice without writing files. |
+| `scaffold_project(...)` | Dry-run by default; can write a checked-in template scaffold when `dry_run=false` and `output_dir` is supplied. |
+| `validate_project(path, allow_placeholders=false, allow_unverified=false)` | Run project-wide lint, symbol-check, hygiene, and evidence gates. |
+| `suggest_imports(code, language="enma")` | Return exact missing Enma addon imports from validation findings. |
+| `explain_finding(finding_json, language="")` | Turn one validator finding into a concrete fix. |
+| `offset_drift_report(old_offsets_json, new_offsets_json)` | Compare named offset snapshots and classify moved/missing/new offsets. |
 
 **Resources** (MCP-fetchable URIs):
 

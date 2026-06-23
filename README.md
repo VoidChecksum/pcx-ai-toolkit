@@ -127,9 +127,13 @@ pcx api json_object --lang enma
 # Script validation.
 pcx symbol-check my_script.em
 pcx verify my_script.as
+pcx verify-project ./my-project
 
 # Markdown answer validation.
 pcx check-answer answer.md
+
+# Regression benchmark for hallucinated answers/snippets.
+python3 tools/hallucination-eval.py
 ```
 
 MCP-aware clients should use this sequence:
@@ -137,11 +141,14 @@ MCP-aware clients should use this sequence:
 ```text
 overview()
 recommend_context(task, language)
+generate_script_plan(task, language)
+scaffold_project(..., dry_run=true)
 get_skill(name)
 get_file(path)
 api_lookup(symbol, language)
 validate_code(code, language)
 validate_answer(markdown)
+validate_project(path)
 ```
 
 | Failure Mode | Countermeasure |
@@ -149,8 +156,9 @@ validate_answer(markdown)
 | Invented API names like `draw_esp()` | `pcx api`, MCP `api_lookup`, and `knowledge/pcx-api-index.json` |
 | Enma lifecycle inside `.as` | `docs/perception/llm-routing.md`, symbol validation, wrong-language detection |
 | Missing Enma imports | `validate_code` missing-import findings for `vec`, `color`, `math`, `json`, and more |
-| Stale docs | provenance, drift checks, regenerated `llms-*` bundles |
+| Stale docs | provenance, drift checks, `tools/regenerate-docs.py`, regenerated `llms-*` bundles |
 | Forum facts treated as APIs | `knowledge/perception-forum-insights.md` is marked secondary |
+| Regressed validators | `tools/hallucination-eval.py` golden corpus |
 
 ## Knowledge Surface
 
@@ -186,6 +194,7 @@ python3 tools/build-counts.py
 python3 tools/build-api-index.py
 python3 tools/build-llms-index.py
 python3 tools/build-provenance.py
+python3 tools/regenerate-docs.py --check
 python3 tools/check-llm-contract.py
 python3 tools/check-skill-contract.py
 ```
@@ -200,17 +209,23 @@ pcx api draw_text --lang enma
 pcx symbol-check file.em
 pcx verify file.as
 pcx check-answer answer.md
-pcx new cheat-skeleton-em ./my-enma-script
-pcx new cheat-skeleton-as ./my-as-script
+pcx create --wizard
+pcx create --name "My ESP" --language enma --kind full --target game.exe --output ./my-esp
+pcx verify-project ./my-esp --allow-placeholders --allow-unverified
 ```
 
 | Tool | Purpose |
 |---|---|
 | [tools/api-lookup.py](tools/api-lookup.py) | Exact API oracle |
 | [tools/symbol-check.py](tools/symbol-check.py) | Script-level source-grounded validation |
+| [tools/as-linter.py](tools/as-linter.py) | AngelScript PCX discipline linting |
+| [tools/verify-project.py](tools/verify-project.py) | Project-wide lint, symbol, hygiene, and evidence verification |
 | [tools/check-llm-answer.py](tools/check-llm-answer.py) | Markdown answer code-block validation |
+| [tools/hallucination-eval.py](tools/hallucination-eval.py) | Golden regression benchmark for hallucination gates |
 | [tools/build-api-index.py](tools/build-api-index.py) | Rebuild source-backed API index |
 | [tools/check-doc-drift.py](tools/check-doc-drift.py) | Compare local docs against upstream |
+| [tools/regenerate-docs.py](tools/regenerate-docs.py) | Fetch drift-checkable upstream Markdown into `docs/` |
+| [tools/re-importer.py](tools/re-importer.py) | Convert IDA/Ghidra/Binja/ReClass exports into PCX offset/evidence seeds |
 | [tools/check-skill-contract.py](tools/check-skill-contract.py) | Reject stale or unsupported AI-skill contracts |
 | [tools/check-mcp-config.py](tools/check-mcp-config.py) | Keep runtime MCP config aligned with docs |
 
@@ -240,7 +255,7 @@ Core skills:
 
 | MCP Surface | Purpose |
 |---|---|
-| [mcp/pcx-knowledge-mcp](mcp/pcx-knowledge-mcp) | Searchable local corpus, API lookup, code validation, answer validation |
+| [mcp/pcx-knowledge-mcp](mcp/pcx-knowledge-mcp) | Searchable corpus, API lookup, project scaffolding, code/project validation, answer validation |
 | [mcp/perception-mcp-config.json](mcp/perception-mcp-config.json) | Runtime Perception MCP config with 59 live-process tools |
 
 Install the knowledge server:
@@ -311,8 +326,10 @@ msbuild visualstudio\AngelScriptVS\AngelScriptVS.csproj /p:Configuration=Release
 Create one:
 
 ```bash
-pcx new cheat-skeleton-em ./pcx-enma-script
-pcx new cheat-skeleton-as ./pcx-as-script
+pcx create --wizard
+pcx create --name "PCX Enma Script" --language enma --kind cheat --target game.exe --output ./pcx-enma-script
+pcx create --name "PCX AS Script" --language angelscript --kind cheat --target game.exe --output ./pcx-as-script
+pcx verify-project ./pcx-enma-script --allow-placeholders --allow-unverified
 ```
 
 ## Repository Map
@@ -326,6 +343,8 @@ pcx-ai-toolkit/
 ├── knowledge/             API index, patterns, forum insights, RE references
 ├── templates/             Enma and AngelScript scaffolds
 ├── tools/                 CLI, validators, builders, RE helpers
+├── evals/                 Hallucination regression corpus
+├── signatures/            Engine and protector reversal signature packs
 ├── mcp/                   Knowledge MCP and Perception MCP setup
 ├── rules/                 Drop-in agent instruction files
 ├── .claude/skills/        Agent skills for PCX work

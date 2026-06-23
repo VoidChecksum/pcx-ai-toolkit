@@ -19,6 +19,12 @@ Tools exposed:
                                 : check Enma/AngelScript snippets against the PCX API index
   - validate_answer(answer, source_path="answer.md")
                                 : validate fenced Enma/AngelScript code blocks in an LLM answer
+  - scaffold_project(...)       : dry-run or write a PCX project scaffold
+  - validate_project(path, ...) : run project-wide verifier
+  - generate_script_plan(...)   : deterministic script/project plan
+  - explain_finding(...)        : turn validator JSON into an actionable fix
+  - suggest_imports(...)        : Enma missing-import suggestions
+  - offset_drift_report(...)    : compare named offset JSON snapshots
 
 Resources exposed:
   - file://<repo-relative-path> : every file in the corpus, addressable by URI
@@ -40,8 +46,10 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -62,6 +70,11 @@ from pcx_grounding import (  # noqa: E402
     validate_answer_markdown,
     validate_code_against_index,
 )
+from pcx_scaffold import (  # noqa: E402
+    available_templates,
+    build_project_plan,
+    scaffold_project as write_scaffold_project,
+)
 
 
 # ── Corpus scanning ──────────────────────────────────────────────────────────
@@ -75,6 +88,7 @@ CATEGORIES = {
     'tools':      ['tools/*.py', 'tools/*.sh'],
     'signatures': ['signatures/**/*.md'],
     'mcp':        ['mcp/*.md', 'mcp/*.json'],
+    'evals':      ['evals/**/*.json', 'evals/**/*.md'],
 }
 
 SKIP_PATTERNS = [
@@ -421,6 +435,7 @@ def overview() -> str:
         "  - docs/llms.txt                    : structured index of the whole corpus\n"
         "  - docs/llms-perception-enma.md     : single-file Enma context pack\n\n"
         "Workflow: recommend_context(task) -> get_skill(name) / get_file(path) -> api_lookup(symbol) -> validate_code(...).\n"
+        "Project workflow: generate_script_plan(...) -> scaffold_project(..., dry_run=false) -> validate_project(...).\n"
         "Answer gate: validate_answer(markdown) before copying generated code.\n"
         "Bulk: list_files(category) to enumerate; list_files() for everything.\n"
     )
@@ -520,6 +535,237 @@ def validate_answer(answer: str, source_path: str = "answer.md") -> str:
     if index is None:
         return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
     return json.dumps(validate_answer_markdown(answer, index, source_path), indent=2)
+
+
+# ── Project creation and workflow helpers ────────────────────────────────────
+
+@mcp.tool()
+def list_project_templates(language: str = "") -> str:
+    """List supported PCX scaffold templates for Enma and AngelScript."""
+    try:
+        return json.dumps(available_templates(language), indent=2)
+    except ValueError as exc:
+        return json.dumps({"error": str(exc)}, indent=2)
+
+
+@mcp.tool()
+def generate_script_plan(
+    task: str,
+    language: str = "enma",
+    kind: str = "full",
+    target_process: str = "game.exe",
+    engine: str = "generic",
+) -> str:
+    """Generate a deterministic source-grounded project/script plan.
+
+    This does not invent APIs. It returns docs, skills, validation commands,
+    and the closest scaffold template for the requested language/kind.
+    """
+    try:
+        plan = build_project_plan(task or "pcx-project", language, kind, target_process, engine)
+    except ValueError as exc:
+        return json.dumps({"error": str(exc), "templates": available_templates()}, indent=2)
+    plan["task"] = task
+    plan["mcp_sequence"] = [
+        "recommend_context(task, language)",
+        "get_file/docs + get_skill/load discipline",
+        "api_lookup(symbol, language) before each uncertain API",
+        "validate_code or validate_answer",
+        "validate_project when files exist",
+    ]
+    return json.dumps(plan, indent=2)
+
+
+@mcp.tool()
+def scaffold_project(
+    name: str,
+    language: str = "enma",
+    kind: str = "full",
+    target_process: str = "game.exe",
+    engine: str = "generic",
+    output_dir: str = "",
+    overwrite: bool = False,
+    dry_run: bool = True,
+) -> str:
+    """Create or preview a PCX project scaffold.
+
+    Safe default: dry_run=true returns the exact plan and CLI command without
+    writing files. Set dry_run=false and output_dir to write a project.
+    """
+    try:
+        if dry_run or not output_dir:
+            plan = build_project_plan(name or "pcx-project", language, kind, target_process, engine)
+            plan["dry_run"] = True
+            plan["write_command"] = (
+                "pcx create "
+                f"--name {json.dumps(name or 'pcx-project')} "
+                f"--language {plan['language']} --kind {plan['kind']} "
+                f"--target {json.dumps(target_process)} --engine {json.dumps(engine)} "
+                "--output <project-dir>"
+            )
+            return json.dumps(plan, indent=2)
+        result = write_scaffold_project(
+            name or "pcx-project",
+            language,
+            kind,
+            Path(output_dir),
+            target_process,
+            engine,
+            overwrite,
+        )
+        return json.dumps(result, indent=2)
+    except Exception as exc:  # noqa: BLE001
+        return json.dumps({"error": f"{type(exc).__name__}: {exc}"}, indent=2)
+
+
+@mcp.tool()
+def validate_project(path: str, allow_placeholders: bool = False, allow_unverified: bool = False) -> str:
+    """Run project-wide validation via `pcx verify-project`.
+
+    Returns the verifier JSON: linter steps, symbol-check output, hygiene
+    findings, and ok=false if any gate failed.
+    """
+    cmd = [
+        sys.executable,
+        str(REPO_ROOT / "tools" / "verify-project.py"),
+        path,
+        "--json",
+    ]
+    if allow_placeholders:
+        cmd.append("--allow-placeholders")
+    if allow_unverified:
+        cmd.append("--allow-unverified")
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        payload = json.loads(res.stdout)
+    except json.JSONDecodeError:
+        payload = {"ok": False, "stdout": res.stdout, "stderr": res.stderr}
+    payload["returncode"] = res.returncode
+    if res.stderr.strip():
+        payload["stderr"] = res.stderr
+    return json.dumps(payload, indent=2)
+
+
+def _coerce_finding(finding_json: str) -> dict[str, Any]:
+    try:
+        data = json.loads(finding_json)
+        if isinstance(data, dict):
+            return data
+    except json.JSONDecodeError:
+        pass
+    return {"kind": "text", "message": finding_json}
+
+
+@mcp.tool()
+def explain_finding(finding_json: str, language: str = "") -> str:
+    """Explain one validator finding and provide the next concrete fix."""
+    finding = _coerce_finding(finding_json)
+    kind = str(finding.get("kind", finding.get("rule", "")))
+    symbol = str(finding.get("symbol", ""))
+    message = str(finding.get("message", ""))
+    fix = str(finding.get("fix", ""))
+    advice = {
+        "missing_import": "Add the exact Enma import shown in `fix`, then re-run validate_code.",
+        "unknown_call": "Do not invent this API. Use api_lookup for the intended operation and replace the call with a documented symbol.",
+        "unknown_type": "Use the language-specific type documented for this binding; check llm-routing before porting types across languages.",
+        "wrong_language_symbol": "This is a cross-binding mixup. Rewrite using the selected language lifecycle/API shape.",
+        "wrong_language_type": "Replace the type with the selected language's documented equivalent.",
+        "AS-1": "Remove Enma-only syntax from AngelScript code and use docs/perception/angelscript/.",
+        "AS-2": "Use uint64 for addresses and pointer-sized arithmetic.",
+        "AS-3": "Add an E-NNN evidence citation or mark the offset/signature UNVERIFIED while scaffolding.",
+        "placeholder": "Replace scaffold placeholder text with target-specific evidence-backed logic before shipping.",
+        "unverified": "Convert UNVERIFIED claims into E-NNN evidence entries before shipping.",
+    }.get(kind, "Read the referenced source/signature, apply the smallest code change, then re-run validation.")
+    return json.dumps({
+        "language": language,
+        "kind": kind,
+        "symbol": symbol,
+        "message": message,
+        "fix": fix,
+        "next_action": advice,
+    }, indent=2)
+
+
+@mcp.tool()
+def suggest_imports(code: str, language: str = "enma") -> str:
+    """Suggest missing Enma imports from source-backed validation findings."""
+    if language != "enma":
+        return json.dumps({"imports": [], "note": "AngelScript does not use Enma addon imports."}, indent=2)
+    index = _load_api_index()
+    if index is None:
+        return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
+    findings = validate_code_against_index(code, "enma", index)
+    imports = []
+    for finding in findings:
+        if finding.get("kind") == "missing_import" and finding.get("fix"):
+            imports.append(str(finding["fix"]))
+    return json.dumps({"imports": _dedupe(imports), "findings": findings}, indent=2)
+
+
+def _flatten_offsets(payload: Any) -> dict[str, int]:
+    out: dict[str, int] = {}
+    if isinstance(payload, str):
+        payload = json.loads(payload)
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            if isinstance(value, dict):
+                nested = _flatten_offsets(value)
+                for nkey, nval in nested.items():
+                    out[f"{key}.{nkey}"] = nval
+                continue
+            if isinstance(value, str):
+                try:
+                    out[str(key)] = int(value, 16) if value.lower().startswith("0x") else int(value)
+                except ValueError:
+                    continue
+            elif isinstance(value, int) and not isinstance(value, bool):
+                out[str(key)] = value
+    if isinstance(payload, list):
+        for item in payload:
+            if isinstance(item, dict) and "name" in item:
+                value = item.get("value", item.get("offset", item.get("rva")))
+                try:
+                    out[str(item["name"])] = int(str(value), 16) if str(value).lower().startswith("0x") else int(str(value))
+                except (TypeError, ValueError):
+                    continue
+    return out
+
+
+@mcp.tool()
+def offset_drift_report(old_offsets_json: str, new_offsets_json: str) -> str:
+    """Compare two named-offset JSON snapshots and report moved/missing/new names."""
+    try:
+        old = _flatten_offsets(old_offsets_json)
+        new = _flatten_offsets(new_offsets_json)
+    except Exception as exc:  # noqa: BLE001
+        return json.dumps({"error": f"invalid JSON: {type(exc).__name__}: {exc}"}, indent=2)
+    names = sorted(set(old) | set(new))
+    rows = []
+    for name in names:
+        if name not in old:
+            rows.append({"name": name, "status": "NEW", "old": None, "new": f"0x{new[name]:X}", "delta": None})
+        elif name not in new:
+            rows.append({"name": name, "status": "MISSING", "old": f"0x{old[name]:X}", "new": None, "delta": None})
+        else:
+            delta = new[name] - old[name]
+            rows.append({
+                "name": name,
+                "status": "UNCHANGED" if delta == 0 else "MOVED",
+                "old": f"0x{old[name]:X}",
+                "new": f"0x{new[name]:X}",
+                "delta": f"{'+' if delta >= 0 else '-'}0x{abs(delta):X}",
+            })
+    return json.dumps({
+        "summary": {
+            "old": len(old),
+            "new": len(new),
+            "moved": sum(1 for row in rows if row["status"] == "MOVED"),
+            "unchanged": sum(1 for row in rows if row["status"] == "UNCHANGED"),
+            "missing": sum(1 for row in rows if row["status"] == "MISSING"),
+            "added": sum(1 for row in rows if row["status"] == "NEW"),
+        },
+        "offsets": rows,
+    }, indent=2)
 
 
 # ── Resources: every file as a URI ─────────────────────────────────────────────

@@ -61,6 +61,11 @@ jobs:
       - name: Install type-checker dependencies
         run: pip install -q mypy pyright
 
+      - name: MCP server launch smoke
+        run: |
+          python3 -m pip install -q mcp
+          python3 mcp/pcx-knowledge-mcp/server.py --help
+
       - name: Static type check (mypy)
         run: mypy tools/
 
@@ -142,16 +147,12 @@ jobs:
       - name: Run unittest regression tests
         run: python3 -m unittest discover -s tests -v
 
-      - name: Dogfood — symbol-check only clean templates
+      - name: Dogfood — symbol-check all templates and examples
         run: |
           set -e
-          # Only check templates that are currently upstream-clean. The larger
-          # cheat-skeleton/full-project templates intentionally use helper
-          # functions not in the two upstream roots and need a separate rewrite.
-          for f in templates/hello-world.em; do
-            python3 tools/symbol-check.py "$f"
-          done
-          echo "Clean templates pass symbol-check"
+          python3 tools/symbol-check.py templates
+          python3 tools/symbol-check.py examples
+          echo "All templates/examples pass source-backed symbol-check"
 
       - name: Dogfood — source-backed API oracle
         run: |
@@ -169,6 +170,25 @@ jobs:
           ```
           MD
           python3 tools/check-llm-answer.py /tmp/pcx-answer.md
+
+      - name: Dogfood — hallucination regression benchmark
+        run: python3 tools/hallucination-eval.py
+
+      - name: Dogfood — project scaffolding and verification
+        run: |
+          set -e
+          tmp="$(mktemp -d)"
+          python3 tools/pcx.py create --name "CI Enma" --language enma --kind full --target ci.exe --output "$tmp/ci-enma"
+          python3 tools/pcx.py create --name "CI AS" --language angelscript --kind full --target ci.exe --output "$tmp/ci-as"
+          python3 tools/verify-project.py "$tmp/ci-enma" --allow-placeholders --allow-unverified
+          python3 tools/verify-project.py "$tmp/ci-as" --allow-placeholders --allow-unverified
+          rm -rf "$tmp"
+
+      - name: Dogfood — RE importer smoke
+        run: |
+          printf 'name,address,kind\nLocalPlayer,0x1234,symbol\n' \
+            | python3 tools/re-importer.py --format ida-names --out-format enma-offsets - \
+            | grep -q 'OFF_LOCALPLAYER'
 
       - name: Check MCP config in sync with mcp-api.md (compatibility gate)
         run: python3 tools/check-mcp-config.py --check
@@ -190,13 +210,12 @@ jobs:
       - name: Check internal markdown links
         run: python3 tools/check-internal-links.py
 
-      - name: Dogfood — lint the toolkit's own templates
+      - name: Dogfood — project-verify templates and examples
         run: |
           set -e
-          for f in templates/*.em; do
-            [ -f "$f" ] && python3 tools/script-linter.py --strict "$f"
-          done
-          echo "All templates pass the toolkit's own linter (--strict)"
+          python3 tools/verify-project.py templates --allow-placeholders --allow-unverified
+          python3 tools/verify-project.py examples --allow-placeholders --allow-unverified
+          echo "All templates/examples pass project verification in scaffold mode"
 
       - name: Validate skill frontmatter (name + description + license in every SKILL.md)
         run: |

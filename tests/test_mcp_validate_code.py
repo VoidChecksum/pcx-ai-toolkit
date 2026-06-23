@@ -30,7 +30,20 @@ class FakeFastMCP:
 sys.modules["mcp.server.fastmcp"].FastMCP = FakeFastMCP
 sys.path.insert(0, str(REPO_ROOT / "mcp" / "pcx-knowledge-mcp"))
 
-from server import api_lookup, get_skill, list_skills, recommend_context, validate_answer, validate_code  # noqa: E402
+from server import (  # noqa: E402
+    api_lookup,
+    explain_finding,
+    generate_script_plan,
+    get_skill,
+    list_project_templates,
+    list_skills,
+    offset_drift_report,
+    recommend_context,
+    scaffold_project,
+    suggest_imports,
+    validate_answer,
+    validate_code,
+)
 
 
 class ValidateCodeTest(unittest.TestCase):
@@ -109,6 +122,33 @@ void r(int64 d) { draw_texxt("hi"); }
         self.assertFalse(result["ok"])
         self.assertEqual(result["blocks_checked"], 1)
         self.assertTrue(any(f["symbol"] == "draw_texxt" for f in result["findings"]))
+
+    def test_project_template_tools_are_available(self):
+        templates = json.loads(list_project_templates("enma"))
+        self.assertTrue(any(t["kind"] == "full" for t in templates))
+        plan = json.loads(generate_script_plan("ESP scaffold", "enma", "full", "game.exe", "source2"))
+        self.assertEqual(plan["language"], "enma")
+        self.assertIn("pcx verify-project . --allow-placeholders --allow-unverified", plan["commands"])
+
+    def test_scaffold_project_dry_run_does_not_require_output_dir(self):
+        result = json.loads(scaffold_project("Dry Run", "angelscript", "full"))
+        self.assertTrue(result["dry_run"])
+        self.assertEqual(result["language"], "angelscript")
+        self.assertIn("write_command", result)
+
+    def test_suggest_imports_from_missing_enma_addon(self):
+        result = json.loads(suggest_imports("int64 main(){ float64 x = atan2(1.0, 2.0); return 1; }", "enma"))
+        self.assertIn('import "math";', result["imports"])
+
+    def test_explain_finding_and_offset_drift_report(self):
+        explanation = json.loads(explain_finding(json.dumps({"kind": "missing_import", "symbol": "atan2", "fix": 'import "math";'}), "enma"))
+        self.assertEqual(explanation["symbol"], "atan2")
+        self.assertIn("Add the exact Enma import", explanation["next_action"])
+
+        drift = json.loads(offset_drift_report('{"A":"0x1000","B":"0x2000"}', '{"A":"0x1010","C":"0x3000"}'))
+        self.assertEqual(drift["summary"]["moved"], 1)
+        self.assertEqual(drift["summary"]["missing"], 1)
+        self.assertEqual(drift["summary"]["added"], 1)
 
 
 if __name__ == "__main__":
