@@ -1,6 +1,8 @@
 [submodule "lsp/enma-lsp"]
 	path = lsp/enma-lsp
-	url = https://github.com/sinnafuls/enma-lsp.git
+	url = https://github.com/VoidChecksum/enma-lsp.git
+	branch = pcx-package-lock-refresh
 [submodule "lsp/angel-lsp-pcx"]
 	path = lsp/angel-lsp-pcx
-	url = https://github.com/sinnafuls/angel-lsp-pcx.git
+	url = https://github.com/VoidChecksum/angel-lsp-pcx.git
+	branch = main
