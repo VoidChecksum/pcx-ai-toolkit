@@ -4,7 +4,435 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 214**
+**Source files included: 219**
+
+---
+
+## Source: `docs/AI_AGENT_OPERATING_MANUAL.md`
+
+# AI Agent Operating Manual
+
+This is the shortest safe workflow for any LLM or MCP-aware agent working with
+Perception.cx scripts in this repo. It exists to prevent hallucinated PCX APIs,
+wrong-language bindings, and stale context loading.
+
+## Non-Negotiable Scope
+
+The supported script languages are:
+
+- Enma (`.em`)
+- AngelScript (`.as`)
+
+If a task asks for another PCX scripting language, stop and state that this
+toolkit is scoped to Enma and AngelScript.
+
+## Load Order
+
+1. Read `docs/perception/llm-routing.md`.
+2. Determine the target language from file extension or user request.
+3. Load the smallest context:
+   - Enma: `docs/llms-perception-enma.md`
+   - AngelScript: `docs/llms-perception-angelscript.md`
+   - Unknown/mixed: call MCP `recommend_context(task, language)` first.
+4. Load the relevant skill:
+   - Game cheat work: `game-cheat-script-master`
+   - Enma syntax/binding work: `pcx-enma-discipline`
+   - AngelScript syntax/binding work: `pcx-angelscript-discipline`
+   - MCP calls: `mcp-tool-routing`
+   - Offset/RE work: `pcx-re-discipline` and `re-evidence-log`
+5. Verify every host API symbol with `pcx api` or MCP `api_lookup`.
+6. Validate generated code with `pcx symbol-check`, MCP `validate_code`, or MCP
+   `validate_answer`.
+
+For forum, changelog, overlay, client, or migration questions, load
+`knowledge/perception-forum-insights.md` after the official docs. It is
+secondary context only; it must not override exact API signatures.
+
+## MCP-First Workflow
+
+Use this sequence in MCP-aware clients:
+
+```text
+overview()
+recommend_context(task, language)
+get_skill(name)
+get_file(path)
+api_lookup(symbol, language)
+validate_code(code, language)
+validate_answer(markdown)
+```
+
+Only use broad `search(query)` after the recommended context does not answer a
+question.
+
+## CLI-First Workflow
+
+Use this sequence in terminal-based workflows:
+
+```bash
+pcx api draw_text --lang enma
+pcx symbol-check script.em
+pcx verify script.as
+pcx check-answer answer.md
+python3 tools/check-llm-contract.py
+```
+
+## Answer Contract
+
+Every generated answer that contains code should satisfy these rules:
+
+- State the target language.
+- Do not mix Enma and AngelScript lifecycle calls.
+- Do not invent API names.
+- Include imports required for Enma value types such as `vec2` and `color`.
+- Keep scanning/update work out of render callbacks.
+- Mark offsets as placeholders unless supplied and verified by the user.
+- Run or recommend the relevant validator before final use.
+
+## Failure Policy
+
+When the docs or API index do not prove a symbol exists, do not guess. Say which
+doc or lookup must be checked next.
+
+---
+
+## Source: `docs/CROSS_LANGUAGE.md`
+
+# Enma vs AngelScript Binding Reference
+
+Side-by-side mapping of common Perception.cx scripting patterns across the two
+supported languages in this toolkit: Enma (`.em`) and AngelScript (`.as`).
+
+Use this when porting code, reviewing LLM output, or checking that an answer did
+not mix bindings.
+
+## Lifecycle
+
+| Operation | Enma (`.em`) | AngelScript (`.as`) |
+|---|---|---|
+| Entry point | `int64 main()` | `int main()` |
+| Repeating work | `register_routine(cast<int64>(fn), data)` | `register_callback(fn, interval_ms, data_index)` |
+| Callback shape | `void fn(int64 data)` | `void fn(int id, int data_index)` |
+| Cleanup | RAII destructors; no callback unregister needed | `on_unload()`, `unregister_callback`, `deref()` |
+| Logging | `println(...)` | `log(...)` |
+
+## Process Handles
+
+| Operation | Enma (`.em`) | AngelScript (`.as`) |
+|---|---|---|
+| Open process | `proc_t p = ref_process("game.exe");` | `proc_t@ p = ref_process("game.exe");` |
+| Null/alive check | `if (!p.alive()) return 0;` | `if (p is null || !p.alive()) return 0;` |
+| Base address | `p.base_address()` | `p.base_address()` |
+| Module size | `p.get_module_size(name)` | `p.get_module(name, base, size)` |
+| Release | automatic | `p.deref()` |
+
+## Memory Reads And Pattern Scans
+
+| Operation | Enma (`.em`) | AngelScript (`.as`) |
+|---|---|---|
+| 8-bit unsigned | `p.ru8(addr)` | `p.ru8(addr)` |
+| 32-bit unsigned | `p.ru32(addr)` | `p.ru32(addr)` |
+| 64-bit unsigned | `p.ru64(addr)` | `p.ru64(addr)` |
+| 32-bit float | `p.rf32(addr)` | `p.rf32(addr)` |
+| Pattern scan | `p.find_code_pattern(base, size, sig)` | `p.find_code_pattern(base, size, sig)` |
+| Find all patterns | `p.find_all_code_patterns(base, size, sig, results)` | `p.find_all_code_patterns(base, size, sig, results)` |
+
+Use `uint64` for addresses in both languages.
+
+## Render API Shape
+
+| Primitive | Enma (`.em`) | AngelScript (`.as`) |
+|---|---|---|
+| Viewport | `get_view_width()` / `get_view_height()` | `get_view(width, height)` out-params |
+| Position | `vec2(x, y)` value | raw `x, y` parameters unless the AS page says otherwise |
+| Color | `color(r, g, b, a)` value | raw RGBA integer parameters unless the AS page says otherwise |
+| Text | `draw_text(text, vec2(...), color(...), font, effect, color(...), amount)` | `draw_text(text, x, y, r, g, b, a, font, effect, er, eg, eb, ea, amount)` |
+| Font handle | `get_font20()` | `get_font20()` |
+
+Do not port render calls by only renaming variables. Enma and AngelScript often
+use different argument shapes for the same conceptual operation.
+
+## Containers And Types
+
+| Concept | Enma (`.em`) | AngelScript (`.as`) |
+|---|---|---|
+| Array | `T[]`, `.push()`, `.pop()`, `.length` property | `array<T>`, `.insertLast()`, `.removeLast()`, `.length()` |
+| Map | `map<K,V>` / `imap<V>` | `dictionary` |
+| String | `string` | `string` |
+| Float | `float64`, `float32` | `double`, `float` |
+| Pointer/handle style | value types and RAII | `@` handles and explicit cleanup |
+
+## AI Review Checklist
+
+Before accepting generated code:
+
+1. Confirm the file extension and target language.
+2. Verify every host API with `pcx api <symbol> --lang enma|angelscript` or MCP
+   `api_lookup`.
+3. Run `pcx symbol-check <file.em|file.as>` or MCP `validate_code`.
+4. Reject Enma code containing `register_callback`, `log`, `get_view(...)`, `@`,
+   `is null`, or `deref()`.
+5. Reject AngelScript code containing `register_routine`, `println`,
+   `get_view_width()`, `get_view_height()`, Enma `vec2/color` render call shapes,
+   or `map<K,V>`.
+
+If an API shape is not proven by the target language docs, do not guess.
+
+---
+
+## Source: `docs/FAQ.md`
+
+# Frequently Asked Questions
+
+A quick reference for common issues and questions when using pcx-ai-toolkit.
+
+---
+
+## Installation & Setup
+
+### Why does `pcx setup` / `pcx update` fail?
+
+**Symptoms:** `git: command not found`, submodule errors, or LSP build failure.
+
+**Fixes:**
+1. Ensure [Git](https://git-scm.com/) is installed and on PATH.
+2. Ensure [Node.js 18+](https://nodejs.org/) is installed.
+3. If you cloned without `--recursive`, run: `git submodule update --init --recursive`
+4. Run `pcx doctor` to get a full diagnostic report.
+
+### Why is the `pcx` command not found after setup?
+
+The setup script adds `pcx` to your PATH. You need to **restart your terminal** after running setup.
+
+If it still doesn't work:
+- **Linux/macOS**: Check `~/.local/bin/pcx` exists and `~/.local/bin` is in your `$PATH`.
+- **Windows**: Check that the toolkit's `tools/` directory was added to your system PATH in Environment Variables.
+
+### What are the minimum requirements?
+
+| Dependency | Minimum | Notes |
+|------------|---------|-------|
+| Git | Any recent | Required for clone + submodules |
+| Node.js | 18+ | Required to build LSP servers |
+| Python | 3.10+ | Required for CLI tools |
+| OS | Windows 10+, Linux, macOS | All supported |
+
+---
+
+## Enma Scripting
+
+### Why won't my Enma script compile?
+
+Common compile errors and their fixes:
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `Cannot implicitly convert 'int64' to 'uint64'` | Using signed int for addresses | Use `uint64` for all addresses |
+| `Float literal requires 'f' suffix` | Missing `f` on float literals | Change `0.2` to `0.2f` |
+| `Type 'color' undefined` | Missing import | Add `import "color";` at top |
+| `Type 'vec2' undefined` | Missing import | Add `import "vec";` at top |
+| `Signed/unsigned mismatch` | Mixed sign arithmetic | Use `cast<uint64>(x)` |
+| `Cannot implicitly convert 'float' to 'int'` | float-to-int assignment | Use `cast<int32>(f)` |
+| `main() must return int32` | Wrong return type | Ensure `main()` returns `int32` |
+| `'proc_t' is not declared` | Missing import | Add `import "proc";` at top |
+
+### Why does my script crash silently?
+
+Silent crashes are almost always null pointer dereferences. Every value returned by a memory read or `proc_read_*` can be zero.
+
+**Debug approach:**
+1. Validate every pointer in a chain before using it:
+   ```enma
+   uint64 base = proc_module_base(proc, "game.exe");
+   if (base == 0) return;  // bail early
+   uint64 ptr = proc_read_uint64(proc, base + offset);
+   if (ptr == 0) return;
+   ```
+2. Use a debug overlay (see `skill://pcx-debug-overlay`) to display intermediate values on screen.
+3. Add `print("checkpoint")` calls to narrow down where execution stops.
+
+### How do I keep offsets up-to-date after a game patch?
+
+Don't use hardcoded offsets. Use **pattern signatures** instead:
+
+```enma
+// Bad: hardcoded offset
+uint64 entity_list = base + 0x1A2B3C;
+
+// Good: pattern scan
+array<uint8> sig = { 0x48, 0x8B, 0x05, 0x??, 0x??, 0x??, 0x?? };
+uint64 entity_list = proc_find_pattern(proc, "game.exe", sig);
+```
+
+See `knowledge/offset-methodology.md` and the `pcx-patch-day-playbook` skill for the full patch-day workflow.
+
+### What's the difference between Enma and AngelScript for PCX?
+
+| | Enma | AngelScript |
+|---|---|---|
+| **Primary use** | Modern PCX scripting and new projects | Compatibility with existing `.as` scripts |
+| **Type safety** | Strong static typing | Strong static typing |
+| **Lifecycle** | `int64 main()` + `register_routine` | `int main()` + `register_callback` |
+| **Process handle** | `proc_t` value with RAII cleanup | `proc_t@` handle with explicit `deref()` |
+| **Render style** | `vec2(...)` and `color(...)` values | Raw/value shapes from the AS API pages |
+| **File extension** | `.em` | `.as` |
+| **Skill** | `pcx-enma-discipline` | `pcx-angelscript-discipline` |
+
+For new scripts, use Enma unless you specifically need to maintain an existing
+AngelScript project. Always read `docs/perception/llm-routing.md` before
+porting between the two languages.
+
+---
+
+## LSP & Editor Support
+
+### Why is the LSP not providing completions?
+
+1. **LSP servers aren't built**: Run `pcx setup` to compile them. Check with `pcx doctor`.
+2. **Wrong server path**: Verify your editor settings point to the correct server files:
+   - Enma: `lsp/enma-lsp/server/dist/server.js`
+   - AngelScript: `lsp/angel-lsp-pcx/server/out/server.js`
+3. **Node.js not on PATH**: The servers require Node.js 18+. Run `node --version` to check.
+4. **Extension not installed**: Install the VSIX from [Releases](https://github.com/VoidChecksum/pcx-ai-toolkit/releases).
+
+See also: [docs/marketplace-install.md](marketplace-install.md) for full extension installation instructions.
+
+### The LSP shows errors but my script compiles fine. Why?
+
+The LSP uses static analysis which can be more conservative than the runtime compiler. Common false positives:
+- Addon types (`color`, `vec2`) — ensure the LSP knows about your `import` statements
+- PCX-specific builtins — the LSP includes PCX API stubs, but edge cases may exist
+
+Report persistent false positives as GitHub issues with label `lsp`.
+
+---
+
+## MCP Integration
+
+### Why are MCP tools not appearing in Claude/Cursor?
+
+1. **MCP server not running**: The Perception MCP server must be running (it's part of the Perception.cx platform, not this toolkit).
+2. **Wrong MCP config**: Check `mcp/perception-mcp-config.json` is correctly configured in your AI client.
+3. **Port mismatch**: The default Perception MCP port is `42069`. Ensure nothing else is using it.
+4. **Restart required**: Most AI clients require a restart after MCP config changes.
+
+See `mcp/troubleshooting.md` for detailed diagnostics.
+
+### Why does `pcx check-mcp` fail?
+
+`pcx check-mcp` verifies that `mcp/perception-mcp-config.json` matches the documented API in `mcp/mcp-api.md`. If they're out of sync, update the config or the docs to match.
+
+---
+
+## Documentation
+
+### How do I know which doc to read for a given API?
+
+Start with:
+- `docs/llms.txt` — the 45 KB structured index of all docs (designed for AI tools)
+- `docs/enma/llms-language.md` — complete Enma language reference (single page, 2861 lines)
+- `docs/perception/*.md` — all PCX Enma APIs
+- `knowledge/enma-cheatsheet.md` — quick reference card
+
+Or use the MCP server: the `pcx-knowledge-mcp` server supports `search <query>` to find relevant docs instantly.
+
+### How do I report a documentation error?
+
+Open a [GitHub Issue](https://github.com/VoidChecksum/pcx-ai-toolkit/issues) with the label `documentation`. Include:
+- The file path of the incorrect documentation
+- What the doc says vs. what it should say
+- The Perception.cx version where you observed the discrepancy
+
+---
+
+## Still Stuck?
+
+- Run `pcx doctor` for a full environment diagnostic
+- Check [GitHub Discussions](https://github.com/VoidChecksum/pcx-ai-toolkit/discussions) for community help
+- Open an [Issue](https://github.com/VoidChecksum/pcx-ai-toolkit/issues) for bugs
+
+---
+
+## Source: `docs/marketplace-install.md`
+
+# Extension Installation Guide
+
+## VS Code Extensions
+
+Two VS Code extensions are available for pcx-ai-toolkit:
+
+| Extension | Language | Purpose |
+|-----------|----------|---------| 
+| `enma-lsp` | Enma (`.em`) | Syntax highlighting, completions, hover docs, diagnostics |
+| `angel-lsp-pcx` | AngelScript (`.as`) | Syntax highlighting, completions, diagnostics |
+
+### Install from VSIX (Current Method)
+
+1. Download the latest `.vsix` files from the [GitHub Releases](https://github.com/VoidChecksum/pcx-ai-toolkit/releases) page.
+2. In VS Code, open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and run **Extensions: Install from VSIX...**
+3. Select the downloaded `.vsix` file.
+4. Repeat for the second extension if needed.
+5. Restart VS Code.
+
+### VS Code Marketplace
+
+> **Status**: Marketplace publication is planned for a future release.
+> Subscribe to [GitHub Releases](https://github.com/VoidChecksum/pcx-ai-toolkit/releases) to be notified when it goes live.
+
+Once published, installation will be as simple as:
+```
+ext install VoidChecksum.enma-lsp
+ext install VoidChecksum.angel-lsp-pcx
+```
+
+Or search for `Perception.cx` in the VS Code Extensions panel.
+
+### Via Setup Script (Recommended for New Installs)
+
+The setup script builds LSP servers from source and installs them automatically:
+
+```bash
+# Linux / macOS / WSL
+./setup.sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -File setup.ps1
+```
+
+This builds the servers at:
+- Enma: `lsp/enma-lsp/server/dist/server.js`
+- AngelScript: `lsp/angel-lsp-pcx/server/out/server.js`
+
+Then configure your editor to use these paths (see your editor's setup guide in `mcp/`).
+
+---
+
+## Visual Studio 2022 Extensions
+
+Native Visual Studio 2022 extensions (`.vsix`) are also provided for Windows developers:
+
+| Extension | Language |
+|-----------|----------|
+| `PcxEnmaVS` | Enma (`.em`) |
+| `PcxAngelScriptVS` | AngelScript (`.as`) |
+
+### Install
+
+1. Download `PcxEnmaVS-*.vsix` or `PcxAngelScriptVS-*.vsix` from [GitHub Releases](https://github.com/VoidChecksum/pcx-ai-toolkit/releases).
+2. **Close Visual Studio** before installing.
+3. Double-click the downloaded `.vsix` file to launch the VSIX Installer.
+4. Follow the prompts and restart Visual Studio.
+
+The extension adds syntax highlighting and LSP-powered completions to the VS IDE.
+
+---
+
+## Troubleshooting
+
+- **Extension not activating**: Ensure you have Node.js 18+ installed and run `pcx setup` to build the LSP servers.
+- **No completions in VS Code**: Check that the LSP server path in your workspace settings matches the built server location (`lsp/enma-lsp/server/dist/server.js`).
+- **Run `pcx doctor`** to automatically diagnose extension and LSP issues.
+- **Still stuck?** See [docs/FAQ.md](FAQ.md) or open a [GitHub Issue](https://github.com/VoidChecksum/pcx-ai-toolkit/issues) with label `lsp`.
 
 ---
 
@@ -32529,11 +32957,19 @@ license: MIT
 
 # AI Pair Programming — Driving Claude / Cursor / Cline / Aider Well on PCX Projects
 
-The other skills cover *what* to write; this one covers *how* to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it gave me a script that doesn't compile" / "it skipped the discipline rules." The 35,000-line documentation corpus, the 14 skills, and the rules drop-ins are not magic — they only work if you drive the AI to use them. This skill names the techniques that close the gap.
+The other skills cover *what* to write; this one covers *how* to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it gave me a script that doesn't compile" / "it skipped the discipline rules." The 32,000+ line supported documentation corpus, the 25 skills, and the rules drop-ins are not magic — they only work if you drive the AI to use them. This skill names the techniques that close the gap.
 
 **Always active when working with an AI on a PCX scripting project.** These techniques apply across Claude Code, Cursor, Cline, Aider, GitHub Copilot, and any other AI coding tool that reads files and writes code.
 
 **Prerequisite:** `rules/CLAUDE.md` / `rules/CURSOR.md` / `rules/CLINE.md` / `rules/COPILOT.md` for the per-tool drop-in; this skill is the workflow that wraps them and makes them stick.
+
+## Source-Grounding Gate
+
+Always force the model through the same gate: read
+`docs/perception/llm-routing.md`, call MCP `recommend_context` when available,
+verify symbols with `api_lookup` or `pcx api`, and validate the final snippet or
+Markdown answer with `validate_code`, `validate_answer`, `pcx symbol-check`, or
+`pcx check-answer`.
 
 ---
 
@@ -32593,14 +33029,14 @@ The task is...
     → docs/perception/<area>-api.md for the API that errored, AND
       knowledge/common-patterns.md for any worked example using it.
 
-  Cross-language work (Enma <-> AngelScript <-> Lua)
-    → knowledge/pcx-cross-language-bridge.md first (decide language),
+  Cross-language work (Enma <-> AngelScript)
+    → docs/perception/llm-routing.md and docs/CROSS_LANGUAGE.md first,
       then the per-language API doc.
 ```
 
 The discipline is per-task, not per-session. A 30-minute session might read 4 different docs — that's fine. Re-loading the cheatsheet at the start of each tool session is also fine; it's small and grounds the AI's API surface.
 
-**Why:** Context is the AI's working memory. Filling it with 35,000 lines of documentation leaves no room for your code, your conversation, or its own reasoning. The cheatsheet was made for this — use it.
+**Why:** Context is the AI's working memory. Filling it with 32,000+ lines of documentation leaves no room for your code, your conversation, or its own reasoning. The cheatsheet was made for this — use it.
 
 ---
 
@@ -32817,7 +33253,7 @@ This is the highest-skill move in AI pair programming — recognizing when "more
 | 6 | Diff-review every multi-file change | Five-minute scan for the 8 high-value pattern matches catches ~90% of violations |
 | 7 | When stuck, change the question | Specific tool-call asks beat "try harder"; the unstuck question is more concrete |
 
-**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 37 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `knowledge/pcx-cross-language-bridge.md` (when to use Enma vs AS vs Lua — the question technique #3 plans against).
+**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 59 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `docs/CROSS_LANGUAGE.md` (Enma vs AngelScript binding split).
 
 ---
 
@@ -33444,7 +33880,7 @@ Devirtualization is expensive (days to weeks for a single function). Before inve
 name: game-cheat-guidelines
 description: >
   Mandatory behavioral rules and practical patterns for writing Perception.cx
-  game-cheat scripts in Enma, AngelScript, and C++. Always active — these
+  game-cheat scripts in Enma and AngelScript. Always active — these
   rules apply every time you write or edit game-cheat code, including ESP,
   aimbot, triggerbot, radar, pattern scanning, and overlay rendering.
   Authorized use only — analyze software you own or are permitted to test.
@@ -33453,13 +33889,21 @@ license: MIT
 
 # Perception.cx Game-Cheat Script Development Guidelines
 
-Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pattern scanning, world-to-screen math, memory reads/writes, and overlay rendering. These rules apply to authorized reverse engineering, security research, and game-cheat development — analyze only software you own or are authorized to test.
+Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma and AngelScript. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pattern scanning, world-to-screen math, memory reads/writes, and overlay rendering. These rules apply to authorized reverse engineering, security research, and game-cheat development — analyze only software you own or are authorized to test.
 
 **Always active.** These rules apply every time you write or edit a game-cheat script. They are not suggestions.
 
 **Prerequisites:** Load the `game-cheat-script-master` skill first. It defines the mandatory co-skills, read-first docs, and the canonical project layout. Then keep `game-hacking-pcx` loaded for the full API doc index. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
 
 **Templates:** Use `templates/cheat-skeleton-em/` and `templates/cheat-skeleton-as/` as the starting scaffold for every new cheat. See `knowledge/cheat-script-cookbook.md` for reusable recipes (W2S, ESP, aimbot smoothing, triggerbot, radar, config save/load).
+
+## Source-Grounding Gate
+
+Before writing or accepting code, load `docs/perception/llm-routing.md`, verify
+host API names with `pcx api <symbol> --lang enma|angelscript` or MCP
+`api_lookup`, then run `pcx symbol-check`, `pcx check-answer`, MCP
+`validate_code`, or MCP `validate_answer`. If the target language docs do not
+prove a symbol exists, do not invent it.
 
 ---
 
@@ -34061,14 +34505,14 @@ name: game-hacking-pcx
 description: >
   Mandatory doc router for all PCX scripting sessions. Triggers on any game
   hacking, game cheat, ESP, aimbot, triggerbot, radar, Enma, AngelScript, or
-  Perception.cx work. Provides the full doc index (43,000+ lines across 139
-  files) and enforces reading the relevant documentation before writing any
+  Perception.cx work. Provides the full supported doc index (32,000+ lines
+  across 123 docs) and enforces reading the relevant documentation before writing any
   API call. Load alongside game-cheat-script-master and game-cheat-guidelines
   on every PCX game-cheat session.
 license: MIT
 ---
 
-# Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
+# Game Hacking & Scripting — Perception.cx / Enma / AngelScript
 
 ## Trigger
 Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
@@ -34090,6 +34534,13 @@ the live upstream version.
 
 You MUST read the relevant upstream doc before writing ANY Enma, AngelScript,
 or PCX API code. Do not write from memory. The docs are the source of truth.
+
+## Source-Grounding Gate
+
+For MCP-aware clients, call `recommend_context(task, language)` first, then load
+the returned skills/docs. Verify host symbols with `api_lookup(symbol, language)`
+and validate generated code with `validate_code` or `validate_answer`. For CLI
+workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 
 ### When writing Enma (.em) code — read these:
 
@@ -34234,7 +34685,7 @@ or PCX API code. Do not write from memory. The docs are the source of truth.
 
 ## Anti-Hallucination Rule
 
-You must NEVER invent a PCX or Enma/AngelScript/Lua API name. Every function,
+You must NEVER invent a PCX, Enma, or AngelScript API name. Every function,
 method, type, and import you use must come from one of:
   - `https://docs.perception.cx/perception/enma/overview` and its sub-pages,
   - `https://docs.perception.cx/perception/angel-script/overview` and its sub-pages,
@@ -36771,15 +37222,23 @@ ledger to `DEFER-LEDGER.md` at the project root. One-shot.
 name: pcx-enma-discipline
 description: >
   Behavioral and syntactic rules for writing .em (Enma) scripts on Perception.cx.
-  Prevents AngelScript/Lua-reflex errors in the Enma API surface — method names,
-  parameter shapes, type system, and lifecycle differ from AS and Lua. Always
+  Prevents AngelScript-reflex errors in the Enma API surface — method names,
+  parameter shapes, type system, and lifecycle differ from AS. Always
   active when editing .em files.
 license: MIT
 ---
 
 # Enma Discipline for Perception.cx
 
-Behavioral and syntactic rules for writing `.em` scripts on Perception.cx. Enma is the **primary** scripting language on PCX and has a distinct C++-like type system, RAII semantics, and value-type APIs that differ from AngelScript (handles, `register_callback`, `array<T>`) and Lua (tables, `on_frame`, `require`). The AI defaults to AS or Lua idioms when editing `.em` files and produces code that does not compile.
+Behavioral and syntactic rules for writing `.em` scripts on Perception.cx. Enma is the **primary** scripting language on PCX and has a distinct C++-like type system, RAII semantics, and value-type APIs that differ from AngelScript handles, `register_callback`, and `array<T>` idioms. The AI often defaults to AS-style code when editing `.em` files and produces code that does not compile.
+
+## Source-Grounding Gate
+
+Before writing Enma code, read `docs/perception/llm-routing.md`, verify host
+symbols with `pcx api <symbol> --lang enma` or MCP `api_lookup`, then run
+`pcx symbol-check`, `pcx check-answer`, MCP `validate_code`, or MCP
+`validate_answer`. Never borrow an AngelScript API shape unless the Enma docs
+prove it.
 
 **Always active when editing `.em` files.** These rules apply every time you write or edit a Perception.cx Enma script.
 
@@ -36823,14 +37282,6 @@ int main() {
     return 1;
 }
 
-// WRONG — Lua idioms in an .em file
-function main()
-    g_proc = ref_process("game.exe")          -- Lua assignment
-    if not g_proc then return 0 end           -- Lua nil-check
-    return 1
-end
-function on_frame() end                       -- Lua lifecycle
-
 // RIGHT — Enma syntax, Enma API, Enma lifecycle
 int64 main() {
     proc_t p = ref_process("game.exe");       // value type, RAII
@@ -36848,7 +37299,7 @@ void on_render(int64 data) {
 }
 ```
 
-**Why:** Enma is a separately compiled host language with its own type system and standard library. The AS and Lua bindings cover overlapping domains but the function signatures, type registrations, and constants are independent. Always confirm the call in `docs/perception/<area>-api.md` before writing it.
+**Why:** Enma is a separately compiled host language with its own type system and standard library. The AngelScript binding covers overlapping domains but the function signatures, type registrations, and constants are independent. Always confirm the call in `docs/perception/<area>-api.md` before writing it.
 
 ---
 
@@ -36918,7 +37369,7 @@ float cx  = get_view_width() * 0.5;    // Enma has no 'float' keyword; use 'floa
 
 ---
 
-## 4. Arrays Use `T[]` Syntax — Not `array<T>`, Not Lua Tables
+## 4. Arrays Use `T[]` Syntax — Not `array<T>`
 
 **Enma's standard array is `T[]` with `.push()`, `.pop()`, `.insert()`, `.remove()`, `.length`, and `.contains()`. Do not use `array<T>` — that is AngelScript syntax.**
 
@@ -36926,10 +37377,6 @@ float cx  = get_view_width() * 0.5;    // Enma has no 'float' keyword; use 'floa
 // WRONG — AS syntax
 array<uint64> entities;
 entities.insertLast(0x12345);
-
-// WRONG — Lua syntax
-local entities = {}
-table.insert(entities, 0x12345)
 
 // RIGHT — Enma syntax
 uint64[] entities;
@@ -36946,7 +37393,7 @@ Enma array methods: `push(v)`, `pop()`, `insert(idx, v)`, `remove(idx)`, `clear(
 
 ---
 
-## 5. Maps Use `map<K,V>` — Not `dictionary`, Not Plain Lua Tables
+## 5. Maps Use `map<K,V>` — Not `dictionary`
 
 **Enma has a generic `map<K,V>` type with `.set(key, val)`, `.get(key)`, `.remove(key)`, `.contains(key)`, `.keys()`, `.values()`, and `.length`. There is no `dictionary` type (that's AS-only).**
 
@@ -37037,7 +37484,7 @@ void on_tick(int64 data) {
 }
 ```
 
-There is no explicit unregister in Enma — routines are tied to the script lifecycle and are cleaned up on unload. There is no `on_unload` hook in Enma (unlike AS and Lua); cleanup happens via RAII destructors.
+There is no explicit unregister in Enma — routines are tied to the script lifecycle and are cleaned up on unload. There is no `on_unload` hook in Enma; cleanup happens via RAII destructors.
 
 **Why:** Enma's `register_routine` takes a function pointer cast to `int64` (the underlying function address) plus an arbitrary `int64` payload. The engine calls the function with that payload. The cast is mandatory because Enma lacks implicit function-to-int conversion. Forgetting `cast<int64>` produces a type mismatch compile error.
 
@@ -37045,7 +37492,7 @@ There is no explicit unregister in Enma — routines are tied to the script life
 
 ## 8. Structs Can Have Default Member Initializers
 
-**Enma structs support default member initializers (`bool valid = false;`). Use them to avoid uninitialized garbage. AS does not support this; Lua doesn't have structs at all.**
+**Enma structs support default member initializers (`bool valid = false;`). Use them to avoid uninitialized garbage. AS does not support this.**
 
 ```cpp
 // Enma struct with defaults
@@ -37070,13 +37517,13 @@ void reset_entities() {
 }
 ```
 
-**Why:** Enma's C++ heritage gives it default member initializers and fixed-size arrays. AS requires manual initialization in constructors (which may not even be registered for all types), and Lua uses tables. Leveraging Enma's features makes code cleaner and less error-prone.
+**Why:** Enma's C++ heritage gives it default member initializers and fixed-size arrays. AS requires manual initialization in constructors, which may not even be registered for all types. Leveraging Enma's features makes code cleaner and less error-prone.
 
 ---
 
 ## 9. Import System: `#pragma once` + `import "module"`
 
-**Enma uses `#pragma once` for header guards and `import "module"` for module imports. Do not use `#include` (C/C++) or `require()` (Lua).**
+**Enma uses `#pragma once` for header guards and `import "module"` for module imports. Do not use C/C++ `#include` syntax.**
 
 ```cpp
 // globals.em — shared header
@@ -45868,6 +46315,117 @@ release carrying every API a script needs. Pure IDE/Analyzer/decompiler internal
 - `docs/enma/llms-language.md`, `lang-pre-processor.md`, `lang-annotations.md`, `lang-advanced.md` — Enma language reference for the Language Version Quirks section.
 - `skill://pcx-angelscript-discipline` — AngelScript usage discipline.
 - `.claude/skills/game-cheat-guidelines/SKILL.md` — the 12 rules every script in this repo follows.
+
+---
+
+## Source: `knowledge/perception-forum-insights.md`
+
+# Perception Forum Insights
+
+Derived from a targeted authenticated read-only crawl of Perception forum pages
+on 2026-06-23. Treat this file as secondary operational context, not as an API
+contract. The official docs, generated API index, and local validators remain
+authoritative for exact Enma and AngelScript symbols.
+
+Do not copy forum text verbatim into generated answers. Use these notes to route
+context, identify likely stale docs, and decide which official source to verify.
+
+## Source Threads
+
+| Topic | Forum Source |
+|-------|--------------|
+| Enma beta announcement | <https://perception.cx/threads/open-beta-perception-enma.1149/> |
+| Overlay compatibility note | <https://perception.cx/threads/new-overlay-information-05-27-2026.1171/> |
+| Official GitBook pointer | <https://perception.cx/threads/official-gitbook-documentation-perception-v2.712/> |
+| Client common issues | <https://perception.cx/threads/perception-client-self-help-guide-for-common-issues.760/> |
+| Changelog 2026-04-06 | <https://perception.cx/threads/changelog-%E2%80%93-04-6-2026.1059/> |
+| Changelog 2026-04-01 | <https://perception.cx/threads/changelog-%E2%80%93-04-1-2026.1050/> |
+| Changelog 2026-03-31 | <https://perception.cx/threads/changelog-%E2%80%93-03-31-2026.1044/> |
+| Changelog 2026-03-30 | <https://perception.cx/threads/changelog-%E2%80%93-03-30-2026.1040/> |
+| Changelog 2026-03-20 | <https://perception.cx/threads/changelog-3-20-2026.1009/> |
+| Changelog 2026-03-17 | <https://perception.cx/threads/changelog-3-17-2026.1000/> |
+| Changelog 2026-03-16 | <https://perception.cx/threads/changelog-3-16-2026.996/> |
+| Changelog 2026-03-14 | <https://perception.cx/threads/changelog-3-14-2026.983/> |
+| Changelog 2026-02-17 | <https://perception.cx/threads/changelog-2-17-2026.921/> |
+| Changelog 2026-02-12 | <https://perception.cx/threads/changelog-2-12-2026.905/> |
+| Changelog 2026-02-01 | <https://perception.cx/threads/changelog-2-1-2026.878/> |
+
+## Enma Rollout Signals
+
+- Enma is Perception's own script language and is positioned as the next major
+  PCX development path. Load `docs/perception/enma` and the generated Enma
+  context pack before answering Enma questions.
+- The forum announcement points to both the Enma GitBook and the Perception Enma
+  docs. If the forum and local mirror disagree, verify against
+  `docs/perception/enma` or the live official docs before asserting behavior.
+- The announcement describes Enma as native-compiled rather than interpreted.
+  For LLM routing, prefer Enma-specific lifecycle, imports, value types, and
+  compile-time semantics over AngelScript habits.
+- The SDK was described as following after language maturity. Do not imply that
+  every embedding SDK feature is available inside PCX scripts unless the local
+  PCX docs or API index prove it.
+
+## AngelScript And Universal API Changelog Signals
+
+- 2026-03-16 and 2026-03-17 expanded AngelScript Custom Draw into a D3D11-style
+  GPU pipeline: shaders, buffers, textures, render targets, indexed rendering,
+  depth state, rasterizer state, viewports, structured buffers, compute shaders,
+  mesh loading, dynamic textures, and backbuffer capture.
+- 2026-03-14 added Sound API coverage for script use and corrected several
+  memory-scan/VAD documentation mismatches. If a VAD or scan signature appears
+  suspicious, check `docs/perception/angelscript/` and `knowledge/pcx-api-index.json`.
+- 2026-02-12 added AngelScript GUI position/size helpers and clarified render
+  callback ordering. UI overlap or ordering answers should check the current
+  Render and GUI docs before assuming older behavior.
+- 2026-02-01 fixed an AngelScript `hash_map` reference issue and added window
+  enumeration support across supported bindings. Prefer exact API lookup before
+  using these names in examples.
+- 2026-02-17 added list widget operations such as get/remove/highlight/show/hide
+  in the older AS-era changelog. Use the current GUI docs for exact modern
+  function and method names.
+
+## IDE, Analyzer, And Agent Tooling Signals
+
+- 2026-04-01 added and refined IDE agent tools including terminal execution,
+  user-waiting, multiple-choice prompts, and note updates. MCP/agent answers
+  should still prefer this repo's `pcx-knowledge-mcp` for deterministic source
+  lookup and validation.
+- 2026-03-30 and 2026-04-01 describe a redesigned IDE, GitHub Models/Copilot
+  integration, and expanded analyzer/reconstruction features. These are product
+  capabilities, not script APIs; do not call them from Enma or AngelScript code.
+- 2026-03-31 and 2026-04-06 describe analyzer memory, reconstruction, decompiler,
+  and freeze/deadlock fixes. When users ask about Analyzer behavior, route them
+  to `docs/perception/analyzer.md` plus changelog context rather than inventing
+  scripting APIs.
+- The forum notes previous AI hallucination/context-trimming fixes inside the
+  Perception IDE. This repo should keep its stricter answer gate:
+  `api_lookup`, `validate_code`, and `validate_answer`.
+
+## Overlay And Client Compatibility Signals
+
+- The 2026-05-27 overlay note says the current overlay path depends on a normal
+  Discord client process being present while its overlay components are disabled.
+  Treat this as compatibility guidance, not as a script API.
+- The 2026-03-20 changelog says fullscreen mode became broadly supported after
+  engine and overlay changes, and that overlay refresh behavior may be expected
+  during client startup.
+- The client self-help guide stresses loading PCX from the desktop before games
+  are opened, while scripts can be loaded and unloaded in-game. This belongs in
+  troubleshooting context, not code examples.
+- If a user asks about overlay crashes, stream/screenshot behavior, or startup
+  order, route to this file and the official client docs before answering.
+
+## LLM Routing Implications
+
+- For Enma tasks: load `docs/perception/llm-routing.md`,
+  `docs/llms-perception-enma.md`, `docs/perception/enma`, and the Enma skill.
+- For AngelScript Custom Draw, Sound, VAD, GUI, input, and window APIs: load
+  `docs/llms-perception-angelscript.md` plus the exact API page, then run
+  `pcx api <symbol> --lang angelscript`.
+- For forum/changelog/overlay/client questions: load this file after the
+  official docs. Never let this file override exact symbol signatures.
+- For all code-bearing answers: finish with `pcx check-answer` or MCP
+  `validate_answer` to catch hallucinated or cross-language API usage.
 
 ---
 

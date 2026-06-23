@@ -17,6 +17,15 @@ See `docs/INDEX.md` for the complete file index. The most useful single-file con
 - [Full Knowledge Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-knowledge.md): every knowledge reference in one file.
 - [Full Toolkit Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-full.txt): the entire toolkit concatenated.
 
+## Agent Operating Docs
+
+Top-level operating manuals, FAQ, and routing references for AI tools using this repo.
+
+- [AI Agent Operating Manual](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/AI_AGENT_OPERATING_MANUAL.md): This is the shortest safe workflow for any LLM or MCP-aware agent working with
+- [Enma vs AngelScript Binding Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/CROSS_LANGUAGE.md): Side-by-side mapping of common Perception.cx scripting patterns across the two
+- [Frequently Asked Questions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/FAQ.md): A quick reference for common issues and questions when using pcx-ai-toolkit.
+- [Extension Installation Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/marketplace-install.md): Two VS Code extensions are available for pcx-ai-toolkit:
+
 ## Enma Language Docs
 
 The native Perception.cx scripting language: syntax, addons, SDK, lifecycle.
@@ -165,9 +174,9 @@ Behavioral / discipline skills loaded automatically by AI tools (Claude Code / O
 - [AI Pair Programming — Driving Claude / Cursor / Cline / Aider Well on PCX Projects](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/ai-pair-programming/SKILL.md): The other skills cover what to write; this one covers how to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it 
 - [Anti-Cheat Reverse Engineering — Kernel-Level Game Protection Analysis](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/anti-cheat-re/SKILL.md): Methodology for reverse engineering kernel-level anti-cheat systems: EAC (Easy Anti-Cheat), BattlEye, Vanguard, GameGuard, XIGNCODE3, and similar kernel drivers that protect game processes. Covers the
 - [Deobfuscation — Reversing Protected Binaries](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/deobfuscation/SKILL.md): Methodology for reversing binaries protected by commercial obfuscators (Themida/WinLicense, VMProtect, Code Virtualizer), compiler-level obfuscation (LLVM-obfuscator, Hikari, OLLVM), and custom protec
-- [Perception.cx Game-Cheat Script Development Guidelines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-guidelines/SKILL.md): Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot,
+- [Perception.cx Game-Cheat Script Development Guidelines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-guidelines/SKILL.md): Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma and AngelScript. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, trigg
 - [Game Cheat Script Master — Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-script-master/SKILL.md): This skill turns any LLM into a specialized Perception.cx cheat-script developer.
-- [Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-hacking-pcx/SKILL.md): Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
+- [Game Hacking & Scripting — Perception.cx / Enma / AngelScript](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-hacking-pcx/SKILL.md): Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
 - [Kernel Driver Analysis — Technical Patterns for AC Driver Reversing](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/kernel-analysis/SKILL.md): Technical patterns for reversing Windows kernel drivers: WDM/KMDF structure identification, IOCTL dispatch table extraction, kernel callback enumeration, integrity check routines, obfuscation layers, 
 - [Perception MCP Tool Routing — The Decision Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/mcp-tool-routing/SKILL.md): 59 tools across memory I/O, modules/threads/PE, memory regions, pattern/scanner/xrefs/signature, code analysis, symbol/function lookup, handles, system/environment, and the Enma scripting bridge. This
 - [Multi-Binary Targeting — One Script, N Game Versions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/multi-binary-targeting/SKILL.md): The pattern for supporting multiple binaries (game versions, architectures, storefront builds, beta channels) from one Enma codebase. A well-organized script can target v1.42.3 and v1.42.4, 32-bit and
@@ -214,6 +223,7 @@ Quick references for engines, anti-cheat architecture, patterns, methodology.
 - [Perception.cx Enma API Quick Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-api-cheatsheet.md): All natives are auto-registered. No import needed (except import "vec"; import "color"; for those types).
 - [PCX Documentation Roots](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-doc-roots.md): The only authoritative sources for Perception.cx scripting APIs are these two
 - [PCX API Version Matrix](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-version-matrix.md): This file maps each PCX API addition / change / removal to the version it landed in, so scripts that target older PCX runtimes know what's safe. Drawn from docs/perception/changelogs.md.
+- [Perception Forum Insights](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/perception-forum-insights.md): Derived from a targeted authenticated read-only crawl of Perception forum pages
 - [RE Plugins & Tools Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/re-plugins-and-tools.md): IDA Pro plugins, Ghidra extensions, FLIRT signature databases, binary diffing tools, and debugger sync infrastructure for game binary reverse engineering. Every tool listed here is cloned, ready to bu
 - [Script Organization Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/script-organization-patterns.md): How an Enma project on Perception.cx is laid out once it grows past a single
 - [VMProtect 2.x Analysis with vmp2](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/vmprotect2-analysis.md): Practical guide for analyzing binaries protected by VMProtect 2.x using the
@@ -299,6 +309,7 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [check-llm-answer](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-llm-answer.py)
 - [check-llm-contract](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-llm-contract.py)
 - [Cut the "Agent Instructions" footer — it mentions urls, not tools.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-mcp-config.py): txt = re.split(r"\n#\sAgent Instructions\b", txt)[0]
+- [check-skill-contract](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-skill-contract.py)
 - [Scripting-API surface keywords that make a changelog release "API-relevant".](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-version-matrix.py): APIKEYWORDS = re.compile(
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dump-strings-xor.py): import os
 - [Internal representation: the parsed table is a list of (category, entries)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dumper-to-enma.py): # groups. category is None when the source has no natural grouping; otherwise

@@ -22,11 +22,19 @@ license: MIT
 
 # AI Pair Programming — Driving Claude / Cursor / Cline / Aider Well on PCX Projects
 
-The other skills cover *what* to write; this one covers *how* to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it gave me a script that doesn't compile" / "it skipped the discipline rules." The 35,000-line documentation corpus, the 14 skills, and the rules drop-ins are not magic — they only work if you drive the AI to use them. This skill names the techniques that close the gap.
+The other skills cover *what* to write; this one covers *how* to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it gave me a script that doesn't compile" / "it skipped the discipline rules." The 32,000+ line supported documentation corpus, the 25 skills, and the rules drop-ins are not magic — they only work if you drive the AI to use them. This skill names the techniques that close the gap.
 
 **Always active when working with an AI on a PCX scripting project.** These techniques apply across Claude Code, Cursor, Cline, Aider, GitHub Copilot, and any other AI coding tool that reads files and writes code.
 
 **Prerequisite:** `rules/CLAUDE.md` / `rules/CURSOR.md` / `rules/CLINE.md` / `rules/COPILOT.md` for the per-tool drop-in; this skill is the workflow that wraps them and makes them stick.
+
+## Source-Grounding Gate
+
+Always force the model through the same gate: read
+`docs/perception/llm-routing.md`, call MCP `recommend_context` when available,
+verify symbols with `api_lookup` or `pcx api`, and validate the final snippet or
+Markdown answer with `validate_code`, `validate_answer`, `pcx symbol-check`, or
+`pcx check-answer`.
 
 ---
 
@@ -86,14 +94,14 @@ The task is...
     → docs/perception/<area>-api.md for the API that errored, AND
       knowledge/common-patterns.md for any worked example using it.
 
-  Cross-language work (Enma <-> AngelScript <-> Lua)
-    → knowledge/pcx-cross-language-bridge.md first (decide language),
+  Cross-language work (Enma <-> AngelScript)
+    → docs/perception/llm-routing.md and docs/CROSS_LANGUAGE.md first,
       then the per-language API doc.
 ```
 
 The discipline is per-task, not per-session. A 30-minute session might read 4 different docs — that's fine. Re-loading the cheatsheet at the start of each tool session is also fine; it's small and grounds the AI's API surface.
 
-**Why:** Context is the AI's working memory. Filling it with 35,000 lines of documentation leaves no room for your code, your conversation, or its own reasoning. The cheatsheet was made for this — use it.
+**Why:** Context is the AI's working memory. Filling it with 32,000+ lines of documentation leaves no room for your code, your conversation, or its own reasoning. The cheatsheet was made for this — use it.
 
 ---
 
@@ -310,7 +318,7 @@ This is the highest-skill move in AI pair programming — recognizing when "more
 | 6 | Diff-review every multi-file change | Five-minute scan for the 8 high-value pattern matches catches ~90% of violations |
 | 7 | When stuck, change the question | Specific tool-call asks beat "try harder"; the unstuck question is more concrete |
 
-**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 37 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `knowledge/pcx-cross-language-bridge.md` (when to use Enma vs AS vs Lua — the question technique #3 plans against).
+**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 59 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `docs/CROSS_LANGUAGE.md` (Enma vs AngelScript binding split).
 
 ---
 
@@ -937,7 +945,7 @@ Devirtualization is expensive (days to weeks for a single function). Before inve
 name: game-cheat-guidelines
 description: >
   Mandatory behavioral rules and practical patterns for writing Perception.cx
-  game-cheat scripts in Enma, AngelScript, and C++. Always active — these
+  game-cheat scripts in Enma and AngelScript. Always active — these
   rules apply every time you write or edit game-cheat code, including ESP,
   aimbot, triggerbot, radar, pattern scanning, and overlay rendering.
   Authorized use only — analyze software you own or are permitted to test.
@@ -946,13 +954,21 @@ license: MIT
 
 # Perception.cx Game-Cheat Script Development Guidelines
 
-Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pattern scanning, world-to-screen math, memory reads/writes, and overlay rendering. These rules apply to authorized reverse engineering, security research, and game-cheat development — analyze only software you own or are authorized to test.
+Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma and AngelScript. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pattern scanning, world-to-screen math, memory reads/writes, and overlay rendering. These rules apply to authorized reverse engineering, security research, and game-cheat development — analyze only software you own or are authorized to test.
 
 **Always active.** These rules apply every time you write or edit a game-cheat script. They are not suggestions.
 
 **Prerequisites:** Load the `game-cheat-script-master` skill first. It defines the mandatory co-skills, read-first docs, and the canonical project layout. Then keep `game-hacking-pcx` loaded for the full API doc index. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
 
 **Templates:** Use `templates/cheat-skeleton-em/` and `templates/cheat-skeleton-as/` as the starting scaffold for every new cheat. See `knowledge/cheat-script-cookbook.md` for reusable recipes (W2S, ESP, aimbot smoothing, triggerbot, radar, config save/load).
+
+## Source-Grounding Gate
+
+Before writing or accepting code, load `docs/perception/llm-routing.md`, verify
+host API names with `pcx api <symbol> --lang enma|angelscript` or MCP
+`api_lookup`, then run `pcx symbol-check`, `pcx check-answer`, MCP
+`validate_code`, or MCP `validate_answer`. If the target language docs do not
+prove a symbol exists, do not invent it.
 
 ---
 
@@ -1554,14 +1570,14 @@ name: game-hacking-pcx
 description: >
   Mandatory doc router for all PCX scripting sessions. Triggers on any game
   hacking, game cheat, ESP, aimbot, triggerbot, radar, Enma, AngelScript, or
-  Perception.cx work. Provides the full doc index (43,000+ lines across 139
-  files) and enforces reading the relevant documentation before writing any
+  Perception.cx work. Provides the full supported doc index (32,000+ lines
+  across 123 docs) and enforces reading the relevant documentation before writing any
   API call. Load alongside game-cheat-script-master and game-cheat-guidelines
   on every PCX game-cheat session.
 license: MIT
 ---
 
-# Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
+# Game Hacking & Scripting — Perception.cx / Enma / AngelScript
 
 ## Trigger
 Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
@@ -1583,6 +1599,13 @@ the live upstream version.
 
 You MUST read the relevant upstream doc before writing ANY Enma, AngelScript,
 or PCX API code. Do not write from memory. The docs are the source of truth.
+
+## Source-Grounding Gate
+
+For MCP-aware clients, call `recommend_context(task, language)` first, then load
+the returned skills/docs. Verify host symbols with `api_lookup(symbol, language)`
+and validate generated code with `validate_code` or `validate_answer`. For CLI
+workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 
 ### When writing Enma (.em) code — read these:
 
@@ -1727,7 +1750,7 @@ or PCX API code. Do not write from memory. The docs are the source of truth.
 
 ## Anti-Hallucination Rule
 
-You must NEVER invent a PCX or Enma/AngelScript/Lua API name. Every function,
+You must NEVER invent a PCX, Enma, or AngelScript API name. Every function,
 method, type, and import you use must come from one of:
   - `https://docs.perception.cx/perception/enma/overview` and its sub-pages,
   - `https://docs.perception.cx/perception/angel-script/overview` and its sub-pages,
@@ -4264,15 +4287,23 @@ ledger to `DEFER-LEDGER.md` at the project root. One-shot.
 name: pcx-enma-discipline
 description: >
   Behavioral and syntactic rules for writing .em (Enma) scripts on Perception.cx.
-  Prevents AngelScript/Lua-reflex errors in the Enma API surface — method names,
-  parameter shapes, type system, and lifecycle differ from AS and Lua. Always
+  Prevents AngelScript-reflex errors in the Enma API surface — method names,
+  parameter shapes, type system, and lifecycle differ from AS. Always
   active when editing .em files.
 license: MIT
 ---
 
 # Enma Discipline for Perception.cx
 
-Behavioral and syntactic rules for writing `.em` scripts on Perception.cx. Enma is the **primary** scripting language on PCX and has a distinct C++-like type system, RAII semantics, and value-type APIs that differ from AngelScript (handles, `register_callback`, `array<T>`) and Lua (tables, `on_frame`, `require`). The AI defaults to AS or Lua idioms when editing `.em` files and produces code that does not compile.
+Behavioral and syntactic rules for writing `.em` scripts on Perception.cx. Enma is the **primary** scripting language on PCX and has a distinct C++-like type system, RAII semantics, and value-type APIs that differ from AngelScript handles, `register_callback`, and `array<T>` idioms. The AI often defaults to AS-style code when editing `.em` files and produces code that does not compile.
+
+## Source-Grounding Gate
+
+Before writing Enma code, read `docs/perception/llm-routing.md`, verify host
+symbols with `pcx api <symbol> --lang enma` or MCP `api_lookup`, then run
+`pcx symbol-check`, `pcx check-answer`, MCP `validate_code`, or MCP
+`validate_answer`. Never borrow an AngelScript API shape unless the Enma docs
+prove it.
 
 **Always active when editing `.em` files.** These rules apply every time you write or edit a Perception.cx Enma script.
 
@@ -4316,14 +4347,6 @@ int main() {
     return 1;
 }
 
-// WRONG — Lua idioms in an .em file
-function main()
-    g_proc = ref_process("game.exe")          -- Lua assignment
-    if not g_proc then return 0 end           -- Lua nil-check
-    return 1
-end
-function on_frame() end                       -- Lua lifecycle
-
 // RIGHT — Enma syntax, Enma API, Enma lifecycle
 int64 main() {
     proc_t p = ref_process("game.exe");       // value type, RAII
@@ -4341,7 +4364,7 @@ void on_render(int64 data) {
 }
 ```
 
-**Why:** Enma is a separately compiled host language with its own type system and standard library. The AS and Lua bindings cover overlapping domains but the function signatures, type registrations, and constants are independent. Always confirm the call in `docs/perception/<area>-api.md` before writing it.
+**Why:** Enma is a separately compiled host language with its own type system and standard library. The AngelScript binding covers overlapping domains but the function signatures, type registrations, and constants are independent. Always confirm the call in `docs/perception/<area>-api.md` before writing it.
 
 ---
 
@@ -4411,7 +4434,7 @@ float cx  = get_view_width() * 0.5;    // Enma has no 'float' keyword; use 'floa
 
 ---
 
-## 4. Arrays Use `T[]` Syntax — Not `array<T>`, Not Lua Tables
+## 4. Arrays Use `T[]` Syntax — Not `array<T>`
 
 **Enma's standard array is `T[]` with `.push()`, `.pop()`, `.insert()`, `.remove()`, `.length`, and `.contains()`. Do not use `array<T>` — that is AngelScript syntax.**
 
@@ -4419,10 +4442,6 @@ float cx  = get_view_width() * 0.5;    // Enma has no 'float' keyword; use 'floa
 // WRONG — AS syntax
 array<uint64> entities;
 entities.insertLast(0x12345);
-
-// WRONG — Lua syntax
-local entities = {}
-table.insert(entities, 0x12345)
 
 // RIGHT — Enma syntax
 uint64[] entities;
@@ -4439,7 +4458,7 @@ Enma array methods: `push(v)`, `pop()`, `insert(idx, v)`, `remove(idx)`, `clear(
 
 ---
 
-## 5. Maps Use `map<K,V>` — Not `dictionary`, Not Plain Lua Tables
+## 5. Maps Use `map<K,V>` — Not `dictionary`
 
 **Enma has a generic `map<K,V>` type with `.set(key, val)`, `.get(key)`, `.remove(key)`, `.contains(key)`, `.keys()`, `.values()`, and `.length`. There is no `dictionary` type (that's AS-only).**
 
@@ -4530,7 +4549,7 @@ void on_tick(int64 data) {
 }
 ```
 
-There is no explicit unregister in Enma — routines are tied to the script lifecycle and are cleaned up on unload. There is no `on_unload` hook in Enma (unlike AS and Lua); cleanup happens via RAII destructors.
+There is no explicit unregister in Enma — routines are tied to the script lifecycle and are cleaned up on unload. There is no `on_unload` hook in Enma; cleanup happens via RAII destructors.
 
 **Why:** Enma's `register_routine` takes a function pointer cast to `int64` (the underlying function address) plus an arbitrary `int64` payload. The engine calls the function with that payload. The cast is mandatory because Enma lacks implicit function-to-int conversion. Forgetting `cast<int64>` produces a type mismatch compile error.
 
@@ -4538,7 +4557,7 @@ There is no explicit unregister in Enma — routines are tied to the script life
 
 ## 8. Structs Can Have Default Member Initializers
 
-**Enma structs support default member initializers (`bool valid = false;`). Use them to avoid uninitialized garbage. AS does not support this; Lua doesn't have structs at all.**
+**Enma structs support default member initializers (`bool valid = false;`). Use them to avoid uninitialized garbage. AS does not support this.**
 
 ```cpp
 // Enma struct with defaults
@@ -4563,13 +4582,13 @@ void reset_entities() {
 }
 ```
 
-**Why:** Enma's C++ heritage gives it default member initializers and fixed-size arrays. AS requires manual initialization in constructors (which may not even be registered for all types), and Lua uses tables. Leveraging Enma's features makes code cleaner and less error-prone.
+**Why:** Enma's C++ heritage gives it default member initializers and fixed-size arrays. AS requires manual initialization in constructors, which may not even be registered for all types. Leveraging Enma's features makes code cleaner and less error-prone.
 
 ---
 
 ## 9. Import System: `#pragma once` + `import "module"`
 
-**Enma uses `#pragma once` for header guards and `import "module"` for module imports. Do not use `#include` (C/C++) or `require()` (Lua).**
+**Enma uses `#pragma once` for header guards and `import "module"` for module imports. Do not use C/C++ `#include` syntax.**
 
 ```cpp
 // globals.em — shared header

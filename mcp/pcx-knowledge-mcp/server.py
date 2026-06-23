@@ -11,9 +11,14 @@ Tools exposed:
   - get_file(path)              : fetch full file content by repo-relative path
   - list_files(category=None)   : enumerate files, optionally filtered to a category
   - overview()                  : top-level summary of the toolkit's structure
+  - list_skills()               : enumerate available AI skills with descriptions
+  - get_skill(name)             : fetch a skill by stable name
+  - recommend_context(task, language="") : deterministic doc/skill/tool starting set
   - api_lookup(symbol, language="") : exact source-backed API lookup
   - validate_code(code, language, source_path="")
                                 : check Enma/AngelScript snippets against the PCX API index
+  - validate_answer(answer, source_path="answer.md")
+                                : validate fenced Enma/AngelScript code blocks in an LLM answer
 
 Resources exposed:
   - file://<repo-relative-path> : every file in the corpus, addressable by URI
@@ -51,7 +56,12 @@ except ImportError:
 # Make the shared parser available to validate_code
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
-from pcx_grounding import load_api_index, lookup_symbol, validate_code_against_index  # noqa: E402
+from pcx_grounding import (  # noqa: E402
+    load_api_index,
+    lookup_symbol,
+    validate_answer_markdown,
+    validate_code_against_index,
+)
 
 
 # ── Corpus scanning ──────────────────────────────────────────────────────────
@@ -186,6 +196,156 @@ class KeywordIndex:
 INDEX = KeywordIndex()
 
 
+# ── Skill metadata ───────────────────────────────────────────────────────────
+
+def _parse_frontmatter(text: str) -> dict[str, str]:
+    if not text.startswith("---\n"):
+        return {}
+    end = text.find("\n---", 4)
+    if end == -1:
+        return {}
+    block = text[4:end]
+    data: dict[str, str] = {}
+    current: str | None = None
+    for raw in block.splitlines():
+        if not raw.strip():
+            continue
+        if raw.startswith((" ", "\t")) and current:
+            data[current] = (data[current] + " " + raw.strip()).strip()
+            continue
+        if ":" not in raw:
+            continue
+        key, value = raw.split(":", 1)
+        current = key.strip()
+        data[current] = value.strip().strip("'\"").strip(">")
+    return data
+
+
+def skill_index() -> list[dict[str, str]]:
+    skills: list[dict[str, str]] = []
+    for path in sorted((REPO_ROOT / ".claude" / "skills").glob("*/SKILL.md")):
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            continue
+        meta = _parse_frontmatter(text)
+        name = meta.get("name") or path.parent.name
+        desc = " ".join((meta.get("description") or "").split())
+        skills.append({
+            "name": name,
+            "path": rel(path),
+            "description": desc,
+        })
+    return skills
+
+
+def _skill_by_name(name: str) -> Path | None:
+    normalized = name.removeprefix("skill://").strip().lower()
+    for item in skill_index():
+        if item["name"].lower() == normalized:
+            return resolve(item["path"])
+    candidate = resolve(f".claude/skills/{normalized}/SKILL.md")
+    return candidate
+
+
+CONTEXT_RULES = [
+    (
+        {"esp", "aimbot", "triggerbot", "radar", "overlay", "cheat", "hack", "memory"},
+        {
+            "skills": ["game-cheat-script-master", "game-cheat-guidelines", "game-hacking-pcx"],
+            "docs": ["docs/perception/llm-routing.md", "knowledge/cheat-script-cookbook.md", "knowledge/common-patterns.md", "knowledge/perception-forum-insights.md"],
+            "tools": ["api_lookup", "validate_code", "search", "get_file"],
+        },
+    ),
+    (
+        {"forum", "changelog", "changelogs", "migration", "beta", "client", "fullscreen"},
+        {
+            "skills": ["pcx-knowledge-index", "ai-pair-programming"],
+            "docs": ["knowledge/perception-forum-insights.md", "docs/perception/changelogs.md", "docs/AI_AGENT_OPERATING_MANUAL.md"],
+            "tools": ["search", "get_file", "api_lookup", "validate_answer"],
+        },
+    ),
+    (
+        {"offset", "signature", "sig", "pattern", "patch", "update", "struct", "reversing"},
+        {
+            "skills": ["pcx-re-discipline", "re-evidence-log", "pcx-patch-day-playbook"],
+            "docs": ["knowledge/offset-methodology.md", "knowledge/pcx-version-matrix.md", "signatures/source-engine/common-sigs.md"],
+            "tools": ["search", "get_file"],
+        },
+    ),
+    (
+        {"mcp", "tool", "memory", "scan", "disassemble", "process"},
+        {
+            "skills": ["mcp-tool-routing", "pcx-knowledge-index"],
+            "docs": ["docs/perception/mcp-api.md", "mcp/perception-mcp-config.json", "mcp/pcx-knowledge-mcp/README.md"],
+            "tools": ["search", "get_file", "api_lookup", "validate_code"],
+        },
+    ),
+    (
+        {"package", "bundle", "ship", "release", "vsix", "extension"},
+        {
+            "skills": ["script-bundler", "pcx-coding-discipline"],
+            "docs": ["README.md", "templates/README.md", "visualstudio/README.md"],
+            "tools": ["search", "get_file"],
+        },
+    ),
+]
+
+
+def _dedupe(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
+
+
+def build_context_recommendation(task: str, language: str = "") -> dict[str, object]:
+    lang = language.lower().strip()
+    text = f"{task} {lang}".lower()
+    tokens = set(re.findall(r"[a-zA-Z_][a-zA-Z0-9_]{2,}", text))
+
+    skills = ["ai-pair-programming", "pcx-knowledge-index"]
+    docs = ["docs/perception/llm-routing.md", "docs/INDEX.md"]
+    tools = ["search", "get_file", "api_lookup", "validate_code", "validate_answer"]
+
+    if lang in {"enma", ".em", "em"} or ".em" in text:
+        skills.extend(["pcx-enma-discipline", "game-hacking-pcx"])
+        docs.extend(["docs/llms-perception-enma.md", "docs/perception/lifecycle-and-routines.md"])
+    if lang in {"angelscript", "angel-script", ".as", "as"} or ".as" in text:
+        skills.extend(["pcx-angelscript-discipline", "game-hacking-pcx"])
+        docs.extend(["docs/llms-perception-angelscript.md", "docs/perception/angelscript/life-cycle.md"])
+
+    for triggers, payload in CONTEXT_RULES:
+        if tokens & triggers:
+            skills.extend(payload["skills"])
+            docs.extend(payload["docs"])
+            tools.extend(payload["tools"])
+
+    return {
+        "task": task,
+        "language": lang,
+        "load_order": [
+            "docs/perception/llm-routing.md",
+            "selected skills",
+            "selected docs",
+            "api_lookup before inventing symbols",
+            "validate_code or validate_answer before final output",
+        ],
+        "skills": _dedupe(skills),
+        "docs": _dedupe(docs),
+        "mcp_tools": _dedupe(tools),
+        "commands": [
+            "pcx api <symbol> --lang enma|angelscript",
+            "pcx symbol-check <file.em|file.as>",
+            "pcx check-answer <answer.md>",
+        ],
+    }
+
+
 # ── MCP server ─────────────────────────────────────────────────────────────────
 
 mcp = FastMCP("pcx-knowledge")
@@ -258,13 +418,43 @@ def overview() -> str:
         "  - docs/perception/llm-routing.md  : load first; language/binding routing\n"
         "  - knowledge/pcx-api-cheatsheet.md  : all PCX APIs at a glance\n"
         "  - knowledge/common-patterns.md     : 13 worked code recipes\n"
+        "  - knowledge/perception-forum-insights.md : secondary forum/changelog/client context\n"
         "  - .claude/skills/game-cheat-guidelines/SKILL.md : the 12 behavioral rules\n"
         "  - .claude/skills/pcx-patch-day-playbook/SKILL.md : when the game updates\n"
         "  - docs/llms.txt                    : structured index of the whole corpus\n"
         "  - docs/llms-perception-enma.md     : single-file Enma context pack\n\n"
-        "Workflow: search(query) -> get_file(path) for the most relevant hits.\n"
+        "Workflow: recommend_context(task) -> get_skill(name) / get_file(path) -> api_lookup(symbol) -> validate_code(...).\n"
+        "Answer gate: validate_answer(markdown) before copying generated code.\n"
         "Bulk: list_files(category) to enumerate; list_files() for everything.\n"
     )
+
+
+@mcp.tool()
+def list_skills() -> str:
+    """List all bundled AI skills with stable names, paths, and descriptions."""
+    return json.dumps(skill_index(), indent=2)
+
+
+@mcp.tool()
+def get_skill(name: str) -> str:
+    """Fetch a bundled AI skill by name, e.g. get_skill("pcx-enma-discipline")."""
+    path = _skill_by_name(name)
+    if path is None:
+        return json.dumps({
+            "error": f"skill not found: {name}",
+            "available": [item["name"] for item in skill_index()],
+        }, indent=2)
+    return path.read_text(encoding="utf-8", errors="ignore")
+
+
+@mcp.tool()
+def recommend_context(task: str, language: str = "") -> str:
+    """Recommend the smallest useful doc/skill/tool set for a PCX task.
+
+    Use this before loading large bundles. It returns an ordered load plan,
+    skill names, docs, MCP tools, and CLI commands for Enma/AngelScript work.
+    """
+    return json.dumps(build_context_recommendation(task, language), indent=2)
 
 
 # ── API grounding and code validation ─────────────────────────────────────────
@@ -319,6 +509,20 @@ def validate_code(code: str, language: str, source_path: str = "") -> str:
     else:
         findings = validate_code_against_index(code, language, index, source_path)
     return json.dumps({"findings": findings, "ok": not findings}, indent=2)
+
+
+@mcp.tool()
+def validate_answer(answer: str, source_path: str = "answer.md") -> str:
+    """Validate fenced Enma/AngelScript code blocks inside a generated answer.
+
+    Returns {blocks_checked, findings, ok}. This is the MCP equivalent of
+    `pcx check-answer <answer.md>` and should be called before copying LLM
+    Markdown into a project.
+    """
+    index = _load_api_index()
+    if index is None:
+        return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
+    return json.dumps(validate_answer_markdown(answer, index, source_path), indent=2)
 
 
 # ── Resources: every file as a URI ─────────────────────────────────────────────

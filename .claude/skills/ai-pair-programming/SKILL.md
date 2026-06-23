@@ -10,11 +10,19 @@ license: MIT
 
 # AI Pair Programming — Driving Claude / Cursor / Cline / Aider Well on PCX Projects
 
-The other skills cover *what* to write; this one covers *how* to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it gave me a script that doesn't compile" / "it skipped the discipline rules." The 35,000-line documentation corpus, the 14 skills, and the rules drop-ins are not magic — they only work if you drive the AI to use them. This skill names the techniques that close the gap.
+The other skills cover *what* to write; this one covers *how* to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it gave me a script that doesn't compile" / "it skipped the discipline rules." The 32,000+ line supported documentation corpus, the 25 skills, and the rules drop-ins are not magic — they only work if you drive the AI to use them. This skill names the techniques that close the gap.
 
 **Always active when working with an AI on a PCX scripting project.** These techniques apply across Claude Code, Cursor, Cline, Aider, GitHub Copilot, and any other AI coding tool that reads files and writes code.
 
 **Prerequisite:** `rules/CLAUDE.md` / `rules/CURSOR.md` / `rules/CLINE.md` / `rules/COPILOT.md` for the per-tool drop-in; this skill is the workflow that wraps them and makes them stick.
+
+## Source-Grounding Gate
+
+Always force the model through the same gate: read
+`docs/perception/llm-routing.md`, call MCP `recommend_context` when available,
+verify symbols with `api_lookup` or `pcx api`, and validate the final snippet or
+Markdown answer with `validate_code`, `validate_answer`, `pcx symbol-check`, or
+`pcx check-answer`.
 
 ---
 
@@ -74,14 +82,14 @@ The task is...
     → docs/perception/<area>-api.md for the API that errored, AND
       knowledge/common-patterns.md for any worked example using it.
 
-  Cross-language work (Enma <-> AngelScript <-> Lua)
-    → knowledge/pcx-cross-language-bridge.md first (decide language),
+  Cross-language work (Enma <-> AngelScript)
+    → docs/perception/llm-routing.md and docs/CROSS_LANGUAGE.md first,
       then the per-language API doc.
 ```
 
 The discipline is per-task, not per-session. A 30-minute session might read 4 different docs — that's fine. Re-loading the cheatsheet at the start of each tool session is also fine; it's small and grounds the AI's API surface.
 
-**Why:** Context is the AI's working memory. Filling it with 35,000 lines of documentation leaves no room for your code, your conversation, or its own reasoning. The cheatsheet was made for this — use it.
+**Why:** Context is the AI's working memory. Filling it with 32,000+ lines of documentation leaves no room for your code, your conversation, or its own reasoning. The cheatsheet was made for this — use it.
 
 ---
 
@@ -298,4 +306,4 @@ This is the highest-skill move in AI pair programming — recognizing when "more
 | 6 | Diff-review every multi-file change | Five-minute scan for the 8 high-value pattern matches catches ~90% of violations |
 | 7 | When stuck, change the question | Specific tool-call asks beat "try harder"; the unstuck question is more concrete |
 
-**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 37 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `knowledge/pcx-cross-language-bridge.md` (when to use Enma vs AS vs Lua — the question technique #3 plans against).
+**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 59 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `docs/CROSS_LANGUAGE.md` (Enma vs AngelScript binding split).

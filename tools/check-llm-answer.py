@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -21,36 +20,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 INDEX_FILE = REPO_ROOT / "knowledge" / "pcx-api-index.json"
 
 sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
-from pcx_grounding import load_api_index, validate_code_against_index  # noqa: E402
-
-LANG_ALIASES = {
-    "enma": "enma",
-    "em": "enma",
-    ".em": "enma",
-    "angelscript": "angelscript",
-    "angel-script": "angelscript",
-    "as": "angelscript",
-    ".as": "angelscript",
-}
-
-FENCE_RE = re.compile(r'^```\s*([A-Za-z_.-]*)[^\n]*\n(.*?)\n```', re.MULTILINE | re.DOTALL)
-
-
-def extract_code_blocks(markdown: str) -> list[dict[str, object]]:
-    blocks: list[dict[str, object]] = []
-    for idx, match in enumerate(FENCE_RE.finditer(markdown), 1):
-        hint = match.group(1).strip().lower()
-        language = LANG_ALIASES.get(hint)
-        if not language:
-            continue
-        line = markdown[:match.start()].count("\n") + 1
-        blocks.append({
-            "index": idx,
-            "line": line,
-            "language": language,
-            "code": match.group(2),
-        })
-    return blocks
+from pcx_grounding import load_api_index, validate_answer_markdown  # noqa: E402
 
 
 def check_answer(path: Path) -> dict[str, object]:
@@ -58,27 +28,9 @@ def check_answer(path: Path) -> dict[str, object]:
         return {"error": f"{INDEX_FILE} missing; run `python3 tools/build-api-index.py`"}
     index = load_api_index(INDEX_FILE)
     markdown = path.read_text(encoding="utf-8", errors="ignore")
-    blocks = extract_code_blocks(markdown)
-    findings: list[dict[str, object]] = []
-    for block in blocks:
-        source = f"{path}:code-block-{block['index']}"
-        block_findings = validate_code_against_index(
-            str(block["code"]),
-            str(block["language"]),
-            index,
-            source,
-        )
-        for finding in block_findings:
-            finding["code_block"] = block["index"]
-            finding["code_block_line"] = block["line"]
-            finding["language"] = block["language"]
-            findings.append(finding)
-    return {
-        "file": str(path),
-        "blocks_checked": len(blocks),
-        "findings": findings,
-        "ok": not findings,
-    }
+    result = validate_answer_markdown(markdown, index, str(path))
+    result["file"] = str(path)
+    return result
 
 
 def print_human(result: dict[str, object]) -> None:

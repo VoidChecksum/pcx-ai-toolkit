@@ -18669,7 +18669,7 @@ Use this mechanism when the answer is not explicitly present in the current page
 name: game-cheat-guidelines
 description: >
   Mandatory behavioral rules and practical patterns for writing Perception.cx
-  game-cheat scripts in Enma, AngelScript, and C++. Always active — these
+  game-cheat scripts in Enma and AngelScript. Always active — these
   rules apply every time you write or edit game-cheat code, including ESP,
   aimbot, triggerbot, radar, pattern scanning, and overlay rendering.
   Authorized use only — analyze software you own or are permitted to test.
@@ -18678,13 +18678,21 @@ license: MIT
 
 # Perception.cx Game-Cheat Script Development Guidelines
 
-Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma, AngelScript, and C++. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pattern scanning, world-to-screen math, memory reads/writes, and overlay rendering. These rules apply to authorized reverse engineering, security research, and game-cheat development — analyze only software you own or are authorized to test.
+Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma and AngelScript. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pattern scanning, world-to-screen math, memory reads/writes, and overlay rendering. These rules apply to authorized reverse engineering, security research, and game-cheat development — analyze only software you own or are authorized to test.
 
 **Always active.** These rules apply every time you write or edit a game-cheat script. They are not suggestions.
 
 **Prerequisites:** Load the `game-cheat-script-master` skill first. It defines the mandatory co-skills, read-first docs, and the canonical project layout. Then keep `game-hacking-pcx` loaded for the full API doc index. **Read the relevant doc before writing any API call** — see `skill://game-hacking-pcx` for the complete file-by-file index.
 
 **Templates:** Use `templates/cheat-skeleton-em/` and `templates/cheat-skeleton-as/` as the starting scaffold for every new cheat. See `knowledge/cheat-script-cookbook.md` for reusable recipes (W2S, ESP, aimbot smoothing, triggerbot, radar, config save/load).
+
+## Source-Grounding Gate
+
+Before writing or accepting code, load `docs/perception/llm-routing.md`, verify
+host API names with `pcx api <symbol> --lang enma|angelscript` or MCP
+`api_lookup`, then run `pcx symbol-check`, `pcx check-answer`, MCP
+`validate_code`, or MCP `validate_answer`. If the target language docs do not
+prove a symbol exists, do not invent it.
 
 ---
 
@@ -19035,14 +19043,14 @@ name: game-hacking-pcx
 description: >
   Mandatory doc router for all PCX scripting sessions. Triggers on any game
   hacking, game cheat, ESP, aimbot, triggerbot, radar, Enma, AngelScript, or
-  Perception.cx work. Provides the full doc index (43,000+ lines across 139
-  files) and enforces reading the relevant documentation before writing any
+  Perception.cx work. Provides the full supported doc index (32,000+ lines
+  across 123 docs) and enforces reading the relevant documentation before writing any
   API call. Load alongside game-cheat-script-master and game-cheat-guidelines
   on every PCX game-cheat session.
 license: MIT
 ---
 
-# Game Hacking & Scripting — Perception.cx / Enma / AngelScript / C++
+# Game Hacking & Scripting — Perception.cx / Enma / AngelScript
 
 ## Trigger
 Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
@@ -19064,6 +19072,13 @@ the live upstream version.
 
 You MUST read the relevant upstream doc before writing ANY Enma, AngelScript,
 or PCX API code. Do not write from memory. The docs are the source of truth.
+
+## Source-Grounding Gate
+
+For MCP-aware clients, call `recommend_context(task, language)` first, then load
+the returned skills/docs. Verify host symbols with `api_lookup(symbol, language)`
+and validate generated code with `validate_code` or `validate_answer`. For CLI
+workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 
 ### When writing Enma (.em) code — read these:
 
@@ -19208,7 +19223,7 @@ or PCX API code. Do not write from memory. The docs are the source of truth.
 
 ## Anti-Hallucination Rule
 
-You must NEVER invent a PCX or Enma/AngelScript/Lua API name. Every function,
+You must NEVER invent a PCX, Enma, or AngelScript API name. Every function,
 method, type, and import you use must come from one of:
   - `https://docs.perception.cx/perception/enma/overview` and its sub-pages,
   - `https://docs.perception.cx/perception/angel-script/overview` and its sub-pages,

@@ -2,15 +2,23 @@
 name: pcx-enma-discipline
 description: >
   Behavioral and syntactic rules for writing .em (Enma) scripts on Perception.cx.
-  Prevents AngelScript/Lua-reflex errors in the Enma API surface — method names,
-  parameter shapes, type system, and lifecycle differ from AS and Lua. Always
+  Prevents AngelScript-reflex errors in the Enma API surface — method names,
+  parameter shapes, type system, and lifecycle differ from AS. Always
   active when editing .em files.
 license: MIT
 ---
 
 # Enma Discipline for Perception.cx
 
-Behavioral and syntactic rules for writing `.em` scripts on Perception.cx. Enma is the **primary** scripting language on PCX and has a distinct C++-like type system, RAII semantics, and value-type APIs that differ from AngelScript (handles, `register_callback`, `array<T>`) and Lua (tables, `on_frame`, `require`). The AI defaults to AS or Lua idioms when editing `.em` files and produces code that does not compile.
+Behavioral and syntactic rules for writing `.em` scripts on Perception.cx. Enma is the **primary** scripting language on PCX and has a distinct C++-like type system, RAII semantics, and value-type APIs that differ from AngelScript handles, `register_callback`, and `array<T>` idioms. The AI often defaults to AS-style code when editing `.em` files and produces code that does not compile.
+
+## Source-Grounding Gate
+
+Before writing Enma code, read `docs/perception/llm-routing.md`, verify host
+symbols with `pcx api <symbol> --lang enma` or MCP `api_lookup`, then run
+`pcx symbol-check`, `pcx check-answer`, MCP `validate_code`, or MCP
+`validate_answer`. Never borrow an AngelScript API shape unless the Enma docs
+prove it.
 
 **Always active when editing `.em` files.** These rules apply every time you write or edit a Perception.cx Enma script.
 
@@ -54,14 +62,6 @@ int main() {
     return 1;
 }
 
-// WRONG — Lua idioms in an .em file
-function main()
-    g_proc = ref_process("game.exe")          -- Lua assignment
-    if not g_proc then return 0 end           -- Lua nil-check
-    return 1
-end
-function on_frame() end                       -- Lua lifecycle
-
 // RIGHT — Enma syntax, Enma API, Enma lifecycle
 int64 main() {
     proc_t p = ref_process("game.exe");       // value type, RAII
@@ -79,7 +79,7 @@ void on_render(int64 data) {
 }
 ```
 
-**Why:** Enma is a separately compiled host language with its own type system and standard library. The AS and Lua bindings cover overlapping domains but the function signatures, type registrations, and constants are independent. Always confirm the call in `docs/perception/<area>-api.md` before writing it.
+**Why:** Enma is a separately compiled host language with its own type system and standard library. The AngelScript binding covers overlapping domains but the function signatures, type registrations, and constants are independent. Always confirm the call in `docs/perception/<area>-api.md` before writing it.
 
 ---
 
@@ -149,7 +149,7 @@ float cx  = get_view_width() * 0.5;    // Enma has no 'float' keyword; use 'floa
 
 ---
 
-## 4. Arrays Use `T[]` Syntax — Not `array<T>`, Not Lua Tables
+## 4. Arrays Use `T[]` Syntax — Not `array<T>`
 
 **Enma's standard array is `T[]` with `.push()`, `.pop()`, `.insert()`, `.remove()`, `.length`, and `.contains()`. Do not use `array<T>` — that is AngelScript syntax.**
 
@@ -157,10 +157,6 @@ float cx  = get_view_width() * 0.5;    // Enma has no 'float' keyword; use 'floa
 // WRONG — AS syntax
 array<uint64> entities;
 entities.insertLast(0x12345);
-
-// WRONG — Lua syntax
-local entities = {}
-table.insert(entities, 0x12345)
 
 // RIGHT — Enma syntax
 uint64[] entities;
@@ -177,7 +173,7 @@ Enma array methods: `push(v)`, `pop()`, `insert(idx, v)`, `remove(idx)`, `clear(
 
 ---
 
-## 5. Maps Use `map<K,V>` — Not `dictionary`, Not Plain Lua Tables
+## 5. Maps Use `map<K,V>` — Not `dictionary`
 
 **Enma has a generic `map<K,V>` type with `.set(key, val)`, `.get(key)`, `.remove(key)`, `.contains(key)`, `.keys()`, `.values()`, and `.length`. There is no `dictionary` type (that's AS-only).**
 
@@ -268,7 +264,7 @@ void on_tick(int64 data) {
 }
 ```
 
-There is no explicit unregister in Enma — routines are tied to the script lifecycle and are cleaned up on unload. There is no `on_unload` hook in Enma (unlike AS and Lua); cleanup happens via RAII destructors.
+There is no explicit unregister in Enma — routines are tied to the script lifecycle and are cleaned up on unload. There is no `on_unload` hook in Enma; cleanup happens via RAII destructors.
 
 **Why:** Enma's `register_routine` takes a function pointer cast to `int64` (the underlying function address) plus an arbitrary `int64` payload. The engine calls the function with that payload. The cast is mandatory because Enma lacks implicit function-to-int conversion. Forgetting `cast<int64>` produces a type mismatch compile error.
 
@@ -276,7 +272,7 @@ There is no explicit unregister in Enma — routines are tied to the script life
 
 ## 8. Structs Can Have Default Member Initializers
 
-**Enma structs support default member initializers (`bool valid = false;`). Use them to avoid uninitialized garbage. AS does not support this; Lua doesn't have structs at all.**
+**Enma structs support default member initializers (`bool valid = false;`). Use them to avoid uninitialized garbage. AS does not support this.**
 
 ```cpp
 // Enma struct with defaults
@@ -301,13 +297,13 @@ void reset_entities() {
 }
 ```
 
-**Why:** Enma's C++ heritage gives it default member initializers and fixed-size arrays. AS requires manual initialization in constructors (which may not even be registered for all types), and Lua uses tables. Leveraging Enma's features makes code cleaner and less error-prone.
+**Why:** Enma's C++ heritage gives it default member initializers and fixed-size arrays. AS requires manual initialization in constructors, which may not even be registered for all types. Leveraging Enma's features makes code cleaner and less error-prone.
 
 ---
 
 ## 9. Import System: `#pragma once` + `import "module"`
 
-**Enma uses `#pragma once` for header guards and `import "module"` for module imports. Do not use `#include` (C/C++) or `require()` (Lua).**
+**Enma uses `#pragma once` for header guards and `import "module"` for module imports. Do not use C/C++ `#include` syntax.**
 
 ```cpp
 // globals.em — shared header

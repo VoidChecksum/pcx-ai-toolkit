@@ -21,6 +21,18 @@ from pcx_parser import (
 
 SUPPORTED_LANGUAGES = {"enma", "angelscript"}
 
+LANG_ALIASES = {
+    "enma": "enma",
+    "em": "enma",
+    ".em": "enma",
+    "angelscript": "angelscript",
+    "angel-script": "angelscript",
+    "as": "angelscript",
+    ".as": "angelscript",
+}
+
+FENCE_RE = re.compile(r'^```\s*([A-Za-z_.-]*)[^\n]*\n(.*?)\n```', re.MULTILINE | re.DOTALL)
+
 ENMA_IMPORT_REQUIRED_TYPES = {"vec2", "vec3", "vec4", "color", "quat", "mat4"}
 ENMA_MODULE_HINTS: dict[str, set[str]] = {
     "vec": {"vec2", "vec3", "vec4"},
@@ -290,3 +302,46 @@ def validate_code_against_index(
         for finding in findings:
             finding["file"] = source_path
     return findings
+
+
+def extract_code_blocks(markdown: str) -> list[dict[str, object]]:
+    """Extract fenced Enma/AngelScript blocks from Markdown-like text."""
+    blocks: list[dict[str, object]] = []
+    for idx, match in enumerate(FENCE_RE.finditer(markdown), 1):
+        hint = match.group(1).strip().lower()
+        language = LANG_ALIASES.get(hint)
+        if not language:
+            continue
+        line = markdown[:match.start()].count("\n") + 1
+        blocks.append({
+            "index": idx,
+            "line": line,
+            "language": language,
+            "code": match.group(2),
+        })
+    return blocks
+
+
+def validate_answer_markdown(markdown: str, index: dict[str, Any], source_path: str = "answer") -> dict[str, Any]:
+    """Validate all Enma/AngelScript code blocks in a generated answer."""
+    blocks = extract_code_blocks(markdown)
+    findings: list[dict[str, Any]] = []
+    for block in blocks:
+        source = f"{source_path}:code-block-{block['index']}"
+        block_findings = validate_code_against_index(
+            str(block["code"]),
+            str(block["language"]),
+            index,
+            source,
+        )
+        for finding in block_findings:
+            finding["code_block"] = block["index"]
+            finding["code_block_line"] = block["line"]
+            finding["language"] = block["language"]
+            findings.append(finding)
+    return {
+        "source": source_path,
+        "blocks_checked": len(blocks),
+        "findings": findings,
+        "ok": not findings,
+    }

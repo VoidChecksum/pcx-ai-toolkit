@@ -30,7 +30,7 @@ class FakeFastMCP:
 sys.modules["mcp.server.fastmcp"].FastMCP = FakeFastMCP
 sys.path.insert(0, str(REPO_ROOT / "mcp" / "pcx-knowledge-mcp"))
 
-from server import api_lookup, validate_code  # noqa: E402
+from server import api_lookup, get_skill, list_skills, recommend_context, validate_answer, validate_code  # noqa: E402
 
 
 class ValidateCodeTest(unittest.TestCase):
@@ -68,6 +68,34 @@ class ValidateCodeTest(unittest.TestCase):
         result = json.loads(api_lookup("draw_texxt", "enma"))
         self.assertFalse(result["found"])
         self.assertIn("draw_text", result["suggestions"])
+
+    def test_list_and_get_skill(self):
+        skills = json.loads(list_skills())
+        names = {item["name"] for item in skills}
+        self.assertIn("pcx-enma-discipline", names)
+        skill = get_skill("pcx-enma-discipline")
+        self.assertIn("# Enma", skill)
+
+    def test_recommend_context_for_enma_esp(self):
+        result = json.loads(recommend_context("write an ESP overlay", "enma"))
+        self.assertIn("pcx-enma-discipline", result["skills"])
+        self.assertIn("game-cheat-script-master", result["skills"])
+        self.assertIn("api_lookup", result["mcp_tools"])
+
+    def test_recommend_context_for_forum_changelog(self):
+        result = json.loads(recommend_context("explain the overlay changelog", ""))
+        self.assertIn("knowledge/perception-forum-insights.md", result["docs"])
+        self.assertIn("docs/perception/changelogs.md", result["docs"])
+        self.assertIn("validate_answer", result["mcp_tools"])
+
+    def test_validate_answer_checks_markdown_code_blocks(self):
+        answer = '''```enma
+void r(int64 d) { draw_texxt("hi"); }
+```'''
+        result = json.loads(validate_answer(answer, "draft.md"))
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["blocks_checked"], 1)
+        self.assertTrue(any(f["symbol"] == "draw_texxt" for f in result["findings"]))
 
 
 if __name__ == "__main__":

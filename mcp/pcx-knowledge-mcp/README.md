@@ -14,8 +14,12 @@ The "indexed database all LLMs can query" half of the toolkit's LLM-knowledge st
 | `get_file(path)` | Fetch full content of any file by repo-relative path. |
 | `list_files(category="")` | Enumerate files, optionally filtered by category (`docs`, `skills`, `knowledge`, `rules`, `templates`, `tools`, `signatures`, `mcp`). |
 | `overview()` | Top-level toolkit summary with file counts per category and starting-point recommendations. |
+| `list_skills()` | Enumerate bundled AI skills by stable name, path, and description. |
+| `get_skill(name)` | Fetch one bundled skill by name, e.g. `pcx-enma-discipline`. |
+| `recommend_context(task, language="")` | Return the smallest useful doc/skill/tool load plan for a task before loading large bundles. |
 | `api_lookup(symbol, language="")` | Exact source-backed lookup for a function, method, or type. Returns signatures, language availability, official source URLs, and typo suggestions. |
 | `validate_code(code, language, source_path="")` | Check a code snippet against the PCX API index. Catches unknown functions, wrong-language symbols, unknown types, and missing Enma imports. Returns `{findings, ok}` with source-backed repair context. |
+| `validate_answer(answer, source_path="answer.md")` | Validate fenced Enma/AngelScript code blocks inside a generated Markdown answer before copying it into a project. |
 
 **Resources** (MCP-fetchable URIs):
 
@@ -132,10 +136,12 @@ Without the knowledge MCP, the AI workflow is "I think I need `docs/perception/r
 
 With it:
 
-1. **Ask the AI to search first.** "search the corpus for 'world to screen with row-major matrix'" → returns the top hits across knowledge/, docs/perception/, .claude/skills/ ranked by relevance.
-2. **Fetch the most relevant.** "get_file the top result" or directly reference the URI.
-3. **Check proposed API names.** "api_lookup draw_text enma" verifies exact signatures and source URLs before code is written.
-4. **Validate generated code.** "validate_code this Enma snippet" catches hallucinated or cross-language symbols before you run it.
+1. **Plan the load.** `recommend_context("write an ESP overlay", "enma")` returns the minimal skills, docs, and tools to use.
+2. **Load the skill and docs.** `get_skill("game-cheat-script-master")`, then `get_file(...)` for the listed docs.
+3. **Search only when needed.** `search("world to screen row-major matrix")` finds relevant supporting references without guessing paths.
+4. **Check proposed API names.** `api_lookup("draw_text", "enma")` verifies exact signatures and source URLs before code is written.
+5. **Validate generated code.** `validate_code(code, "enma")` catches hallucinated or cross-language symbols before you run it.
+6. **Validate full answers.** `validate_answer(markdown)` checks all fenced Enma/AngelScript code blocks in an LLM response.
 
 For tools that support resource URIs (Claude Desktop, Cline): the AI can also discover files lazily — list_files to enumerate, then fetch what's relevant. No hardcoded path knowledge needed.
 

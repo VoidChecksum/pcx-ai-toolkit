@@ -82,18 +82,21 @@ uint64 entity_list = proc_find_pattern(proc, "game.exe", sig);
 
 See `knowledge/offset-methodology.md` and the `pcx-patch-day-playbook` skill for the full patch-day workflow.
 
-### What's the difference between Enma, AngelScript, and Lua for PCX?
+### What's the difference between Enma and AngelScript for PCX?
 
-| | Enma | AngelScript | Lua |
-|---|---|---|---|
-| **Primary use** | Modern PCX scripting (recommended) | Legacy/compat scripts | Lightweight automation |
-| **Type safety** | Strong static typing | Strong static typing | Dynamic |
-| **Performance** | Compiled, fast | Compiled, fast | Interpreted |
-| **Memory access** | Full `proc_*` API | Full `@handle` API | Limited |
-| **File extension** | `.em` | `.as` | `.lua` |
-| **Skill** | `game-cheat-guidelines` | `pcx-angelscript-discipline` | `pcx-lua-discipline` |
+| | Enma | AngelScript |
+|---|---|---|
+| **Primary use** | Modern PCX scripting and new projects | Compatibility with existing `.as` scripts |
+| **Type safety** | Strong static typing | Strong static typing |
+| **Lifecycle** | `int64 main()` + `register_routine` | `int main()` + `register_callback` |
+| **Process handle** | `proc_t` value with RAII cleanup | `proc_t@` handle with explicit `deref()` |
+| **Render style** | `vec2(...)` and `color(...)` values | Raw/value shapes from the AS API pages |
+| **File extension** | `.em` | `.as` |
+| **Skill** | `pcx-enma-discipline` | `pcx-angelscript-discipline` |
 
-For new scripts, **use Enma**. Use AngelScript only if you're maintaining existing `.as` scripts.
+For new scripts, use Enma unless you specifically need to maintain an existing
+AngelScript project. Always read `docs/perception/llm-routing.md` before
+porting between the two languages.
 
 ---
 

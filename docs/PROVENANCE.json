@@ -1,7 +1,12 @@
 {
-  "count": 121,
+  "count": 122,
   "drift_checkable": 87,
   "files": {
+    "docs/AI_AGENT_OPERATING_MANUAL.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/CROSS_LANGUAGE.md": {
       "drift_check": false,
       "source": "local",
@@ -610,6 +615,7 @@
   },
   "generated": "2026-06-23",
   "unmapped": [
+    "docs/AI_AGENT_OPERATING_MANUAL.md",
     "docs/CROSS_LANGUAGE.md",
     "docs/FAQ.md",
     "docs/enma/UPSTREAM-SUGGESTIONS.md",

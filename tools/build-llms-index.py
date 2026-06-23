@@ -53,6 +53,7 @@ RAW_URL  = f'{REPO_URL}/raw/main'
 
 # Categories: glob pattern -> (label, description for llms.txt section header)
 CATEGORIES = [
+    ('docs/*.md',                    'Agent Operating Docs',    'Top-level operating manuals, FAQ, and routing references for AI tools using this repo.'),
     ('docs/enma/**/*.md',              'Enma Language Docs',     'The native Perception.cx scripting language: syntax, addons, SDK, lifecycle.'),
     ('docs/perception/*.md',           'Enma Platform APIs',     'The Perception.cx host API surface as exposed to Enma.'),
     ('docs/perception/angelscript/**/*.md', 'AngelScript APIs',  'The Perception.cx host API surface as exposed to AngelScript.'),
