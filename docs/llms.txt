@@ -320,6 +320,7 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 Bash scripts for pre-ship hygiene checks and one-shot installers.
 
 - [Install reverse engineering plugins, deobfuscation tools, and Python packages.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/install-re-tools.sh): #
+- [package-vsix](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/package-vsix.sh)
 - [pre-ship-check.sh — pre-release hygiene checklist for PCX scripting projects.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pre-ship-check.sh): #
 - [test-runner.sh — Smoke test all python tools against a mock PE binary.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/test-runner.sh): #
 - [update-toolkit.sh — Self-update pcx-ai-toolkit from its git remote.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/update-toolkit.sh): #
