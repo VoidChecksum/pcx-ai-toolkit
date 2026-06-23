@@ -34,6 +34,30 @@ class ApiLookupTest(unittest.TestCase):
         self.assertFalse(data["found"])
         self.assertIn("draw_text", data["suggestions"])
 
+    def test_angelscript_lookup_returns_source(self):
+        result = subprocess.run(
+            [sys.executable, str(API_LOOKUP), "register_callback", "--lang", "angelscript", "--json"],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertTrue(data["found"])
+        self.assertTrue(data["signatures"])
+
+    def test_enma_language_addon_lookup_returns_source(self):
+        result = subprocess.run(
+            [sys.executable, str(API_LOOKUP), "json_object", "--lang", "enma", "--json"],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertTrue(data["found"])
+        self.assertTrue(data["signatures"])
+        self.assertTrue(any(sig["source"].startswith("https://enma-1.gitbook.io/enma/")
+                            for sig in data["signatures"]))
+
 
 if __name__ == "__main__":
     unittest.main()

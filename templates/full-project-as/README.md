@@ -52,5 +52,5 @@ This scaffold honors the 12 `game-cheat-guidelines`:
 - `templates/full-project/` — the Enma version
 - `skill://pcx-angelscript-discipline` — the 10 AS-specific rules
 - `skill://game-cheat-guidelines` — the underlying 12 rules
-- `knowledge/pcx-cross-language-bridge.md` — when to pick AS over Enma or Lua
+- `docs/perception/llm-routing.md` — when to pick AS vs Enma and how not to mix bindings
 - `docs/perception/angelscript/` — the AS API surface

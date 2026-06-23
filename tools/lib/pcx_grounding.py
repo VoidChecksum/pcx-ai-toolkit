@@ -10,7 +10,7 @@ import difflib
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from pcx_parser import (
     extract_calls,
@@ -38,20 +38,85 @@ ENMA_MODULE_HINTS: dict[str, set[str]] = {
     "vec": {"vec2", "vec3", "vec4"},
     "color": {"color"},
     "math3d": {"quat", "mat4"},
-    "math": {"sin", "cos", "sqrt", "pow", "clamp", "lerp", "abs", "floor", "ceil",
-             "deg_to_rad", "rad_to_deg", "lerp_angle", "move_toward"},
-    "strings": {"format", "to_int", "split", "replace", "substr"},
-    "json": {"json_parse", "json_stringify", "json_value"},
-    "file": {"read_file", "write_file", "create_directory", "does_file_exist", "query_directory"},
-    "bits": {"popcount", "clz", "ctz", "bswap", "rotl", "rotr"},
-    "time": {"time_ms", "time_us", "sleep"},
+    "math": {
+        "sin", "cos", "tan", "asin", "acos", "atan", "atan2",
+        "sinh", "cosh", "tanh", "asinh", "acosh", "atanh",
+        "sqrt", "cbrt", "pow", "hypot", "log", "log2", "log10", "log_base", "exp",
+        "floor", "ceil", "round", "round_up", "round_down",
+        "fabs", "fmod", "fmin", "fmax", "fclamp",
+        "iabs", "imin", "imax", "iclamp",
+        "abs", "min", "max", "clamp",
+        "pi", "euler", "seed", "rand", "rand_int", "random_bool", "random_gaussian",
+        "lerp", "inverse_lerp", "remap", "smoothstep", "step", "saturate",
+        "is_nan", "is_inf", "is_finite", "sign", "fract", "wrap",
+        "copysign", "nextafter", "f32_to_u32", "u32_to_f32", "f64_to_u64", "u64_to_f64",
+        "deg_to_rad", "rad_to_deg", "lerp_angle", "move_toward",
+        "ease_in", "ease_out", "ease_in_out", "approx_eq",
+    },
+    "strings": {
+        "format", "to_string", "char_to_str", "ord", "chr", "from_chars",
+        "hex_encode", "hex_decode", "hex_to_int", "base64_encode", "base64_decode",
+        "url_encode", "url_decode", "to_int", "to_float", "split", "replace", "substr",
+    },
+    "json": {
+        "json_parse", "json_stringify", "json_value", "json_object", "json_array",
+        "is_valid", "is_null", "is_bool", "is_num", "is_str", "is_array", "is_obj",
+        "kind", "as_bool", "as_num", "as_int", "as_str", "size", "has_key", "keys",
+        "get_key", "get_at", "set_key", "remove_key", "push_value", "stringify", "pretty",
+    },
+    "file": {
+        "read_file", "write_file", "create_directory", "does_file_exist", "query_directory",
+        "file_exists", "file_remove", "file_rename", "file_copy", "file_size", "file_mtime",
+        "file_read", "file_write", "file_read_bytes", "file_write_bytes",
+        "dir_exists", "dir_create", "dir_list", "dir_walk",
+    },
+    "bits": {
+        "popcount", "popcount_i32", "clz", "clz_i32", "ctz", "ctz_i32",
+        "bswap", "bswap_i32", "rotl", "rotl_i32", "rotr", "rotr_i32",
+        "parity", "bit_reverse", "bit_reverse_i32", "set_bit", "clear_bit",
+        "toggle_bit", "test_bit", "extract_bits", "insert_bits", "is_pow2",
+        "next_pow2", "prev_pow2", "align_up", "align_down",
+    },
+    "time": {
+        "now_us", "now_ms", "now_ns", "unix_seconds", "mono_us", "sleep_ms",
+        "from_ymd", "from_ymdhms", "year", "month", "day", "hour", "minute",
+        "second", "day_of_week", "day_of_year", "is_leap", "days_in_month",
+        "iso_format", "iso_parse", "add_seconds", "add_days", "diff_us", "diff_ms", "diff_s",
+    },
+    "atomic": {"memory_barrier", "read_barrier", "write_barrier"},
+    "simd": {
+        "simd_add_f64", "simd_sub_f64", "simd_mul_f64", "simd_div_f64", "simd_min_f64",
+        "simd_max_f64", "simd_abs_f64", "simd_sqrt_f64", "simd_fma_f64", "simd_scale_f64",
+        "simd_dot_f64", "simd_sum_f64", "simd_min_reduce_f64", "simd_max_reduce_f64",
+        "simd_cmp_eq_f64", "simd_cmp_lt_f64", "simd_add_f32", "simd_sub_f32",
+        "simd_mul_f32", "simd_div_f32", "simd_sqrt_f32", "simd_abs_f32",
+        "simd_min_f32", "simd_max_f32", "simd_dot_f32", "simd_sum_f32",
+        "simd_add_i64", "simd_sub_i64", "simd_mul_i64", "simd_sum_i64",
+        "simd_add_i32", "simd_sub_i32", "simd_mul_i32", "simd_add_i16",
+        "simd_sub_i16", "simd_mul_i16", "simd_add_i8", "simd_sub_i8",
+        "simd_cmp_eq_i8", "simd_movemask_i8", "simd_shuffle_i8",
+        "simd_and", "simd_or", "simd_xor", "simd_memset", "simd_memcpy",
+    },
+    "thread": {"sleep_us", "yield_cpu", "hardware_threads"},
     "array": {"push", "pop", "sort", "contains", "slice", "resize", "length"},
     "map": {"map", "imap", "get", "set", "contains", "remove"},
 }
 
 LANGUAGE_BUILTIN_CALLS: dict[str, set[str]] = {
-    "enma": {"print", "println"},
-    "angelscript": {"log"},
+    "enma": {
+        "print", "println", "time_ms", "assert", "heap_collect", "heap_count",
+        "set_budget", "set_memory_budget", "register_event", "fire_event", "clear_events",
+    },
+    "angelscript": {
+        "log", "log_error", "log_console", "log_console_error",
+        "sin", "cos", "tan", "asin", "acos", "atan", "atan2",
+        "sqrt", "pow", "abs", "min", "max", "fmod",
+        "round", "floor", "ceil", "clamp",
+        "formatInt", "formatFloat",
+        "length", "isEmpty", "resize", "reserve", "insertAt", "removeAt",
+        "insertLast", "removeLast", "sortAsc", "sortDesc", "sort", "reverse",
+        "find", "findByRef", "substr", "findFirst", "findLast", "split",
+    },
 }
 
 FORBIDDEN_CALLS_BY_LANGUAGE: dict[str, dict[str, str]] = {
@@ -89,7 +154,10 @@ FORBIDDEN_TYPES_BY_LANGUAGE: dict[str, dict[str, str]] = {
 
 def load_api_index(path: Path) -> dict[str, Any]:
     """Load the generated API index and normalize absent sections."""
-    data = json.loads(path.read_text(encoding="utf-8"))
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError(f"API index root must be an object: {path}")
+    data = cast(dict[str, Any], raw)
     data.setdefault("functions", {})
     data.setdefault("methods", {})
     data.setdefault("types", [])
@@ -117,9 +185,16 @@ def signatures_for(index: dict[str, Any], symbol: str, language: str | None = No
     """Return all source-backed signatures for a function/method symbol."""
     sigs: list[dict[str, Any]] = []
     for section in ("functions", "methods"):
-        raw = index.get(section, {}).get(symbol, [])
-        if isinstance(raw, list):
-            sigs.extend(dict(s) for s in raw if not language or s.get("language") == language)
+        section_obj = index.get(section, {})
+        section_map = cast(dict[str, object], section_obj) if isinstance(section_obj, dict) else {}
+        raw_obj: object = section_map.get(symbol, [])
+        if isinstance(raw_obj, list):
+            for item in cast(list[object], raw_obj):
+                if not isinstance(item, dict):
+                    continue
+                sig = cast(dict[str, Any], item)
+                if not language or sig.get("language") == language:
+                    sigs.append(dict(sig))
     return sigs
 
 
@@ -204,6 +279,7 @@ def validate_code_against_index(
     language: str,
     index: dict[str, Any],
     source_path: str = "",
+    extra_user_functions: set[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Validate Enma/AngelScript code for unknown or cross-language symbols."""
     if language not in SUPPORTED_LANGUAGES:
@@ -212,6 +288,8 @@ def validate_code_against_index(
 
     findings: list[dict[str, Any]] = []
     user_funcs = {name for name, _ in extract_function_defs(code, language)}
+    if extra_user_functions:
+        user_funcs.update(extra_user_functions)
     language_builtins = LANGUAGE_BUILTIN_CALLS.get(language, set())
     forbidden_calls = FORBIDDEN_CALLS_BY_LANGUAGE.get(language, {})
     forbidden_types = FORBIDDEN_TYPES_BY_LANGUAGE.get(language, {})
@@ -229,6 +307,21 @@ def validate_code_against_index(
                 **_symbol_context(index, name, language),
             ))
             continue
+
+        if language == "enma":
+            provider = next((mod for mod, names in ENMA_MODULE_HINTS.items() if name in names), "")
+            if provider:
+                imports = set(extract_enma_imports(code))
+                if provider in imports or provider in {"array", "map"}:
+                    continue
+                findings.append(_finding(
+                    "missing_import",
+                    line,
+                    name,
+                    f"'{name}' requires `import \"{provider}\";`",
+                    fix=f'import "{provider}";',
+                ))
+                continue
 
         lang_sigs = signatures_for(index, name, language)
         any_sigs = signatures_for(index, name)

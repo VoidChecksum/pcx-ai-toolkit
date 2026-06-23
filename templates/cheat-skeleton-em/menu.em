@@ -3,6 +3,7 @@
 
 import "globals";
 import "json";
+import "strings";
 
 const string CONFIG_PATH = "cheat_skeleton_config.json";
 

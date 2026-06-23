@@ -12,7 +12,7 @@ slider_double_t g_sl_fov;
 checkbox_t      g_cb_trigger;
 checkbox_t      g_cb_radar;
 
-void sync_from_widgets() {
+void sync_from_widgets(int id, int data_index) {
     g_esp_enabled     = g_cb_esp.get();
     g_aim_enabled     = g_cb_aim.get();
     g_aim_smooth      = g_sl_smooth.get();

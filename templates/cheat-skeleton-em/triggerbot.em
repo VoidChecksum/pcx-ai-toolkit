@@ -3,6 +3,7 @@
 
 import "globals";
 import "utils";
+import "time";
 
 // Engine-specific helper: return the entity under the crosshair.
 EntityInfo get_entity_under_crosshair() {

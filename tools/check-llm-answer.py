@@ -15,6 +15,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 INDEX_FILE = REPO_ROOT / "knowledge" / "pcx-api-index.json"
@@ -23,17 +24,17 @@ sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
 from pcx_grounding import load_api_index, validate_answer_markdown  # noqa: E402
 
 
-def check_answer(path: Path) -> dict[str, object]:
+def check_answer(path: Path) -> dict[str, Any]:
     if not INDEX_FILE.exists():
         return {"error": f"{INDEX_FILE} missing; run `python3 tools/build-api-index.py`"}
     index = load_api_index(INDEX_FILE)
     markdown = path.read_text(encoding="utf-8", errors="ignore")
     result = validate_answer_markdown(markdown, index, str(path))
     result["file"] = str(path)
-    return result
+    return cast(dict[str, Any], result)
 
 
-def print_human(result: dict[str, object]) -> None:
+def print_human(result: dict[str, Any]) -> None:
     if "error" in result:
         print(f"ERROR: {result['error']}", file=sys.stderr)
         return

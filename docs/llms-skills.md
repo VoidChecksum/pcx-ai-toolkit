@@ -1418,15 +1418,15 @@ Every full cheat project should look like this. One feature, one file.
 
 ```
 project/
-├── globals.em/as/lua   # proc_t, base/size, entity cache, config state
-├── offsets.em/as/lua   # all sigs + resolved addresses + RIP helpers
-├── esp.em/as/lua       # entity reads + 2D/3D box / health / name
-├── aim.em/as/lua       # target selection + smoothing + angle writeback
-├── triggerbot.em/as/lua # trigger timing + crosshair check
-├── radar.em/as/lua     # world-to-map + blips
-├── menu.em/as/lua      # GUI sidebar, keybinds, config load/save
-├── utils.em/as/lua     # W2S, distance, team check, visibility helper
-└── main.em/as/lua      # attach, resolve, register routines, unload
+├── globals.em/as   # proc_t, base/size, entity cache, config state
+├── offsets.em/as   # all sigs + resolved addresses + RIP helpers
+├── esp.em/as       # entity reads + 2D/3D box / health / name
+├── aim.em/as       # target selection + smoothing + angle writeback
+├── triggerbot.em/as # trigger timing + crosshair check
+├── radar.em/as     # world-to-map + blips
+├── menu.em/as      # GUI sidebar, keybinds, config load/save
+├── utils.em/as     # W2S, distance, team check, visibility helper
+└── main.em/as      # attach, resolve, register routines, unload
 ```
 
 If the target engine or game is known, name the process string and module

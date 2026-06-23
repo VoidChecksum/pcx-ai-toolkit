@@ -40,8 +40,6 @@ jobs:
           python tools/check-doc-drift.py --json > drift-report.json 2> drift-stderr.txt
           RC=$?
           cat drift-stderr.txt
-          # Always print the human summary; --json appends a JSON object.
-          python tools/check-doc-drift.py --limit 0 > /dev/null 2>&1 || true
           # Extract counts from the JSON report for the issue body.
           python - <<'PY'
           import json, os

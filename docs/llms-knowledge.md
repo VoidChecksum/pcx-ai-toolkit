@@ -851,8 +851,8 @@ and adapt them inside your own projects; they follow the 12 guidelines and the
 cheat-script master rules.
 
 All examples are written in **Enma (.em)** because that is the default PCX
-language. AngelScript and Lua equivalents follow the same logic with their own
-syntax (see `knowledge/pcx-cross-language-bridge.md`).
+language for this cookbook. Use the AngelScript context pack and templates when
+working in `.as`; do not translate examples into unsupported bindings.
 
 ---
 
@@ -4168,7 +4168,7 @@ using namespace MyLib;            // bring names into scope
 
 # Perception.cx Game Support Reference
 
-Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. Scripting language is **AngelScript** (`AS`) across the board; CS2 additionally exposes a **Lua** surface.
+Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. This toolkit supports **AngelScript** (`AS`) and **Enma** only; market entries below are listed as AngelScript unless a project-specific Enma port is explicitly created.
 
 > Counts are minimums (`N+`) — they reflect publicly listed market entries, not private/loader-only scripts.
 
@@ -4176,7 +4176,7 @@ Every game with active scripts in the Perception.cx Script Market (as of June 20
 
 | Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
 |------|--------|---------|-----------|---------|------|
-| Counter-Strike 2 | Source 2 | 10+ | VAC | Official + community suite | AS, Lua |
+| Counter-Strike 2 | Source 2 | 10+ | VAC | Official + community suite | AS |
 | Apex Legends | Source (Respawn) | 5+ | EAC (EOS) | UFOHOOK, ATLAS, ARIEngine | AS |
 | COD: Black Ops 7 / Warzone | IW Engine | 2+ | RICOCHET | — | AS |
 | Fortnite | Unreal Engine | 1+ | EAC (EOS) | — | AS |
@@ -6187,7 +6187,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 | `draw_four_corner_gradient` | unknown | In `docs/perception/render-api.md` but never named in the changelog. Treat as `<= 2026-02-01` core. | — | — |
 | `draw_polygon` | unknown | In `docs/perception/render-api.md`; no changelog row. Treat as `<= 2026-02-01` core. | — | — |
 | `get_font18/20/24/28`, `get_text_width`, `get_text_height` | `<= 2026-02-01` | Built-in font handles; predate the window. | — | — |
-| `create_font` / `create_font_mem` — optional `glyph_ranges` arg | `2026-02-03(b)` | Optional `glyph_ranges` added to both (changelog `Feb 3 (b) → AngelScript & Lua`). Older builds: no `glyph_ranges` parameter. | — | — |
+| `create_font` / `create_font_mem` — optional `glyph_ranges` arg | `2026-02-03(b)` | Optional `glyph_ranges` added in a combined historical changelog row. Older builds: no `glyph_ranges` parameter. | — | — |
 | Font loading latency | `2026-02-03(b)` | "Font loading now instant" + render backend optimized (changelog `Feb 3 (b) → Render Engine`). Behavior change, not a new symbol. | — | — |
 | Script render order | `2026-02-12` | Changed: "newly created callbacks render first" (changelog `Feb 12 → Render System`). Order reversed vs earlier builds. | — | — |
 
@@ -6240,7 +6240,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 
 | API | Since | Notes | Deprecated/Removed In | Replacement |
 |-----|-------|-------|-----------------------|-------------|
-| `mat4.readas_float` / `readas_double` / `writeas_float` / `writeas_double` | `2026-02-03(b)` | Matrix4x4 double-precision read/write variants (changelog `Feb 3 (b) → AngelScript & Lua`). | — | — |
+| `mat4.readas_float` / `readas_double` / `writeas_float` / `writeas_double` | `2026-02-03(b)` | Matrix4x4 double-precision read/write variants from a combined historical changelog row. | — | — |
 | default `matrix4x4` read/write (no precision suffix) | `<= 2026-02-03(a)` | — | `2026-02-03(b)` (deprecated) | `readas_float` / `readas_double` / `writeas_float` / `writeas_double` |
 | `atomic_int32`, `atomic_int64` | `2026-02-03(b)` | Lock-free shared state (changelog `Feb 3 (b) → AngelScript → Atomic API`). AngelScript-only entry. | — | — |
 | `set_thread_to_highest_priority` / `lowest` / `normal_priority` | `2026-02-03(b)` | Thread priority helpers (changelog `Feb 3 (b) → AngelScript`). AngelScript-only entry. | — | — |
@@ -6251,7 +6251,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 |-----|-------|-------|-----------------------|-------------|
 | `source2_world_to_screen` (no viewport) | `<= 2026-02-01` | Original Source 2 W2S. | `2026-02-03(b)` (deprecated) | `world_to_screen_rowmajor` / `world_to_screen_transposed` |
 | `source2_world_to_screen` — optional `viewport` arg | `2026-02-03(a)` | Added optional `const vector2 &in viewport = vector2(0,0)` (changelog `Feb 3 (a) → AngelScript`). Superseded one release later. | `2026-02-03(b)` (deprecated) | `world_to_screen_rowmajor` / `world_to_screen_transposed` |
-| `world_to_screen_rowmajor` | `2026-02-03(b)` | Replaces `source2_world_to_screen` for row-major matrices (changelog `Feb 3 (b) → AngelScript & Lua`, "migration required"). | — | — |
+| `world_to_screen_rowmajor` | `2026-02-03(b)` | Replaces `source2_world_to_screen` for row-major matrices (combined historical changelog row, "migration required"). | — | — |
 | `world_to_screen_transposed` | `2026-02-03(b)` | New, for transposed/column-major matrices (changelog `Feb 3 (b)`). | — | — |
 
 ### Input
@@ -6298,7 +6298,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 | API | Since | Notes | Deprecated/Removed In | Replacement |
 |-----|-------|-------|-----------------------|-------------|
 | `enum_windows`, `window_t`, `send_key`, `send_mouse`, `get_clipboard`, `set_clipboard` | `<= 2026-02-01` | Core Win API. `docs/perception/win-api.md`. | — | — |
-| `get_all_hwnds()` | `2026-02-01` | Added (changelog `Feb 1 → AngelScript & Lua`, "returns all window handles"). | — | — |
+| `get_all_hwnds()` | `2026-02-01` | Added in a combined historical changelog row ("returns all window handles"). | — | — |
 
 ### Filesystem
 
@@ -6347,7 +6347,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 
 | API | Status | Since | Replacement | Source row |
 |-----|--------|-------|-------------|------------|
-| `source2_world_to_screen` | Deprecated | `2026-02-03(b)` | `world_to_screen_rowmajor` (row-major) / `world_to_screen_transposed` (transposed/column-major) | changelog `Feb 3 (b) → AngelScript & Lua → Deprecated`; also `Mar 16` cheatsheet note |
+| `source2_world_to_screen` | Deprecated | `2026-02-03(b)` | `world_to_screen_rowmajor` (row-major) / `world_to_screen_transposed` (transposed/column-major) | combined historical changelog row; also `Mar 16` cheatsheet note |
 | default `matrix4x4` read/write (no precision suffix) | Deprecated | `2026-02-03(b)` | `readas_float` / `readas_double` / `writeas_float` / `writeas_double` | changelog `Feb 3 (b) → Deprecated` |
 | `scan_bytes`, `scan_all_bytes`, `scan_all_u32`, `scan_all_u64` | Removed (never actually existed) | `2026-03-14` | `scan_float` / `scan_double` / `scan_string` / `scan_wstring` / `scan_pointer` | changelog `Mar 14 → VAD / Memory Scan API Fixes`, "Removed nonexistent functions from docs" |
 | Legacy RE tools + old chatbot | Removed | `2026-03-08` | New RE tools GUI + IDE AI assistant (same release) | changelog `Mar 8` |
@@ -6361,25 +6361,25 @@ the docs, not when they worked.
 
 ## Language Version Quirks
 
-PCX has hosted three scripting front-ends. The timeline below is what the changelog
-and `docs/` support; exact per-feature introduction dates inside a language reference
-that ships unversioned are marked `unknown`.
+PCX changelogs have historical labels for multiple scripting front-ends. This
+toolkit indexes and validates only Enma and AngelScript; exact per-feature
+introduction dates inside an unversioned language reference are marked `unknown`.
 
 ### Front-end split history
 
 | Era | Languages | Evidence |
 |-----|-----------|----------|
-| `<= 2026-03` | AngelScript + Lua | Changelog entries split between `AngelScript` (AS-only) and `AngelScript & Lua` (both) throughout Feb–Mar 2026. `2026-03-11`: "Perception API IntelliSense injects both AngelScript and Lua API references". |
+| `<= 2026-03` | AngelScript plus historical non-indexed bindings | Changelog entries split between `AngelScript` and combined labels throughout Feb-Mar 2026. Treat combined labels as changelog provenance, not as a supported toolkit target. |
 | `Enma Open Beta — Phase 2 (May 2026)` | Enma (new, proprietary AOT/JIT) added | Changelog `Enma Open Beta — Phase 2`: "Perception's proprietary programming language, built from scratch … compiles to native machine code". |
 
-**AS-only vs AS+Lua intrinsics** (from the changelog's section headers):
+**AngelScript scope notes** (from the changelog's section headers):
 
 | Feature | Scope at introduction | Since |
 |---------|-----------------------|-------|
-| `get_all_hwnds()` | AngelScript & Lua | `2026-02-01` |
-| `create_font` / `create_font_mem` `glyph_ranges` | AngelScript & Lua | `2026-02-03(b)` |
-| `mat4.readas_*` / `writeas_*` precision variants | AngelScript & Lua | `2026-02-03(b)` |
-| `world_to_screen_rowmajor` / `_transposed` | AngelScript & Lua | `2026-02-03(b)` |
+| `get_all_hwnds()` | AngelScript in this toolkit | `2026-02-01` |
+| `create_font` / `create_font_mem` `glyph_ranges` | AngelScript in this toolkit | `2026-02-03(b)` |
+| `mat4.readas_*` / `writeas_*` precision variants | AngelScript in this toolkit | `2026-02-03(b)` |
+| `world_to_screen_rowmajor` / `_transposed` | AngelScript in this toolkit | `2026-02-03(b)` |
 | `atomic_int32` / `atomic_int64` | **AngelScript only** | `2026-02-03(b)` |
 | `set_thread_to_*_priority` | **AngelScript only** | `2026-02-03(b)` |
 | `hash_map` global-init fix | **AngelScript only** | `2026-02-01` |
@@ -6387,8 +6387,7 @@ that ships unversioned are marked `unknown`.
 | `register_callback` `render_on_top` | **AngelScript only** | `2026-03-17(b)` |
 | Unicorn `UC_HOOK_*`, `uc_get_*_exception*` | **AngelScript only** | `2026-03-18` |
 
-Treat AngelScript-only rows as **not present in Lua** at that date unless a later
-`AngelScript & Lua` entry restates them.
+Do not infer support for any non-indexed binding from these historical labels.
 
 ### Enma
 
@@ -6417,15 +6416,6 @@ are dated land in the AS-specific rows of the matrix above (atomics, thread prio
 `render_on_top`, Unicorn hooks, etc.). The base AngelScript language itself is the
 upstream AngelScript spec; PCX does not changelog core-language grammar changes.
 
-### Lua
-
-PCX exposes a Lua binding alongside AngelScript through `2026-03`. Only the
-`AngelScript & Lua` changelog rows apply to it (font `glyph_ranges`, matrix precision
-variants, W2S replacement, `get_all_hwnds`). No Lua-only language feature is dated in
-the changelog; assume the AS+Lua shared surface and nothing more.
-
----
-
 ## Release Timeline Index
 
 Reverse-chronological. Each row lists the script-facing API surface a release
@@ -6446,7 +6436,7 @@ release carrying every API a script needs. Pure IDE/Analyzer/decompiler internal
 | `2026-03-17(a)` | Custom Draw 3D/compute: `create_index_buffer`, `custom_draw_indexed`, `create_depth_buffer`/`create_depth_stencil_state`, `custom_set_render_target_ext`, `create_rasterizer_state`, `custom_set_viewport`, `custom_bind_textures`, `custom_bind_constant_buffers`, `create_compute_shader`/`dispatch_compute`/`create_structured_buffer`/`read_structured_buffer`, `load_obj_mesh`, dynamic textures, `capture_backbuffer`, `custom_resolve_render_target` |
 | `2026-03-16` | Custom Draw base pipeline: `create_shader`, `create_vertex_buffer`, `create_constant_buffer`, `create_blend_state`, `create_sampler`, `create_texture`, `create_render_target` (Universal + CS2) |
 | `2026-03-14` | Sound API (entire surface); scan `scan_float/double/string/wstring/pointer` + `array<uint64>@` return; `get_vad_snapshot` fix; `scan_bytes`/`scan_all_*` struck from docs; Extensions system |
-| `2026-03-11` | Combined AngelScript + Lua API IntelliSense; multi-root workspace |
+| `2026-03-11` | Combined API IntelliSense; multi-root workspace |
 | `2026-03-08` | 32-bit games support; legacy RE tools + old chatbot removed |
 | `2026-02-17` | GUI list ops: `list:get/remove/highlight/remove_highlight/hide/show` |
 | `2026-02-12` | XINPUT controller keybinds; `get_mouse_delta` fix; `get_gui_position`/`get_gui_size`; render order reversed |

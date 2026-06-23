@@ -11,6 +11,7 @@
 
 import "vec";
 import "color";
+import "math";
 
 // ── Offsets / sigs (rule #1: ground every offset; rule #5: prefer sigs) ──
 // All UNVERIFIED — placeholders. Resolve against YOUR target before use; never

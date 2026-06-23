@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Build knowledge/pcx-api-index.json from the two live upstream PCX API docs.
+"""Build knowledge/pcx-api-index.json from source-backed PCX language docs.
 
 Authoritative roots:
   1. https://docs.perception.cx/perception/enma/overview  (Enma API surface)
      Markdown equivalent: https://docs.perception.cx/perception/enma/readme.md
   2. https://docs.perception.cx/perception/angel-script/overview  (AngelScript API surface)
      Markdown equivalent: https://docs.perception.cx/perception/angel-script/overview.md
+  3. Local mirrors of official Enma and AngelScript language/add-on references.
 
-Only pages under these two roots contribute API symbols to the index.
-The docs.perception.cx `llms.txt` index is used solely to enumerate sub-page
-URLs under the two roots; it is not itself a source of API symbols.
+Only official/live PCX pages and checked-in official language mirrors contribute
+symbols. The docs.perception.cx `llms.txt` index is used solely to enumerate
+PCX sub-page URLs; it is not itself a source of API symbols.
 
 Usage:
     python tools/build-api-index.py          # regenerate knowledge/pcx-api-index.json
@@ -26,6 +27,7 @@ import urllib.parse
 import urllib.request
 from collections.abc import Sized
 from pathlib import Path
+from typing import cast
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 KNOWLEDGE = REPO_ROOT / "knowledge"
@@ -42,6 +44,8 @@ from pcx_parser import (  # noqa: E402
 ENMA_ROOT_URL = "https://docs.perception.cx/perception/enma/readme.md"
 AS_ROOT_URL = "https://docs.perception.cx/perception/angel-script/overview.md"
 LLMS_INDEX_URL = "https://docs.perception.cx/perception/llms.txt"
+ENMA_LANGUAGE_ROOT_URL = "https://enma-1.gitbook.io/enma/llms-language.md"
+AS_LANGUAGE_ROOT_URL = "https://www.angelcode.com/angelscript/sdk/docs/manual/"
 
 ENMA_PREFIX = "/perception/enma/"
 AS_PREFIX = "/perception/angel-script/"
@@ -56,7 +60,7 @@ ENMA_BUILTIN_TYPES = {
 }
 
 AS_BUILTIN_TYPES = {
-    "bool", "int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64",
+    "bool", "int", "uint", "int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64",
     "float", "double", "string", "void", "any", "array", "dictionary", "grid",
     "proc_t", "mutex_t", "ws_t", "subtab_t", "panel_t", "checkbox_t",
     "slider_double_t", "slider_int_t", "input_t", "multi_select_t",
@@ -64,6 +68,47 @@ AS_BUILTIN_TYPES = {
     "vector2", "vector3", "vector4", "matrix4x4", "quaternion",
     "funcdef",
 }
+
+LOCAL_LANGUAGE_DOCS = [
+    (REPO_ROOT / "docs" / "enma" / "llms-language.md", "enma"),
+    (REPO_ROOT / "docs" / "angelscript-lang" / "addon-math.md", "angelscript"),
+    (REPO_ROOT / "docs" / "angelscript-lang" / "dictionary.md", "angelscript"),
+]
+
+EXTRA_SOURCE_SIGNATURES = [
+    (
+        "enma",
+        "https://enma-1.gitbook.io/enma/addons/json.md",
+        """
+json_value json_parse(string text);
+json_value json_object();
+json_value json_array();
+string json_stringify(json_value value);
+bool json_value.is_valid();
+bool json_value.is_null();
+bool json_value.is_bool();
+bool json_value.is_num();
+bool json_value.is_str();
+bool json_value.is_array();
+bool json_value.is_obj();
+int64 json_value.kind();
+bool json_value.as_bool();
+float64 json_value.as_num();
+int64 json_value.as_int();
+string json_value.as_str();
+int64 json_value.size();
+bool json_value.has_key(string key);
+array json_value.keys();
+json_value json_value.get_key(string key);
+json_value json_value.get_at(int64 index);
+bool json_value.set_key(string key, json_value value);
+bool json_value.remove_key(string key);
+bool json_value.push_value(json_value value);
+string json_value.stringify();
+string json_value.pretty();
+""",
+    ),
+]
 
 
 def _fetch(url: str, timeout: int = 30) -> str:
@@ -89,12 +134,53 @@ def _language_from_path(path: str) -> str:
     return "enma"
 
 
+def _local_source_url(path: Path, text: str) -> str:
+    """Return the original source URL embedded in a checked-in local mirror."""
+    source = re.search(r'Source:\s*(https?://[^\s]+)', text)
+    if source:
+        return source.group(1)
+    markdown = re.search(r'\[Markdown\]\((https?://[^)]+)\)', text)
+    if markdown:
+        return markdown.group(1)
+    return path.relative_to(REPO_ROOT).as_posix()
+
+
 def _find_markdown_code_blocks(text: str) -> list[tuple[str, str]]:
     """Return list of (language_hint, body) for fenced code blocks."""
     out: list[tuple[str, str]] = []
     for m in re.finditer(r'^```\s*(\w*)\s*\n(.*?)\n```', text, re.MULTILINE | re.DOTALL):
         out.append((m.group(1).lower(), m.group(2)))
     return out
+
+
+def _find_inline_signature_blocks(text: str, language: str) -> list[str]:
+    """Return signature snippets documented outside fenced code blocks.
+
+    Several PCX pages use heading backticks such as
+    `bool create_file(const string &in path, ...)` or prose headings like
+    `clamp(x, a, b) -> double`. These are official source-backed signatures and
+    should feed the same index as fenced declarations.
+    """
+    snippets: list[str] = []
+
+    for m in re.finditer(r'`([^`\n]*\([^`\n]*\)[^`\n]*)`', text):
+        sig = m.group(1).strip().replace("\\_", "_")
+        if " " not in sig.split("(", 1)[0]:
+            continue
+        snippets.append(sig.rstrip(";") + ";")
+
+    if language == "angelscript":
+        arrow_re = re.compile(
+            r'\b([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*(?:→|->)\s*'
+            r'([A-Za-z_][A-Za-z0-9_]*)'
+        )
+        for m in arrow_re.finditer(text.replace("\\_", "_")):
+            name, raw_args, ret = m.groups()
+            args = [a.strip().split()[0] for a in raw_args.split(",") if a.strip()]
+            typed_args = ", ".join(f"double {arg}" for arg in args)
+            snippets.append(f"{ret} {name}({typed_args});")
+
+    return snippets
 
 
 def _discover_sub_pages() -> list[str]:
@@ -113,12 +199,14 @@ def _discover_sub_pages() -> list[str]:
             paths.add(href)
 
     # The AngelScript overview does not link to sub-pages in markdown, so we use
-    # the site's structured index to discover them.
+    # the site's structured index to discover them. Links in llms.txt may be
+    # absolute URLs; compare against the parsed path, not the raw href.
     index = _fetch(LLMS_INDEX_URL)
     for m in re.finditer(r'\[([^\]]*)\]\(([^)]+)\)', index):
         href = urllib.parse.urldefrag(m.group(2).strip())[0]
-        if href.startswith((ENMA_PREFIX, AS_PREFIX)) and href.endswith(".md"):
-            paths.add(urllib.parse.urlparse(href).path)
+        path = urllib.parse.urlparse(href).path
+        if path.startswith((ENMA_PREFIX, AS_PREFIX)) and path.endswith(".md"):
+            paths.add(path)
 
     return sorted(paths)
 
@@ -137,6 +225,15 @@ def _fetch_pages(paths: list[str]) -> dict[str, str]:
     return out
 
 
+def _local_language_pages() -> list[tuple[Path, str, str]]:
+    """Return checked-in language mirrors as (path, language, markdown_text)."""
+    out: list[tuple[Path, str, str]] = []
+    for path, language in LOCAL_LANGUAGE_DOCS:
+        if path.exists():
+            out.append((path, language, path.read_text(encoding="utf-8", errors="ignore")))
+    return out
+
+
 def build_index() -> dict[str, object]:
     functions: dict[str, list[dict[str, object]]] = {}
     methods: dict[str, list[dict[str, object]]] = {}
@@ -148,6 +245,20 @@ def build_index() -> dict[str, object]:
 
     page_paths = _discover_sub_pages()
     pages = _fetch_pages(page_paths)
+    local_pages = _local_language_pages()
+
+    def add_sig(sig: dict[str, object]) -> None:
+        name = str(sig["name"])
+        types.add(_base_type(str(sig.get("return_type") or "")))
+        raw_arg_types = sig.get("arg_types", [])
+        arg_types = cast(list[object], raw_arg_types) if isinstance(raw_arg_types, list) else []
+        for at in arg_types:
+            types.add(_base_type(str(at)))
+
+        if sig["kind"] == "method":
+            methods.setdefault(name, []).append(sig)
+        else:
+            functions.setdefault(name, []).append(sig)
 
     for path, text in pages.items():
         language = _language_from_path(path)
@@ -161,15 +272,33 @@ def build_index() -> dict[str, object]:
             block_language = lang_hint if lang_hint in {"enma", "angelscript"} else language
             sigs = extract_api_signatures(body, block_language, source_url)
             for sig in sigs:
-                name = sig["name"]
-                types.add(_base_type(sig.get("return_type") or ""))
-                for at in sig.get("arg_types", []):
-                    types.add(_base_type(at))
+                add_sig(sig)
 
-                if sig["kind"] == "method":
-                    methods.setdefault(name, []).append(sig)
-                else:
-                    functions.setdefault(name, []).append(sig)
+        for body in _find_inline_signature_blocks(text, language):
+            sigs = extract_api_signatures(body, language, source_url)
+            for sig in sigs:
+                add_sig(sig)
+
+    for local_path, language, text in local_pages:
+        source_url = _local_source_url(local_path, text)
+        if language == "enma":
+            for mod in extract_enma_imports(text):
+                modules.setdefault(mod, set())
+
+        for lang_hint, body in _find_markdown_code_blocks(text):
+            block_language = lang_hint if lang_hint in {"enma", "angelscript"} else language
+            sigs = extract_api_signatures(body, block_language, source_url)
+            for sig in sigs:
+                add_sig(sig)
+
+        for body in _find_inline_signature_blocks(text, language):
+            sigs = extract_api_signatures(body, language, source_url)
+            for sig in sigs:
+                add_sig(sig)
+
+    for language, source_url, body in EXTRA_SOURCE_SIGNATURES:
+        for sig in extract_api_signatures(body, language, source_url):
+            add_sig(sig)
 
     # Treat any module-like word imported in Enma examples as a module.
     module_names = set(modules.keys())
@@ -181,18 +310,29 @@ def build_index() -> dict[str, object]:
     }}
 
     def sig_list_to_json(d: dict[str, list[dict[str, object]]]) -> dict[str, list[dict[str, object]]]:
-        return {k: [{kk: vv for kk, vv in s.items() if kk != "line"} for s in v]
-                for k, v in sorted(d.items())}
+        out: dict[str, list[dict[str, object]]] = {}
+        for k, v in sorted(d.items()):
+            seen: set[str] = set()
+            clean_items: list[dict[str, object]] = []
+            for s in v:
+                clean = {kk: vv for kk, vv in s.items() if kk != "line"}
+                key = json.dumps(clean, sort_keys=True)
+                if key in seen:
+                    continue
+                seen.add(key)
+                clean_items.append(clean)
+            out[k] = clean_items
+        return out
 
     return {
         "version": 1,
         "generated_by": "tools/build-api-index.py",
-        "source_roots": [ENMA_ROOT_URL, AS_ROOT_URL],
+        "source_roots": [ENMA_ROOT_URL, AS_ROOT_URL, ENMA_LANGUAGE_ROOT_URL, AS_LANGUAGE_ROOT_URL],
         "functions": sig_list_to_json(functions),
         "methods": sig_list_to_json(methods),
         "types": sorted(types),
         "modules": sorted(module_names),
-        "doc_count": len(pages),
+        "doc_count": len(pages) + len(local_pages),
     }
 
 
@@ -235,3 +375,7 @@ def main() -> int:
     assert isinstance(functions, Sized) and isinstance(methods, Sized)
     assert isinstance(types, Sized) and isinstance(modules, Sized)
     return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

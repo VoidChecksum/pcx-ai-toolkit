@@ -2,7 +2,7 @@
 
 ## Scope
 
-This policy covers vulnerabilities in **pcx-ai-toolkit's own code** — the Python tools under `tools/`, the `pcx-knowledge-mcp` server (`mcp/pcx-knowledge-mcp/`), the shell setup scripts (`setup.sh`, `setup.ps1`, and `tools/*.sh`), and the LSP wiring under `lsp/`. It does **not** cover end-user scripts written *with* the toolkit (Enma / AngelScript / Lua), the Perception.cx product itself, or any third-party RE tools the installers reference.
+This policy covers vulnerabilities in **pcx-ai-toolkit's own code** — the Python tools under `tools/`, the `pcx-knowledge-mcp` server (`mcp/pcx-knowledge-mcp/`), the shell setup scripts (`setup.sh`, `setup.ps1`, and `tools/*.sh`), and the LSP wiring under `lsp/`. It does **not** cover end-user scripts written *with* the toolkit (Enma / AngelScript), the Perception.cx product itself, or any third-party RE tools the installers reference.
 
 ## Reporting a Vulnerability
 
@@ -37,7 +37,7 @@ Please include, at minimum:
 
 **Out of scope:**
 
-- User-written Enma / AngelScript / Lua scripts produced *with* the toolkit — those are the user's responsibility.
+- User-written Enma / AngelScript scripts produced *with* the toolkit — those are the user's responsibility.
 - The Perception.cx product itself — report to its vendor, not here.
 - Third-party RE tools invoked by the installers (IDA, Ghidra, etc.) — report upstream.
 - Any IDA-related installer layer — that layer was **removed** from this repository and is no longer maintained here. Do not file reports against it.

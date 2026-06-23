@@ -95,6 +95,11 @@ def main() -> int:
     results = []
     drift = 0
     errors = 0
+
+    def human(message: str = "") -> None:
+        if not args.json:
+            print(message)
+
     for i, (local, meta) in enumerate(targets, 1):
         url = meta["url"]
         local_norm = normalize(local.read_text(encoding="utf-8", errors="ignore"))
@@ -103,8 +108,8 @@ def main() -> int:
             results.append({"file": local.relative_to(REPO_ROOT).as_posix(), "url": url,
                             "status": "FETCH_ERROR", "detail": (upstream or "").split(":", 1)[-1].strip()})
             errors += 1
-            print(f"[{i}/{len(targets)}] FETCH_ERROR  {local.relative_to(REPO_ROOT)}  <- {url}")
-            print(f"             {upstream}" if upstream else "")
+            human(f"[{i}/{len(targets)}] FETCH_ERROR  {local.relative_to(REPO_ROOT)}  <- {url}")
+            human(f"             {upstream}" if upstream else "")
             continue
         up_norm = normalize(upstream)
         status = "IN_SYNC" if up_norm == local_norm else "DRIFT"
@@ -123,20 +128,21 @@ def main() -> int:
                     hint = f"line count differs: local={len(local_lines)} upstream={len(up_lines)}"
             results.append({"file": local.relative_to(REPO_ROOT).as_posix(), "url": url,
                              "status": "DRIFT", "hint": hint})
-            print(f"[{i}/{len(targets)}] DRIFT        {local.relative_to(REPO_ROOT)}  <- {url}")
+            human(f"[{i}/{len(targets)}] DRIFT        {local.relative_to(REPO_ROOT)}  <- {url}")
             if hint:
-                print(f"             {hint}")
+                human(f"             {hint}")
         else:
             results.append({"file": local.relative_to(REPO_ROOT).as_posix(), "url": url, "status": "IN_SYNC"})
-            print(f"[{i}/{len(targets)}] IN_SYNC      {local.relative_to(REPO_ROOT)}")
+            human(f"[{i}/{len(targets)}] IN_SYNC      {local.relative_to(REPO_ROOT)}")
 
     summary = {"checked": len(targets), "in_sync": len(targets) - drift - errors,
                "drift": drift, "fetch_errors": errors, "results": results}
-    print(f"\nSummary: {summary['checked']} checked, {summary['in_sync']} in sync, "
-          f"{drift} drifted, {errors} fetch errors.")
 
     if args.json:
         print(json.dumps(summary, indent=2))
+    else:
+        print(f"\nSummary: {summary['checked']} checked, {summary['in_sync']} in sync, "
+              f"{drift} drifted, {errors} fetch errors.")
 
     if args.check and (drift or errors):
         return 1

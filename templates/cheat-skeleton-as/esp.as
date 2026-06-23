@@ -37,32 +37,33 @@ void esp_update(int id, int data_index) {
 void esp_render(int id, int data_index) {
     if (!g_esp_enabled || g_esp_count == 0) return;
 
-    color enemy(255, 80, 80, 220);
-    color ally(80, 255, 80, 220);
-    color white(255, 255, 255, 255);
-
-    double vw = get_view_width();
-    vec2 screen_bottom(vw * 0.5, get_view_height());
+    float vw;
+    float vh;
+    get_view(vw, vh);
+    vector2 screen_bottom = vector2(vw * 0.5, vh);
 
     for (int i = 0; i < g_esp_count; i++) {
         EntityInfo@ e = g_entities[i];
         if (!e.valid) continue;
 
-        vec2 head2d, feet2d;
+        vector2 head2d, feet2d;
         if (!world_to_screen(e.head, head2d)) continue;
         if (!world_to_screen(e.pos,  feet2d)) continue;
 
         double h = feet2d.y - head2d.y;
         double w = h * 0.5;
         double x = head2d.x - w * 0.5;
-        color c = (e.team == g_local_team && e.team != 0) ? ally : enemy;
+        bool friendly = (e.team == g_local_team && e.team != 0);
+        uint8 cr = friendly ? 80 : 255;
+        uint8 cg = friendly ? 255 : 80;
+        uint8 cb = friendly ? 80 : 80;
 
-        draw_rect(vec2(x, head2d.y), vec2(w, h), c, 1.0, false);
-        draw_line(screen_bottom, feet2d, color(255, 255, 255, 120), 1.0);
+        draw_rect(float(x), float(head2d.y), float(w), float(h), cr, cg, cb, 220, 1.0f, 0.0f, 0);
+        draw_line(screen_bottom.x, screen_bottom.y, float(feet2d.x), float(feet2d.y), 255, 255, 255, 120, 1.0f);
 
-        string hp = format("{}", e.health);
-        draw_text(hp, vec2(head2d.x - 10.0, head2d.y - 18.0), white,
-                  get_font18(), 0, color(0,0,0,0), 0.0);
+        string hp = "" + e.health;
+        draw_text(hp, float(head2d.x - 10.0), float(head2d.y - 18.0), 255, 255, 255, 255,
+                  get_font18(), 0, 0, 0, 0, 0, 0.0f);
     }
 }
 

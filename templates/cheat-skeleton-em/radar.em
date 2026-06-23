@@ -4,6 +4,7 @@
 import "globals";
 import "utils";
 import "color";
+import "vec";
 
 const float64 RADAR_SCALE = 0.05;
 const float64 RADAR_RADIUS = 100.0;
@@ -35,7 +36,7 @@ void radar_render(int64 data) {
 
         vec2 blip;
         if (!world_to_map(e.pos, blip)) continue;
-        vec2 rel = blip.sub(local2d);
+        vec2 rel = vec2(blip.x - local2d.x, blip.y - local2d.y);
         rel.x *= RADAR_SCALE;
         rel.y *= RADAR_SCALE;
 

@@ -79,9 +79,6 @@ CATEGORIES = {
 
 SKIP_PATTERNS = [
     re.compile(r'/(node_modules|\.git|build|dist|lsp)/'),
-    re.compile(r'/docs/(perception/lua|lua-lang)/'),
-    re.compile(r'/templates/.*\.lua$'),
-    re.compile(r'/\.claude/skills/pcx-lua-discipline/'),
     re.compile(r'\.(vsix|dll|exe|so|bin)$'),
 ]
 
@@ -539,6 +536,17 @@ def file_resource(path: str) -> str:
 # ── Entry point ──────────────────────────────────────────────────────────────
 
 def main() -> None:
+    if any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
+        print(
+            "pcx-knowledge-mcp - MCP server for the pcx-ai-toolkit corpus\n\n"
+            "Usage:\n"
+            "  pcx-knowledge-mcp\n\n"
+            "Configure an MCP client to run this command. Exposed tools include "
+            "search, get_file, recommend_context, api_lookup, validate_code, "
+            "and validate_answer."
+        )
+        return
+
     # Eagerly load the index so the first search is fast.
     INDEX.load()
     mcp.run()

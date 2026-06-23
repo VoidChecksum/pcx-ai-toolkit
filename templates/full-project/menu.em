@@ -3,6 +3,7 @@
 
 import "color";
 import "globals";
+import "strings";
 
 sidebar_section_t g_sec;
 checkbox_t        g_cb_enabled;

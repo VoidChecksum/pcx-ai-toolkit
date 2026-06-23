@@ -39,6 +39,35 @@ class ApiIndexTest(unittest.TestCase):
         self.assertTrue(required_types.issubset(types),
                         f"missing types: {required_types - types}")
 
+    def test_angelscript_symbols_present(self):
+        data = json.loads(INDEX_FILE.read_text(encoding="utf-8"))
+        funcs = data.get("functions", {})
+        methods = data.get("methods", {})
+
+        self.assertGreaterEqual(data.get("doc_count", 0), 39)
+        self.assertTrue(any(sig.get("language") == "angelscript"
+                            for sig in funcs.get("register_callback", [])))
+        self.assertTrue(any(sig.get("language") == "angelscript"
+                            for sig in funcs.get("ref_process", [])))
+        self.assertTrue(any(sig.get("language") == "angelscript"
+                            for sig in methods.get("deref", [])))
+        self.assertTrue(any(sig.get("language") == "angelscript"
+                            for sig in methods.get("get_all_tebs", [])))
+
+    def test_language_addon_symbols_present(self):
+        data = json.loads(INDEX_FILE.read_text(encoding="utf-8"))
+        funcs = data.get("functions", {})
+        methods = data.get("methods", {})
+
+        self.assertTrue(any(sig.get("language") == "enma"
+                            for sig in funcs.get("atan2", [])))
+        self.assertTrue(any(sig.get("language") == "enma"
+                            for sig in funcs.get("json_object", [])))
+        self.assertTrue(any(sig.get("language") == "enma"
+                            for sig in methods.get("pretty", [])))
+        self.assertTrue(any(sig.get("language") == "angelscript"
+                            for sig in funcs.get("closeTo", [])))
+
     def test_builder_check_passes(self):
         result = subprocess.run(
             [sys.executable, str(BUILDER), "--check"],
@@ -47,6 +76,7 @@ class ApiIndexTest(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0,
                          f"build-api-index --check failed:\n{result.stdout}\n{result.stderr}")
+        self.assertIn("is up to date", result.stdout)
 
 
 if __name__ == "__main__":

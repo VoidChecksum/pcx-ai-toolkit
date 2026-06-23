@@ -40,7 +40,8 @@ toolkit is scoped to Enma and AngelScript.
    - AngelScript syntax/binding work: `pcx-angelscript-discipline`
    - MCP calls: `mcp-tool-routing`
    - Offset/RE work: `pcx-re-discipline` and `re-evidence-log`
-5. Verify every host API symbol with `pcx api` or MCP `api_lookup`.
+5. Verify every host API and language/add-on symbol with `pcx api` or MCP
+   `api_lookup`.
 6. Validate generated code with `pcx symbol-check`, MCP `validate_code`, or MCP
    `validate_answer`.
 
@@ -71,6 +72,7 @@ Use this sequence in terminal-based workflows:
 
 ```bash
 pcx api draw_text --lang enma
+pcx api atan2 --lang enma
 pcx symbol-check script.em
 pcx verify script.as
 pcx check-answer answer.md
@@ -17411,7 +17413,8 @@ Before producing code:
 3. Load that language's context pack or the load-order pages above.
 4. Verify every PCX function name and parameter shape against the matching API
    page, `pcx api <symbol> --lang enma|angelscript`, or MCP
-   `api_lookup(symbol, language)`.
+   `api_lookup(symbol, language)`. Use the same lookup for Enma/AngelScript
+   language and add-on helpers before assuming a stdlib call exists.
 5. Prefer symbolic offsets and placeholders over version-specific magic values
    unless the user supplied verified offsets.
 6. Keep update/scanning work out of render callbacks.
@@ -34353,15 +34356,15 @@ Every full cheat project should look like this. One feature, one file.
 
 ```
 project/
-├── globals.em/as/lua   # proc_t, base/size, entity cache, config state
-├── offsets.em/as/lua   # all sigs + resolved addresses + RIP helpers
-├── esp.em/as/lua       # entity reads + 2D/3D box / health / name
-├── aim.em/as/lua       # target selection + smoothing + angle writeback
-├── triggerbot.em/as/lua # trigger timing + crosshair check
-├── radar.em/as/lua     # world-to-map + blips
-├── menu.em/as/lua      # GUI sidebar, keybinds, config load/save
-├── utils.em/as/lua     # W2S, distance, team check, visibility helper
-└── main.em/as/lua      # attach, resolve, register routines, unload
+├── globals.em/as   # proc_t, base/size, entity cache, config state
+├── offsets.em/as   # all sigs + resolved addresses + RIP helpers
+├── esp.em/as       # entity reads + 2D/3D box / health / name
+├── aim.em/as       # target selection + smoothing + angle writeback
+├── triggerbot.em/as # trigger timing + crosshair check
+├── radar.em/as     # world-to-map + blips
+├── menu.em/as      # GUI sidebar, keybinds, config load/save
+├── utils.em/as     # W2S, distance, team check, visibility helper
+└── main.em/as      # attach, resolve, register routines, unload
 ```
 
 If the target engine or game is known, name the process string and module
@@ -40701,8 +40704,8 @@ and adapt them inside your own projects; they follow the 12 guidelines and the
 cheat-script master rules.
 
 All examples are written in **Enma (.em)** because that is the default PCX
-language. AngelScript and Lua equivalents follow the same logic with their own
-syntax (see `knowledge/pcx-cross-language-bridge.md`).
+language for this cookbook. Use the AngelScript context pack and templates when
+working in `.as`; do not translate examples into unsupported bindings.
 
 ---
 
@@ -44018,7 +44021,7 @@ using namespace MyLib;            // bring names into scope
 
 # Perception.cx Game Support Reference
 
-Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. Scripting language is **AngelScript** (`AS`) across the board; CS2 additionally exposes a **Lua** surface.
+Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. This toolkit supports **AngelScript** (`AS`) and **Enma** only; market entries below are listed as AngelScript unless a project-specific Enma port is explicitly created.
 
 > Counts are minimums (`N+`) — they reflect publicly listed market entries, not private/loader-only scripts.
 
@@ -44026,7 +44029,7 @@ Every game with active scripts in the Perception.cx Script Market (as of June 20
 
 | Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
 |------|--------|---------|-----------|---------|------|
-| Counter-Strike 2 | Source 2 | 10+ | VAC | Official + community suite | AS, Lua |
+| Counter-Strike 2 | Source 2 | 10+ | VAC | Official + community suite | AS |
 | Apex Legends | Source (Respawn) | 5+ | EAC (EOS) | UFOHOOK, ATLAS, ARIEngine | AS |
 | COD: Black Ops 7 / Warzone | IW Engine | 2+ | RICOCHET | — | AS |
 | Fortnite | Unreal Engine | 1+ | EAC (EOS) | — | AS |
@@ -46037,7 +46040,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 | `draw_four_corner_gradient` | unknown | In `docs/perception/render-api.md` but never named in the changelog. Treat as `<= 2026-02-01` core. | — | — |
 | `draw_polygon` | unknown | In `docs/perception/render-api.md`; no changelog row. Treat as `<= 2026-02-01` core. | — | — |
 | `get_font18/20/24/28`, `get_text_width`, `get_text_height` | `<= 2026-02-01` | Built-in font handles; predate the window. | — | — |
-| `create_font` / `create_font_mem` — optional `glyph_ranges` arg | `2026-02-03(b)` | Optional `glyph_ranges` added to both (changelog `Feb 3 (b) → AngelScript & Lua`). Older builds: no `glyph_ranges` parameter. | — | — |
+| `create_font` / `create_font_mem` — optional `glyph_ranges` arg | `2026-02-03(b)` | Optional `glyph_ranges` added in a combined historical changelog row. Older builds: no `glyph_ranges` parameter. | — | — |
 | Font loading latency | `2026-02-03(b)` | "Font loading now instant" + render backend optimized (changelog `Feb 3 (b) → Render Engine`). Behavior change, not a new symbol. | — | — |
 | Script render order | `2026-02-12` | Changed: "newly created callbacks render first" (changelog `Feb 12 → Render System`). Order reversed vs earlier builds. | — | — |
 
@@ -46090,7 +46093,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 
 | API | Since | Notes | Deprecated/Removed In | Replacement |
 |-----|-------|-------|-----------------------|-------------|
-| `mat4.readas_float` / `readas_double` / `writeas_float` / `writeas_double` | `2026-02-03(b)` | Matrix4x4 double-precision read/write variants (changelog `Feb 3 (b) → AngelScript & Lua`). | — | — |
+| `mat4.readas_float` / `readas_double` / `writeas_float` / `writeas_double` | `2026-02-03(b)` | Matrix4x4 double-precision read/write variants from a combined historical changelog row. | — | — |
 | default `matrix4x4` read/write (no precision suffix) | `<= 2026-02-03(a)` | — | `2026-02-03(b)` (deprecated) | `readas_float` / `readas_double` / `writeas_float` / `writeas_double` |
 | `atomic_int32`, `atomic_int64` | `2026-02-03(b)` | Lock-free shared state (changelog `Feb 3 (b) → AngelScript → Atomic API`). AngelScript-only entry. | — | — |
 | `set_thread_to_highest_priority` / `lowest` / `normal_priority` | `2026-02-03(b)` | Thread priority helpers (changelog `Feb 3 (b) → AngelScript`). AngelScript-only entry. | — | — |
@@ -46101,7 +46104,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 |-----|-------|-------|-----------------------|-------------|
 | `source2_world_to_screen` (no viewport) | `<= 2026-02-01` | Original Source 2 W2S. | `2026-02-03(b)` (deprecated) | `world_to_screen_rowmajor` / `world_to_screen_transposed` |
 | `source2_world_to_screen` — optional `viewport` arg | `2026-02-03(a)` | Added optional `const vector2 &in viewport = vector2(0,0)` (changelog `Feb 3 (a) → AngelScript`). Superseded one release later. | `2026-02-03(b)` (deprecated) | `world_to_screen_rowmajor` / `world_to_screen_transposed` |
-| `world_to_screen_rowmajor` | `2026-02-03(b)` | Replaces `source2_world_to_screen` for row-major matrices (changelog `Feb 3 (b) → AngelScript & Lua`, "migration required"). | — | — |
+| `world_to_screen_rowmajor` | `2026-02-03(b)` | Replaces `source2_world_to_screen` for row-major matrices (combined historical changelog row, "migration required"). | — | — |
 | `world_to_screen_transposed` | `2026-02-03(b)` | New, for transposed/column-major matrices (changelog `Feb 3 (b)`). | — | — |
 
 ### Input
@@ -46148,7 +46151,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 | API | Since | Notes | Deprecated/Removed In | Replacement |
 |-----|-------|-------|-----------------------|-------------|
 | `enum_windows`, `window_t`, `send_key`, `send_mouse`, `get_clipboard`, `set_clipboard` | `<= 2026-02-01` | Core Win API. `docs/perception/win-api.md`. | — | — |
-| `get_all_hwnds()` | `2026-02-01` | Added (changelog `Feb 1 → AngelScript & Lua`, "returns all window handles"). | — | — |
+| `get_all_hwnds()` | `2026-02-01` | Added in a combined historical changelog row ("returns all window handles"). | — | — |
 
 ### Filesystem
 
@@ -46197,7 +46200,7 @@ Every `Since` cites the changelog release date or is marked `unknown` / `<= <dat
 
 | API | Status | Since | Replacement | Source row |
 |-----|--------|-------|-------------|------------|
-| `source2_world_to_screen` | Deprecated | `2026-02-03(b)` | `world_to_screen_rowmajor` (row-major) / `world_to_screen_transposed` (transposed/column-major) | changelog `Feb 3 (b) → AngelScript & Lua → Deprecated`; also `Mar 16` cheatsheet note |
+| `source2_world_to_screen` | Deprecated | `2026-02-03(b)` | `world_to_screen_rowmajor` (row-major) / `world_to_screen_transposed` (transposed/column-major) | combined historical changelog row; also `Mar 16` cheatsheet note |
 | default `matrix4x4` read/write (no precision suffix) | Deprecated | `2026-02-03(b)` | `readas_float` / `readas_double` / `writeas_float` / `writeas_double` | changelog `Feb 3 (b) → Deprecated` |
 | `scan_bytes`, `scan_all_bytes`, `scan_all_u32`, `scan_all_u64` | Removed (never actually existed) | `2026-03-14` | `scan_float` / `scan_double` / `scan_string` / `scan_wstring` / `scan_pointer` | changelog `Mar 14 → VAD / Memory Scan API Fixes`, "Removed nonexistent functions from docs" |
 | Legacy RE tools + old chatbot | Removed | `2026-03-08` | New RE tools GUI + IDE AI assistant (same release) | changelog `Mar 8` |
@@ -46211,25 +46214,25 @@ the docs, not when they worked.
 
 ## Language Version Quirks
 
-PCX has hosted three scripting front-ends. The timeline below is what the changelog
-and `docs/` support; exact per-feature introduction dates inside a language reference
-that ships unversioned are marked `unknown`.
+PCX changelogs have historical labels for multiple scripting front-ends. This
+toolkit indexes and validates only Enma and AngelScript; exact per-feature
+introduction dates inside an unversioned language reference are marked `unknown`.
 
 ### Front-end split history
 
 | Era | Languages | Evidence |
 |-----|-----------|----------|
-| `<= 2026-03` | AngelScript + Lua | Changelog entries split between `AngelScript` (AS-only) and `AngelScript & Lua` (both) throughout Feb–Mar 2026. `2026-03-11`: "Perception API IntelliSense injects both AngelScript and Lua API references". |
+| `<= 2026-03` | AngelScript plus historical non-indexed bindings | Changelog entries split between `AngelScript` and combined labels throughout Feb-Mar 2026. Treat combined labels as changelog provenance, not as a supported toolkit target. |
 | `Enma Open Beta — Phase 2 (May 2026)` | Enma (new, proprietary AOT/JIT) added | Changelog `Enma Open Beta — Phase 2`: "Perception's proprietary programming language, built from scratch … compiles to native machine code". |
 
-**AS-only vs AS+Lua intrinsics** (from the changelog's section headers):
+**AngelScript scope notes** (from the changelog's section headers):
 
 | Feature | Scope at introduction | Since |
 |---------|-----------------------|-------|
-| `get_all_hwnds()` | AngelScript & Lua | `2026-02-01` |
-| `create_font` / `create_font_mem` `glyph_ranges` | AngelScript & Lua | `2026-02-03(b)` |
-| `mat4.readas_*` / `writeas_*` precision variants | AngelScript & Lua | `2026-02-03(b)` |
-| `world_to_screen_rowmajor` / `_transposed` | AngelScript & Lua | `2026-02-03(b)` |
+| `get_all_hwnds()` | AngelScript in this toolkit | `2026-02-01` |
+| `create_font` / `create_font_mem` `glyph_ranges` | AngelScript in this toolkit | `2026-02-03(b)` |
+| `mat4.readas_*` / `writeas_*` precision variants | AngelScript in this toolkit | `2026-02-03(b)` |
+| `world_to_screen_rowmajor` / `_transposed` | AngelScript in this toolkit | `2026-02-03(b)` |
 | `atomic_int32` / `atomic_int64` | **AngelScript only** | `2026-02-03(b)` |
 | `set_thread_to_*_priority` | **AngelScript only** | `2026-02-03(b)` |
 | `hash_map` global-init fix | **AngelScript only** | `2026-02-01` |
@@ -46237,8 +46240,7 @@ that ships unversioned are marked `unknown`.
 | `register_callback` `render_on_top` | **AngelScript only** | `2026-03-17(b)` |
 | Unicorn `UC_HOOK_*`, `uc_get_*_exception*` | **AngelScript only** | `2026-03-18` |
 
-Treat AngelScript-only rows as **not present in Lua** at that date unless a later
-`AngelScript & Lua` entry restates them.
+Do not infer support for any non-indexed binding from these historical labels.
 
 ### Enma
 
@@ -46267,15 +46269,6 @@ are dated land in the AS-specific rows of the matrix above (atomics, thread prio
 `render_on_top`, Unicorn hooks, etc.). The base AngelScript language itself is the
 upstream AngelScript spec; PCX does not changelog core-language grammar changes.
 
-### Lua
-
-PCX exposes a Lua binding alongside AngelScript through `2026-03`. Only the
-`AngelScript & Lua` changelog rows apply to it (font `glyph_ranges`, matrix precision
-variants, W2S replacement, `get_all_hwnds`). No Lua-only language feature is dated in
-the changelog; assume the AS+Lua shared surface and nothing more.
-
----
-
 ## Release Timeline Index
 
 Reverse-chronological. Each row lists the script-facing API surface a release
@@ -46296,7 +46289,7 @@ release carrying every API a script needs. Pure IDE/Analyzer/decompiler internal
 | `2026-03-17(a)` | Custom Draw 3D/compute: `create_index_buffer`, `custom_draw_indexed`, `create_depth_buffer`/`create_depth_stencil_state`, `custom_set_render_target_ext`, `create_rasterizer_state`, `custom_set_viewport`, `custom_bind_textures`, `custom_bind_constant_buffers`, `create_compute_shader`/`dispatch_compute`/`create_structured_buffer`/`read_structured_buffer`, `load_obj_mesh`, dynamic textures, `capture_backbuffer`, `custom_resolve_render_target` |
 | `2026-03-16` | Custom Draw base pipeline: `create_shader`, `create_vertex_buffer`, `create_constant_buffer`, `create_blend_state`, `create_sampler`, `create_texture`, `create_render_target` (Universal + CS2) |
 | `2026-03-14` | Sound API (entire surface); scan `scan_float/double/string/wstring/pointer` + `array<uint64>@` return; `get_vad_snapshot` fix; `scan_bytes`/`scan_all_*` struck from docs; Extensions system |
-| `2026-03-11` | Combined AngelScript + Lua API IntelliSense; multi-root workspace |
+| `2026-03-11` | Combined API IntelliSense; multi-root workspace |
 | `2026-03-08` | 32-bit games support; legacy RE tools + old chatbot removed |
 | `2026-02-17` | GUI list ops: `list:get/remove/highlight/remove_highlight/hide/show` |
 | `2026-02-12` | XINPUT controller keybinds; `get_mouse_delta` fix; `get_gui_position`/`get_gui_size`; render order reversed |
@@ -48166,6 +48159,9 @@ project/
 
 import "vec";
 import "color";
+import "math";
+import "math3d";
+import "strings";
 
 // ── Signatures (UNVERIFIED — instruction patterns, not version offsets) ──
 // Each matches the instruction that loads a global pointer; the 4-byte
@@ -48258,6 +48254,14 @@ bool ensure_resolved() {
 }
 
 // Update: memory reads + aim logic only, no drawing (rule 4).
+bool project_world_to_screen(vec3 world, mat4 vm, out vec2 screen) {
+    // Enma currently exposes matrix reads but not the AngelScript W2S helpers.
+    // Replace this with target-specific projection math once your matrix layout
+    // is verified; returning false is safer than pretending a helper exists.
+    screen = vec2(0.0, 0.0);
+    return false;
+}
+
 void on_update(int64 data) {
     g_have_target = false;
     if (!g_enabled) return;
@@ -48296,7 +48300,7 @@ void on_update(int64 data) {
 
         // Project the bone; measure pixel distance to the crosshair.
         vec2 screen;
-        if (!world_to_screen_rowmajor(bone, vm, screen)) continue; // behind camera (rule 10)
+        if (!project_world_to_screen(bone, vm, screen)) continue; // behind camera (rule 10)
         float64 pdx = screen.x - cx;
         float64 pdy = screen.y - cy;
         float64 pixel = sqrt(pdx*pdx + pdy*pdy);
@@ -48374,6 +48378,8 @@ int64 main() {
 
 import "globals";
 import "utils";
+import "vec";
+import "math";
 
 // Engine-specific helpers — replace with your target's angle read/write.
 vec2 read_view_angles() {
@@ -48442,6 +48448,8 @@ void aimbot_render(int64 data) {
 import "globals";
 import "utils";
 import "color";
+import "vec";
+import "strings";
 
 const float64 PLAYER_HEIGHT = 72.0;
 
@@ -48636,6 +48644,7 @@ int64 main() {
 
 import "globals";
 import "json";
+import "strings";
 
 const string CONFIG_PATH = "cheat_skeleton_config.json";
 
@@ -48759,6 +48768,7 @@ bool resolve_all() {
 import "globals";
 import "utils";
 import "color";
+import "vec";
 
 const float64 RADAR_SCALE = 0.05;
 const float64 RADAR_RADIUS = 100.0;
@@ -48790,7 +48800,7 @@ void radar_render(int64 data) {
 
         vec2 blip;
         if (!world_to_map(e.pos, blip)) continue;
-        vec2 rel = blip.sub(local2d);
+        vec2 rel = vec2(blip.x - local2d.x, blip.y - local2d.y);
         rel.x *= RADAR_SCALE;
         rel.y *= RADAR_SCALE;
 
@@ -48812,6 +48822,7 @@ void radar_render(int64 data) {
 
 import "globals";
 import "utils";
+import "time";
 
 // Engine-specific helper: return the entity under the crosshair.
 EntityInfo get_entity_under_crosshair() {
@@ -48905,7 +48916,7 @@ bool world_to_screen(vec3 world, out vec2 screen) {
 }
 
 vec2 calc_angle(vec3 src, vec3 dst) {
-    vec3 d = dst.sub(src);
+    vec3 d = vec3(dst.x - src.x, dst.y - src.y, dst.z - src.z);
     float64 dist_xy = sqrt(d.x*d.x + d.y*d.y);
     float64 pitch = atan2(-d.z, dist_xy) * RAD2DEG;
     float64 yaw   = atan2(d.y, d.x) * RAD2DEG;
@@ -48924,7 +48935,7 @@ vec3 angles_to_forward(float64 pitch_deg, float64 yaw_deg) {
 }
 
 bool in_fov(vec3 src, vec2 view_angles, vec3 target, float64 fov_deg) {
-    vec3 dir = target.sub(src);
+    vec3 dir = vec3(target.x - src.x, target.y - src.y, target.z - src.z);
     float64 len = sqrt(dir.x*dir.x + dir.y*dir.y + dir.z*dir.z);
     if (len == 0.0) return false;
     dir = vec3(dir.x / len, dir.y / len, dir.z / len);
@@ -49048,6 +49059,7 @@ int64 main() {
 
 import "color";
 import "globals";
+import "strings";
 
 sidebar_section_t g_sec;
 checkbox_t        g_cb_enabled;
@@ -49175,6 +49187,7 @@ int64 main() {
 
 import "vec";
 import "color";
+import "math";
 
 // ── Offsets / sigs (rule #1: ground every offset; rule #5: prefer sigs) ──
 // All UNVERIFIED — placeholders. Resolve against YOUR target before use; never
@@ -49385,6 +49398,7 @@ int64 main() {
 
 import "vec";
 import "color";
+import "strings";
 
 // ── Config (bound to GUI widgets) ──
 bool    g_enabled   = true;
@@ -49461,12 +49475,12 @@ int64 main() {
 namespace Cheat {
 
 // Engine-specific helpers — replace with your target's angle read/write.
-vec2 read_view_angles() {
+vector2 read_view_angles() {
     // placeholder: read from your engine's view-angle address
-    return vec2(0, 0);
+    return vector2(0, 0);
 }
 
-void write_view_angles(const vec2&in angles) {
+void write_view_angles(const vector2&in angles) {
     // placeholder: clamp pitch to [-89, 89] and write to engine memory
 }
 
@@ -49474,8 +49488,8 @@ void aimbot_update(int id, int data_index) {
     if (!g_aim_enabled || !g_initialized || !g_proc.alive()) return;
     if (!key_down(g_aim_key)) { g_aim_target.valid = false; return; }
 
-    vec3 local_pos = read_vec3(g_local_player + OFF_POS);
-    vec2 current   = read_view_angles();
+    vector3 local_pos = read_vec3(g_local_player + OFF_POS);
+    vector2 current   = read_view_angles();
 
     EntityInfo best;
     double best_score = 1e9;
@@ -49485,7 +49499,7 @@ void aimbot_update(int id, int data_index) {
         if (!e.valid || e.team == g_local_team || e.health <= 0) continue;
         if (!in_fov(local_pos, current, e.head, g_aim_fov)) continue;
 
-        vec2 target_ang = calc_angle(local_pos, e.head);
+        vector2 target_ang = calc_angle(local_pos, e.head);
         double yaw_delta   = normalize_delta(target_ang.y - current.y);
         double pitch_delta = clamp(target_ang.x - current.x, -89.0, 89.0);
         double score = yaw_delta*yaw_delta + pitch_delta*pitch_delta;
@@ -49502,14 +49516,14 @@ void aimbot_update(int id, int data_index) {
 void aimbot_render(int id, int data_index) {
     if (!g_aim_enabled || !g_aim_target.valid) return;
 
-    vec3 local_pos = read_vec3(g_local_player + OFF_POS);
-    vec2 target = calc_angle(local_pos, g_aim_target.head);
-    vec2 current = read_view_angles();
+    vector3 local_pos = read_vec3(g_local_player + OFF_POS);
+    vector2 target = calc_angle(local_pos, g_aim_target.head);
+    vector2 current = read_view_angles();
 
     double yaw_delta   = normalize_delta(target.y - current.y);
     double pitch_delta = clamp(target.x - current.x, -89.0, 89.0);
 
-    vec2 smoothed(
+    vector2 smoothed = vector2(
         current.x + pitch_delta * g_aim_smooth,
         current.y + yaw_delta   * g_aim_smooth
     );
@@ -49562,32 +49576,33 @@ void esp_update(int id, int data_index) {
 void esp_render(int id, int data_index) {
     if (!g_esp_enabled || g_esp_count == 0) return;
 
-    color enemy(255, 80, 80, 220);
-    color ally(80, 255, 80, 220);
-    color white(255, 255, 255, 255);
-
-    double vw = get_view_width();
-    vec2 screen_bottom(vw * 0.5, get_view_height());
+    float vw;
+    float vh;
+    get_view(vw, vh);
+    vector2 screen_bottom = vector2(vw * 0.5, vh);
 
     for (int i = 0; i < g_esp_count; i++) {
         EntityInfo@ e = g_entities[i];
         if (!e.valid) continue;
 
-        vec2 head2d, feet2d;
+        vector2 head2d, feet2d;
         if (!world_to_screen(e.head, head2d)) continue;
         if (!world_to_screen(e.pos,  feet2d)) continue;
 
         double h = feet2d.y - head2d.y;
         double w = h * 0.5;
         double x = head2d.x - w * 0.5;
-        color c = (e.team == g_local_team && e.team != 0) ? ally : enemy;
+        bool friendly = (e.team == g_local_team && e.team != 0);
+        uint8 cr = friendly ? 80 : 255;
+        uint8 cg = friendly ? 255 : 80;
+        uint8 cb = friendly ? 80 : 80;
 
-        draw_rect(vec2(x, head2d.y), vec2(w, h), c, 1.0, false);
-        draw_line(screen_bottom, feet2d, color(255, 255, 255, 120), 1.0);
+        draw_rect(float(x), float(head2d.y), float(w), float(h), cr, cg, cb, 220, 1.0f, 0.0f, 0);
+        draw_line(screen_bottom.x, screen_bottom.y, float(feet2d.x), float(feet2d.y), 255, 255, 255, 120, 1.0f);
 
-        string hp = format("{}", e.health);
-        draw_text(hp, vec2(head2d.x - 10.0, head2d.y - 18.0), white,
-                  get_font18(), 0, color(0,0,0,0), 0.0);
+        string hp = "" + e.health;
+        draw_text(hp, float(head2d.x - 10.0), float(head2d.y - 18.0), 255, 255, 255, 255,
+                  get_font18(), 0, 0, 0, 0, 0, 0.0f);
     }
 }
 
@@ -49638,8 +49653,8 @@ class EntityInfo {
     uint64 ptr  = 0;
     int health  = 0;
     int team    = 0;
-    vec3 pos;
-    vec3 head;
+    vector3 pos;
+    vector3 head;
 };
 
 array<EntityInfo> g_entities(MAX_ENTITIES);
@@ -49730,7 +49745,7 @@ slider_double_t g_sl_fov;
 checkbox_t      g_cb_trigger;
 checkbox_t      g_cb_radar;
 
-void sync_from_widgets() {
+void sync_from_widgets(int id, int data_index) {
     g_esp_enabled     = g_cb_esp.get();
     g_aim_enabled     = g_cb_aim.get();
     g_aim_smooth      = g_sl_smooth.get();
@@ -49850,43 +49865,45 @@ namespace Cheat {
 const double RADAR_SCALE  = 0.05;
 const double RADAR_RADIUS = 100.0;
 
-bool world_to_map(const vec3&in world, vec2&out map) {
-    map = vec2(world.x, world.y);
+bool world_to_map(const vector3&in world, vector2&out map) {
+    map = vector2(world.x, world.y);
     return true;
 }
 
 void radar_render(int id, int data_index) {
     if (!g_radar_enabled || g_esp_count == 0) return;
 
-    vec3 local_pos = read_vec3(g_local_player + OFF_POS);
-    vec2 local2d;
+    vector3 local_pos = read_vec3(g_local_player + OFF_POS);
+    vector2 local2d;
     if (!world_to_map(local_pos, local2d)) return;
 
-    double cx = get_view_width()  - 150.0;
-    double cy = get_view_height() - 150.0;
+    float vw;
+    float vh;
+    get_view(vw, vh);
+    double cx = vw - 150.0;
+    double cy = vh - 150.0;
 
-    color bg(0, 0, 0, 160);
-    draw_circle(vec2(cx, cy), RADAR_RADIUS, bg, 2.0, true);
+    draw_circle(float(cx), float(cy), float(RADAR_RADIUS), 0, 0, 0, 160, 2.0f, true);
 
-    color local_color(255, 255, 255, 255);
-    draw_circle(vec2(cx, cy), 4.0, local_color, 1.0, true);
+    draw_circle(float(cx), float(cy), 4.0f, 255, 255, 255, 255, 1.0f, true);
 
     for (int i = 0; i < g_esp_count; i++) {
         EntityInfo@ e = g_entities[i];
         if (!e.valid) continue;
 
-        vec2 blip;
+        vector2 blip;
         if (!world_to_map(e.pos, blip)) continue;
-        vec2 rel = blip - local2d;
+        vector2 rel = blip - local2d;
         rel.x *= RADAR_SCALE;
         rel.y *= RADAR_SCALE;
 
         if (rel.x*rel.x + rel.y*rel.y > RADAR_RADIUS*RADAR_RADIUS) continue;
 
-        color c = (e.team == g_local_team && g_local_team != 0)
-            ? color(80, 255, 80, 255)
-            : color(255, 80, 80, 255);
-        draw_circle(vec2(cx + rel.x, cy + rel.y), 4.0, c, 1.0, true);
+        bool friendly = (e.team == g_local_team && g_local_team != 0);
+        uint8 cr = friendly ? 80 : 255;
+        uint8 cg = friendly ? 255 : 80;
+        uint8 cb = 80;
+        draw_circle(float(cx + rel.x), float(cy + rel.y), 4.0f, cr, cg, cb, 255, 1.0f, true);
     }
 }
 
@@ -49939,12 +49956,12 @@ const double RAD2DEG = 180.0 / PI;
 const double DEG2RAD = PI / 180.0;
 
 // Read a 3-float vector from a memory address.
-vec3 read_vec3(uint64 addr) {
-    if (addr == 0) return vec3(0,0,0);
+vector3 read_vec3(uint64 addr) {
+    if (addr == 0) return vector3(0,0,0);
     double x = g_proc.rf32(addr + 0);
     double y = g_proc.rf32(addr + 4);
     double z = g_proc.rf32(addr + 8);
-    return vec3(x, y, z);
+    return vector3(x, y, z);
 }
 
 // Pointer-chain reader.
@@ -49959,14 +49976,14 @@ uint64 read_chain(uint64 base, const array<int> &in offsets) {
     return addr;
 }
 
-double distance3d(const vec3&in a, const vec3&in b) {
+double distance3d(const vector3&in a, const vector3&in b) {
     double dx = a.x - b.x;
     double dy = a.y - b.y;
     double dz = a.z - b.z;
     return sqrt(dx*dx + dy*dy + dz*dz);
 }
 
-bool world_to_screen(const vec3&in world, vec2&out screen) {
+bool world_to_screen(const vector3&in world, vector2&out screen) {
     if (g_view_matrix == 0) return false;
 
     double m[16];
@@ -49981,39 +49998,40 @@ bool world_to_screen(const vec3&in world, vec2&out screen) {
     double nx = (m[0]*world.x + m[4]*world.y + m[8]*world.z + m[12]) * inv_w;
     double ny = (m[1]*world.x + m[5]*world.y + m[9]*world.z + m[13]) * inv_w;
 
-    double vw = get_view_width();
-    double vh = get_view_height();
+    float vw;
+    float vh;
+    get_view(vw, vh);
     screen.x = (vw * 0.5) + (nx * vw * 0.5);
     screen.y = (vh * 0.5) - (ny * vh * 0.5);
     return true;
 }
 
-vec2 calc_angle(const vec3&in src, const vec3&in dst) {
-    vec3 d = dst - src;
+vector2 calc_angle(const vector3&in src, const vector3&in dst) {
+    vector3 d = dst - src;
     double dist_xy = sqrt(d.x*d.x + d.y*d.y);
     double pitch = atan2(-d.z, dist_xy) * RAD2DEG;
     double yaw   = atan2(d.y, d.x) * RAD2DEG;
-    return vec2(pitch, yaw);
+    return vector2(pitch, yaw);
 }
 
 double normalize_delta(double delta) {
     return fmod(delta + 540.0, 360.0) - 180.0;
 }
 
-vec3 angles_to_forward(double pitch_deg, double yaw_deg) {
+vector3 angles_to_forward(double pitch_deg, double yaw_deg) {
     double p = pitch_deg * DEG2RAD;
     double y = yaw_deg   * DEG2RAD;
     double cp = cos(p);
-    return vec3(cp * cos(y), cp * sin(y), -sin(p));
+    return vector3(cp * cos(y), cp * sin(y), -sin(p));
 }
 
-bool in_fov(const vec3&in src, const vec2&in view_angles, const vec3&in target, double fov_deg) {
-    vec3 dir = target - src;
+bool in_fov(const vector3&in src, const vector2&in view_angles, const vector3&in target, double fov_deg) {
+    vector3 dir = target - src;
     double len = sqrt(dir.x*dir.x + dir.y*dir.y + dir.z*dir.z);
     if (len == 0.0) return false;
-    dir = vec3(dir.x / len, dir.y / len, dir.z / len);
+    dir = vector3(dir.x / len, dir.y / len, dir.z / len);
 
-    vec3 fwd = angles_to_forward(view_angles.x, view_angles.y);
+    vector3 fwd = angles_to_forward(view_angles.x, view_angles.y);
     double dot = fwd.x*dir.x + fwd.y*dir.y + fwd.z*dir.z;
     return dot >= cos(fov_deg * DEG2RAD);
 }

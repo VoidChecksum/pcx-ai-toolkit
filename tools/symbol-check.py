@@ -21,6 +21,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 INDEX_FILE = REPO_ROOT / "knowledge" / "pcx-api-index.json"
@@ -29,12 +30,12 @@ sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
 from pcx_grounding import load_api_index, validate_code_against_index  # noqa: E402
 
 
-def load_index(path: Path) -> dict[str, object]:
+def load_index(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(
             f"{path} not found. Build it first:\n  python3 tools/build-api-index.py"
         )
-    return load_api_index(path)
+    return cast(dict[str, Any], load_api_index(path))
 
 
 def detect_language(path: Path) -> str:
@@ -57,21 +58,40 @@ def collect_files(target: Path) -> list[Path]:
     return sorted(p for p in target.rglob("*") if p.suffix.lower() in {".em", ".as"})
 
 
-def check_file(path: Path, index: dict[str, object], language: str | None = None) -> list[dict[str, object]]:
+def _project_functions(paths: list[Path]) -> dict[str, set[str]]:
+    funcs: dict[str, set[str]] = {"enma": set(), "angelscript": set()}
+    for path in paths:
+        language = detect_language(path)
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        from pcx_parser import extract_function_defs  # noqa: PLC0415
+
+        funcs[language].update(name for name, _ in extract_function_defs(text, language))
+    return funcs
+
+
+def check_file(
+    path: Path,
+    index: dict[str, Any],
+    language: str | None = None,
+    extra_user_functions: set[str] | None = None,
+) -> list[dict[str, Any]]:
     text = path.read_text(encoding="utf-8", errors="ignore")
     if language is None:
         language = detect_language(path)
-    return validate_code_against_index(text, language, index, str(path))
+    return cast(
+        list[dict[str, Any]],
+        validate_code_against_index(text, language, index, str(path), extra_user_functions),
+    )
 
 
-def print_findings(findings: list[dict[str, object]], json_mode: bool) -> None:
+def print_findings(findings: list[dict[str, Any]], json_mode: bool) -> None:
     if json_mode:
         print(json.dumps(findings, indent=2))
         return
     if not findings:
         print("clean: no unknown symbols")
         return
-    by_file: dict[str, list[dict[str, object]]] = {}
+    by_file: dict[str, list[dict[str, Any]]] = {}
     for f in findings:
         by_file.setdefault(str(f["file"]), []).append(f)
     for file_path, items in by_file.items():
@@ -104,9 +124,12 @@ def main() -> int:
         print(f"ERROR: not found: {target}", file=sys.stderr)
         return 2
 
-    all_findings: list[dict[str, object]] = []
-    for path in collect_files(target):
-        all_findings.extend(check_file(path, index, args.lang))
+    paths = collect_files(target)
+    project_funcs = _project_functions(paths) if target.is_dir() and args.lang is None else {}
+    all_findings: list[dict[str, Any]] = []
+    for path in paths:
+        language = args.lang or detect_language(path)
+        all_findings.extend(check_file(path, index, language, project_funcs.get(language)))
 
     print_findings(all_findings, args.json)
     return 1 if all_findings else 0

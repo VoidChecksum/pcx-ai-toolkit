@@ -44,8 +44,6 @@ def source_docs() -> list[Path]:
         if p.name == "INDEX.md":
             continue
         rel = p.relative_to(REPO_ROOT).as_posix()
-        if rel.startswith(("docs/perception/lua/", "docs/lua-lang/")):
-            continue
         # Exclude only the generated bundles sitting directly under docs/.
         if p.parent == (REPO_ROOT / "docs") and p.name.startswith("llms-"):
             continue
@@ -77,10 +75,7 @@ def mcp_tool_count() -> int:
 
 def build() -> dict:
     docs = source_docs()
-    skills = [
-        p for p in sorted((REPO_ROOT / ".claude" / "skills").glob("*/SKILL.md"))
-        if p.parent.name != "pcx-lua-discipline"
-    ]
+    skills = sorted((REPO_ROOT / ".claude" / "skills").glob("*/SKILL.md"))
     knowledge = [
         p for p in sorted((REPO_ROOT / "knowledge").glob("*.md"))
         if p.name != "pcx-cross-language-bridge.md"

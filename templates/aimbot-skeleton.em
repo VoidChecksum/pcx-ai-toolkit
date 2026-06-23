@@ -7,6 +7,9 @@
 
 import "vec";
 import "color";
+import "math";
+import "math3d";
+import "strings";
 
 // ── Signatures (UNVERIFIED — instruction patterns, not version offsets) ──
 // Each matches the instruction that loads a global pointer; the 4-byte
@@ -99,6 +102,14 @@ bool ensure_resolved() {
 }
 
 // Update: memory reads + aim logic only, no drawing (rule 4).
+bool project_world_to_screen(vec3 world, mat4 vm, out vec2 screen) {
+    // Enma currently exposes matrix reads but not the AngelScript W2S helpers.
+    // Replace this with target-specific projection math once your matrix layout
+    // is verified; returning false is safer than pretending a helper exists.
+    screen = vec2(0.0, 0.0);
+    return false;
+}
+
 void on_update(int64 data) {
     g_have_target = false;
     if (!g_enabled) return;
@@ -137,7 +148,7 @@ void on_update(int64 data) {
 
         // Project the bone; measure pixel distance to the crosshair.
         vec2 screen;
-        if (!world_to_screen_rowmajor(bone, vm, screen)) continue; // behind camera (rule 10)
+        if (!project_world_to_screen(bone, vm, screen)) continue; // behind camera (rule 10)
         float64 pdx = screen.x - cx;
         float64 pdy = screen.y - cy;
         float64 pixel = sqrt(pdx*pdx + pdy*pdy);

@@ -28,7 +28,8 @@ toolkit is scoped to Enma and AngelScript.
    - AngelScript syntax/binding work: `pcx-angelscript-discipline`
    - MCP calls: `mcp-tool-routing`
    - Offset/RE work: `pcx-re-discipline` and `re-evidence-log`
-5. Verify every host API symbol with `pcx api` or MCP `api_lookup`.
+5. Verify every host API and language/add-on symbol with `pcx api` or MCP
+   `api_lookup`.
 6. Validate generated code with `pcx symbol-check`, MCP `validate_code`, or MCP
    `validate_answer`.
 
@@ -59,6 +60,7 @@ Use this sequence in terminal-based workflows:
 
 ```bash
 pcx api draw_text --lang enma
+pcx api atan2 --lang enma
 pcx symbol-check script.em
 pcx verify script.as
 pcx check-answer answer.md

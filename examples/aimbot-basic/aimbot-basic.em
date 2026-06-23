@@ -1,190 +1,79 @@
-// aimbot-basic.em — Basic aimbot skeleton
-// Demonstrates: FOV check, bone targeting, smooth mouse movement
-// Guidelines: uint64 addresses, f suffix, null checks, separate update/render, sigs
-// NOTE: This demonstrates the mathematical and API patterns only.
-// Lint: pcx lint aimbot-basic.em
+// aimbot-basic.em — current Enma screen-space aim skeleton.
+// Target acquisition is intentionally left as a verified-project step; this file
+// demonstrates GUI state, input polling, draw-only render, and mouse movement
+// without inventing undocumented PCX helpers.
 
 import "vec";
 import "color";
-import "proc";
-import "input";  // for mouse_move(), key_down()
+import "strings";
+import "math";
 
-// ============================================================
-// CONFIGURATION (Guideline #11: GUI for all tunables)
-// ============================================================
-bool  g_aimbot_enabled = false;   // disabled by default — enable via GUI
-float g_fov_degrees    = 10.0f;   // only target within this cone from crosshair
-float g_smoothing      = 5.0f;    // larger = slower/smoother aim movement
-bool  g_hold_key       = true;    // true = must hold activation key
-int32 g_aim_key        = KEY_LALT; // key that activates aim assist
+bool g_enabled = true;
+float64 g_fov = 120.0;
+float64 g_smooth = 8.0;
+int64 g_aim_key = 0x06; // VK_XBUTTON2
 
-// ============================================================
-// OFFSETS — pattern signatures (Guideline #5: no hardcodes)
-// ============================================================
-array<uint8> SIG_LOCAL_PLAYER = {
-    0x48, 0x8B, 0x0D, 0x??, 0x??, 0x??, 0x??,
-    0x48, 0x85, 0xC9
-};
-array<uint8> SIG_ENTITY_LIST = {
-    0x4C, 0x8B, 0x0D, 0x??, 0x??, 0x??, 0x??,
-    0x45, 0x33, 0xC0
-};
+sidebar_section_t g_sec;
+checkbox_t g_cb_enabled;
+slider_t g_sl_fov;
+slider_t g_sl_smooth;
+keybind_t g_kb_aim;
 
-// Entity structure offsets (game-specific)
-const uint64 OFF_HEALTH      = 0x100;
-const uint64 OFF_BONE_HEAD   = 0x6D8;  // head bone world position
-const uint64 OFF_BONE_CHEST  = 0x638;  // chest bone world position (fallback)
-const uint64 OFF_TEAM        = 0x258;  // team ID
+bool g_has_target = false;
+vec2 g_target_screen = vec2(0.0, 0.0);
 
-// ============================================================
-// STATE — updated in update_routine, consumed in render_routine
-// ============================================================
-struct AimTarget {
-    vec2  screen_pos;   // projected aim point
-    float dist_px;      // distance from crosshair in pixels
-    bool  valid;
+void on_enabled(int64 h) { g_enabled = g_cb_enabled.get(); }
+void on_fov(int64 h) { g_fov = g_sl_fov.get(); }
+void on_smooth(int64 h) { g_smooth = g_sl_smooth.get(); }
+
+void acquire_target_placeholder() {
+    // Replace with source-grounded target reads and projection for your game.
+    // Keeping this deterministic prevents a sample from implying fake APIs.
+    g_has_target = false;
 }
 
-AimTarget g_best_target;
-proc_t    g_proc;
-uint64    g_local_player_ptr = 0;
-uint64    g_entity_list_ptr  = 0;
-int32     g_local_team       = -1;
+void on_update(int64 data) {
+    if (!g_enabled) return;
+    acquire_target_placeholder();
 
-// ============================================================
-// is_in_fov() — is the screen position within our FOV cone?
-// Uses screen-space distance from center. Fast, no trig needed.
-// ============================================================
-bool is_in_fov(vec2 screen_pos, out float dist_px) {
-    float cx = cast<float>(screen_width())  * 0.5f;
-    float cy = cast<float>(screen_height()) * 0.5f;
-    float dx = screen_pos.x - cx;
-    float dy = screen_pos.y - cy;
-    // Approximate FOV radius in pixels (screen_width * fov / 90 gives a reasonable mapping)
-    float fov_px = cast<float>(screen_width()) * (g_fov_degrees / 90.0f);
-    dist_px = sqrt(dx * dx + dy * dy);
-    return dist_px < fov_px;
+    if (!g_has_target || !key_down(g_aim_key)) return;
+
+    float64 cx = get_view_width() * 0.5;
+    float64 cy = get_view_height() * 0.5;
+    float64 dx = g_target_screen.x - cx;
+    float64 dy = g_target_screen.y - cy;
+    float64 dist = sqrt(dx * dx + dy * dy);
+    if (dist > g_fov) return;
+
+    mouse_move_relative(cast<int64>(dx / g_smooth), cast<int64>(dy / g_smooth));
 }
 
-// ============================================================
-// smooth_move_to() — move mouse toward target with smoothing
-// Smoothing of 1.0 = instant snap; higher values = gradual
-// ============================================================
-void smooth_move_to(vec2 target_screen) {
-    float cx  = cast<float>(screen_width())  * 0.5f;
-    float cy  = cast<float>(screen_height()) * 0.5f;
-    float dx  = (target_screen.x - cx) / g_smoothing;
-    float dy  = (target_screen.y - cy) / g_smoothing;
-    mouse_move(cast<int32>(dx), cast<int32>(dy));
+void on_render(int64 data) {
+    if (!g_enabled) return;
+
+    float64 cx = get_view_width() * 0.5;
+    float64 cy = get_view_height() * 0.5;
+    color fov = color(80, 170, 255, 180);
+    color white = color(255, 255, 255, 255);
+    color shadow = color(0, 0, 0, 180);
+
+    draw_circle(vec2(cx, cy), g_fov, fov, 1.5, false);
+    draw_text("No target provider installed", vec2(24.0, 24.0),
+              white, get_font18(), 1, shadow, 1.0);
 }
 
-int32 main() {
-    g_proc = proc_open("game.exe");
-    if (!g_proc.valid()) return -1;
+int64 main() {
+    g_sec = create_sidebar_section("Aimbot Example", "");
+    g_cb_enabled = g_sec.create_checkbox("Enabled", g_enabled);
+    g_cb_enabled.on_change(cast<int64>(on_enabled));
+    g_sl_fov = g_sec.create_slider("FOV", g_fov, 20.0, 600.0, 1.0);
+    g_sl_fov.on_change(cast<int64>(on_fov));
+    g_sl_smooth = g_sec.create_slider("Smooth", g_smooth, 1.0, 30.0, 0.1);
+    g_sl_smooth.on_change(cast<int64>(on_smooth));
+    g_kb_aim = g_sec.create_keybind("Aim Key");
+    g_kb_aim.bind(cast<int64>(g_aim_key), false, false, false, keybind_mode::on);
 
-    // Resolve sigs (see memory-scanner.em for full resolution logic with RIP-relative)
-    g_local_player_ptr = proc_find_pattern(g_proc, "game.exe", SIG_LOCAL_PLAYER);
-    g_entity_list_ptr  = proc_find_pattern(g_proc, "game.exe", SIG_ENTITY_LIST);
-
-    if (g_local_player_ptr == 0 || g_entity_list_ptr == 0) {
-        print("[Aimbot] Signature resolution failed — update SIG_* arrays");
-        return -1;
-    }
-
-    register_routine(cast<int64>(update_routine), null);
-    register_render(cast<int64>(render_routine), null);
+    register_routine(cast<int64>(on_update), 0);
+    register_routine(cast<int64>(on_render), 0);
     return 1;
-}
-
-// ============================================================
-// update_routine — finds the best valid target this tick
-// ============================================================
-void update_routine(void@ data) {
-    g_best_target.valid = false;
-
-    if (!g_aimbot_enabled) return;
-    if (g_hold_key && !key_down(g_aim_key)) return;
-
-    // Resolve local player (Guideline #3: null check)
-    uint64 local_player = proc_read_uint64(g_proc, g_local_player_ptr);
-    if (local_player == 0) return;
-
-    // Cache local team to avoid friendly-fire
-    g_local_team = proc_read_int32(g_proc, local_player + OFF_TEAM);
-
-    uint64 entity_list = proc_read_uint64(g_proc, g_entity_list_ptr);
-    if (entity_list == 0) return;  // Guideline #3
-
-    float best_dist = 1e9f;
-
-    for (int i = 0; i < 100; i++) {
-        uint64 entity = proc_read_uint64(g_proc, entity_list + cast<uint64>(i) * 8);
-        if (entity == 0) continue;          // Guideline #3
-        if (entity == local_player) continue; // skip self
-
-        // Skip dead entities
-        int32 health = proc_read_int32(g_proc, entity + OFF_HEALTH);
-        if (health <= 0) continue;
-
-        // Skip teammates
-        int32 team = proc_read_int32(g_proc, entity + OFF_TEAM);
-        if (team == g_local_team && g_local_team >= 0) continue;
-
-        // Project head bone to screen (Guideline #10: w > 0 guard)
-        vec3 head_world = proc_read_vec3(g_proc, entity + OFF_BONE_HEAD);
-        vec2 head_screen;
-        float w;
-        if (!world_to_screen(head_world, head_screen, w)) continue;
-        if (w <= 0.0f) continue;
-
-        // Check FOV cone
-        float dist_px;
-        if (!is_in_fov(head_screen, dist_px)) continue;
-
-        // Pick the target closest to crosshair
-        if (dist_px < best_dist) {
-            best_dist = dist_px;
-            g_best_target.screen_pos = head_screen;
-            g_best_target.dist_px   = dist_px;
-            g_best_target.valid     = true;
-        }
-    }
-
-    // Move toward best target (done in update, not render)
-    if (g_best_target.valid) {
-        smooth_move_to(g_best_target.screen_pos);
-    }
-}
-
-// ============================================================
-// render_routine — draw visual indicator, no memory reads
-// ============================================================
-void render_routine(void@ data) {
-    if (!g_aimbot_enabled) return;
-
-    // Draw FOV circle (visual reference)
-    float fov_px = cast<float>(screen_width()) * (g_fov_degrees / 90.0f);
-    float cx = cast<float>(screen_width())  * 0.5f;
-    float cy = cast<float>(screen_height()) * 0.5f;
-    draw_circle_outline(cx, cy, fov_px, color(100, 100, 100, 80), 1.0f);
-
-    // Highlight locked target
-    if (g_best_target.valid) {
-        draw_circle(
-            g_best_target.screen_pos.x,
-            g_best_target.screen_pos.y,
-            6.0f,
-            color(255, 50, 50, 200)
-        );
-    }
-}
-
-// ============================================================
-// gui — all tunables as GUI controls (Guideline #11)
-// ============================================================
-void gui() {
-    gui_checkbox("Aimbot",       g_aimbot_enabled);
-    gui_slider_float("FOV",      g_fov_degrees, 1.0f, 90.0f);
-    gui_slider_float("Smoothing", g_smoothing,  1.0f, 20.0f);
-    gui_checkbox("Hold Key Required", g_hold_key);
 }

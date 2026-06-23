@@ -3,6 +3,8 @@
 
 import "globals";
 import "utils";
+import "vec";
+import "math";
 
 // Engine-specific helpers — replace with your target's angle read/write.
 vec2 read_view_angles() {

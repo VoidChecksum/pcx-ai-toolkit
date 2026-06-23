@@ -7,8 +7,8 @@ All examples follow the [12 coding guidelines](../rules/CLAUDE.md) and pass `pcx
 
 | Script | Language | Demonstrates |
 |--------|----------|--------------| 
-| [esp-overlay/esp-overlay.em](esp-overlay/esp-overlay.em) | Enma | ESP boxes, text rendering, world-to-screen, entity iteration |
-| [aimbot-basic/aimbot-basic.em](aimbot-basic/aimbot-basic.em) | Enma | FOV check, bone targeting, mouse movement, smoothing |
+| [esp-overlay/esp-overlay.em](esp-overlay/esp-overlay.em) | Enma | Current proc API, entity iteration cache, render-only overlay markers |
+| [aimbot-basic/aimbot-basic.em](aimbot-basic/aimbot-basic.em) | Enma | GUI-bound FOV, input polling, mouse movement, smoothing scaffold |
 | [memory-scanner/memory-scanner.em](memory-scanner/memory-scanner.em) | Enma | Pattern scanning, offset caching, sig-based resilience |
 
 ## How to Use
@@ -29,7 +29,7 @@ All examples demonstrate:
 - ✅ Pattern signatures, not hardcoded offsets
 - ✅ One feature per file
 - ✅ Colors and vecs constructed fresh each frame
-- ✅ World-to-screen with `w > 0` guard
+- ✅ No undocumented projection helpers; add W2S only after verifying your target matrix
 - ✅ GUI controls for all tunables
 
 ## See Also

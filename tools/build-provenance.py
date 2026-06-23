@@ -49,7 +49,6 @@ SKIP_DRIFT_URLS = {
     "https://docs.perception.cx/perception/angel-script/cs2-extended-api.md",
     "https://docs.perception.cx/perception/angel-script/custom-draw-api.md",
     "https://docs.perception.cx/perception/enma/custom-draw-api.md",
-    "https://docs.perception.cx/perception/lua-script/cs2-extended-api.md",
 }
 def is_source_doc(p: Path) -> bool:
     if p.name in EXCLUDE_NAMES:
@@ -57,8 +56,6 @@ def is_source_doc(p: Path) -> bool:
     if any(p.name.startswith(pre) for pre in EXCLUDE_PREFIX):
         return False
     rel = p.relative_to(REPO_ROOT).as_posix()
-    if rel.startswith(("docs/perception/lua/", "docs/lua-lang/")):
-        return False
     return True
 
 
@@ -68,8 +65,6 @@ def classify(url: str) -> str:
         return "gitbook"
     if "angelcode.com" in host:
         return "angelcode"
-    if "lua.org" in host:
-        return "lua"
     return "other"
 
 

@@ -39,8 +39,8 @@ class EntityInfo {
     uint64 ptr  = 0;
     int health  = 0;
     int team    = 0;
-    vec3 pos;
-    vec3 head;
+    vector3 pos;
+    vector3 head;
 };
 
 array<EntityInfo> g_entities(MAX_ENTITIES);

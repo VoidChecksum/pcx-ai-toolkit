@@ -15,6 +15,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 INDEX_FILE = REPO_ROOT / "knowledge" / "pcx-api-index.json"
@@ -23,7 +24,7 @@ sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
 from pcx_grounding import load_api_index, lookup_symbol  # noqa: E402
 
 
-def _print_human(result: dict[str, object]) -> None:
+def _print_human(result: dict[str, Any]) -> None:
     symbol = result["symbol"]
     language = result.get("language") or "any language"
     if not result["found"]:

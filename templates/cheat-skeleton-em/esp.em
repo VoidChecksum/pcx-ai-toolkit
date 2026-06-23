@@ -4,6 +4,8 @@
 import "globals";
 import "utils";
 import "color";
+import "vec";
+import "strings";
 
 const float64 PLAYER_HEIGHT = 72.0;
 

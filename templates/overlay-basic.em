@@ -5,6 +5,7 @@
 
 import "vec";
 import "color";
+import "strings";
 
 // ── Config (bound to GUI widgets) ──
 bool    g_enabled   = true;

@@ -169,4 +169,4 @@ jobs:
             1. Download `PcxEnmaVS-*.vsix` or `PcxAngelScriptVS-*.vsix`.
             2. Double-click the downloaded file to run the VSIX Installer.
 
-            All extensions are MIT-licensed builds of [enma-lsp](https://github.com/sinnafuls/enma-lsp) and [angel-lsp-pcx](https://github.com/sinnafuls/angel-lsp-pcx).
+            All extensions are MIT-licensed builds of [enma-lsp](https://github.com/VoidChecksum/enma-lsp) and [angel-lsp-pcx](https://github.com/VoidChecksum/angel-lsp-pcx).

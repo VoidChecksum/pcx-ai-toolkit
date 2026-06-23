@@ -1,6 +1,6 @@
 # Perception.cx Game Support Reference
 
-Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. Scripting language is **AngelScript** (`AS`) across the board; CS2 additionally exposes a **Lua** surface.
+Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. This toolkit supports **AngelScript** (`AS`) and **Enma** only; market entries below are listed as AngelScript unless a project-specific Enma port is explicitly created.
 
 > Counts are minimums (`N+`) — they reflect publicly listed market entries, not private/loader-only scripts.
 
@@ -8,7 +8,7 @@ Every game with active scripts in the Perception.cx Script Market (as of June 20
 
 | Game | Engine | Scripts | Anti-Cheat | Notable | Lang |
 |------|--------|---------|-----------|---------|------|
-| Counter-Strike 2 | Source 2 | 10+ | VAC | Official + community suite | AS, Lua |
+| Counter-Strike 2 | Source 2 | 10+ | VAC | Official + community suite | AS |
 | Apex Legends | Source (Respawn) | 5+ | EAC (EOS) | UFOHOOK, ATLAS, ARIEngine | AS |
 | COD: Black Ops 7 / Warzone | IW Engine | 2+ | RICOCHET | — | AS |
 | Fortnite | Unreal Engine | 1+ | EAC (EOS) | — | AS |

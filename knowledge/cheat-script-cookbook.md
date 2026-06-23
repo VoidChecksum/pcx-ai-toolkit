@@ -8,8 +8,8 @@ and adapt them inside your own projects; they follow the 12 guidelines and the
 cheat-script master rules.
 
 All examples are written in **Enma (.em)** because that is the default PCX
-language. AngelScript and Lua equivalents follow the same logic with their own
-syntax (see `knowledge/pcx-cross-language-bridge.md`).
+language for this cookbook. Use the AngelScript context pack and templates when
+working in `.as`; do not translate examples into unsupported bindings.
 
 ---
 

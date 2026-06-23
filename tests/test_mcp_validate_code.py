@@ -45,6 +45,19 @@ class ValidateCodeTest(unittest.TestCase):
         result = json.loads(validate_code(code, "enma"))
         self.assertTrue(result["ok"], result["findings"])
 
+    def test_enma_addon_symbols_require_imports(self):
+        code = 'int64 main(){ float64 a = atan2(1.0, 2.0); return 1; }'
+        result = json.loads(validate_code(code, "enma"))
+        self.assertFalse(result["ok"])
+        finding = next(f for f in result["findings"] if f["symbol"] == "atan2")
+        self.assertEqual(finding["kind"], "missing_import")
+        self.assertEqual(finding["fix"], 'import "math";')
+
+    def test_enma_addon_symbols_pass_with_imports(self):
+        code = 'import "math";\nint64 main(){ float64 a = atan2(1.0, 2.0); return 1; }'
+        result = json.loads(validate_code(code, "enma"))
+        self.assertTrue(result["ok"], result["findings"])
+
     def test_catches_wrong_language_symbol(self):
         code = 'int main(){ register_routine(cast<int64>(r),0); return 1; } void r(int id, int data_index){}'
         result = json.loads(validate_code(code, "angelscript"))

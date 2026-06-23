@@ -35,7 +35,7 @@ ignore_errors = true
 
 [tool.pyright]
 include = ["tools/lib"]
-exclude = ["**/node_modules", "**/__pycache__", "lsp", "visualstudio", "tools/*.py"]
+exclude = ["**/node_modules", "**/__pycache__", "lsp", "visualstudio"]
 pythonVersion = "3.12"
 typeCheckingMode = "strict"
 useLibraryCodeForTypes = true
@@ -49,7 +49,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pcx-ai-toolkit"
 version = "1.16.0"
-description = "AI-powered scripting toolkit for Perception.cx"
+description = "Source-grounded Enma and AngelScript toolkit for Perception.cx"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}

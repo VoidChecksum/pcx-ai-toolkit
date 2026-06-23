@@ -1,6 +1,6 @@
 # Templates
 
-Starter Enma scripts for Perception.cx. All follow the [12 guidelines](../.claude/skills/game-cheat-guidelines/SKILL.md).
+Starter Enma and AngelScript scripts for Perception.cx. All follow the [12 guidelines](../.claude/skills/game-cheat-guidelines/SKILL.md) and validate against the generated API index.
 
 ## Single-file starters
 
@@ -22,6 +22,8 @@ Starter Enma scripts for Perception.cx. All follow the [12 guidelines](../.claud
 | [`main.em`](full-project/main.em) | Entry point: attach, resolve, register routines |
 
 **Bundle order:** `globals → offsets → feature → menu → main` (each imports the ones above it).
+
+[`full-project-as/`](full-project-as/) and [`cheat-skeleton-as/`](cheat-skeleton-as/) provide AngelScript equivalents using documented `proc_t@`, `register_callback`, `vector2`/`vector3`, and raw RGBA render calls.
 
 ## Using these
 

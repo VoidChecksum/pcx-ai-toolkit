@@ -72,8 +72,6 @@ CATEGORIES = [
 SKIP_PATTERNS = [
     re.compile(r'docs/llms[-_].*'),
     re.compile(r'docs/INDEX\.md$'),
-    re.compile(r'docs/(perception/lua|lua-lang)/'),
-    re.compile(r'\.claude/skills/pcx-lua-discipline/'),
     re.compile(r'knowledge/pcx-cross-language-bridge\.md$'),
     re.compile(r'lsp/'),
     re.compile(r'visualstudio/.*\.(vsix|dll|exe)$'),

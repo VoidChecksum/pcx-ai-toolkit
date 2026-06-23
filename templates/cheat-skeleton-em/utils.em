@@ -60,7 +60,7 @@ bool world_to_screen(vec3 world, out vec2 screen) {
 }
 
 vec2 calc_angle(vec3 src, vec3 dst) {
-    vec3 d = dst.sub(src);
+    vec3 d = vec3(dst.x - src.x, dst.y - src.y, dst.z - src.z);
     float64 dist_xy = sqrt(d.x*d.x + d.y*d.y);
     float64 pitch = atan2(-d.z, dist_xy) * RAD2DEG;
     float64 yaw   = atan2(d.y, d.x) * RAD2DEG;
@@ -79,7 +79,7 @@ vec3 angles_to_forward(float64 pitch_deg, float64 yaw_deg) {
 }
 
 bool in_fov(vec3 src, vec2 view_angles, vec3 target, float64 fov_deg) {
-    vec3 dir = target.sub(src);
+    vec3 dir = vec3(target.x - src.x, target.y - src.y, target.z - src.z);
     float64 len = sqrt(dir.x*dir.x + dir.y*dir.y + dir.z*dir.z);
     if (len == 0.0) return false;
     dir = vec3(dir.x / len, dir.y / len, dir.z / len);

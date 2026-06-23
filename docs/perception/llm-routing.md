@@ -89,7 +89,8 @@ Before producing code:
 3. Load that language's context pack or the load-order pages above.
 4. Verify every PCX function name and parameter shape against the matching API
    page, `pcx api <symbol> --lang enma|angelscript`, or MCP
-   `api_lookup(symbol, language)`.
+   `api_lookup(symbol, language)`. Use the same lookup for Enma/AngelScript
+   language and add-on helpers before assuming a stdlib call exists.
 5. Prefer symbolic offsets and placeholders over version-specific magic values
    unless the user supplied verified offsets.
 6. Keep update/scanning work out of render callbacks.
