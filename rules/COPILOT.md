@@ -15,13 +15,13 @@ Most projects want option 1; option 2 is for adding personal preferences on top 
 
 ## Project Context
 
-- **Languages.** Enma (`.em`), AngelScript (`.as`), Lua (`.lua`), C++ (host SDK).
+- **Languages.** Enma (`.em`) and AngelScript (`.as`).
 - **Platform.** Perception.cx scripting runtime.
 - **API docs.** Live under `docs/`:
+  - `docs/perception/llm-routing.md` — load first; choose Enma vs AngelScript before using API names
   - `docs/enma/` — Enma language + standard library + SDK
   - `docs/perception/` — Enma APIs
   - `docs/perception/angelscript/` — AngelScript APIs
-  - `docs/perception/lua/` — Lua APIs
 - **Read before writing API calls.** Copilot does not have these APIs in pretraining; it will hallucinate confident-looking names. Always grep / link the relevant doc file when an API is needed.
 
 ## Coding Standards
@@ -72,7 +72,7 @@ project/
 - Inline completions: routine boilerplate, GUI sections with N widgets, common loop shapes.
 - Doc-comment generation: turn a one-line description into a documented function header.
 - Pattern-following: once you've written one feature module the right way, Copilot mimics its shape well in the next module.
-- Test scaffolding for the host C++ SDK side.
+- Test scaffolding for validation tooling around scripts.
 - Rote refactors confined to a single file (renames within scope, extracting a helper).
 
 ## What Copilot Is Bad At Here
@@ -80,7 +80,7 @@ project/
 - **Multi-file refactors.** Use Cursor / Cline / Aider for cross-file changes; Copilot's window is too narrow.
 - **API names from less-common APIs.** It will hallucinate `proc.read_mat3x4_fl32` because the more common APIs follow that shape. Verify every API name against `docs/`.
 - **Enforcing the 12 guidelines unprompted.** It does not scan its own completions for `int64`-on-an-address or missing `f` suffixes. You must.
-- **Choosing between Enma / AngelScript / Lua.** See `knowledge/pcx-cross-language-bridge.md` for the decision; Copilot will produce whichever language the file extension suggests, which is sometimes the wrong choice.
+- **Choosing between Enma / AngelScript.** See `docs/perception/llm-routing.md` for the decision; Copilot will produce whichever language the file extension suggests, which is sometimes the wrong choice.
 - **MCP-aware work.** Copilot does not speak MCP. Binary-level RE (find_pattern, disassemble, struct_dump) happens in another tool; Copilot handles only the script-side editing.
 
 ## Workflow Notes

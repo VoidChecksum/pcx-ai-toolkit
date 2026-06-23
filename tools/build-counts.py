@@ -13,7 +13,7 @@ Counts:
   mcp_tools   length of the `tools` array in mcp/perception-mcp-config.json
   skills      count of .claude/skills/*/SKILL.md
   knowledge   count of knowledge/*.md
-  templates   count of starter scripts under templates/ (*.em, *.as, *.lua + scaffold files)
+  templates   count of supported starter scripts under templates/ (*.em, *.as + scaffold docs)
   tools       count of standalone tools/*.py + tools/*.sh (excludes lib/, pe-parser/)
   signatures  count of signature files under signatures/**/*.md
   engines     count of knowledge/engine-*.md references
@@ -42,6 +42,9 @@ def source_docs() -> list[Path]:
     out = []
     for p in (REPO_ROOT / "docs").rglob("*.md"):
         if p.name == "INDEX.md":
+            continue
+        rel = p.relative_to(REPO_ROOT).as_posix()
+        if rel.startswith(("docs/perception/lua/", "docs/lua-lang/")):
             continue
         # Exclude only the generated bundles sitting directly under docs/.
         if p.parent == (REPO_ROOT / "docs") and p.name.startswith("llms-"):
@@ -74,10 +77,16 @@ def mcp_tool_count() -> int:
 
 def build() -> dict:
     docs = source_docs()
-    skills = sorted((REPO_ROOT / ".claude" / "skills").glob("*/SKILL.md"))
-    knowledge = sorted((REPO_ROOT / "knowledge").glob("*.md"))
+    skills = [
+        p for p in sorted((REPO_ROOT / ".claude" / "skills").glob("*/SKILL.md"))
+        if p.parent.name != "pcx-lua-discipline"
+    ]
+    knowledge = [
+        p for p in sorted((REPO_ROOT / "knowledge").glob("*.md"))
+        if p.name != "pcx-cross-language-bridge.md"
+    ]
     templates = sorted((REPO_ROOT / "templates").rglob("*"))
-    templates = [p for p in templates if p.is_file() and p.suffix in {".em", ".as", ".lua", ".md"} and p.name != "README.md"]
+    templates = [p for p in templates if p.is_file() and p.suffix in {".em", ".as", ".md"} and p.name != "README.md"]
     tools = [p for p in (REPO_ROOT / "tools").iterdir() if p.is_file() and (p.suffix in {".py", ".sh"} or p.name == "pcx")]
     sigs = sorted((REPO_ROOT / "signatures").rglob("*.md"))
     engines = sorted((REPO_ROOT / "knowledge").glob("engine-*.md"))

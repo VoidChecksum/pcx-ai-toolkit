@@ -8,9 +8,10 @@ Drop-in project rules for Windsurf (the IDE) and Cascade. Parallel to `rules/CLA
 
 ## Project Context
 
-- **Languages:** Enma (`.em`), AngelScript (`.as`), C++. Enma is the primary scripting language.
+- **Languages:** Enma (`.em`) and AngelScript (`.as`). Enma is the primary scripting language.
 - **Platform:** Perception.cx. Scripts attach to a game process, read state, and draw an overlay.
 - **Read the relevant doc before writing any API call.** Point Windsurf/Cascade to these files:
+  - Routing first: `docs/perception/llm-routing.md` (choose Enma vs AngelScript before using API names)
   - Enma language: `docs/enma/llms-language.md` (complete single-page reference)
   - PCX Enma APIs: `docs/perception/` (proc, render, gui, input, cpu, zydis, unicorn, net, win, fs, sound, lifecycle, mcp)
   - PCX AngelScript APIs: `docs/perception/angelscript/`

@@ -146,7 +146,7 @@ void update_routine(void@ data) {
         ed.distance    = dist;
         ed.name        = name;
         ed.valid       = true;
-        g_entities.push_back(ed);
+        g_entities.push(ed);
     }
 }
 

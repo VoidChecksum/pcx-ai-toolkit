@@ -10,7 +10,17 @@ import "color";
 bool    g_enabled   = true;
 float64 g_box_size  = 120.0;
 color   g_box_color = color(80, 170, 255, 220);
-int32   g_toggle_key = 0x77; // VK_F8
+
+// ── Widget handles (bound in main, synced via on_change) ──
+sidebar_section_t g_sec;
+checkbox_t        g_cb_enabled;
+slider_t          g_sl_size;
+colorpicker_t     g_cp_color;
+keybind_t         g_kb_toggle;   // bound to VK_F8 in single mode (edge-toggle)
+
+void on_enabled(int64 h) { g_enabled   = g_cb_enabled.get(); }
+void on_size(int64 h)    { g_box_size  = g_sl_size.get(); }
+void on_color(int64 h)   { g_box_color = g_cp_color.get(); }
 
 // ── Cached state (written by update, read by render) ──
 bool    g_visible = true;
@@ -18,8 +28,8 @@ float64 g_fps     = 0.0;
 
 // Update routine: logic only, no drawing.
 void on_update(int64 data) {
-    // Edge-triggered toggle so holding the key doesn't flicker.
-    if (key_fired(g_toggle_key)) {
+    // Edge-triggered toggle via the keybind (single mode fires once per press).
+    if (g_kb_toggle.is_active()) {
         g_visible = !g_visible;
     }
     g_fps = get_fps();
@@ -46,13 +56,17 @@ void on_render(int64 data) {
 
 int64 main() {
     // GUI sidebar — every tunable is a widget, never a magic constant.
-    int64 sec = create_section("Overlay");
-    section_checkbox(sec, "Enabled", g_enabled);
-    section_slider_float(sec, "Box Size", g_box_size, 20.0, 400.0);
-    section_color_picker(sec, "Box Color", g_box_color);
-    section_keybind(sec, "Toggle Key", g_toggle_key);
-    section_separator(sec);
-    section_label(sec, "F8 toggles visibility");
+    g_sec = create_sidebar_section("Overlay", "");
+    g_cb_enabled = g_sec.create_checkbox("Enabled", g_enabled);
+    g_cb_enabled.on_change(cast<int64>(on_enabled));
+    g_sl_size = g_sec.create_slider("Box Size", g_box_size, 20.0, 400.0, 1.0);
+    g_sl_size.on_change(cast<int64>(on_size));
+    g_cp_color = g_sec.create_colorpicker("Box Color", g_box_color);
+    g_cp_color.on_change(cast<int64>(on_color));
+    g_kb_toggle = g_sec.create_keybind("Toggle Key");
+    g_kb_toggle.bind(0x77, false, false, false, keybind_mode::single); // VK_F8
+    g_sec.create_separator();
+    g_sec.create_label("F8 toggles visibility", ui_align::left);
 
     register_routine(cast<int64>(on_update), 0);
     register_routine(cast<int64>(on_render), 0);

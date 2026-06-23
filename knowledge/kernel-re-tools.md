@@ -63,9 +63,9 @@ Tools for reversing kernel drivers, analyzing anti-cheat systems, and inspecting
 | Tool | Surface | What It Does |
 |------|---------|-------------|
 | `system/list_drivers` | MCP | Enumerate loaded kernel modules (gated: `kernel_rw_access`) |
-| `get_eprocess` | `proc_t` (Enma/AS/Lua) | Get target's EPROCESS kernel address (gated: `kernel_rw_access`) |
-| `ru64` / `ru32` / `read_struct` (kernel range) | `proc_t` (Enma/AS/Lua) | Read kernel memory when `kernel_rw_access` is granted |
-| `find_code_pattern` | `proc_t` (Enma/AS/Lua) | Pattern-scan driver `.text` sections |
+| `get_eprocess` | `proc_t` (Enma/AS) | Get target's EPROCESS kernel address (gated: `kernel_rw_access`) |
+| `ru64` / `ru32` / `read_struct` (kernel range) | `proc_t` (Enma/AS) | Read kernel memory when `kernel_rw_access` is granted |
+| `find_code_pattern` | `proc_t` (Enma/AS) | Pattern-scan driver `.text` sections |
 | `struct_dump` | Perception IDE AI tool | Heuristically dump + classify a driver data structure at an address |
 | `process/disassemble` | MCP | Disassemble driver code at kernel addresses |
 | `process/analyze_vtable` | MCP | Walk vtables in kernel objects |

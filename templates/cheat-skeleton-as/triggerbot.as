@@ -10,17 +10,17 @@ EntityInfo get_entity_under_crosshair() {
 
 void triggerbot_update(int id, int data_index) {
     if (!g_trigger_enabled || !g_initialized || !g_proc.alive()) return;
-    if (!is_key_down(g_trigger_key)) return;
+    if (!key_down(g_trigger_key)) return;
 
     EntityInfo t = get_entity_under_crosshair();
     if (!t.valid) return;
     if (t.team == g_local_team && g_local_team != 0) return;
     if (t.health <= 0) return;
 
-    if (time_ms() - g_last_fire < g_trigger_delay_ms) return;
-    g_last_fire = time_ms();
+    if (get_tickcount64() - g_last_fire < g_trigger_delay_ms) return;
+    g_last_fire = get_tickcount64();
 
-    press_mouse_left();
+    mouse_left_click();
 }
 
 void triggerbot_render(int id, int data_index) {

@@ -28,10 +28,8 @@ int main() {
         return 0;
     }
 
-    // 2. Resolve module base.
-    g_base = g_proc.base_address();
-    g_size = g_proc.module_size("game.exe");
-    if (g_base == 0 || g_size == 0) {
+    // 2. Resolve module base + size.
+    if (!g_proc.get_module("game.exe", g_base, g_size)) {
         log("[main] module base or size 0");
         g_proc.deref();
         @g_proc = null;

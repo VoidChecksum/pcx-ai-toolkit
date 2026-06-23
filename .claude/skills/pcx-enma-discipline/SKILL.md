@@ -14,35 +14,35 @@ Behavioral and syntactic rules for writing `.em` scripts on Perception.cx. Enma 
 
 **Always active when editing `.em` files.** These rules apply every time you write or edit a Perception.cx Enma script.
 
-**Prerequisite:** `game-cheat-guidelines` skill for the full doc index. **Read the relevant `docs/perception/enma/<file>.md` before writing any API call** — the Enma surface is not the AS surface, and method names, parameter shapes, and constants differ.
+**Prerequisite:** `game-cheat-guidelines` skill for the full doc index. **Read the relevant `docs/perception/<file>.md` before writing any API call** — the Enma surface is not the AS surface, and method names, parameter shapes, and constants differ.
 
 ---
 
 ## Trigger
 
-`.em` file open, Enma syntax visible (`import`, `#pragma once`, `register_routine`, `println`, `color`/`vec2` value types, `cast<T>`), user mentions Enma / `proc_t` value semantics / PCX scripting in Enma context, any code referencing `docs/perception/enma/`.
+`.em` file open, Enma syntax visible (`import`, `#pragma once`, `register_routine`, `println`, `color`/`vec2` value types, `cast<T>`), user mentions Enma / `proc_t` value semantics / PCX scripting in Enma context, any code referencing `docs/perception/`.
 
 ---
 
-## 1. Enma Is Not AngelScript or Lua — Don't Paste AS/Lua APIs
+## 1. Enma Is Not AngelScript — Don't Paste AS APIs
 
-**The PCX Enma API has different function names, different parameter shapes, and different idioms than AS and Lua. They look similar; they are not interchangeable.**
+**The PCX Enma API has different function names, different parameter shapes, and different idioms than AngelScript. They look similar; they are not interchangeable.**
 
-The most common bug in AI-written `.em` scripts is pasting AS or Lua API calls verbatim. The script doesn't compile because Enma is a statically typed C++-like language with value semantics, not a garbage-collected handle system (AS) or a dynamic table language (Lua).
+The most common bug in AI-written `.em` scripts is pasting AngelScript API calls verbatim. The script doesn't compile because Enma is a statically typed C++-like language with value semantics, not AngelScript's handle system.
 
-| Enma | AngelScript | Lua |
-|---|---|---|
-| `register_routine(cast<int64>(on_render), 0)` | `register_callback(on_tick, 16, 0)` | `function on_frame()` — no registration |
-| `int64 main()` | `int main()` | `function main()` — returns number |
-| `void on_render(int64 data)` | `void on_tick(int id, int data_index)` | `function on_frame()` — no args |
-| `println(...)` | `log(...)` | `log(...)` |
-| `color(r,g,b,a)` then `draw_rect(vec2(pos), vec2(size), color, ...)` | `draw_rect_filled(x, y, w, h, r, g, b, a, rounding, flags)` | `draw_rect_filled(x, y, w, h, r, g, b, a, rounding, flags)` |
-| `get_view_width()` / `get_view_height()` | `get_view(vw, vh)` — out-param | `vw, vh = get_view()` — multi-return |
-| `proc_t g_proc;` (value, RAII) | `proc_t@ g_proc;` (handle, ref-counted) | `g_proc = ref_process(...)` — userdata |
-| `T[]` arrays with `.push()`, `.pop()` | `array<T>` with `.insertLast()`, `.removeLast()` | `{}` tables with `table.insert()` |
-| `map<K,V>` with `.set()`, `.get()` | `dictionary` with string keys only | `table` as map |
-| `cast<T>(x)` | `T(x)` or `float(x)` — C-style cast | `tonumber(x)` — no generic cast |
-| `#pragma once` + `import "module"` | `#pragma once` + `#include "module"` | No header guards; `require()` |
+| Enma | AngelScript |
+|---|---|
+| `register_routine(cast<int64>(on_render), 0)` | `register_callback(on_tick, 16, 0)` |
+| `int64 main()` | `int main()` |
+| `void on_render(int64 data)` | `void on_tick(int id, int data_index)` |
+| `println(...)` | `log(...)` |
+| `color(r,g,b,a)` then `draw_rect(vec2(pos), vec2(size), color, ...)` | `draw_rect_filled(x, y, w, h, r, g, b, a, rounding, flags)` |
+| `get_view_width()` / `get_view_height()` | `get_view(vw, vh)` — out-param |
+| `proc_t g_proc;` (value, RAII) | `proc_t@ g_proc;` (handle, ref-counted) |
+| `T[]` arrays with `.push()`, `.pop()` | `array<T>` with `.insertLast()`, `.removeLast()` |
+| `map<K,V>` with `.set()`, `.get()` | `dictionary` with string keys only |
+| `cast<T>(x)` | `T(x)` or `float(x)` — C-style cast |
+| `#pragma once` + `import "module"` | `#pragma once` + `#include "module"` |
 
 ```cpp
 // WRONG — AS idioms in an .em file
@@ -79,7 +79,7 @@ void on_render(int64 data) {
 }
 ```
 
-**Why:** Enma is a separately compiled host language with its own type system and standard library. The AS and Lua bindings cover overlapping domains but the function signatures, type registrations, and constants are independent. Always confirm the call in `docs/perception/enma/<area>-api.md` before writing it.
+**Why:** Enma is a separately compiled host language with its own type system and standard library. The AS and Lua bindings cover overlapping domains but the function signatures, type registrations, and constants are independent. Always confirm the call in `docs/perception/<area>-api.md` before writing it.
 
 ---
 
@@ -118,25 +118,34 @@ int64 main() {
 
 ---
 
-## 3. `float64` Is the Default Float; `float32` Is Explicit
+## 3. `float64` Is the Default Float; `float32` Uses the `f` Suffix
 
-**Enma uses `float64` (double-precision) as its default floating-point type. `float32` is explicit. Literal `1.5` is `float64`. Render APIs and math use `float64` unless otherwise documented.**
+**Enma uses `float64` (double-precision) as its default floating-point type. A bare literal `1.5` is `float64`. `float32` is explicit: write `float32` literals with the `f` suffix (`0.2f`, `1.5f`) — not `cast<float32>(0.2)`. Render APIs and math use `float64` unless otherwise documented.**
 
-Unlike AngelScript where `float` means `float32` and `double` means `float64`, Enma's native float is `float64`. The `f` suffix does not exist in Enma — `1.5` is already `float64`.
+This is the official Enma overview convention — *"Float32 literals: `0.2f`, not `cast<float32>(0.2)`. Required for vertex buffers."* It is also guideline #8 (`f` suffix on float32) and `script-linter.py` rule 8: a `float32` target assigned a bare `float64` literal is flagged. `cast<float32>(x)` is for converting a `float64` *value* (variable/expression), not a literal.
 
 ```cpp
-// Enma — float64 by default
-float64 smooth = 0.15;        // 0.15 is float64
-float32 fov = 30.0f;          // explicit f suffix for float32 ONLY if needed
+// Enma — float64 by default, float32 via the f suffix
+float64 smooth = 0.15;          // 0.15 is float64
+float32 fov    = 30.0f;         // f suffix -> float32
+float32 uv     = 0.2f;          // 0.2f, NOT cast<float32>(0.2) — vertex buffers need float32
 
-float64 cx = get_view_width() * 0.5;   // no promotion issues; 0.5 is float64
+float64 cx = get_view_width() * 0.5;   // 0.5 is float64; no promotion issue
 
-// WRONG — AS-style float/double confusion
+// Convert a float64 VALUE (not a literal) with cast<float32>:
+int64  ticks    = 40;
+float64 measured = cast<float64>(ticks);    // a float64 value from an int64
+float32 m32      = cast<float32>(measured); // cast the value, not a literal
+
+// WRONG — bare float64 literal into a float32 (linter rule 8 fires)
+float32 bad = 0.2;              // 0.2 is float64; write 0.2f
+
+// WRONG — AS-style float/double keywords
 double cx = get_view_width() * 0.5f;   // Enma has no 'double' keyword; use 'float64'
 float cx  = get_view_width() * 0.5;    // Enma has no 'float' keyword; use 'float32'
 ```
 
-**Why:** Enma is closer to C++ than AS. `float64` / `float32` map directly to C++ `double` / `float`. Using `double` or `float` in Enma is a compile error — those keywords don't exist. The default `float64` eliminates the silent promotion issues that plague AS.
+**Why:** Enma is closer to C++ than AS. `float64` / `float32` map directly to C++ `double` / `float`; `double` and `float` are not keywords. A silent `float64`→`float32` literal truncation corrupts GPU vertex-buffer layout — which is why the overview mandates the `f` suffix and the linter warns on bare `float64` literals assigned to `float32`. The default `float64` eliminates the promotion issues that plague AS.
 
 ---
 
@@ -189,7 +198,7 @@ if (offsets.contains("local_player")) {
 }
 ```
 
-Note: Enma's `map<K,V>` requires `K` to support `operator<` (ordered map) or hashing (unordered map). The exact constraints depend on the PCX Enma registration — verify in `docs/perception/enma/overview.md`.
+Note: Enma's `map<K,V>` requires `K` to support `operator<` (ordered map) or hashing (unordered map). The exact constraints depend on the PCX Enma registration — verify in `docs/perception/readme.md`.
 
 **Why:** AS's `dictionary` is a string-keyed boxed-value map. Enma's `map<K,V>` is closer to C++ `std::map` or `std::unordered_map` with typed keys and values. Using the wrong map type produces compile errors or runtime misbehavior.
 
@@ -197,10 +206,10 @@ Note: Enma's `map<K,V>` requires `K` to support `operator<` (ordered map) or has
 
 ## 6. Render API Takes `vec2`, `color`, and Other Value Types
 
-**The PCX Enma render API is struct-typed: pass `vec2` for positions/sizes, `color` for RGBA, and `float64` for scalars. Do not pass raw positional args the way AS and Lua do.**
+**The PCX Enma render API is struct-typed: pass `vec2` for positions/sizes, `color` for RGBA, and `float64` for scalars. Do not pass raw positional args the way AngelScript does.**
 
 ```cpp
-// WRONG — AS/Lua raw-positional style in Enma
+// WRONG — AngelScript raw-positional style in Enma
 draw_rect_filled(10.0, 10.0, 100.0, 100.0,
                  255, 100, 50, 200, 4.0, 15);
 
@@ -214,7 +223,7 @@ draw_text("HUD", vec2(20, 25),
           TE_NONE, color(0, 0, 0, 0), 0.0);
 ```
 
-Enma value types (`vec2`, `vec3`, `color`) are lightweight stack structs — copying them is cheap. You can construct them inline or cache them:
+Enma value types (`vec2`, `vec3`, `color`) are lightweight stack structs — copying them is cheap. You can construct them inline or cache them. Per the official Enma overview convention, **colors and positions should always be wrapped** (`color(255, 255, 255, 255)`, `vec2(10.0, 20.0)`) — and **constructing them fresh each frame is fine; Enma drops the temporaries at scope exit.** You don't need to hoist them into globals to avoid per-frame cost (guideline #7's "construct per frame" is about not binding magic constants to cached globals, not about avoiding inline construction).
 
 ```cpp
 // Named colors are fine in Enma
@@ -229,7 +238,7 @@ void on_render(int64 data) {
 }
 ```
 
-**Why:** The Enma render API was designed around C++-style value semantics. Passing four separate integers for color and four separate floats for rectangle bounds is the AS/Lua binding choice to avoid marshaling structs across the language boundary. In Enma, the structs live on the native side and are passed by value efficiently.
+**Why:** The Enma render API was designed around C++-style value semantics. Passing four separate integers for color and four separate floats for rectangle bounds is the AngelScript binding choice to avoid marshaling structs across the language boundary. In Enma, the structs live on the native side and are passed by value efficiently.
 
 ---
 
@@ -462,13 +471,43 @@ int32 hp = g_proc.r32(player + OFF_HEALTH);
 
 ---
 
+## 13. Encrypted `int64` Handles — Pass Back, Never Inspect
+
+**Every `create_*` and `load_*` native returns an encrypted `int64` handle. Store it, pass it straight back into the matching `draw_*` / `bind_*` / `destroy_*` call, and never inspect, print, do arithmetic on, or compare it against a raw integer.**
+
+This is an official Enma overview convention — *"Handles: all `create_*` / `load_*` natives return an encrypted `int64`. Pass it back into draw / bind / destroy. Don't inspect."* The handle is an opaque encrypted token the host uses to locate the resource internally; its bits are not a pointer or an index.
+
+```cpp
+// RIGHT — store the encrypted int64, round-trip it opaquely
+int64 g_tex  = /* return value of a create_* / load_* native */;
+int64 g_font = /* return value of a create_* / load_* native */;
+
+void on_render(int64 data) {
+    // Hand g_tex / g_font straight back to their matching
+    // bind_* / draw_* / destroy_* natives as-is — never inspect the value.
+}
+// on unload: pass each handle to its matching destroy_* native
+```
+
+```cpp
+// WRONG — treating the encrypted handle as a meaningful integer
+int64 tex = /* create_* / load_* return value */;
+if (tex == 0) { ... }                     // don't compare to a raw int
+println("handle = " + cast<string>(tex)); // don't print or inspect it
+int64 leaked = tex + 0x1000;              // don't do arithmetic on it
+```
+
+**Why:** Inspecting or mutating the encrypted handle yields garbage and breaks the resource binding — the host can no longer match the token to its internal resource. Keep it in an `int64`, pass it back unchanged, and let the matching `destroy_*` native release it. This is distinct from rule #2's `proc_t` value semantics: `proc_t` is a value type with methods (`.alive()`, `.base_address()`); `create_*`/`load_*` handles are raw encrypted `int64` tokens with no methods.
+
+---
+
 ## Summary
 
 | # | Rule | One-liner |
 |---|---|---|
-| 1 | Enma is not AS/Lua | Look up every API in `docs/perception/enma/` before pasting |
+| 1 | Enma is not AS | Look up every API in `docs/perception/` before pasting |
 | 2 | Value semantics | `proc_t` is a value; no `@`, no `deref()`, no `is null` |
-| 3 | `float64` default | No `float`/`double` keywords; use `float64` / `float32` |
+| 3 | `float64` default, `float32` `f` suffix | `0.2f` is `float32`; bare `0.2` is `float64`; no `float`/`double` keywords |
 | 4 | `T[]` arrays | `.push()`, `.pop()`; `length` is a property |
 | 5 | `map<K,V>` | Typed keys/values; `.set()`, `.get()`, `.contains()` |
 | 6 | Value-type render API | `vec2`, `color` structs; not raw positional args |
@@ -478,7 +517,8 @@ int32 hp = g_proc.r32(player + OFF_HEALTH);
 | 10 | Hot-reload safety | Re-attach, re-resolve, re-register every `main()`; no `on_unload` |
 | 11 | `cast<T>(x)` | Explicit cast syntax; no C-style or AS-style |
 | 12 | Type-scaled pointers | Use `uint64` offsets + `proc_t` reads; never raw pointer arithmetic |
+| 13 | Encrypted `int64` handles | `create_*`/`load_*` return encrypted `int64`; pass back to `draw_*`/`bind_*`/`destroy_*`; never inspect |
 
 **The 12 game-cheat-guidelines rules still apply** — this skill is the *Enma-flavored* version of those discipline rules. Address types are `uint64`, null-check every read, separate update from render, sigs over hardcodes, one feature per file, minimize writes, validate against the live binary. Read `skill://game-cheat-guidelines` for the full discipline.
 
-**Cross-references:** `skill://game-cheat-guidelines` (the 12 rules), `skill://game-hacking-pcx` (doc router), `skill://pcx-angelscript-discipline` (AS-specific gotchas, useful when porting), `skill://pcx-lua-discipline` (Lua-specific gotchas, useful when porting), `docs/perception/enma/overview.md` (registered modules and addons), `docs/perception/enma/proc-api.md`, `docs/perception/enma/render-api.md`, `docs/perception/enma/life-cycle.md`, `docs/perception/enma/gui-api.md`.
+**Cross-references:** `skill://game-cheat-guidelines` (the 12 rules), `skill://game-hacking-pcx` (doc router), `skill://pcx-angelscript-discipline` (AS-specific gotchas, useful when porting), `docs/perception/readme.md` (registered modules and addons), `docs/perception/proc-api.md`, `docs/perception/render-api.md`, `docs/perception/lifecycle-and-routines.md`, `docs/perception/gui-api.md`.

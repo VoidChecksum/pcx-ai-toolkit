@@ -13,7 +13,6 @@ See `docs/INDEX.md` for the complete file index. The most useful single-file con
 
 - [Enma Context Pack](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-perception-enma.md): Single-file context pack for AI tools writing Enma scripts. Bundles the language docs, platform APIs, behavioral skills, and quick-reference knowledge most relevant when working in Enma.
 - [AngelScript Context Pack](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-perception-angelscript.md): Single-file context pack for AI tools writing AngelScript scripts on Perception.cx. Bundles the AngelScript API surface, the discipline skill, and cross-references to the underlying 12 guidelines.
-- [Lua Context Pack](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-perception-lua.md): Single-file context pack for AI tools writing Lua scripts on Perception.cx. Bundles the Lua API surface, the discipline skill, and cross-references to the underlying 12 guidelines.
 - [Full Skills Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-skills.md): every AI skill in one file.
 - [Full Knowledge Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-knowledge.md): every knowledge reference in one file.
 - [Full Toolkit Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-full.txt): the entire toolkit concatenated.
@@ -88,6 +87,7 @@ The Perception.cx host API surface as exposed to Enma.
 - [Perception IDE](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/ide.md): Perception.cx ships with a fully integrated code editor and AI assistant. It's a native overlay panel — no Electron, no browser runtime. Write, test, and iterate on scripts without ever leaving the pl
 - [Input API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/input-api.md): All input natives are auto-registered into every loaded script.
 - [Lifecycle and Routines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lifecycle-and-routines.md): Every script needs a main() function. It runs once when the script is loaded.
+- [Perception-First LLM Routing](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/llm-routing.md): Use this page before writing any Perception.cx script in this toolkit. The repo
 - [MCP API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/mcp-api.md): Perception's MCP server exposes the proc-API surface as JSON-RPC tools that any Model Context Protocol client (Claude Code, Cline, Continue, ...) can call.
 - [Net API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/net-api.md): All net natives are auto-registered into every loaded script.
 - [Proc API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/proc-api.md): All proc natives are auto-registered into every loaded script.
@@ -127,28 +127,6 @@ The Perception.cx host API surface as exposed to AngelScript.
 - [Win API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/win-api.md): This API allows AngelScript scripts to interact with Windows:
 - [Zydis Encoder](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/zydis-encoder.md): The Zydis Encoder API lets you assemble instructions into raw machine code at runtime. It’s designed for:
 
-## Lua APIs
-
-The Perception.cx host API surface as exposed to Lua.
-
-- [CS2 Extended API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/cs2-extended-api.md): This API is available in both the Uni API and the CS2 product.
-- [Engine Specific API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/engine-specific-api.md): The unrealengine table contains helpers for working with Unreal Engine games (UE4 / UE5).
-- [Engine](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/engine.md): The Engine provides three global logging helpers available in every Lua script.\
-- [Extended Math API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/extended-math-api.md): This API provides vectors, quaternions, matrices, math constants, and helper functions found in modern game engines.
-- [File System](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/file-system.md): Filesystem API that allows scripts to read, write, and manage files only inside the main scripting directory.
-- [GUI API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/gui-api.md): The Lua GUI API allows scripts to dynamically create UI inside the Perception.cx interface.\
-- [Input API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/input-api.md): The Input API provides access to mouse, keyboard, and UI-hover information from Lua scripts.\
-- [Json API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/json-api.md): The JSON API provides simple, fast parsing and encoding of JSON using native Lua data types.\
-- [Life Cycle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/life-cycle.md): Every Lua script must define an entry function:
-- [Net API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/net-api.md): The Net API provides:
-- [Overview](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/overview.md): This environment provides a lightweight scripting layer for UI, rendering, memory analysis and interaction in Perception.cx. It uses Lua with core add-ons and PCX-specific APIs enabled by default.
-- [Proc API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/proc-api.md): This API lets scripts inspect and modify the memory of external processes via a process userdata.\
-- [Render API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/render-api.md): RRTOPLEFT
-- [Sound API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/sound-api.md): The Sound API lets Lua scripts load and play audio files with real-time volume and stereo panning control.
-- [System API (CPU & Disassembly)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/system-api-cpu-and-disassembly.md): The System API provides low-level functionality for CPU information, performance timing, and x64 instruction disassembly using Zydis.\
-- [Utilities](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/utilities.md): The util module provides fast Base64, Hex, and URL encoding/decoding helpers for Lua scripts.
-- [Win API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lua/win-api.md): This API exposes a small subset of the Win32 window, clipboard, keyboard, mouse and messaging functions to Lua:
-
 ## AngelScript Language (Core)
 
 The core AngelScript language manual scraped from angelcode.com (zlib/libpng license): datatypes, strings, arrays, expressions, statements, functions, classes, handles, generics, delegates, enums, namespaces, coroutines, add-ons.
@@ -180,15 +158,6 @@ The core AngelScript language manual scraped from angelcode.com (zlib/libpng lic
 - [Custom string type](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/strings.md): Almost all applications have some need to manipulate text strings in one way or another. However most applications have very different needs, and also different ways of representing their string types
 - [Variables](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/variables.md): Global variables may be declared in the scripts, which will then be shared between all contexts accessing the script module.
 
-## Lua Language (Core)
-
-The core Lua 5.4 reference manual scraped from lua.org (Lua license).
-
-- [Lua 5.4 Language Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/lua-lang/INDEX.md): This directory contains the authoritative core Lua 5.4 language reference, scraped from the official Lua manual at https://www.lua.org/manual/5.4/. It documents the Lua language itself — its lexical c
-- [License](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/lua-lang/license.md): Lua is free software distributed under the terms of the MIT license reproduced here. Lua may be used for any purpose, including commercial purposes, at absolutely no cost. No paperwork, no royalties, 
-- [Lua 5.4 Reference Manual](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/lua-lang/manual-5.4.md): by Roberto Ierusalimschy, Luiz Henrique de Figueiredo, Waldemar Celes
-- [Welcome to Lua 5.4](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/lua-lang/readme-5.4.md): about · installation · changes · license · reference manual
-
 ## AI Skills
 
 Behavioral / discipline skills loaded automatically by AI tools (Claude Code / OMC).
@@ -210,7 +179,6 @@ Behavioral / discipline skills loaded automatically by AI tools (Claude Code / O
 - [SKILL](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-defer-ledger/SKILL.md)
 - [Enma Discipline for Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-enma-discipline/SKILL.md): Behavioral and syntactic rules for writing .em scripts on Perception.cx. Enma is the primary scripting language on PCX and has a distinct C++-like type system, RAII semantics, and value-type APIs that
 - [PCX Knowledge Index — The Three Ways AI Tools Reach the Toolkit's Corpus](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-knowledge-index/SKILL.md): The toolkit publishes its docs / skills / knowledge / templates / tools via three complementary surfaces, each optimized for a different AI-tool integration model. This skill names which surface to re
-- [PCX Lua Discipline — Lua Idioms for Perception.cx Scripts](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-lua-discipline/SKILL.md): Lua-specific rules for writing Perception.cx scripts in Lua 5.4.6 (confirmed in docs/perception/lua/render-api.md). PCX exposes a third scripting surface alongside Enma and AngelScript; the host APIs 
 - [Patch Day Playbook — Recovering After a Game Update](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-patch-day-playbook/SKILL.md): The ordered triage workflow for when a game update lands and your Perception.cx script stops working. This is the single most painful recurring scenario in scripting work; the cost is dominated by not
 - [Performance Budget — Frame-Time Targets for PCX Scripts](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-perf-budget/SKILL.md): Turns game-cheat-guidelines rule #4 (separate update from render) into enforceable numeric budgets, so the question "is my script too slow?" gets answered with monous() measurements instead of vibes. 
 - [PCX Reverse-Engineering Discipline — Finding Offsets Without Fooling Yourself](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-re-discipline/SKILL.md): Workflow discipline for reverse engineering and offset maintenance: locating structs, generating signatures, resolving RIP-relative addresses, and keeping an offset table alive across game patches. De
@@ -236,7 +204,7 @@ Quick references for engines, anti-cheat architecture, patterns, methodology.
 - [Godot Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/engine-godot.md): Engine-specific notes for Godot Engine titles (Godot 3.x C++ core, Godot 4.x rewritten core with Vulkan and dual GDScript/C# support). Read this before attaching to a Godot title — the node-tree archi
 - [RE Engine Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/engine-re-engine.md): Engine-specific RE notes for Capcom's RE Engine (Resident Evil 2/3/4 remakes, RE7, RE Village, Devil May Cry 5, Monster Hunter Rise / Wilds, Street Fighter 6, Dragon's Dogma 2, Onimusha, Pragmata). Re
 - [REDengine Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/engine-redengine.md): Engine-specific RE notes for CD Projekt Red's REDengine (Cyberpunk 2077 on REDengine 4, The Witcher 3 on REDengine 3). Read this before attaching to a REDengine title — its RTTI/reflection system, RED
-- [Enma Language Quick Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/enma-cheatsheet.md): int32 x = 42;
+- [Enma Language Quick Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/enma-cheatsheet.md): color white    = color(255, 255, 255, 255);   // wrap, fresh per frame is fine
 - [Perception.cx Game Support Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/game-targets.md): Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. Scripting language is AngelScript (AS) across the board; CS2 additionally exposes a Lua surf
 - [GUI Design Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/gui-design-patterns.md): The Perception.cx sidebar GUI is a fixed-width vertical strip. Good layouts make features discoverable, tunings easy to find, and state visible at a glance. The 12 game-cheat-guidelines say "GUI for e
 - [Kernel-Level Reverse Engineering Tools](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/kernel-re-tools.md): Tools for reversing kernel drivers, analyzing anti-cheat systems, and inspecting kernel state. Organized by workflow stage.
@@ -244,7 +212,6 @@ Quick references for engines, anti-cheat architecture, patterns, methodology.
 - [Obfuscation & Protector Taxonomy](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/obfuscation-taxonomy.md): Architecture, VM internals, protection layers, and known weaknesses for every major commercial and open-source binary protector. Read this before starting deobfuscation — it tells you what you're figh
 - [Offset Finding and Maintenance Methodology](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/offset-methodology.md): 1. Open the function in IDA/Ghidra. Find the instruction that loads/references the value you need.
 - [Perception.cx Enma API Quick Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-api-cheatsheet.md): All natives are auto-registered. No import needed (except import "vec"; import "color"; for those types).
-- [PCX Cross-Language Bridge — Enma vs AngelScript vs Lua](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-cross-language-bridge.md): Perception.cx supports three scripting languages: Enma (the native one), AngelScript, and Lua. Each has a different API surface, different performance characteristics, and different ergonomic strength
 - [PCX Documentation Roots](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-doc-roots.md): The only authoritative sources for Perception.cx scripting APIs are these two
 - [PCX API Version Matrix](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/pcx-version-matrix.md): This file maps each PCX API addition / change / removal to the version it landed in, so scripts that target older PCX runtimes know what's safe. Drawn from docs/perception/changelogs.md.
 - [RE Plugins & Tools Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/re-plugins-and-tools.md): IDA Pro plugins, Ghidra extensions, FLIRT signature databases, binary diffing tools, and debugger sync infrastructure for game binary reverse engineering. Every tool listed here is cloned, ready to bu
@@ -256,7 +223,7 @@ Quick references for engines, anti-cheat architecture, patterns, methodology.
 Project-rules drop-ins for Claude Code / Cursor / Cline / Copilot / Aider / Zed / Continue.
 
 - [Agent Definitions for PCX Scripting Projects](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/AGENTS.md): Analyzes game binaries to find data structures, pointers, and function signatures.
-- [Perception.cx Scripting Project](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CLAUDE.md): Languages: Enma (.em), AngelScript (.as), C++
+- [Perception.cx Scripting Project](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CLAUDE.md): Languages: Enma (.em), AngelScript (.as)
 - [Cline Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CLINE.md): Drop-in custom instructions for Cline, the VS Code AI agent. Sibling to rules/CLAUDE.md (Claude Code drop-in) and rules/CURSOR.md (Cursor drop-in). Cline reads its custom instructions on every turn, s
 - [GitHub Copilot Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/COPILOT.md): Drop-in custom instructions for GitHub Copilot. Sibling to rules/CLAUDE.md (Claude Code), rules/CURSOR.md (Cursor), rules/CLINE.md (Cline). Copilot reads .github/copilot-instructions.md for repo-wide 
 - [Cursor Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CURSOR.md): Drop-in project rules for Cursor (the IDE), parallel to CLAUDE.md but tailored for Cursor's context system.
@@ -321,6 +288,7 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [pcx-ai-toolkit tools package](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/__init__.py)
 - [Section names strongly associated with VMProtect](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/analyze-vmprotect.py): VMPSECTIONS = (b'.vmp0', b'.vmp1', b'.vmp2', b'.vmp3', b'.vmp4')
 - [── Detection tables ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/anti-debug-scanner.py): DIRECTCHECKIMPORTS = {
+- [api-lookup](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/api-lookup.py)
 - [.text classifier thresholds (block-level identical %, raw-size delta %).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/binary-diff-summary.py): RECOMPILEMINSAME = 70.0
 - [── Upstream endpoints ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-api-index.py): ENMAROOTURL = "https://docs.perception.cx/perception/enma/readme.md"
 - [Exclude only the generated bundles sitting directly under docs/.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-counts.py): if p.parent == (REPOROOT / "docs") and p.name.startswith("llms-"):
@@ -328,6 +296,8 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [Files / dirs that are generated or local-only — never a drift source.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-provenance.py): EXCLUDENAMES = {"INDEX.md"}
 - [Show a short, useful diff hint (first differing normalized line).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-doc-drift.py): locallines = localnorm.splitlines()
 - [check-internal-links](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-internal-links.py)
+- [check-llm-answer](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-llm-answer.py)
+- [check-llm-contract](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-llm-contract.py)
 - [Cut the "Agent Instructions" footer — it mentions urls, not tools.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-mcp-config.py): txt = re.split(r"\n#\sAgent Instructions\b", txt)[0]
 - [Scripting-API surface keywords that make a changelog release "API-relevant".](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-version-matrix.py): APIKEYWORDS = re.compile(
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dump-strings-xor.py): import os
@@ -343,7 +313,7 @@ Stdlib-only Python tools for binary RE / sig validation / dumper conversion / li
 - [── Rule registry ─────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/script-linter.py): # rule number -> (severity, one-liner). Severity is fixed per rule, not per hit.
 - [1. Update submodules](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/setup-core.py): print("[..] Checking git submodules...")
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/sig-uniqueness-checker.py): import os
-- [Types that require an explicit module import in Enma.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/symbol-check.py): ENMAIMPORTREQUIREDTYPES = {
+- [symbol-check](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/symbol-check.py)
 
 ## Build Scripts
 

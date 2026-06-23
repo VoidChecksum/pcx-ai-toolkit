@@ -30,7 +30,7 @@ memory script, or Perception.cx tooling related to games.**
   signature, offset, vtable hook, anti-cheat, EAC, BattlEye, Vanguard, GameGuard,
   integrity check, bypass, streamproof, kernel driver, dump, IDA, Ghidra, r5sdk,
   source engine, Unreal Engine, Unity, Frostbite, REDengine, CryEngine, Godot.
-- Any file extension: `.em`, `.as`, `.lua` in a Perception.cx context.
+- Any file extension: `.em`, `.as` in a Perception.cx context.
 - Any mention of `ref_process`, `find_code_pattern`, `ru64`, `draw_rect`,
   `world_to_screen`, `register_routine`, `proc_t`, `perception`, `enma`, `angelscript`.
 
@@ -195,11 +195,9 @@ explicitly, but never hardcode an absolute address.
 |---------------|---------|-------------|
 | Modern PCX, hot reload, typed, fast | **Enma (.em)** | — |
 | Host already loads AngelScript | AngelScript (.as) | — |
-| Minimal embedded scripting, existing Lua host | Lua (.lua) | — |
-| Cross-engine portability | Enma | Lua |
-| Tight C++ interop / SDK work | C++ host + Enma | — |
+| Cross-engine portability | Enma | AngelScript when the host already loads it |
 
-See `knowledge/pcx-cross-language-bridge.md` for the full comparison.
+See `docs/perception/llm-routing.md` for the full Enma vs AngelScript comparison.
 
 ---
 

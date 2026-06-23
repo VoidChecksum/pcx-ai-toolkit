@@ -1,6 +1,6 @@
 {
-  "count": 140,
-  "drift_checkable": 103,
+  "count": 121,
+  "drift_checkable": 87,
   "files": {
     "docs/CROSS_LANGUAGE.md": {
       "drift_check": false,
@@ -382,21 +382,6 @@
       "source": "gitbook",
       "url": "https://enma-1.gitbook.io/enma/sdk-guide/type-registration.md"
     },
-    "docs/lua-lang/license.md": {
-      "drift_check": false,
-      "source": "lua",
-      "url": "https://www.lua.org/manual/5.4/license.html"
-    },
-    "docs/lua-lang/manual-5.4.md": {
-      "drift_check": false,
-      "source": "lua",
-      "url": "https://www.lua.org/manual/5.4/manual.html"
-    },
-    "docs/lua-lang/readme-5.4.md": {
-      "drift_check": false,
-      "source": "lua",
-      "url": "https://www.lua.org/manual/5.4/readme.html"
-    },
     "docs/marketplace-install.md": {
       "drift_check": false,
       "source": "local",
@@ -572,90 +557,10 @@
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/enma/lifecycle-and-routines.md"
     },
-    "docs/perception/lua/cs2-extended-api.md": {
+    "docs/perception/llm-routing.md": {
       "drift_check": false,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/cs2-extended-api.md"
-    },
-    "docs/perception/lua/engine-specific-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/engine-specific-api.md"
-    },
-    "docs/perception/lua/engine.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/engine.md"
-    },
-    "docs/perception/lua/extended-math-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/extended-math-api.md"
-    },
-    "docs/perception/lua/file-system.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/file-system.md"
-    },
-    "docs/perception/lua/gui-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/gui-api.md"
-    },
-    "docs/perception/lua/input-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/input-api.md"
-    },
-    "docs/perception/lua/json-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/json-api.md"
-    },
-    "docs/perception/lua/life-cycle.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/life-cycle.md"
-    },
-    "docs/perception/lua/net-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/net-api.md"
-    },
-    "docs/perception/lua/overview.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/overview.md"
-    },
-    "docs/perception/lua/proc-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/proc-api.md"
-    },
-    "docs/perception/lua/render-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/render-api.md"
-    },
-    "docs/perception/lua/sound-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/sound-api.md"
-    },
-    "docs/perception/lua/system-api-cpu-and-disassembly.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/system-api-cpu-and-disassembly.md"
-    },
-    "docs/perception/lua/utilities.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/utilities.md"
-    },
-    "docs/perception/lua/win-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/lua-script/win-api.md"
+      "source": "local",
+      "url": null
     },
     "docs/perception/mcp-api.md": {
       "drift_check": true,
@@ -703,12 +608,13 @@
       "url": "https://docs.perception.cx/perception/enma/zydis-api.md"
     }
   },
-  "generated": "2026-06-22",
+  "generated": "2026-06-23",
   "unmapped": [
     "docs/CROSS_LANGUAGE.md",
     "docs/FAQ.md",
     "docs/enma/UPSTREAM-SUGGESTIONS.md",
     "docs/marketplace-install.md",
-    "docs/perception/changelogs.md"
+    "docs/perception/changelogs.md",
+    "docs/perception/llm-routing.md"
   ]
 }

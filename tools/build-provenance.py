@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 """Build docs/PROVENANCE.json — the file → upstream-source-URL mapping.
 
-The toolkit's docs/ tree is a scrape of three upstream sources:
+The supported docs/ surface is a scrape of three upstream sources:
 
   * enma-1.gitbook.io/enma/**           (the Enma language)
   * docs.perception.cx/perception/**    (the Perception.cx host APIs)
   * www.angelcode.com/angelscript/**     (the core AngelScript language manual)
-  * www.lua.org/manual/5.4/**            (the core Lua 5.4 reference)
 
 GitBook pages carry their own canonical URL in a header blockquote:
     > ... this page is available as [Markdown](<upstream-url>).
-The AngelScript / Lua scrapes carry theirs in an HTML comment header:
+The AngelScript scrape carries its upstream source in an HTML comment header:
     <!-- Source: <upstream-url> ... -->
 
 This script extracts those URLs and writes docs/PROVENANCE.json, consumed by
 tools/check-doc-drift.py (weekly CI drift detection against the live upstream).
 Only GitBook-sourced files are drift-checkable 1:1 (the local files are markdown
-mirrors, modulo internal-link flattening). The AngelScript/Lua core-manual files
-are hand-converted from Doxygen HTML / a single big HTML manual and are NOT
-byte-comparable to upstream; they are recorded for provenance but excluded from
-automated drift checking (marked "drift_check": false).
+mirrors, modulo internal-link flattening). The AngelScript core-manual files
+are hand-converted from Doxygen HTML and are NOT byte-comparable to upstream;
+they are recorded for provenance but excluded from automated drift checking
+(marked "drift_check": false).
 
 Usage:
     python tools/build-provenance.py             # write docs/PROVENANCE.json
@@ -56,6 +55,9 @@ def is_source_doc(p: Path) -> bool:
     if p.name in EXCLUDE_NAMES:
         return False
     if any(p.name.startswith(pre) for pre in EXCLUDE_PREFIX):
+        return False
+    rel = p.relative_to(REPO_ROOT).as_posix()
+    if rel.startswith(("docs/perception/lua/", "docs/lua-lang/")):
         return False
     return True
 

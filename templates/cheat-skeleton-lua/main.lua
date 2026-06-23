@@ -46,6 +46,8 @@ end
 function on_frame()
     if not g_initialized or not g_proc or not g_proc:alive() then return end
 
+    sync_from_widgets()  -- pull GUI widget state into the config globals
+
     esp_update()
     aimbot_update()
     triggerbot_update()

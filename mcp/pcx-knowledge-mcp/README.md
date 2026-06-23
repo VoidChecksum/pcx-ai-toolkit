@@ -14,7 +14,8 @@ The "indexed database all LLMs can query" half of the toolkit's LLM-knowledge st
 | `get_file(path)` | Fetch full content of any file by repo-relative path. |
 | `list_files(category="")` | Enumerate files, optionally filtered by category (`docs`, `skills`, `knowledge`, `rules`, `templates`, `tools`, `signatures`, `mcp`). |
 | `overview()` | Top-level toolkit summary with file counts per category and starting-point recommendations. |
-| `validate_code(code, language, source_path="")` | Check a code snippet against the PCX API index. Catches unknown functions, methods, types, and missing Enma imports. Returns `{findings, ok}`. |
+| `api_lookup(symbol, language="")` | Exact source-backed lookup for a function, method, or type. Returns signatures, language availability, official source URLs, and typo suggestions. |
+| `validate_code(code, language, source_path="")` | Check a code snippet against the PCX API index. Catches unknown functions, wrong-language symbols, unknown types, and missing Enma imports. Returns `{findings, ok}` with source-backed repair context. |
 
 **Resources** (MCP-fetchable URIs):
 
@@ -133,7 +134,8 @@ With it:
 
 1. **Ask the AI to search first.** "search the corpus for 'world to screen with row-major matrix'" → returns the top hits across knowledge/, docs/perception/, .claude/skills/ ranked by relevance.
 2. **Fetch the most relevant.** "get_file the top result" or directly reference the URI.
-3. **AI works against the cited source** rather than guessing the API surface.
+3. **Check proposed API names.** "api_lookup draw_text enma" verifies exact signatures and source URLs before code is written.
+4. **Validate generated code.** "validate_code this Enma snippet" catches hallucinated or cross-language symbols before you run it.
 
 For tools that support resource URIs (Claude Desktop, Cline): the AI can also discover files lazily — list_files to enumerate, then fetch what's relevant. No hardcoded path knowledge needed.
 

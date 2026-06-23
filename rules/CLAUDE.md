@@ -1,11 +1,12 @@
 # Perception.cx Scripting Project
 
-Languages: Enma (.em), AngelScript (.as), C++
+Languages: Enma (.em), AngelScript (.as)
 
 ## Documentation
 
 Full API docs at `docs/` in this toolkit. **Read the relevant doc before writing any API call.**
 
+- Start here for every task: `docs/perception/llm-routing.md` — choose Enma vs AngelScript before using any API name.
 - Enma language: `docs/enma/llms-language.md` (complete single-page reference)
 - PCX Enma APIs: `docs/perception/*.md` (proc, render, gui, input, cpu, zydis, unicorn, net, win, fs, sound, lifecycle, mcp)
 - PCX AngelScript APIs: `docs/perception/angelscript/*.md`
@@ -63,7 +64,7 @@ project/
 4. **Goal-driven execution** — done = visible success criteria met on the live target, not "it compiles."
 ## Anti-Hallucination Rule
 
-Do not invent PCX, Enma, AngelScript, or Lua API names. Every function,
+Do not invent PCX, Enma, or AngelScript API names. Every function,
 method, type, and import must be traceable to one of these two upstream
 sources:
 
@@ -77,8 +78,8 @@ structured markdown. Prefer reading the live upstream doc over the local
 The generated `knowledge/pcx-api-index.json` is an acceptable shortcut once
 you have confirmed the symbol exists in the upstream docs. Before delivering
 code, run `pcx verify <file>`. Fix every `unknown_call`, `unknown_type`,
-and `missing_import` by reading the relevant upstream doc — do not rename
-symbols to silence the checker.
+`missing_import`, `wrong_language_symbol`, and `wrong_language_type` by reading
+the relevant upstream doc — do not rename symbols to silence the checker.
 
 See `knowledge/pcx-doc-roots.md` for the full sourcing policy.
 

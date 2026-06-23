@@ -65,8 +65,6 @@ AS_BUILTIN_TYPES = {
     "funcdef",
 }
 
-LUA_BUILTIN_NAMES = {"main", "on_frame", "on_unload", "on_tick"}
-
 
 def _fetch(url: str, timeout: int = 30) -> str:
     """Fetch a URL and return UTF-8 text."""
@@ -160,7 +158,7 @@ def build_index() -> dict[str, object]:
                 modules.setdefault(mod, set())
 
         for lang_hint, body in _find_markdown_code_blocks(text):
-            block_language = lang_hint if lang_hint in {"enma", "angelscript", "lua"} else language
+            block_language = lang_hint if lang_hint in {"enma", "angelscript"} else language
             sigs = extract_api_signatures(body, block_language, source_url)
             for sig in sigs:
                 name = sig["name"]
@@ -175,20 +173,6 @@ def build_index() -> dict[str, object]:
 
     # Treat any module-like word imported in Enma examples as a module.
     module_names = set(modules.keys())
-
-    # Lua lifecycle entry points are not part of the two roots, but the
-    # symbol-checker still supports Lua scripts that use them.
-    for name in LUA_BUILTIN_NAMES:
-        functions.setdefault(name, []).append({
-            "name": name,
-            "language": "lua",
-            "source": "lua-lifecycle",
-            "kind": "global",
-            "parent_type": None,
-            "arity": -1,
-            "arg_types": [],
-            "return_type": "",
-        })
 
     # Drop accidental keyword/type entries and empty/invalid identifiers.
     types = {t for t in types if t and not t[0].isdigit() and t not in {
@@ -251,4 +235,3 @@ def main() -> int:
     assert isinstance(functions, Sized) and isinstance(methods, Sized)
     assert isinstance(types, Sized) and isinstance(modules, Sized)
     return 0
-

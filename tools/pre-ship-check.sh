@@ -80,7 +80,7 @@ emit() {
 
 src_files() {
     # all source files we care about, NUL-separated so paths-with-spaces survive
-    find . -type f \( -name '*.em' -o -name '*.as' -o -name '*.lua' \) \
+    find . -type f \( -name '*.em' -o -name '*.as' \) \
         -not -path './.git/*' -not -path '*/node_modules/*' \
         -not -path '*/build/*' -not -path '*/dist/*'  2>/dev/null
 }
@@ -88,7 +88,7 @@ src_files() {
 src_files_md() {
     # Source + config + docs. Used for the LICENSE/README/CHANGELOG existence
     # checks; path-leak scan (check 1) restricts further to source files only.
-    find . -type f \( -name '*.em' -o -name '*.as' -o -name '*.lua' \
+    find . -type f \( -name '*.em' -o -name '*.as' \
                    -o -name '*.json' -o -name '*.md' \) \
         -not -path './.git/*' -not -path '*/node_modules/*' \
         -not -path '*/build/*' -not -path '*/dist/*' 2>/dev/null

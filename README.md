@@ -11,7 +11,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.docs&label=Docs&suffix=%20pages&color=brightgreen)](#documentation-coverage)
 [![Doc Lines](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.doc_lines&label=Doc%20Lines&color=brightgreen)](#documentation-coverage)
-[![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript%20%7C%20Lua%20%7C%20C%2B%2B-orange.svg)](#)
+[![Languages](https://img.shields.io/badge/Languages-Enma%20%7C%20AngelScript-orange.svg)](#)
 [![MCP Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.mcp_tools&label=MCP%20Tools&color=purple)](#perception-mcp-server)
 [![Skills](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.skills&label=AI%20Skills&color=yellow)](#ai-skills)
 [![VSIX](https://img.shields.io/badge/VS%20Code-VSIX%20in%20Releases-007ACC.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/releases)
@@ -45,7 +45,7 @@ LLMs don't know Enma. They don't know the Perception.cx API. Ask them to write a
 
 ## The Solution
 
-Give the AI **43,000+ lines of real documentation**, a **game-cheat master skill**, the **12 hard rules**, and **ready-to-use scaffolds** for ESP, aimbot, triggerbot, and radar. The AI reads the actual docs, follows real API signatures, and produces scripts that work.
+Give the AI **32,000+ lines of supported Enma + AngelScript documentation**, a **game-cheat master skill**, the **12 hard rules**, and **ready-to-use scaffolds** for ESP, aimbot, triggerbot, and radar. The AI reads the actual docs, follows real API signatures, and produces scripts that work.
 
 ```
 Before:  "Write me an ESP overlay"
@@ -63,8 +63,10 @@ Result:  Compiles. Runs. Correct API calls.
 The toolkit installs a unified CLI tool (`pcx`) directly to your system `PATH`. Manage compilation, synchronization, linting, symbol validation, and auto-updating with simple commands from any folder:
 
 - `pcx lint <script.em>` – Lints Enma scripts against the 12 guidelines.
-- `pcx symbol-check <script.em|as|lua>` – Catches hallucinated API names and missing imports against `knowledge/pcx-api-index.json`.
-- `pcx verify <script.em|as|lua>` – Runs `lint` + `symbol-check` in one pass.
+- `pcx symbol-check <script.em|as>` – Catches hallucinated API names, wrong-language symbols, and missing imports against `knowledge/pcx-api-index.json`, with source-backed repair hints.
+- `pcx api <symbol> [--lang enma|angelscript]` – Exact API oracle with official source URLs and typo suggestions before trusting an LLM-proposed call.
+- `pcx check-answer <answer.md>` – Scans an LLM Markdown answer for Enma/AngelScript code blocks and validates them before you copy code.
+- `pcx verify <script.em|as>` – Runs `lint` + `symbol-check` in one pass.
 - `pcx update` – Self-updates the toolkit from git, syncs skills, and rebuilds LSP.
 - `pcx setup` – Re-runs LSP compilation, rebuilds core parser, and syncs AI skills.
 ## Scope
@@ -145,6 +147,8 @@ You can also run other helper tools via the `pcx` CLI from anywhere:
 pcx setup          # re-run LSP build and skill sync
 pcx lint [file]    # lint Enma (.em) script against the 12 guidelines
 pcx symbol-check <file>  # catch hallucinated API names / missing imports
+pcx api <symbol>         # source-backed API lookup / typo suggestions
+pcx check-answer <md>    # validate Enma/AngelScript code blocks in an LLM answer
 pcx verify <file>        # lint + symbol-check in one pass
 pcx build-api-index      # regenerate knowledge/pcx-api-index.json
 pcx check-drift    # check documentation drift against live upstream
@@ -206,25 +210,24 @@ Upgrade anytime with `uv tool upgrade ida-pro-mcp`. Full reference:
 <td width="50%" valign="top">
 
 ### Documentation
-130+ pages, 43,000+ lines (live counts in docs/COUNTS.json)
+123 supported pages, 32,000+ lines (live counts in docs/COUNTS.json)
 
 - Complete Enma language spec
 - All 18 standard library addons
-- Full C++ SDK embedding guide
-- Every PCX API (Enma, AngelScript, Lua)
+- Enma language and addon references
+- Every PCX API surface used by Enma and AngelScript
 - IDE, Extensions, Analyzer docs
 
 </td>
 <td width="50%" valign="top">
 
 ### AI Skills
-24 Claude Code / OMC skills
+25 Claude Code / OMC skills
 
 - **game-cheat-script-master** — mandatory entry point for all game-cheat requests: co-skills, read-first docs, project scaffold, and domain rules
 - **game-hacking-pcx** — doc index, API rules, scaffolds, cookbook links
 - **game-cheat-guidelines** — 12 behavioral rules (Enma)
 - **pcx-angelscript-discipline** — 10 AS-specific rules (`@` handles, `&out`, `array<T>`)
-- **pcx-lua-discipline** — 10 Lua-specific rules (int subtype, `pcall`, hot-reload)
 - **pcx-coding-discipline** — Karpathy workflow: scripts
 - **pcx-re-discipline** — Karpathy workflow: RE
 - **pcx-debug-overlay** — diagnostic surfaces separate from production overlay
@@ -245,7 +248,7 @@ Upgrade anytime with `uv tool upgrade ida-pro-mcp`. Full reference:
 - **pcx-defer-ledger** — cleanup/RAII validation for temporary resources
 - **rust-python-integration** — multi-binary Cargo architecture + Python proxies & fallbacks
 
-Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
+Auto-trigger on `.em` / `.as` work and PCX topics.
 
 </td>
 </tr>
@@ -253,14 +256,14 @@ Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
 <td width="50%" valign="top">
 
 ### Knowledge Base
-25 reference files
+25 supported reference files
 
 - Enma + PCX API cheatsheets
 - Working code patterns (13 recipes)
 - **cheat-script-cookbook.md** — game-cheat recipes: pattern scan, pointer chain, W2S, ESP, aim smoothing, FOV, triggerbot, radar, config save/load, unload cleanup
 - **vmprotect2-analysis.md** — VMP 2.x triage, `vmp2` suite (`vmemu`/`vmdevirt`/`vmprofiler`), x64dbg VMProtect plugin workflow
 - GUI design patterns (section layout, slider discipline, hotkey conventions)
-- Cross-language bridge (Enma vs AngelScript vs Lua decision guide)
+- Enma vs AngelScript binding and migration notes
 - Offset-finding methodology, RE plugin reference
 - Aimbot math (atan2, FOV, prediction, smoothing)
 - Multi-file script organization patterns (extends `templates/full-project/`)
@@ -276,11 +279,12 @@ Auto-trigger on `.em` / `.as` / `.lua` work and PCX topics.
 MCP + LSP + Rules + 3 LLM-knowledge surfaces
 
 - **Perception MCP** (59 live-process tools)
-- **pcx-knowledge-mcp** (search + fetch over 211 docs)
+- **pcx-knowledge-mcp** (search + fetch over the supported Enma/AngelScript corpus)
 - **Enma + AngelScript LSPs** (syntax, completion, hover)
-- **`docs/llms.txt`** + 6 concatenated context-pack bundles
+- **`docs/llms.txt`** + 5 concatenated context-pack bundles
+- **Perception-first LLM routing** (`docs/perception/llm-routing.md`)
 - **Rules drop-ins** for Claude / Cursor / Cline / Copilot
-- **28 standalone tools** (Python + bash, stdlib-only)
+- **32 standalone tools** (Python + bash, stdlib-only)
 </td>
 </tr>
 </table>
@@ -289,15 +293,15 @@ MCP + LSP + Rules + 3 LLM-knowledge surfaces
 
 ## Indexed Knowledge Surfaces
 
-Three complementary surfaces let any AI tool reach the toolkit's corpus efficiently. Pick by integration model; see [`.claude/skills/pcx-knowledge-index/SKILL.md`](.claude/skills/pcx-knowledge-index/SKILL.md) for the full decision tree.
+Three complementary surfaces let any AI tool reach the toolkit's corpus efficiently. Start with [`docs/perception/llm-routing.md`](docs/perception/llm-routing.md) so the model chooses the correct Enma or AngelScript binding before it writes code. Pick the loading surface by integration model; see [`.claude/skills/pcx-knowledge-index/SKILL.md`](.claude/skills/pcx-knowledge-index/SKILL.md) for the full decision tree.
 
 | # | Surface | What it is | Who uses it | Cost |
 |---|---------|------------|-------------|------|
-| 1 | [`docs/llms.txt`](docs/llms.txt) | 45 KB structured index (Anthropic / Mintlify convention) | Tools that auto-fetch the convention (Claude, Cursor, ...) | 45 KB context |
-| 2 | `docs/llms-perception-{enma,angelscript,lua}.md` | Per-language concatenated context packs (215 KB - 950 KB) | Aider `/read`, Cursor / Continue `@file`, Copilot paste | bundle size |
-| 2 | [`docs/llms-skills.md`](docs/llms-skills.md) / [`llms-knowledge.md`](docs/llms-knowledge.md) | All 23 skills / all 23 knowledge refs concatenated | Same as above, category-focused | 323-350 KB |
-| 2 | [`docs/llms-full.txt`](docs/llms-full.txt) | Full corpus concatenation (~2 MB) | All-language sessions in non-MCP tools | 2 MB context |
-| 3 | [`mcp/pcx-knowledge-mcp/`](mcp/pcx-knowledge-mcp/) | Python MCP server with `search` / `get_file` / `list_files` / `overview` | Claude Desktop, Cline, Continue, Zed, any MCP-aware tool | one process, <100 ms cold |
+| 1 | [`docs/llms.txt`](docs/llms.txt) | 56 KB structured index (Anthropic / Mintlify convention) | Tools that auto-fetch the convention (Claude, Cursor, ...) | 56 KB context |
+| 2 | `docs/llms-perception-{enma,angelscript}.md` | Per-language concatenated context packs | Aider `/read`, Cursor / Continue `@file`, Copilot paste | bundle size |
+| 2 | [`docs/llms-skills.md`](docs/llms-skills.md) / [`llms-knowledge.md`](docs/llms-knowledge.md) | Supported skills / knowledge refs concatenated | Same as above, category-focused | 361-363 KB |
+| 2 | [`docs/llms-full.txt`](docs/llms-full.txt) | Full supported corpus concatenation (~2.1 MB) | Enma + AngelScript sessions in non-MCP tools | 2.1 MB context |
+| 3 | [`mcp/pcx-knowledge-mcp/`](mcp/pcx-knowledge-mcp/) | Python MCP server with `search` / `get_file` / `list_files` / `overview` / `api_lookup` / `validate_code` | Claude Desktop, Cline, Continue, Zed, any MCP-aware tool | one process, <100 ms cold |
 
 All static bundles are generated by [`tools/build-llms-index.py`](tools/build-llms-index.py). CI runs `build-llms-index.py --check` on every push; the build fails if the committed bundles drift from the source.
 
@@ -356,7 +360,7 @@ The toolkit versions script compatibility against the rolling release dates of t
 ```
 pcx-ai-toolkit/
 │
-├── docs/                             130+ pages of documentation (live count in docs/COUNTS.json)
+├── docs/                             123 supported pages of documentation (live count in docs/COUNTS.json)
 │   ├── enma/                         ── Enma language, addons, SDK (50 files)
 │   │   ├── llms-language.md              Complete language reference (2,861 lines)
 │   │   ├── llms-sdk.md                   Complete SDK reference (832 lines)
@@ -367,16 +371,13 @@ pcx-ai-toolkit/
 │   ├── perception/                   ── Perception.cx platform APIs
 │   │   ├── *.md                          Enma APIs (19 files)
 │   │   ├── angelscript/                  AngelScript APIs (24 files)
-│   │   └── lua/                          Lua APIs (17 files)
 │   ├── angelscript-lang/              ── Core AngelScript language manual (angelcode.com, zlib license)
-│   └── lua-lang/                      ── Core Lua 5.4 reference (lua.org, Lua license)
 │
 ├── .claude/skills/                   ── AI Skills (24)
 │   ├── game-cheat-script-master/        Mandatory entry point for every game-cheat request
 │   ├── game-hacking-pcx/                Doc index + coding rules + scaffolds/cookbook links
 │   ├── game-cheat-guidelines/           12 behavioral guidelines (Enma)
 │   ├── pcx-angelscript-discipline/      10 AS-specific rules
-│   ├── pcx-lua-discipline/              10 Lua-specific rules
 │   ├── pcx-coding-discipline/           Karpathy workflow — writing scripts
 │   ├── pcx-re-discipline/               Karpathy workflow — reverse engineering
 │   ├── ai-pair-programming/             Driving Claude/Cursor/Cline/Aider/Copilot well
@@ -401,7 +402,6 @@ pcx-ai-toolkit/
 │   ├── enma-cheatsheet.md                Language quick-ref card
 │   ├── pcx-api-cheatsheet.md             All APIs at a glance
 │   ├── pcx-version-matrix.md             Since-version API matrix (sourced from changelogs.md)
-│   ├── pcx-cross-language-bridge.md      Enma vs AngelScript vs Lua decision guide
 │   ├── gui-design-patterns.md            PCX sidebar layout + slider/hotkey/color discipline
 │   ├── script-organization-patterns.md   Multi-file project organization beyond full-project/
 │   ├── anti-cheat-architecture.md        EAC/BE/Vanguard/GG architecture + detection matrix
@@ -490,7 +490,7 @@ pcx-ai-toolkit/
 
 ## Documentation Coverage
 
-> **All published Enma + Perception.cx GitBook pages are mirrored, plus the core AngelScript and Lua language references. Counts are live — see the badges above, sourced from [`docs/COUNTS.json`](docs/COUNTS.json).**
+> **Published Enma + AngelScript Perception.cx docs are mirrored into the LLM surfaces, plus the core AngelScript language reference. Counts are live — see the badges above, sourced from [`docs/COUNTS.json`](docs/COUNTS.json).**
 
 <table>
 <tr>
@@ -518,27 +518,15 @@ pcx-ai-toolkit/
 <td>All of the above + Intrinsics, Zydis Encoder, Bit Reinterpret, Mutex, Atomic Types, CS2 Extended, Custom Draw</td>
 </tr>
 <tr>
-<td><strong>PCX Lua APIs</strong></td>
-<td align="center">17</td>
-<td align="center">5,779</td>
-<td>All core APIs in Lua syntax</td>
-</tr>
-<tr>
 <td><strong>AngelScript language (core)</strong></td>
 <td align="center">25</td>
 <td align="center">2,162</td>
 <td>Core AS language manual scraped from angelcode.com (zlib/libpng license) — datatypes, strings, arrays, expressions, statements, functions, classes, handles, generics, delegates, enums, namespaces, coroutines, add-ons</td>
 </tr>
 <tr>
-<td><strong>Lua language (core)</strong></td>
-<td align="center">3</td>
-<td align="center">6,232</td>
-<td>Core Lua 5.4 reference from lua.org (Lua license) — see <a href="docs/lua-lang/">docs/lua-lang/</a></td>
-</tr>
-<tr>
 <td><strong>Total</strong></td>
-<td align="center"><strong>138</strong></td>
-<td align="center"><strong>43,616</strong></td>
+<td align="center"><strong>123</strong></td>
+<td align="center"><strong>32,226</strong></td>
 </tr>
 </table>
 
@@ -671,7 +659,7 @@ Technical patterns for reversing Windows kernel drivers: identify WDM vs KMDF, e
 
 ### Plus 12 more skills
 
-`pcx-angelscript-discipline` · `pcx-lua-discipline` · `re-evidence-log` · `pcx-patch-day-playbook` · `multi-binary-targeting` · `script-bundler` · `pcx-perf-budget` · `pcx-streamproof` · `pcx-debug-overlay` · `pcx-knowledge-index` · `ai-pair-programming` · `mcp-tool-routing`
+`pcx-angelscript-discipline` · `re-evidence-log` · `pcx-patch-day-playbook` · `multi-binary-targeting` · `script-bundler` · `pcx-perf-budget` · `pcx-streamproof` · `pcx-debug-overlay` · `pcx-knowledge-index` · `ai-pair-programming` · `mcp-tool-routing`
 
 Browse the full set at [`.claude/skills/`](.claude/skills/). Every skill auto-triggers on relevant keywords / file extensions.
 
@@ -737,7 +725,7 @@ Complete reference for the installed RE toolkit: 6 IDA plugins (hrtng deobfuscat
 
 ### Plus 17 more knowledge files
 
-Browse the full set at [`knowledge/`](knowledge/). Topics include: `aimbot-math` · `gui-design-patterns` · `script-organization-patterns` · `pcx-version-matrix` · `pcx-cross-language-bridge` · `network-protocol-re` · 5 engine RE references (CryEngine, Frostbite, RE Engine, REDengine, Godot) · obfuscation taxonomy · deobfuscation tools · game targets · custom draw patterns · community tools.
+Browse the full set at [`knowledge/`](knowledge/). Topics include: `aimbot-math` · `gui-design-patterns` · `script-organization-patterns` · `pcx-version-matrix` · `network-protocol-re` · 5 engine RE references (CryEngine, Frostbite, RE Engine, REDengine, Godot) · obfuscation taxonomy · deobfuscation tools · game targets · custom draw patterns · community tools.
 
 ---
 

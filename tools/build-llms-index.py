@@ -16,8 +16,8 @@ Generates four kinds of artifacts under docs/:
                              ingest one big file but don't speak the llms.txt
                              convention.
 
-  3. llms-perception-*.md  — Per-language context packs (Enma / AngelScript /
-                             Lua) for tools like Cursor / Aider / Continue
+  3. llms-perception-*.md  — Per-language context packs (Enma / AngelScript)
+                             for tools like Cursor / Aider / Continue
                              that want to @-reference a single bundle scoped
                              to one scripting language.
 
@@ -56,9 +56,7 @@ CATEGORIES = [
     ('docs/enma/**/*.md',              'Enma Language Docs',     'The native Perception.cx scripting language: syntax, addons, SDK, lifecycle.'),
     ('docs/perception/*.md',           'Enma Platform APIs',     'The Perception.cx host API surface as exposed to Enma.'),
     ('docs/perception/angelscript/**/*.md', 'AngelScript APIs',  'The Perception.cx host API surface as exposed to AngelScript.'),
-    ('docs/perception/lua/**/*.md',    'Lua APIs',               'The Perception.cx host API surface as exposed to Lua.'),
     ('docs/angelscript-lang/**/*.md', 'AngelScript Language (Core)', 'The core AngelScript language manual scraped from angelcode.com (zlib/libpng license): datatypes, strings, arrays, expressions, statements, functions, classes, handles, generics, delegates, enums, namespaces, coroutines, add-ons.'),
-    ('docs/lua-lang/**/*.md',         'Lua Language (Core)',         'The core Lua 5.4 reference manual scraped from lua.org (Lua license).'),
     ('.claude/skills/*/SKILL.md',      'AI Skills',              'Behavioral / discipline skills loaded automatically by AI tools (Claude Code / OMC).'),
     ('knowledge/*.md',                 'Knowledge References',   'Quick references for engines, anti-cheat architecture, patterns, methodology.'),
     ('rules/*.md',                     'IDE Drop-Ins',           'Project-rules drop-ins for Claude Code / Cursor / Cline / Copilot / Aider / Zed / Continue.'),
@@ -73,6 +71,9 @@ CATEGORIES = [
 SKIP_PATTERNS = [
     re.compile(r'docs/llms[-_].*'),
     re.compile(r'docs/INDEX\.md$'),
+    re.compile(r'docs/(perception/lua|lua-lang)/'),
+    re.compile(r'\.claude/skills/pcx-lua-discipline/'),
+    re.compile(r'knowledge/pcx-cross-language-bridge\.md$'),
     re.compile(r'lsp/'),
     re.compile(r'visualstudio/.*\.(vsix|dll|exe)$'),
     re.compile(r'tools/pe-parser/'),
@@ -86,6 +87,7 @@ LANG_BUNDLES = {
         'title': 'Enma Context Pack',
         'desc':  'Single-file context pack for AI tools writing Enma scripts. Bundles the language docs, platform APIs, behavioral skills, and quick-reference knowledge most relevant when working in Enma.',
         'globs': [
+            'docs/perception/llm-routing.md',
             'docs/enma/**/*.md',
             'docs/perception/*.md',
             '.claude/skills/game-cheat-guidelines/SKILL.md',
@@ -106,26 +108,13 @@ LANG_BUNDLES = {
         'title': 'AngelScript Context Pack',
         'desc':  'Single-file context pack for AI tools writing AngelScript scripts on Perception.cx. Bundles the AngelScript API surface, the discipline skill, and cross-references to the underlying 12 guidelines.',
         'globs': [
+            'docs/perception/llm-routing.md',
             'docs/perception/angelscript/**/*.md',
             'docs/angelscript-lang/**/*.md',
             '.claude/skills/pcx-angelscript-discipline/SKILL.md',
             '.claude/skills/game-cheat-guidelines/SKILL.md',
             '.claude/skills/game-hacking-pcx/SKILL.md',
             'knowledge/pcx-api-cheatsheet.md',
-            'knowledge/pcx-cross-language-bridge.md',
-        ],
-    },
-    'lua': {
-        'title': 'Lua Context Pack',
-        'desc':  'Single-file context pack for AI tools writing Lua scripts on Perception.cx. Bundles the Lua API surface, the discipline skill, and cross-references to the underlying 12 guidelines.',
-        'globs': [
-            'docs/perception/lua/**/*.md',
-            'docs/lua-lang/**/*.md',
-            '.claude/skills/pcx-lua-discipline/SKILL.md',
-            '.claude/skills/game-cheat-guidelines/SKILL.md',
-            '.claude/skills/game-hacking-pcx/SKILL.md',
-            'knowledge/pcx-api-cheatsheet.md',
-            'knowledge/pcx-cross-language-bridge.md',
         ],
     },
 }
@@ -284,7 +273,7 @@ def build_llms_full() -> str:
     desc = ('Full text concatenation of every doc, skill, knowledge reference, IDE drop-in, '
             'signature guide, and template in the pcx-ai-toolkit. ~MB-sized; load into AI tools '
             'that accept a single bundle. For per-language context, use the smaller '
-            'llms-perception-{enma,angelscript,lua}.md packs instead.')
+            'llms-perception-{enma,angelscript}.md packs instead.')
     return build_concat_bundle('pcx-ai-toolkit — Full Bundle', desc, files)
 
 
@@ -325,7 +314,6 @@ GENERATORS = {
     'llms-full.txt':                  build_llms_full,
     'llms-perception-enma.md':        lambda: build_lang_bundle('enma'),
     'llms-perception-angelscript.md': lambda: build_lang_bundle('angelscript'),
-    'llms-perception-lua.md':         lambda: build_lang_bundle('lua'),
     'llms-skills.md':                 build_skills_bundle,
     'llms-knowledge.md':              build_knowledge_bundle,
 }

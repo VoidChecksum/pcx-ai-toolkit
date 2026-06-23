@@ -19,9 +19,7 @@ int main() {
         return 0;
     }
 
-    g_base = g_proc.base_address();
-    g_size = g_proc.get_module_size(TARGET_PROCESS);
-    if (g_base == 0 || g_size == 0) {
+    if (!g_proc.get_module(TARGET_PROCESS, g_base, g_size)) {
         log("[main] module not ready");
         return 0;
     }
@@ -33,6 +31,9 @@ int main() {
 
     g_initialized = true;
     setup_menu();
+
+    // Poll widget state back into the config globals every tick.
+    register_callback(@sync_from_widgets, 16, 0);
 
     // Memory/update routines (~60 Hz)
     register_callback(@esp_update, 16, 0);

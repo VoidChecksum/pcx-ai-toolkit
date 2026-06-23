@@ -62,7 +62,7 @@ void esp_render(int id, int data_index) {
 
         string hp = format("{}", e.health);
         draw_text(hp, vec2(head2d.x - 10.0, head2d.y - 18.0), white,
-                  get_font14(), 0, color(0,0,0,0), 0.0);
+                  get_font18(), 0, color(0,0,0,0), 0.0);
     }
 }
 

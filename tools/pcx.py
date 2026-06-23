@@ -10,6 +10,8 @@ Usage:
     pcx update         # self-update, rebuild LSP, sync skills, check bundles
     pcx lint [file]    # lint Enma (.em) script against the 12 guidelines
     pcx symbol-check <file>   # catch hallucinated API names / missing imports
+    pcx api <symbol>          # source-backed API lookup / typo suggestions
+    pcx check-answer <file.md> # validate code blocks in an LLM answer
     pcx build-api-index       # regenerate knowledge/pcx-api-index.json
     pcx verify <file>         # lint + symbol-check + LSP diagnostics (when built)
     pcx check-drift    # check documentation drift against live upstream
@@ -244,10 +246,10 @@ def cmd_new(args: list[str]) -> int:
 def cmd_verify(args: list[str]) -> int:
     """Run lint + symbol-check on one script.
 
-    Usage: pcx verify <file.em|.as|.lua>
+    Usage: pcx verify <file.em|.as>
     """
     if not args or any(a in ("-h", "--help") for a in args):
-        print("Usage: pcx verify <file.em|.as|.lua>")
+        print("Usage: pcx verify <file.em|.as>")
         return 0 if any(a in ("-h", "--help") for a in args) else 1
 
     target = args[0]
@@ -276,8 +278,9 @@ def main() -> int:
     ap.add_argument("-V", "--version", action="version",
                     version=f"pcx-ai-toolkit v{get_version()}")
     ap.add_argument("command", nargs="?", help=(
-        "Command to run: setup, update, lint, symbol-check, build-api-index, "
-        "verify, check-drift, check-mcp, check-matrix, counts, version, doctor, new, help"
+        "Command to run: setup, update, lint, symbol-check, api, check-answer, "
+        "build-api-index, verify, check-drift, check-mcp, check-matrix, counts, "
+        "version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
     args = ap.parse_args()
@@ -308,6 +311,12 @@ def main() -> int:
 
     if cmd == "symbol-check":
         return run_python_tool("symbol-check", sub_args)
+
+    if cmd in ("api", "api-lookup"):
+        return run_python_tool("api-lookup", sub_args)
+
+    if cmd in ("check-answer", "answer-check"):
+        return run_python_tool("check-llm-answer", sub_args)
 
     if cmd == "build-api-index":
         return run_python_tool("build-api-index", sub_args)

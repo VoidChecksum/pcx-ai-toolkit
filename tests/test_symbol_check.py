@@ -73,6 +73,47 @@ int64 main() {
         finally:
             path.unlink(missing_ok=True)
 
+    def test_angelscript_rejects_enma_lifecycle(self):
+        code = """
+int main() {
+    register_routine(cast<int64>(on_render), 0);
+    return 1;
+}
+
+void on_render(int data) {
+    println("wrong language");
+}
+"""
+        path = Path("/tmp/pcx_wrong_language_as_test.as")
+        path.write_text(code, encoding="utf-8")
+        try:
+            rc, out, err = _run(str(path))
+            self.assertEqual(rc, 1, f"AS using Enma lifecycle should fail:\n{out}\n{err}")
+            self.assertIn("wrong_language_symbol", out)
+            self.assertIn("register_routine", out)
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_enma_rejects_angelscript_lifecycle(self):
+        code = """
+int64 main() {
+    register_callback(on_tick, 16, 0);
+    log("wrong language");
+    return 1;
+}
+
+void on_tick(int64 data) {}
+"""
+        path = Path("/tmp/pcx_wrong_language_enma_test.em")
+        path.write_text(code, encoding="utf-8")
+        try:
+            rc, out, err = _run(str(path))
+            self.assertEqual(rc, 1, f"Enma using AS lifecycle should fail:\n{out}\n{err}")
+            self.assertIn("wrong_language_symbol", out)
+            self.assertIn("register_callback", out)
+        finally:
+            path.unlink(missing_ok=True)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -37,6 +37,28 @@ color   g_friendly_color  = color(60, 170, 255, 255);
 color   g_enemy_color     = color(255, 60, 60, 255);
 int32   g_background_alpha = 150;
 
+// ── Widget handles (bound in main, synced via on_change) ──
+sidebar_section_t g_sec;
+checkbox_t        g_cb_enabled;
+slider_t          g_sl_radius;
+slider_t          g_sl_posx;
+slider_t          g_sl_posy;
+slider_t          g_sl_scale;
+slider_t          g_sl_alpha;
+checkbox_t        g_cb_friendlies;
+colorpicker_t     g_cp_friendly;
+colorpicker_t     g_cp_enemy;
+
+void on_enabled(int64 h)          { g_enabled          = g_cb_enabled.get(); }
+void on_radius(int64 h)           { g_radius           = g_sl_radius.get(); }
+void on_posx(int64 h)             { g_pos_x            = g_sl_posx.get(); }
+void on_posy(int64 h)             { g_pos_y            = g_sl_posy.get(); }
+void on_scale(int64 h)            { g_world_scale      = g_sl_scale.get(); }
+void on_alpha(int64 h)            { g_background_alpha = cast<int32>(g_sl_alpha.get()); }
+void on_friendlies(int64 h)       { g_show_friendlies  = g_cb_friendlies.get(); }
+void on_friendly_color(int64 h)   { g_friendly_color   = g_cp_friendly.get(); }
+void on_enemy_color(int64 h)      { g_enemy_color      = g_cp_enemy.get(); }
+
 // ── Resolved once in main() (rule #2: addresses are uint64) ──
 proc_t g_proc;
 uint64 g_entity_list = 0;  // address of the entity-list global
@@ -161,18 +183,27 @@ int64 main() {
     g_ent_team.resize(MAX_ENTITIES);
 
     // GUI — every tunable is a widget, no magic constants (rule #11).
-    int64 sec = create_section("Minimap");
-    section_checkbox(sec, "Enabled", g_enabled);
-    section_slider_float(sec, "Radius (px)", g_radius, 40.0, 240.0);
-    section_slider_float(sec, "Position X", g_pos_x, 0.0, 1920.0);
-    section_slider_float(sec, "Position Y", g_pos_y, 0.0, 1080.0);
-    section_slider_float(sec, "World Scale (units/px)", g_world_scale, 1.0, 80.0);
-    section_slider_int(sec, "Background Alpha", g_background_alpha, 0, 255);
-    section_checkbox(sec, "Show Friendlies", g_show_friendlies);
-    section_color_picker(sec, "Friendly Color", g_friendly_color);
-    section_color_picker(sec, "Enemy Color", g_enemy_color);
-    section_separator(sec);
-    section_label(sec, "Top of map = player forward");
+    g_sec = create_sidebar_section("Minimap", "");
+    g_cb_enabled   = g_sec.create_checkbox("Enabled", g_enabled);
+    g_cb_enabled.on_change(cast<int64>(on_enabled));
+    g_sl_radius    = g_sec.create_slider("Radius (px)", g_radius, 40.0, 240.0, 1.0);
+    g_sl_radius.on_change(cast<int64>(on_radius));
+    g_sl_posx      = g_sec.create_slider("Position X", g_pos_x, 0.0, 1920.0, 1.0);
+    g_sl_posx.on_change(cast<int64>(on_posx));
+    g_sl_posy      = g_sec.create_slider("Position Y", g_pos_y, 0.0, 1080.0, 1.0);
+    g_sl_posy.on_change(cast<int64>(on_posy));
+    g_sl_scale     = g_sec.create_slider("World Scale (units/px)", g_world_scale, 1.0, 80.0, 0.1);
+    g_sl_scale.on_change(cast<int64>(on_scale));
+    g_sl_alpha     = g_sec.create_slider("Background Alpha", cast<float64>(g_background_alpha), 0.0, 255.0, 1.0);
+    g_sl_alpha.on_change(cast<int64>(on_alpha));
+    g_cb_friendlies = g_sec.create_checkbox("Show Friendlies", g_show_friendlies);
+    g_cb_friendlies.on_change(cast<int64>(on_friendlies));
+    g_cp_friendly  = g_sec.create_colorpicker("Friendly Color", g_friendly_color);
+    g_cp_friendly.on_change(cast<int64>(on_friendly_color));
+    g_cp_enemy     = g_sec.create_colorpicker("Enemy Color", g_enemy_color);
+    g_cp_enemy.on_change(cast<int64>(on_enemy_color));
+    g_sec.create_separator();
+    g_sec.create_label("Top of map = player forward", ui_align::left);
 
     register_routine(cast<int64>(on_update), 0);
     register_routine(cast<int64>(on_render), 0);

@@ -67,7 +67,7 @@ function esp_render()
         local hp = string.format("%d", e.health)
         draw_text(hp, head2d.x - 10, head2d.y - 18,
                   255, 255, 255, 255,
-                  get_font14(), 0,
+                  get_font18(), 0,
                   0, 0, 0, 0, 0.0)
         ::continue::
     end

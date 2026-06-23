@@ -13,7 +13,7 @@ EntityInfo get_entity_under_crosshair() {
 
 void triggerbot_update(int64 data) {
     if (!g_trigger_enabled || !g_initialized || !g_proc.alive()) return;
-    if (!is_key_down(g_trigger_key)) return;
+    if (!key_down(g_trigger_key)) return;
 
     EntityInfo t = get_entity_under_crosshair();
     if (!t.valid) return;
@@ -23,7 +23,7 @@ void triggerbot_update(int64 data) {
     if (time_ms() - g_last_fire < g_trigger_delay_ms) return;
     g_last_fire = time_ms();
 
-    press_mouse_left();
+    mouse_left_click();
 }
 
 void triggerbot_render(int64 data) {

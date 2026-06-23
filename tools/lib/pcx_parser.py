@@ -278,7 +278,7 @@ FUNC_DEF_RE = re.compile(
 
 
 def extract_function_defs(code: str, lang: str) -> list[tuple[str, int]]:
-    """Return (name, line) for function definitions in Enma/AS/Lua."""
+    """Return (name, line) for function definitions in supported PCX languages."""
     out: list[tuple[str, int]] = []
     if lang == "lua":
         clean = strip_lua_comments(strip_lua_strings(code))
@@ -310,6 +310,19 @@ SIG_METHOD_RE = re.compile(
     r'^\s*(?:const\s+)?'
     r'([A-Za-z_][A-Za-z0-9_\u003c\u003e,\[\]\*\s]*?)\s+'
     r'([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*;?\s*$',
+)
+# Slash-abbreviated method signatures, e.g.
+#   uint8/16/32/64 proc.ru8/ru16/ru32/ru64(uint64 addr);
+#   bool proc.wu8/wu16/wu32/wu64(uint64 addr, uintN v);
+# The return width and every method name after a '/' are expanded into one
+# signature per concrete name so the index doesn't miss ru16/ru32/ru64 etc.
+SIG_METHOD_SLASH_RE = re.compile(
+    r'^\s*(?:const\s+)?'
+    r'([A-Za-z_][A-Za-z0-9_]*)'            # base return type (first width)
+    r'(?:/[0-9A-Za-z_]+)*\s+'              # optional slash-abbreviated return widths
+    r'([A-Za-z_][A-Za-z0-9_]*)\.'          # parent type
+    r'([A-Za-z_][A-Za-z0-9_]*(?:/[A-Za-z_][A-Za-z0-9_]*)+)\s*'  # slash-abbreviated names
+    r'\(([^)]*)\)\s*;?\s*$',
 )
 LUA_FUNC_RE = re.compile(
     r'^\s*(?:local\s+)?function\s+([A-Za-z_][A-Za-z0-9_\.:]*)\s*\(([^)]*)\)\s*$',

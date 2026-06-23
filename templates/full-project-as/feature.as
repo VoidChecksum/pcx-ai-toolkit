@@ -47,6 +47,6 @@ void feature_update_and_render() {
         float y = 30.0f + float(i / 32) * 22.0f;
         draw_rect_filled(x, y, 14.0f, 14.0f,
                          g_color_r, g_color_g, g_color_b, g_color_a,
-                         3.0f, RR_ALL);
+                         3.0f, RR_TOP_LEFT | RR_TOP_RIGHT | RR_BOTTOM_LEFT | RR_BOTTOM_RIGHT);
     }
 }

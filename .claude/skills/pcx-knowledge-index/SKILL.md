@@ -45,18 +45,17 @@ Located at `docs/llms.txt` (also `docs/llms-full.txt` for the full bundle).
 
 ### 2. Concatenated Context Packs — the Bundle Surface
 
-Located at `docs/llms-full.txt`, `docs/llms-perception-{enma,angelscript,lua}.md`, `docs/llms-skills.md`, `docs/llms-knowledge.md`.
+Located at `docs/llms-full.txt`, `docs/llms-perception-{enma,angelscript}.md`, `docs/llms-skills.md`, `docs/llms-knowledge.md`.
 
 **What it is.** Per-language and per-category single-file concatenations of the relevant subset of the toolkit. Each file carries every member document inline with stable separators and the original source path preserved.
 
 | Bundle | Scope | Size |
 |---|---|---:|
-| `llms-full.txt` | Everything (docs / skills / knowledge / rules / templates / signatures) | ~2 MB |
+| `llms-full.txt` | Supported Enma + AngelScript docs / skills / knowledge / rules / templates / signatures | ~2.1 MB |
 | `llms-perception-enma.md` | Enma language + APIs + Enma-discipline skills + cheatsheet | ~950 KB |
-| `llms-perception-angelscript.md` | AngelScript APIs + AS discipline + cheatsheet | ~400 KB |
-| `llms-perception-lua.md` | Lua APIs + Lua discipline + cheatsheet | ~215 KB |
-| `llms-skills.md` | All 17 skills concatenated | ~300 KB |
-| `llms-knowledge.md` | All 20 knowledge references concatenated | ~350 KB |
+| `llms-perception-angelscript.md` | AngelScript APIs + AS discipline + cheatsheet | ~519 KB |
+| `llms-skills.md` | Supported skills concatenated | ~361 KB |
+| `llms-knowledge.md` | Supported knowledge references concatenated | ~363 KB |
 
 **Who uses it.** Any tool that accepts a single file as context:
 - Aider (`/read docs/llms-perception-enma.md`)
@@ -102,7 +101,7 @@ Which surface should I use right now?
   │
   └── NO  → continue
             │
-            ├─ Will the session work primarily in ONE language (Enma / AS / Lua)?
+            ├─ Will the session work primarily in ONE language (Enma / AS)?
             │
             ├── YES → the matching per-language bundle (docs/llms-perception-<lang>.md)
             │        Smallest preload that covers the typical session.
@@ -198,10 +197,10 @@ The index also doesn't help with content the toolkit doesn't have — if you're 
 
 | # | Surface | When to use | Cost |
 |---|---|---|---|
-| 1 | `docs/llms.txt` | First-touch with a new tool; auto-fetch convention | ~45 KB context |
-| 2 | `docs/llms-perception-<lang>.md` | One-language session in a non-MCP tool | ~215-950 KB context |
-| 3 | `docs/llms-full.txt` | All-language session in a non-MCP tool | ~2 MB context |
-| 4 | `docs/llms-skills.md` / `llms-knowledge.md` | Skills- or knowledge-focused session | ~300-350 KB context |
+| 1 | `docs/llms.txt` | First-touch with a new tool; auto-fetch convention | ~56 KB context |
+| 2 | `docs/llms-perception-<lang>.md` | One-language session in a non-MCP tool | ~519-950 KB context |
+| 3 | `docs/llms-full.txt` | Enma + AngelScript session in a non-MCP tool | ~2.1 MB context |
+| 4 | `docs/llms-skills.md` / `llms-knowledge.md` | Skills- or knowledge-focused session | ~361-363 KB context |
 | 5 | `mcp/pcx-knowledge-mcp/` server | MCP-aware tool, long session, lazy loading | One running process |
 
 **Combine #2 + #5** for the best of both: small upfront context for your primary language + searchable depth for everything else. Recommended for long sessions.

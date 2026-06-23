@@ -8,17 +8,17 @@ end
 
 function triggerbot_update()
     if not g_trigger_enabled or not g_initialized or not g_proc or not g_proc:alive() then return end
-    if not is_key_down(g_trigger_key) then return end
+    if not key_down(g_trigger_key) then return end
 
     local t = get_entity_under_crosshair()
     if not t.valid then return end
     if t.team == g_local_team and g_local_team ~= 0 then return end
     if t.health <= 0 then return end
 
-    if time_ms() - g_last_fire < g_trigger_delay_ms then return end
-    g_last_fire = time_ms()
+    if get_tickcount64() - g_last_fire < g_trigger_delay_ms then return end
+    g_last_fire = get_tickcount64()
 
-    press_mouse_left()
+    mouse_left_click()
 end
 
 function triggerbot_render()

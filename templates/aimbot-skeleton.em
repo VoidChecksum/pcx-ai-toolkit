@@ -35,6 +35,25 @@ int32   g_hotkey       = 0x06;              // VK_XBUTTON2 — hold to aim
 color   g_fov_color    = color(80, 170, 255, 200);
 color   g_target_color = color(255, 60, 60, 230);
 
+// ── Widget handles (bound in main, synced via on_change) ──
+sidebar_section_t g_sec;
+checkbox_t        g_cb_enabled;
+slider_t          g_sl_fov;
+slider_t          g_sl_smooth;
+slider_t          g_sl_bone;
+slider_t          g_sl_dist;
+keybind_t         g_kb_aim;
+colorpicker_t     g_cp_fov;
+colorpicker_t     g_cp_target;
+
+void on_enabled(int64 h)       { g_enabled      = g_cb_enabled.get(); }
+void on_fov(int64 h)           { g_fov_radius   = g_sl_fov.get(); }
+void on_smooth(int64 h)        { g_smoothing    = g_sl_smooth.get(); }
+void on_bone(int64 h)          { g_target_bone  = g_sl_bone.get(); }
+void on_dist(int64 h)          { g_max_distance = g_sl_dist.get(); }
+void on_fov_color(int64 h)     { g_fov_color    = g_cp_fov.get(); }
+void on_target_color(int64 h)  { g_target_color = g_cp_target.get(); }
+
 // ── Process + resolved globals (uint64 throughout, rule 2) ──
 proc_t  g_proc;
 uint64  g_base = 0;
@@ -133,7 +152,7 @@ void on_update(int64 data) {
     // Aim: hotkey held + locked target -> nudge the crosshair toward it.
     // mouse_move_relative (win-api.md, SendInput) is write-free — no memory
     // write, no .text patch (rule 9). Avoid wf32 to a view-angle address.
-    if (g_have_target && key_down(g_hotkey)) {
+    if (g_have_target && g_kb_aim.is_active()) {
         float64 mdx = (g_target_screen.x - cx) / g_smoothing;
         float64 mdy = (g_target_screen.y - cy) / g_smoothing;
         mouse_move_relative(cast<int64>(mdx), cast<int64>(mdy));
@@ -161,18 +180,26 @@ void on_render(int64 data) {
 
 int64 main() {
     // GUI sidebar — every tunable is a widget, never a magic constant (rule 11).
-    int64 sec = create_section("Aimbot");
-    section_checkbox(sec, "Enabled", g_enabled);
-    section_slider_float(sec, "FOV Radius (px)", g_fov_radius, 10.0, 600.0);
-    section_slider_float(sec, "Smoothing", g_smoothing, 1.0, 30.0);
-    section_slider_float(sec, "Bone Index", g_target_bone, 0.0, 30.0);
-    section_slider_float(sec, "Max Distance", g_max_distance, 100.0, 10000.0);
-    section_keybind(sec, "Aim Key", g_hotkey);
-    section_color_picker(sec, "FOV Color", g_fov_color);
-    section_color_picker(sec, "Target Color", g_target_color);
-    section_separator(sec);
-    section_label(sec, "Hold the Aim Key to lock the closest target in FOV");
-    section_label(sec, "Offsets are UNVERIFIED placeholders — fill before use");
+    g_sec = create_sidebar_section("Aimbot", "");
+    g_cb_enabled = g_sec.create_checkbox("Enabled", g_enabled);
+    g_cb_enabled.on_change(cast<int64>(on_enabled));
+    g_sl_fov    = g_sec.create_slider("FOV Radius (px)", g_fov_radius, 10.0, 600.0, 1.0);
+    g_sl_fov.on_change(cast<int64>(on_fov));
+    g_sl_smooth = g_sec.create_slider("Smoothing", g_smoothing, 1.0, 30.0, 0.1);
+    g_sl_smooth.on_change(cast<int64>(on_smooth));
+    g_sl_bone   = g_sec.create_slider("Bone Index", g_target_bone, 0.0, 30.0, 1.0);
+    g_sl_bone.on_change(cast<int64>(on_bone));
+    g_sl_dist   = g_sec.create_slider("Max Distance", g_max_distance, 100.0, 10000.0, 10.0);
+    g_sl_dist.on_change(cast<int64>(on_dist));
+    g_kb_aim    = g_sec.create_keybind("Aim Key");
+    g_kb_aim.bind(cast<int64>(g_hotkey), false, false, false, keybind_mode::on); // hold to aim
+    g_cp_fov    = g_sec.create_colorpicker("FOV Color", g_fov_color);
+    g_cp_fov.on_change(cast<int64>(on_fov_color));
+    g_cp_target = g_sec.create_colorpicker("Target Color", g_target_color);
+    g_cp_target.on_change(cast<int64>(on_target_color));
+    g_sec.create_separator();
+    g_sec.create_label("Hold the Aim Key to lock the closest target in FOV", ui_align::left);
+    g_sec.create_label("Offsets are UNVERIFIED placeholders — fill before use", ui_align::left);
 
     register_routine(cast<int64>(on_update), 0);
     register_routine(cast<int64>(on_render), 0);

@@ -12,7 +12,7 @@ end
 
 function aimbot_update()
     if not g_aim_enabled or not g_initialized or not g_proc or not g_proc:alive() then return end
-    if not is_key_down(g_aim_key) then
+    if not key_down(g_aim_key) then
         g_aim_target.valid = false
         return
     end

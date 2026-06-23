@@ -16,7 +16,7 @@ void write_view_angles(vec2 angles) {
 
 void aimbot_update(int64 data) {
     if (!g_aim_enabled || !g_initialized || !g_proc.alive()) return;
-    if (!is_key_down(g_aim_key)) { g_aim_target.valid = false; return; }
+    if (!key_down(g_aim_key)) { g_aim_target.valid = false; return; }
 
     vec3 local_pos = read_vec3(g_local_player + OFF_POS);
     vec2 current   = read_view_angles();

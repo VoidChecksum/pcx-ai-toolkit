@@ -165,19 +165,6 @@ or PCX API code. Do not write from memory. The docs are the source of truth.
 | Extensions API | `docs/perception/extensions-api.md` | 371 |
 | Analyzer | `docs/perception/analyzer.md` | 370 |
 
-### When writing core Lua (.lua) code — read the language manual:
-
-| Doc | Path | Lines | Content |
-|-----|------|-------|---------|
-| **Reference Manual** | `docs/lua-lang/manual-5.4.md` | 6056 | Full, authoritative Lua 5.4 reference manual |
-| Welcome & Readme | `docs/lua-lang/readme-5.4.md` | 150 | Lua 5.4 readme and changes |
-
-### PCX Lua (.lua) scripting:
-
-| API | Path | Lines |
-|-----|------|-------|
-| Overview | `docs/perception/lua/overview.md` | 59 |
-| All APIs | `docs/perception/lua/*.md` | 5779 total |
 ## How To Use These Docs
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`

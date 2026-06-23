@@ -22,6 +22,32 @@
 - `float64 → float32` → **COMPILE ERROR** — use `cast<float32>(d)`
 - `pointer ↔ int64/uint64` → implicit (both 8-byte)
 
+## Conventions (official Enma overview)
+
+> Source: [Perception Enma — Overview](https://docs.perception.cx/perception/enma) → *Conventions*.
+> Mirror in this repo: [`docs/perception/readme.md`](../docs/perception/readme.md).
+
+- **Colors and positions — always wrap.** `color(255, 255, 255, 255)`, `vec2(10.0, 20.0)`. Freshly constructed each frame is fine; Enma drops the temporaries at scope exit. (See guideline #7.)
+- **Float32 literals — use the `f` suffix.** `0.2f`, **not** `cast<float32>(0.2)`. A bare `0.2` is `float64`. Required for vertex buffers (the GPU cares). This is guideline #8 and `script-linter.py` rule 8. Reserve `cast<float32>(x)` for converting a `float64` *value* (variable/expression), not a literal.
+- **Handles — opaque encrypted `int64`.** Every `create_*` / `load_*` native returns an encrypted `int64`. Pass it straight back into the matching `draw_*` / `bind_*` / `destroy_*` call. Don't inspect, print, arithmetic, or compare it to a raw integer.
+
+```cpp
+color white    = color(255, 255, 255, 255);   // wrap, fresh per frame is fine
+color noeffect = color(0, 0, 0, 0);
+vec2  pos      = vec2(40.0, 40.0);            // float64 literals by default
+
+float32 uv_bias = 0.2f;                       // f suffix -> float32 (vertex buffers)
+int64  ticks    = 40;
+float64 measured = cast<float64>(ticks);      // a float64 VALUE
+float32 m32      = cast<float32>(measured);   // cast a value, not a literal
+
+int64 tex = /* any create_* / load_* native */;  // encrypted handle — opaque
+// Hand tex straight back to its matching draw_* / bind_* / destroy_* native.
+// WRONG: if (tex == 0) ... ;  println(tex);  tex + 0x1000;
+```
+
+> **SDK:** Perception's Enma SDK is not public yet (per the same overview).
+
 ## Variables
 
 ```cpp

@@ -122,6 +122,9 @@ jobs:
             exit 1
           }
 
+      - name: Check LLM routing contract
+        run: python3 tools/check-llm-contract.py
+
       - name: Check docs/PROVENANCE.json in sync with the tree
         run: python3 tools/build-provenance.py --check
 
@@ -146,6 +149,23 @@ jobs:
             python3 tools/symbol-check.py "$f"
           done
           echo "Clean templates pass symbol-check"
+
+      - name: Dogfood — source-backed API oracle
+        run: |
+          python3 tools/api-lookup.py draw_text --lang enma --json
+          python3 tools/api-lookup.py register_callback --lang angelscript --json
+
+      - name: Dogfood — LLM answer code-block checker
+        run: |
+          cat > /tmp/pcx-answer.md <<'MD'
+          ```enma
+          int64 main() {
+              println("hello");
+              return 1;
+          }
+          ```
+          MD
+          python3 tools/check-llm-answer.py /tmp/pcx-answer.md
 
       - name: Check MCP config in sync with mcp-api.md (compatibility gate)
         run: python3 tools/check-mcp-config.py --check

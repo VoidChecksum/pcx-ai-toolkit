@@ -16,13 +16,13 @@ Cline will apply these rules on every message in the project.
 
 ## Project Context
 
-- **Languages.** Enma (`.em`), AngelScript (`.as`), Lua (`.lua`), C++ (host SDK).
+- **Languages.** Enma (`.em`) and AngelScript (`.as`).
 - **Platform.** Perception.cx scripting runtime (`perception.cx`).
 - **API docs.** Live under `docs/`:
+  - `docs/perception/llm-routing.md` — load first; choose Enma vs AngelScript before using API names
   - `docs/enma/` — Enma language + standard library + SDK (50 files)
   - `docs/perception/` — Enma APIs (17 files)
   - `docs/perception/angelscript/` — AngelScript APIs (23 files)
-  - `docs/perception/lua/` — Lua APIs (17 files)
 - **Read before writing API calls.** Cline does not have these APIs in its pretraining; it must `@`-reference the relevant doc file before producing code.
 
 ## Coding Standards
