@@ -192,6 +192,26 @@ fn mcp_can_scaffold_project() {
 }
 
 #[test]
+fn native_verify_project_accepts_checked_scenarios() {
+    let scenarios =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../examples/scenarios");
+    let out = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args([
+            "verify-project",
+            scenarios.to_str().unwrap(),
+            "--allow-placeholders",
+            "--allow-unverified",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stderr),
+        String::from_utf8_lossy(&out.stdout)
+    );
+}
+#[test]
 fn native_create_check_answer_and_check_drift_work() {
     let dir = std::env::temp_dir().join("pcx_native_create_project");
     let _ = fs::remove_dir_all(&dir);

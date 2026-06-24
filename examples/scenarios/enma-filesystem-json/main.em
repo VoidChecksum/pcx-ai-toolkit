@@ -1,4 +1,7 @@
 import "json";
+import "file";
+
+// Host must grant PERM_FILE before compiling this script.
 
 int64 main() {
     string path = "pcx-scenario.json";

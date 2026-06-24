@@ -213,7 +213,8 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
     let mut findings = Vec::new();
     for p in scripts {
         let lang = language_for(&p).unwrap();
-        let text = clean(&fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))?);
+        let raw = fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))?;
+        let text = clean(&raw);
         let user = funcs(&text);
         let imports = enma_imports(&text);
         if lang == "enma" {
@@ -252,7 +253,7 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
                 continue;
             }
             if lang == "enma" {
-                if n.starts_with("fs_") && !text.contains("PERM_FILE") {
+                if n.starts_with("fs_") && !raw.contains("PERM_FILE") {
                     findings.push(ValidationFinding {
                         file: p.display().to_string(),
                         line: l,
