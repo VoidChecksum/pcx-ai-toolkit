@@ -1,7 +1,7 @@
-name: Build and Release Extensions
+name: Build and Release Toolkit
 
-# Builds both VS Code and Visual Studio 2022 extensions, then attaches them
-# to a single unified GitHub Release when a version tag (v*) is pushed.
+# Builds VS Code and Visual Studio 2022 extensions plus the Rust CLI, then
+# attaches them to one GitHub Release when a version tag (v*) is pushed.
 on:
   push:
     tags:
@@ -56,6 +56,29 @@ jobs:
           path: dist/*.vsix
           retention-days: 1
 
+
+  build-rust-cli:
+    name: Build Rust CLI
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build pcx-rs
+        working-directory: tools/pe-parser
+        run: cargo build --release --bin pcx-rs
+
+      - name: Stage pcx-rs
+        run: |
+          mkdir -p dist
+          cp tools/pe-parser/target/release/pcx-rs dist/pcx-rs
+
+      - name: Upload Rust CLI
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-cli
+          path: dist/pcx-rs
+          retention-days: 1
   build-visualstudio:
     name: Build Visual Studio 2022 Extensions
     runs-on: windows-latest
@@ -131,7 +154,7 @@ jobs:
 
   release:
     name: Create GitHub Release
-    needs: [build-vscode, build-visualstudio]
+    needs: [build-vscode, build-visualstudio, build-rust-cli]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -150,6 +173,12 @@ jobs:
           name: visual-studio-vsix
           path: release-artifacts
 
+      - name: Download Rust CLI
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-cli
+          path: release-artifacts
+
       - name: List collected artifacts
         run: ls -lh release-artifacts/
 
@@ -157,6 +186,7 @@ jobs:
         run: |
           cd release-artifacts
           sha256sum *.vsix > SHA256SUMS.txt
+          sha256sum pcx-rs >> SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Create / update GitHub Release
@@ -165,9 +195,10 @@ jobs:
           files: |
             release-artifacts/*.vsix
             release-artifacts/SHA256SUMS.txt
+            release-artifacts/pcx-rs
           generate_release_notes: true
           body: |
-            ## VS Code & Visual Studio Extensions
+            ## PCX Toolkit Release
 
             ### VS Code (Drag-and-Drop)
             1. Download `enma-language-*.vsix` (Enma) or `angel-lsp-*.vsix` (AngelScript).
@@ -176,5 +207,8 @@ jobs:
             ### Visual Studio 2022
             1. Download `PcxEnmaVS-*.vsix` or `PcxAngelScriptVS-*.vsix`.
             2. Double-click the downloaded file to run the VSIX Installer.
+
+            ### Rust CLI
+            Download `pcx-rs` for native validation, MCP stdio, and API lookup commands.
 
             All extensions are MIT-licensed builds of [enma-lsp](https://github.com/VoidChecksum/enma-lsp) and [angel-lsp-pcx](https://github.com/VoidChecksum/angel-lsp-pcx).

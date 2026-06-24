@@ -20,6 +20,13 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("release-artifacts/*.vsix", text)
         self.assertIn("release-artifacts/SHA256SUMS.txt", text)
 
+    def test_release_uploads_rust_cli_artifact(self):
+        workflow = REPO_ROOT / ".github" / "workflows" / "release.yml"
+        text = workflow.read_text(encoding="utf-8")
+        self.assertIn("Build Rust CLI", text)
+        self.assertIn("cargo build --release --bin pcx-rs", text)
+        self.assertIn("release-artifacts/pcx-rs", text)
+
 
 if __name__ == "__main__":
     unittest.main()
