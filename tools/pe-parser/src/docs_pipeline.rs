@@ -150,12 +150,16 @@ fn extract_source(path: &Path) -> Result<(Option<String>, &'static str), String>
     let text = fs::read_to_string(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let head = text.chars().take(6000).collect::<String>();
     if let Some(url) = between_after(&head, "available as [Markdown](", ")") {
-        let source = classify(&url);
-        return Ok((Some(url), source));
+        if is_http_url(&url) {
+            let source = classify(&url);
+            return Ok((Some(url), source));
+        }
     }
     if let Some(url) = after_source_comment(&head) {
-        let source = classify(&url);
-        return Ok((Some(url), source));
+        if is_http_url(&url) {
+            let source = classify(&url);
+            return Ok((Some(url), source));
+        }
     }
     Ok((None, "local"))
 }
@@ -169,6 +173,10 @@ fn classify(url: &str) -> &'static str {
     } else {
         "other"
     }
+}
+
+fn is_http_url(url: &str) -> bool {
+    url.starts_with("http://") || url.starts_with("https://")
 }
 
 fn between_after(text: &str, prefix: &str, suffix: &str) -> Option<String> {
