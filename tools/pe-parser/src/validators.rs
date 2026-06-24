@@ -223,7 +223,7 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
         for (n, l) in calls(&text) {
             if matches!(
                 n.as_str(),
-                "if" | "for" | "while" | "switch" | "return" | "cast"
+                "if" | "for" | "while" | "switch" | "return" | "cast" | "catch"
             ) || user.contains(&n)
             {
                 continue;

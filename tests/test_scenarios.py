@@ -25,6 +25,7 @@ class ScenarioCoverageTest(unittest.TestCase):
             "unicorn-enma/main.em",
             "enma-language-addons/main.em",
             "enma-filesystem-json/main.em",
+            "enma-runtime-traps/main.em",
             "mcp-answer-validation/answer.md",
         }
         root = REPO_ROOT / "examples" / "scenarios"
