@@ -21,6 +21,42 @@ fn native_counts_json_does_not_need_python() {
     assert!(json["docs"].as_u64().unwrap() > 0);
     assert!(json["native_tools"].as_u64().unwrap() > 0);
 }
+
+#[test]
+fn native_build_provenance_check_does_not_need_python() {
+    let out = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["build-provenance", "--check"])
+        .env("PATH", "")
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stderr),
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert!(stdout.contains("PROVENANCE.json in sync"));
+}
+
+#[test]
+fn native_build_provenance_json_reports_counts() {
+    let out = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["build-provenance", "--json"])
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stderr),
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(json["source"], "rust");
+    assert!(json["count"].as_u64().unwrap() > 100);
+    assert!(json["drift_checkable"].as_u64().unwrap() > 50);
+    assert!(json["unmapped"].as_array().unwrap().len() > 0);
+}
 #[test]
 fn verify_project_json_reports_summary() {
     let dir = std::env::temp_dir().join("pcx_verify_json_project");
