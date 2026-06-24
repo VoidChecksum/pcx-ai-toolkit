@@ -1,6 +1,6 @@
 {
-  "count": 125,
-  "drift_checkable": 87,
+  "count": 127,
+  "drift_checkable": 89,
   "files": {
     "docs/AI_AGENT_OPERATING_MANUAL.md": {
       "drift_check": false,
@@ -296,6 +296,16 @@
       "drift_check": true,
       "source": "gitbook",
       "url": "https://enma-1.gitbook.io/enma/language-guide/templates.md"
+    },
+    "docs/enma/llms-language.md": {
+      "drift_check": true,
+      "source": "gitbook",
+      "url": "https://enma-1.gitbook.io/enma/llms-language.md"
+    },
+    "docs/enma/llms-sdk.md": {
+      "drift_check": true,
+      "source": "gitbook",
+      "url": "https://enma-1.gitbook.io/enma/llms-sdk.md"
     },
     "docs/enma/quick-access.md": {
       "drift_check": true,

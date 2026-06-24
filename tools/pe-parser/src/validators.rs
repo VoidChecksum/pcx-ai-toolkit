@@ -1,6 +1,7 @@
 use crate::api_index::{load_api_index, lookup_symbol};
 use serde::Serialize;
 use std::{
+    collections::{HashMap, HashSet},
     fs,
     path::{Path, PathBuf},
 };
@@ -11,6 +12,25 @@ pub struct ValidationFinding {
     pub kind: &'static str,
     pub symbol: String,
     pub message: String,
+}
+
+fn unsupported_symbols(root: &Path) -> HashMap<String, String> {
+    let path = root.join("knowledge/unsupported-symbols.json");
+    let Ok(text) = fs::read_to_string(path) else {
+        return HashMap::new();
+    };
+    let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) else {
+        return HashMap::new();
+    };
+    json.get("symbols")
+        .and_then(|v| v.as_object())
+        .map(|symbols| {
+            symbols
+                .iter()
+                .filter_map(|(name, reason)| reason.as_str().map(|r| (name.clone(), r.to_string())))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 fn language_for(p: &Path) -> Option<&'static str> {
     match p
@@ -51,7 +71,7 @@ fn clean(t: &str) -> String {
 fn line(t: &str, o: usize) -> usize {
     t[..o.min(t.len())].bytes().filter(|b| *b == b'\n').count() + 1
 }
-fn funcs(t: &str) -> std::collections::HashSet<String> {
+fn funcs(t: &str) -> HashSet<String> {
     let mut out = std::collections::HashSet::new();
     for l in t.lines() {
         let l = l.trim();
@@ -107,7 +127,7 @@ fn enma_missing_import(name: &str) -> Option<&'static str> {
     }
 }
 
-fn enma_imports(text: &str) -> std::collections::HashSet<String> {
+fn enma_imports(text: &str) -> HashSet<String> {
     text.lines()
         .filter_map(|line| {
             let line = line.trim();
@@ -137,6 +157,7 @@ fn forbidden(lang: &str, n: &str) -> Option<&'static str> {
 }
 pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>, String> {
     let idx = load_api_index(root)?;
+    let unsupported = unsupported_symbols(root);
     let mut scripts = Vec::new();
     collect(target, &mut scripts)?;
     let mut findings = Vec::new();
@@ -151,6 +172,16 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
                 "if" | "for" | "while" | "switch" | "return" | "cast"
             ) || user.contains(&n)
             {
+                continue;
+            }
+            if let Some(r) = unsupported.get(&n) {
+                findings.push(ValidationFinding {
+                    file: p.display().to_string(),
+                    line: l,
+                    kind: "unsupported_symbol",
+                    symbol: n.clone(),
+                    message: r.clone(),
+                });
                 continue;
             }
             if let Some(r) = forbidden(lang, &n) {

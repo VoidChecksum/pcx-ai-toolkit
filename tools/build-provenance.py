@@ -41,8 +41,6 @@ GITBOOK_RE = re.compile(r"available as \[Markdown\]\((https?://[^)]+)\)")
 COMMENT_RE = re.compile(r"<!--\s*Source:\s*(https?://\S+)")
 # Files / dirs that are generated or local-only — never a drift source.
 EXCLUDE_NAMES = {"INDEX.md"}
-EXCLUDE_PREFIX = ("llms-",)  # generated bundles under docs/
-
 # Upstream URLs that are known 404 / removed; keep them in provenance but
 # don't fail CI drift checks on them.
 SKIP_DRIFT_URLS = {
@@ -50,12 +48,14 @@ SKIP_DRIFT_URLS = {
     "https://docs.perception.cx/perception/angel-script/custom-draw-api.md",
     "https://docs.perception.cx/perception/enma/custom-draw-api.md",
 }
+
+
 def is_source_doc(p: Path) -> bool:
     if p.name in EXCLUDE_NAMES:
         return False
-    if any(p.name.startswith(pre) for pre in EXCLUDE_PREFIX):
-        return False
     rel = p.relative_to(REPO_ROOT).as_posix()
+    if rel.startswith("docs/llms-"):
+        return False
     return True
 
 

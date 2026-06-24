@@ -42,6 +42,17 @@ fn rejects_lua_denylist_symbol() {
 }
 
 #[test]
+fn rejects_json_denylist_symbol() {
+    let p = std::env::temp_dir().join("pcx_json_denylist_bad.em");
+    fs::write(&p, "int64 main(){read_view_angles();return 1;}\n").unwrap();
+    let f = symbol_check(&root(), &p).unwrap();
+    assert!(f.iter().any(|x| x.kind == "unsupported_symbol"
+        && x.symbol == "read_view_angles"
+        && x.message.contains("Perception API index")));
+    let _ = fs::remove_file(p);
+}
+
+#[test]
 fn reports_missing_enma_import() {
     let p = std::env::temp_dir().join("pcx_missing_import.em");
     fs::write(
