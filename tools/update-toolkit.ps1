@@ -83,12 +83,11 @@ if ($Check) {
     exit 1
 }
 
-# -- safety: abort if local has uncommitted changes --------------------------
+# -- safety: abort if local has uncommitted or untracked changes -------------
 
-$diff = git diff --quiet 2>$null
-$diffCached = git diff --cached --quiet 2>$null
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Uncommitted changes detected -- stash or commit before updating."
+$status = git status --porcelain
+if ($status) {
+    [Console]::Error.WriteLine("Uncommitted changes detected -- stash or commit before updating.`n$status")
     exit 3
 }
 

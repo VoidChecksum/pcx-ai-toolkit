@@ -95,12 +95,12 @@ if [ "$CHECK_ONLY" -eq 1 ]; then
     exit 1
 fi
 
-# ── safety: abort if local has uncommitted changes ──────────────────────────
+# ── safety: abort if local has uncommitted or untracked changes ─────────────
 
-if ! git diff --quiet || ! git diff --cached --quiet; then
+STATUS="$(git status --porcelain)"
+if [ -n "$STATUS" ]; then
     echo "Uncommitted changes detected — stash or commit before updating." >&2
-    echo "  Unstaged:  $(git diff --stat)" >&2
-    echo "  Staged:    $(git diff --cached --stat)" >&2
+    echo "$STATUS" >&2
     exit 3
 fi
 
@@ -229,3 +229,5 @@ echo "  Branch:   $CURRENT_BRANCH"
 [ "$SKIP_LSP" -eq 0 ]    && command -v cargo &>/dev/null && [ -f "$TOOLKIT_DIR/tools/bin/offset-diff" ] && echo "  Rust:     rebuilt"
 [ "$SKIP_SKILLS" -eq 0 ]  && echo "  Skills:   refreshed"
 [ "$SKIP_BUNDLES" -eq 0 ] && echo "  Bundles:  checked"
+
+exit 0
