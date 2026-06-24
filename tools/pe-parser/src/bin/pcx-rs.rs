@@ -75,6 +75,7 @@ fn print_help(repo_root: &Path) {
     println!("  create --name <name> [--language enma|angelscript] [--kind hello] --output <dir>");
     println!("  check-answer <answer.md> [--json]");
     println!("  check-drift [--json] [--limit N]");
+    println!("  counts [--json] [--check]");
     println!("  doctor");
     for tool in NATIVE_TOOLS {
         println!("  {tool} [args]");
@@ -82,7 +83,7 @@ fn print_help(repo_root: &Path) {
     println!();
     println!("Compatibility commands delegated to Python until ported:");
     println!("  setup, update, lint");
-    println!("  build-api-index, check-mcp, check-matrix, counts, new");
+    println!("  build-api-index, check-mcp, check-matrix, new");
 }
 
 fn normalize_lang(lang: Option<&str>) -> Result<Option<&str>, String> {
@@ -221,6 +222,188 @@ fn count_scripts(path: &Path) -> usize {
         .filter_map(Result::ok)
         .map(|entry| count_scripts(&entry.path()))
         .sum()
+}
+
+fn collect_files(root: &Path, out: &mut Vec<PathBuf>) {
+    let Ok(entries) = fs::read_dir(root) else {
+        return;
+    };
+    for entry in entries.filter_map(Result::ok) {
+        let path = entry.path();
+        if path.is_dir() {
+            collect_files(&path, out);
+        } else {
+            out.push(path);
+        }
+    }
+}
+
+fn line_count(path: &Path) -> usize {
+    fs::read_to_string(path)
+        .map(|text| text.lines().count())
+        .unwrap_or(0)
+}
+
+fn has_ext(path: &Path, ext: &str) -> bool {
+    path.extension().and_then(|e| e.to_str()) == Some(ext)
+}
+
+fn pcx_counts(repo_root: &Path) -> serde_json::Value {
+    let mut doc_files = Vec::new();
+    collect_files(&repo_root.join("docs"), &mut doc_files);
+    let docs_root = repo_root.join("docs");
+    let docs = doc_files
+        .iter()
+        .filter(|p| has_ext(p, "md"))
+        .filter(|p| p.file_name().and_then(|n| n.to_str()) != Some("INDEX.md"))
+        .filter(|p| {
+            !(p.parent() == Some(docs_root.as_path())
+                && p.file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("")
+                    .starts_with("llms-"))
+        })
+        .collect::<Vec<_>>();
+
+    let mcp_tools = fs::read_to_string(repo_root.join("mcp").join("perception-mcp-config.json"))
+        .ok()
+        .and_then(|text| serde_json::from_str::<serde_json::Value>(&text).ok())
+        .and_then(|cfg| cfg.get("mcpServers").and_then(|v| v.as_object()).cloned())
+        .map(|servers| {
+            servers
+                .values()
+                .filter_map(|server| server.get("tools").and_then(|tools| tools.as_array()))
+                .map(|tools| tools.len())
+                .sum::<usize>()
+        })
+        .unwrap_or(0);
+
+    let skills = fs::read_dir(repo_root.join(".claude").join("skills"))
+        .map(|entries| {
+            entries
+                .filter_map(Result::ok)
+                .filter(|entry| entry.path().join("SKILL.md").exists())
+                .count()
+        })
+        .unwrap_or(0);
+
+    let knowledge = fs::read_dir(repo_root.join("knowledge"))
+        .map(|entries| {
+            entries
+                .filter_map(Result::ok)
+                .map(|entry| entry.path())
+                .filter(|p| has_ext(p, "md"))
+                .filter(|p| {
+                    p.file_name().and_then(|n| n.to_str()) != Some("pcx-cross-language-bridge.md")
+                })
+                .count()
+        })
+        .unwrap_or(0);
+
+    let mut template_files = Vec::new();
+    collect_files(&repo_root.join("templates"), &mut template_files);
+    let templates = template_files
+        .iter()
+        .filter(|p| {
+            matches!(
+                p.extension().and_then(|e| e.to_str()),
+                Some("em" | "as" | "md")
+            )
+        })
+        .filter(|p| p.file_name().and_then(|n| n.to_str()) != Some("README.md"))
+        .count();
+
+    let tools = fs::read_dir(repo_root.join("tools"))
+        .map(|entries| {
+            entries
+                .filter_map(Result::ok)
+                .map(|entry| entry.path())
+                .filter(|p| p.is_file())
+                .filter(|p| {
+                    matches!(p.extension().and_then(|e| e.to_str()), Some("py" | "sh"))
+                        || p.file_name().and_then(|n| n.to_str()) == Some("pcx")
+                })
+                .count()
+        })
+        .unwrap_or(0);
+
+    let native_root = repo_root.join("tools").join("pe-parser").join("src");
+    let native_tools = fs::read_dir(native_root.join("bin"))
+        .map(|entries| {
+            entries
+                .filter_map(Result::ok)
+                .map(|entry| entry.path())
+                .filter(|p| has_ext(p, "rs"))
+                .count()
+        })
+        .unwrap_or(0)
+        + usize::from(native_root.join("main.rs").exists());
+
+    let mut signature_files = Vec::new();
+    collect_files(&repo_root.join("signatures"), &mut signature_files);
+    let signatures = signature_files.iter().filter(|p| has_ext(p, "md")).count();
+
+    let engines = fs::read_dir(repo_root.join("knowledge"))
+        .map(|entries| {
+            entries
+                .filter_map(Result::ok)
+                .map(|entry| entry.path())
+                .filter(|p| {
+                    p.file_name()
+                        .and_then(|n| n.to_str())
+                        .is_some_and(|name| name.starts_with("engine-") && name.ends_with(".md"))
+                })
+                .count()
+        })
+        .unwrap_or(0);
+
+    serde_json::json!({
+        "doc_lines": docs.iter().map(|p| line_count(p)).sum::<usize>(),
+        "docs": docs.len(),
+        "engines": engines,
+        "knowledge": knowledge,
+        "mcp_tools": mcp_tools,
+        "native_tools": native_tools,
+        "signatures": signatures,
+        "skills": skills,
+        "templates": templates,
+        "tools": tools,
+    })
+}
+
+fn cmd_counts(repo_root: &Path, args: &[String]) -> i32 {
+    let data = pcx_counts(repo_root);
+    if args.iter().any(|a| a == "--json") {
+        println!("{}", serde_json::to_string_pretty(&data).unwrap());
+        return 0;
+    }
+    let out = repo_root.join("docs").join("COUNTS.json");
+    if args.iter().any(|a| a == "--check") {
+        let Ok(existing_text) = fs::read_to_string(&out) else {
+            eprintln!("COUNTS.json missing — run: pcx-rs counts");
+            return 1;
+        };
+        let existing = serde_json::from_str::<serde_json::Value>(&existing_text)
+            .unwrap_or(serde_json::Value::Null);
+        if existing != data {
+            println!("COUNTS.json out of sync with the tree. Regenerate:");
+            println!("  pcx-rs counts");
+            println!("  committed: {existing}");
+            println!("  live:      {data}");
+            return 1;
+        }
+        println!("COUNTS.json in sync: {data}");
+        return 0;
+    }
+    if let Err(e) = fs::write(&out, serde_json::to_string_pretty(&data).unwrap() + "\n") {
+        eprintln!("ERROR: {}: {e}", out.display());
+        return 2;
+    }
+    println!(
+        "Wrote {}",
+        out.strip_prefix(repo_root).unwrap_or(&out).display()
+    );
+    0
 }
 
 fn cmd_verify_project(repo_root: &Path, args: &[String]) -> i32 {
@@ -845,6 +1028,7 @@ fn main() {
         "create" | "new" => cmd_create(&repo_root, &args.args),
         "check-answer" => cmd_check_answer(&repo_root, &args.args),
         "check-drift" => cmd_check_drift(&repo_root, &args.args),
+        "counts" => cmd_counts(&repo_root, &args.args),
         "doctor" => cmd_doctor(&repo_root),
         tool if NATIVE_TOOLS.contains(&tool) => run_native_tool(&repo_root, tool, &args.args)
             .unwrap_or_else(|| run_python_fallback(&repo_root, tool, &args.args)),

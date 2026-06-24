@@ -5,6 +5,23 @@ use std::{
 };
 
 #[test]
+fn native_counts_json_does_not_need_python() {
+    let out = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["counts", "--json"])
+        .env("PATH", "")
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stderr),
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert!(json["docs"].as_u64().unwrap() > 0);
+    assert!(json["native_tools"].as_u64().unwrap() > 0);
+}
+#[test]
 fn verify_project_json_reports_summary() {
     let dir = std::env::temp_dir().join("pcx_verify_json_project");
     let _ = fs::remove_dir_all(&dir);
