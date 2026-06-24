@@ -68,6 +68,23 @@ int64 main() {
         finally:
             path.unlink(missing_ok=True)
 
+    def test_common_hallucinated_aim_helper_uses_denylist_reason(self):
+        code = """
+int64 main() {
+    read_view_angles();
+    return 1;
+}
+"""
+        path = Path("/tmp/pcx_unsupported_aim_test.em")
+        path.write_text(code, encoding="utf-8")
+        try:
+            rc, out, err = _run(str(path))
+            self.assertEqual(rc, 1, f"denylisted read_view_angles should fail symbol-check:\n{out}\n{err}")
+            self.assertIn("unsupported_symbol", out)
+            self.assertIn("not in the Perception API index", out)
+        finally:
+            path.unlink(missing_ok=True)
+
     def test_user_defined_callback_allowed(self):
         code = """
 import "vec";

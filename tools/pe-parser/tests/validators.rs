@@ -29,6 +29,32 @@ fn rejects_wrong_lang() {
     assert!(f.iter().any(|x| x.symbol == "register_routine"));
     let _ = fs::remove_file(p);
 }
+
+#[test]
+fn rejects_lua_denylist_symbol() {
+    let p = std::env::temp_dir().join("pcx_lua_bad.em");
+    fs::write(&p, "int64 main(){lua_pcall();return 1;}\n").unwrap();
+    let f = symbol_check(&root(), &p).unwrap();
+    assert!(f
+        .iter()
+        .any(|x| x.kind == "unsupported_symbol" && x.symbol == "lua_pcall"));
+    let _ = fs::remove_file(p);
+}
+
+#[test]
+fn reports_missing_enma_import() {
+    let p = std::env::temp_dir().join("pcx_missing_import.em");
+    fs::write(
+        &p,
+        "int64 main(){color c = color(255,255,255,255);return 1;}\n",
+    )
+    .unwrap();
+    let f = symbol_check(&root(), &p).unwrap();
+    assert!(f
+        .iter()
+        .any(|x| x.kind == "missing_import" && x.symbol == "color"));
+    let _ = fs::remove_file(p);
+}
 #[test]
 fn verify_empty() {
     let d = std::env::temp_dir().join("pcx_empty");

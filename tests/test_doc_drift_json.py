@@ -20,6 +20,8 @@ class DocDriftJsonTest(unittest.TestCase):
         data = json.loads(result.stdout)
         self.assertEqual(data["checked"], 1)
         self.assertIn("results", data)
+        self.assertEqual(data["mode"], "offline")
+        self.assertEqual(data["snapshot"], "docs/PROVENANCE.json")
 
 
 if __name__ == "__main__":

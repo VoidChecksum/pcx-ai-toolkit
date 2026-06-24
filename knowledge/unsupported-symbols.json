@@ -2,6 +2,11 @@
   "version": 1,
   "symbols": {
     "draw_esp": "Invented helper; use source-backed render APIs such as draw_text/draw_rect.",
-    "lua_pcall": "Lua is outside pcx-ai-toolkit scope; use Enma or AngelScript only."
+    "lua_pcall": "Lua is outside pcx-ai-toolkit scope; use Enma or AngelScript only.",
+    "read_view_angles": "Common cheat-helper hallucination; not in the Perception API index. Use documented Proc/System APIs and verified offsets instead.",
+    "write_view_angles": "Common cheat-helper hallucination; not in the Perception API index. Use documented Proc APIs only with authorization and verified evidence.",
+    "world_to_screen": "Common overlay helper hallucination; not in the Perception API index. Use documented render/math APIs and project-specific camera data.",
+    "get_entity_list": "Common game-specific helper hallucination; not in the Perception API index. Resolve entities from documented Proc APIs plus verified offsets.",
+    "aim_at_target": "High-level aimbot helper hallucination; not in the Perception API index. Build only authorized educational examples from documented primitives."
   }
 }

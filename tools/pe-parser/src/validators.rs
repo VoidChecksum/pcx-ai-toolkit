@@ -95,6 +95,29 @@ fn calls(t: &str) -> Vec<(String, usize)> {
     }
     out
 }
+fn enma_missing_import(name: &str) -> Option<&'static str> {
+    match name {
+        "color" => Some("color"),
+        "vec2" | "vec3" | "vec4" => Some("vec"),
+        "quat" | "mat4" => Some("math3d"),
+        "json_parse" | "json_stringify" | "json_value" | "json_object" | "json_array" => {
+            Some("json")
+        }
+        _ => None,
+    }
+}
+
+fn enma_imports(text: &str) -> std::collections::HashSet<String> {
+    text.lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            line.strip_prefix("import \"")
+                .and_then(|rest| rest.split('"').next())
+                .map(|item| item.to_string())
+        })
+        .collect()
+}
+
 fn forbidden(lang: &str, n: &str) -> Option<&'static str> {
     match (lang, n) {
         ("enma", "register_callback") => {
@@ -121,6 +144,7 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
         let lang = language_for(&p).unwrap();
         let text = clean(&fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))?);
         let user = funcs(&text);
+        let imports = enma_imports(&text);
         for (n, l) in calls(&text) {
             if matches!(
                 n.as_str(),
@@ -133,11 +157,28 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
                 findings.push(ValidationFinding {
                     file: p.display().to_string(),
                     line: l,
-                    kind: "wrong_language_or_unsupported",
-                    symbol: n,
+                    kind: if matches!(n.as_str(), "draw_esp" | "lua_pcall") {
+                        "unsupported_symbol"
+                    } else {
+                        "wrong_language_symbol"
+                    },
+                    symbol: n.clone(),
                     message: r.into(),
                 });
                 continue;
+            }
+            if lang == "enma" {
+                if let Some(module) = enma_missing_import(&n) {
+                    if !imports.contains(module) {
+                        findings.push(ValidationFinding {
+                            file: p.display().to_string(),
+                            line: l,
+                            kind: "missing_import",
+                            symbol: n.clone(),
+                            message: format!("import \"{module}\" before using {n}"),
+                        });
+                    }
+                }
             }
             if !lookup_symbol(&idx, &n, Some(lang)).found {
                 let any = lookup_symbol(&idx, &n, None);

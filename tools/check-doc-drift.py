@@ -95,7 +95,7 @@ def main() -> int:
 
     if not args.live:
         missing = [p.relative_to(REPO_ROOT).as_posix() for p, _ in targets if not p.exists()]
-        summary = {"checked": len(targets), "in_sync": len(targets) - len(missing), "drift": 0, "fetch_errors": len(missing), "mode": "offline", "results": []}
+        summary = {"checked": len(targets), "in_sync": len(targets) - len(missing), "drift": 0, "fetch_errors": len(missing), "mode": "offline", "snapshot": "docs/PROVENANCE.json", "results": []}
         if args.json:
             print(json.dumps(summary, indent=2))
         else:

@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import re
 import sys
@@ -171,8 +172,9 @@ def render_evidence(rows: list[dict[str, Any]], source: str) -> str:
 
 
 
-def render_evidence_jsonl(rows: list[dict[str, Any]], source: str) -> str:
-    return "".join(json.dumps({"id": f"E-{idx:03d}", "name": str(row["name"]), "imported_value": f"0x{int(row['value']):X}", "imported_kind": str(row.get("kind", "symbol")), "source": source, "status": "UNVERIFIED"}) + "\n" for idx, row in enumerate(rows, 1))
+def render_evidence_jsonl(rows: list[dict[str, Any]], source: str, source_text: str) -> str:
+    source_sha256 = hashlib.sha256(source_text.encode("utf-8", errors="replace")).hexdigest()
+    return "".join(json.dumps({"id": f"E-{idx:03d}", "name": str(row["name"]), "imported_value": f"0x{int(row['value']):X}", "imported_kind": str(row.get("kind", "symbol")), "source": source, "source_sha256": source_sha256, "status": "UNVERIFIED"}) + "\n" for idx, row in enumerate(rows, 1))
 
 def render_signature_health(rows: list[dict[str, Any]], source: str) -> str:
     lines = [f"# Signature Health Seeds: {source}", ""]
@@ -219,7 +221,7 @@ def main() -> int:
     elif args.out_format == "evidence":
         output = render_evidence(rows, source_name)
     elif args.out_format == "evidence-jsonl":
-        output = render_evidence_jsonl(rows, source_name)
+        output = render_evidence_jsonl(rows, source_name, input_text)
     elif args.out_format == "signature-health":
         output = render_signature_health(rows, source_name)
     elif args.out_format == "patch-summary":

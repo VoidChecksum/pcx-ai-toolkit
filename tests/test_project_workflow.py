@@ -85,6 +85,18 @@ class ProjectWorkflowTest(unittest.TestCase):
         self.assertIn("const uint64 OFF_LOCALPLAYER = 0x1234;", result.stdout)
         self.assertIn("UNVERIFIED", result.stdout)
 
+
+    def test_re_importer_evidence_jsonl_has_source_hash(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(RE_IMPORTER), "--format", "ida-names", "--out-format", "evidence-jsonl", "-"],
+            input="name,address,kind\nLocalPlayer,0x1234,symbol\n",
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        row = json.loads(result.stdout)
+        self.assertEqual(row["name"], "LocalPlayer")
+        self.assertIn("source_sha256", row)
     def test_hallucination_eval_corpus_passes(self) -> None:
         result = subprocess.run([sys.executable, str(HALLUCINATION_EVAL), "--json"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)

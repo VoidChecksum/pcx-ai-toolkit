@@ -2,6 +2,7 @@ use clap::Parser;
 use pe_parser::api_index::{load_api_index, lookup_symbol, print_lookup_human};
 use pe_parser::mcp_schema::all_tools;
 use pe_parser::validators::{symbol_check, verify_project};
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -202,6 +203,22 @@ fn cmd_symbol_check(repo_root: &Path, args: &[String]) -> i32 {
         }
     }
 }
+fn count_scripts(path: &Path) -> usize {
+    if path.is_file() {
+        return usize::from(matches!(
+            path.extension().and_then(|e| e.to_str()),
+            Some("em" | "as")
+        ));
+    }
+    let Ok(entries) = std::fs::read_dir(path) else {
+        return 0;
+    };
+    entries
+        .filter_map(Result::ok)
+        .map(|entry| count_scripts(&entry.path()))
+        .sum()
+}
+
 fn cmd_verify_project(repo_root: &Path, args: &[String]) -> i32 {
     let json = args.iter().any(|a| a == "--json");
     let allow_p = args.iter().any(|a| a == "--allow-placeholders");
@@ -213,7 +230,13 @@ fn cmd_verify_project(repo_root: &Path, args: &[String]) -> i32 {
     match verify_project(repo_root, Path::new(path), allow_p, allow_u) {
         Ok(f) => {
             if json {
-                println!("{}", serde_json::to_string_pretty(&f).unwrap())
+                let report = serde_json::json!({
+                    "ok": f.is_empty(),
+                    "scripts": count_scripts(Path::new(path)),
+                    "finding_count": f.len(),
+                    "findings": f,
+                });
+                println!("{}", serde_json::to_string_pretty(&report).unwrap())
             } else if f.is_empty() {
                 println!("clean: project verified")
             } else {
@@ -236,15 +259,55 @@ fn cmd_verify_project(repo_root: &Path, args: &[String]) -> i32 {
         }
     }
 }
+fn mcp_overview() -> serde_json::Value {
+    serde_json::json!({
+        "name": "pcx-ai-toolkit",
+        "schema_tools": all_tools().len(),
+        "methods": ["overview", "api_lookup", "validate_code", "validate_answer", "validate_project"],
+        "authorized_use": {
+            "scope": "owned-lab-ctf-or-authorized-research",
+            "no_public_multiplayer_abuse": true,
+            "requires_evidence": true
+        }
+    })
+}
+
 fn cmd_mcp(repo_root: &Path, args: &[String]) -> i32 {
-    let Some(method) = args.first().map(|s| s.as_str()) else {
-        eprintln!("ERROR: missing MCP method");
+    if args.is_empty() {
+        let mut input = String::new();
+        if let Err(err) = std::io::stdin().read_to_string(&mut input) {
+            eprintln!("ERROR: failed to read stdin: {err}");
+            return 2;
+        }
+        let req: serde_json::Value = match serde_json::from_str(&input) {
+            Ok(req) => req,
+            Err(err) => {
+                eprintln!("ERROR: invalid JSON request: {err}");
+                return 2;
+            }
+        };
+        let id = req.get("id").cloned().unwrap_or(serde_json::Value::Null);
+        let method = req.get("method").and_then(|m| m.as_str()).unwrap_or("");
+        if method == "overview" {
+            let result = mcp_overview();
+            println!(
+                "{}",
+                serde_json::to_string_pretty(
+                    &serde_json::json!({"jsonrpc":"2.0","id":id,"result":result})
+                )
+                .unwrap()
+            );
+            return 0;
+        }
+        eprintln!("ERROR: unknown MCP method {method}");
         return 2;
+    }
+    let Some(method) = args.first().map(|s| s.as_str()) else {
+        unreachable!()
     };
     match method {
         "overview" => {
-            let payload = serde_json::json!({"name":"pcx-ai-toolkit","schema_tools":all_tools().len(),"methods":["overview","api_lookup","validate_code","validate_answer","validate_project"]});
-            println!("{}", serde_json::to_string_pretty(&payload).unwrap());
+            println!("{}", serde_json::to_string_pretty(&mcp_overview()).unwrap());
             0
         }
         "api_lookup" => {
