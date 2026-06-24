@@ -1,7 +1,10 @@
 // menu.em — GUI sidebar + config persistence.
 // Every tunable is a widget; config saves/loads via the filesystem API.
 
+// Host must grant PERM_FILE before compiling this script.
+
 import "color";
+import "file";
 import "globals";
 import "strings";
 

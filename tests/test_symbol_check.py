@@ -149,5 +149,47 @@ void on_tick(int64 data) {}
             path.unlink(missing_ok=True)
 
 
+    def test_enma_semantic_edges_match_rust_validator(self):
+        cases = {
+            "pcx_py_map_key_bad.em": (
+                'import "maps"\nint64 main(){map<int64, int64> counts; return 1;}\n',
+                "semantic_error",
+                "imap<V>",
+            ),
+            "pcx_py_pointer_escape_bad.em": (
+                "int64* leak(){int64 local = 1; return &local;}\n",
+                "semantic_error",
+                "escaping local addresses",
+            ),
+            "pcx_py_file_perm_bad.em": (
+                'import "file"\nint64 main(){return fs_read_file("x.txt").length();}\n',
+                "missing_permission",
+                "PERM_FILE",
+            ),
+        }
+        for name, (code, kind, expected) in cases.items():
+            with self.subTest(name=name):
+                path = Path("/tmp") / name
+                path.write_text(code, encoding="utf-8")
+                try:
+                    rc, out, err = _run(str(path))
+                    self.assertEqual(rc, 1, f"{name} should fail symbol-check:\n{out}\n{err}")
+                    self.assertIn(kind, out)
+                    self.assertIn(expected, out)
+                finally:
+                    path.unlink(missing_ok=True)
+
+    def test_enma_file_permission_annotation_allowed(self):
+        path = Path("/tmp/pcx_py_file_perm_ok.em")
+        path.write_text(
+            'import "file"\n// Host must grant PERM_FILE before compile.\nint64 main(){return fs_read_file("x.txt").length();}\n',
+            encoding="utf-8",
+        )
+        try:
+            rc, out, err = _run(str(path))
+            self.assertEqual(rc, 0, f"PERM_FILE host annotation should pass:\n{out}\n{err}")
+        finally:
+            path.unlink(missing_ok=True)
+
 if __name__ == "__main__":
     unittest.main()

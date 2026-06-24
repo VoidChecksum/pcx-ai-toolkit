@@ -269,6 +269,38 @@ def _finding(kind: str, line: int, symbol: str, message: str, **extra: Any) -> d
     return out
 
 
+def _line_for_offset(text: str, offset: int) -> int:
+    return text[:offset].count("\n") + 1
+
+
+def _without_line_comments(text: str) -> str:
+    return "\n".join(line.split("//", 1)[0] for line in text.splitlines())
+
+
+def _validate_enma_semantics(code: str) -> list[dict[str, Any]]:
+    clean = _without_line_comments(code)
+    findings: list[dict[str, Any]] = []
+    for match in re.finditer(r"\bmap\s*<\s*([^,>]+)", clean):
+        key = match.group(1).strip()
+        if key != "string":
+            symbol = f"map<{key}"
+            findings.append(_finding(
+                "semantic_error",
+                _line_for_offset(clean, match.start()),
+                symbol,
+                "Enma map<K,V> uses string keys; use imap<V> for integer keys.",
+            ))
+    match = re.search(r"\breturn\s*&", clean)
+    if match:
+        findings.append(_finding(
+            "semantic_error",
+            _line_for_offset(clean, match.start()),
+            "return &",
+            "Enma rejects escaping local addresses; return values or store owned state.",
+        ))
+    return findings
+
+
 def _symbol_context(index: dict[str, Any], symbol: str, language: str) -> dict[str, Any]:
     exact = lookup_symbol(index, symbol, language)
     any_lang = lookup_symbol(index, symbol)
@@ -296,6 +328,8 @@ def validate_code_against_index(
                          f"unsupported language: {language}; expected enma or angelscript")]
 
     findings: list[dict[str, Any]] = []
+    if language == "enma":
+        findings.extend(_validate_enma_semantics(code))
     user_funcs = {name for name, _ in extract_function_defs(code, language)}
     if extra_user_functions:
         user_funcs.update(extra_user_functions)
@@ -342,6 +376,13 @@ def validate_code_against_index(
                     fix=f'import "{provider}";',
                 ))
                 continue
+            if name.startswith("fs_") and "PERM_FILE" not in code:
+                findings.append(_finding(
+                    "missing_permission",
+                    line,
+                    "PERM_FILE",
+                    f"{name} requires PERM_FILE in the script permission set",
+                ))
 
         lang_sigs = signatures_for(index, name, language)
         any_sigs = signatures_for(index, name)

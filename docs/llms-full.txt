@@ -48664,10 +48664,12 @@ int64 main() {
 ## Source: `templates/cheat-skeleton-em/menu.em`
 
 // menu.em — config, keybinds, save/load
+// Host must grant PERM_FILE before compiling this script.
 #pragma once
 
 import "globals";
 import "json";
+import "file";
 import "strings";
 
 const string CONFIG_PATH = "cheat_skeleton_config.json";
@@ -49081,7 +49083,10 @@ int64 main() {
 // menu.em — GUI sidebar + config persistence.
 // Every tunable is a widget; config saves/loads via the filesystem API.
 
+// Host must grant PERM_FILE before compiling this script.
+
 import "color";
+import "file";
 import "globals";
 import "strings";
 

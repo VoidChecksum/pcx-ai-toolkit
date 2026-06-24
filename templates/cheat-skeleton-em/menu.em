@@ -1,8 +1,10 @@
 // menu.em — config, keybinds, save/load
+// Host must grant PERM_FILE before compiling this script.
 #pragma once
 
 import "globals";
 import "json";
+import "file";
 import "strings";
 
 const string CONFIG_PATH = "cheat_skeleton_config.json";
