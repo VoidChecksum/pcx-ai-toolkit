@@ -295,6 +295,16 @@ def print_report(result: dict[str, Any]) -> None:
 
 
 def main() -> int:
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'analyze-vmprotect.exe' if os.name == 'nt' else 'analyze-vmprotect'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            return res.returncode
+        except Exception:
+            pass
+
     parser = argparse.ArgumentParser(description='Analyze VMProtect-protected PE files')
     parser.add_argument('binary', help='PE binary to analyze')
     parser.add_argument('--json', action='store_true', help='JSON output')

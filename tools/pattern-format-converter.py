@@ -29,6 +29,8 @@ Usage:
 import sys
 import json
 import argparse
+import os
+import subprocess
 
 FORMATS = ['ida', 'ghidra', 'x64dbg', 'ce', 'enma', 'cstyle', 'bytes', 'sig_mask']
 MASK_FORMATS = ('cstyle', 'bytes', 'sig_mask')  # need a separate mask to parse
@@ -144,6 +146,16 @@ def emit(fmt, norm):
 
 
 def main():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'pattern-format-converter.exe' if os.name == 'nt' else 'pattern-format-converter'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            sys.exit(res.returncode)
+        except Exception:
+            pass
+
     parser = argparse.ArgumentParser(
         description='Convert byte patterns between IDA/Ghidra/x64dbg/CE/Enma/C formats',
         formatter_class=argparse.RawDescriptionHelpFormatter,

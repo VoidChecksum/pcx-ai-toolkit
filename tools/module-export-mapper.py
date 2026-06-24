@@ -19,6 +19,7 @@ import struct
 import os
 import json
 import argparse
+import subprocess
 
 
 # ── PE parser imports ─────────────────────────────────────────────────────────
@@ -217,6 +218,16 @@ def print_table(module, exports, with_consumers):
 
 
 def main():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'module-export-mapper.exe' if os.name == 'nt' else 'module-export-mapper'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            sys.exit(res.returncode)
+        except Exception:
+            pass
+
     ap = argparse.ArgumentParser(description='Map PE module exports and consumers')
     ap.add_argument('binary', help='PE module whose exports to list')
     ap.add_argument('--consumers', metavar='DIR',

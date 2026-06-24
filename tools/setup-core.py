@@ -13,7 +13,21 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-RUST_TOOLS = ("pe-parser", "sig-uniqueness-checker", "binary-diff-summary", "offset-diff")
+RUST_TOOLS = (
+    "pe-parser",
+    "pcx-rs",
+    "api-lookup",
+    "pattern-format-converter",
+    "sig-uniqueness-checker",
+    "binary-diff-summary",
+    "offset-diff",
+    "anti-debug-scanner",
+    "identify-protector",
+    "pe-section-analyzer",
+    "analyze-vmprotect",
+    "dump-strings-xor",
+    "module-export-mapper",
+)
 
 
 class CmdResult:

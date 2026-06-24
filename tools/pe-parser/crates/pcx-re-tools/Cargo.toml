@@ -1,0 +1,8 @@
+[package]
+name = "pcx-re-tools"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+pe-parser = { path = "../.." }
+pcx-core = { path = "../pcx-core" }

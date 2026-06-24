@@ -14,6 +14,7 @@ import struct
 import os
 import json
 import argparse
+import subprocess
 
 SECTION_SIGS = {
     b'.vmp0':    'VMProtect',
@@ -223,6 +224,16 @@ def identify(filepath):
 
 
 def main():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'identify-protector.exe' if os.name == 'nt' else 'identify-protector'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            sys.exit(res.returncode)
+        except Exception:
+            pass
+
     parser = argparse.ArgumentParser(description='Identify binary protectors')
     parser.add_argument('binary', help='PE binary to analyze')
     parser.add_argument('--json', action='store_true', help='JSON output')

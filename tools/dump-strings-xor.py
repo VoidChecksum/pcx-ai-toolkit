@@ -19,6 +19,7 @@ import os
 import json
 import argparse
 import string
+import subprocess
 
 
 # ── PE parser imports ─────────────────────────────────────────────────────────
@@ -92,6 +93,16 @@ def find_xor_strings(data: bytes, min_length: int = 6, key: int = None):
 
 
 def main():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'dump-strings-xor.exe' if os.name == 'nt' else 'dump-strings-xor'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            sys.exit(res.returncode)
+        except Exception:
+            pass
+
     parser = argparse.ArgumentParser(description='Extract XOR-encrypted strings')
     parser.add_argument('binary', help='PE binary to scan')
     parser.add_argument('--key', help='Known XOR key (hex, e.g., 0x55)')

@@ -165,7 +165,7 @@ validate_project(path)
 
 | Docs | Doc Lines | API Docs Indexed | API Functions | API Methods | Skills | Templates | MCP Tools | Native Tools |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 124 | 32,186 | 39 | 836 | 333 | 25 | 30 | 59 | 4 |
+| 124 | 32,186 | 39 | 836 | 333 | 25 | 30 | 59 | 13 |
 
 | Surface | Path | Best For |
 |---|---|---|
@@ -227,6 +227,12 @@ pcx verify-project ./my-esp --allow-placeholders --allow-unverified
 | [tools/check-doc-drift.py](tools/check-doc-drift.py) | Compare local docs against upstream |
 | [tools/regenerate-docs.py](tools/regenerate-docs.py) | Fetch drift-checkable upstream Markdown into `docs/` |
 | [tools/re-importer.py](tools/re-importer.py) | Convert IDA/Ghidra/Binja/ReClass exports into PCX offset/evidence seeds |
+| [tools/anti-debug-scanner.py](tools/anti-debug-scanner.py) | Native-backed anti-debug import, byte-pattern, and string scanner |
+| [tools/identify-protector.py](tools/identify-protector.py) | Native-backed protector, packer, overlay, and anti-debug indicator scan |
+| [tools/pe-section-analyzer.py](tools/pe-section-analyzer.py) | Native-backed section entropy, flag, overlay, and anomaly report |
+| [tools/analyze-vmprotect.py](tools/analyze-vmprotect.py) | Native-backed VMProtect section, VM-entry, and workflow analyzer |
+| [tools/dump-strings-xor.py](tools/dump-strings-xor.py) | Native-backed single-byte XOR string extraction |
+| [tools/module-export-mapper.py](tools/module-export-mapper.py) | Native-backed export listing and named consumer cross-reference |
 | [tools/sig-uniqueness-checker.py](tools/sig-uniqueness-checker.py) | Validate byte signatures; proxies to native Rust when built |
 | [tools/binary-diff-summary.py](tools/binary-diff-summary.py) | Patch-day section diff and recompile/refactor/major-change classifier; proxies to native Rust when built |
 | [tools/offset-diff.py](tools/offset-diff.py) | Diff named direct/RIP signatures across binary versions; proxies to native Rust when built |
@@ -240,17 +246,45 @@ The high-volume binary-analysis path is Rust-first with Python compatibility wra
 ```bash
 cargo build --release --manifest-path tools/pe-parser/Cargo.toml
 mkdir -p tools/bin
-cp tools/pe-parser/target/release/{pe-parser,sig-uniqueness-checker,binary-diff-summary,offset-diff} tools/bin/
+for tool in pe-parser anti-debug-scanner identify-protector pe-section-analyzer \
+  pcx-rs api-lookup pattern-format-converter analyze-vmprotect \
+  dump-strings-xor module-export-mapper \
+  sig-uniqueness-checker binary-diff-summary offset-diff; do
+  cp "tools/pe-parser/target/release/$tool" "tools/bin/$tool"
+done
 ```
 
 | Native binary | Wrapper | Use |
 |---|---|---|
+| `pcx-rs` | [tools/pcx](tools/pcx) | Rust-first manager command layer and native command router |
+| `api-lookup` | [tools/api-lookup.py](tools/api-lookup.py) | Source-backed Enma and AngelScript API lookup |
+| `pattern-format-converter` | [tools/pattern-format-converter.py](tools/pattern-format-converter.py) | Pattern conversion across IDA, Ghidra, x64dbg, CE, Enma, and mask formats |
 | `pe-parser` | [tools/lib/pe_parse.py](tools/lib/pe_parse.py) | PE/ELF/Mach-O metadata extraction for all RE tools |
+| `anti-debug-scanner` | [tools/anti-debug-scanner.py](tools/anti-debug-scanner.py) | Anti-debug imports, byte patterns, timing, context, and debugger-string scan |
+| `identify-protector` | [tools/identify-protector.py](tools/identify-protector.py) | Protector and packer heuristics from sections, imports, stubs, and overlays |
+| `pe-section-analyzer` | [tools/pe-section-analyzer.py](tools/pe-section-analyzer.py) | Entropy, flags, overlay, and section anomaly analysis |
+| `analyze-vmprotect` | [tools/analyze-vmprotect.py](tools/analyze-vmprotect.py) | VMProtect-specific section, entry-stub, and tooling recommendations |
+| `dump-strings-xor` | [tools/dump-strings-xor.py](tools/dump-strings-xor.py) | XOR-hidden string extraction across selected sections |
+| `module-export-mapper` | [tools/module-export-mapper.py](tools/module-export-mapper.py) | Export table mapping and named import consumer cross-reference |
 | `sig-uniqueness-checker` | [tools/sig-uniqueness-checker.py](tools/sig-uniqueness-checker.py) | Unique/stale/ambiguous signature verdicts with near-miss support |
 | `binary-diff-summary` | [tools/binary-diff-summary.py](tools/binary-diff-summary.py) | Fast patch-day section survival summary |
 | `offset-diff` | [tools/offset-diff.py](tools/offset-diff.py) | Direct and RIP-relative offset movement report |
 
 Keep new binary-analysis tools in the same Cargo package under [tools/pe-parser](tools/pe-parser), then expose a small Python wrapper so existing agent commands do not change.
+
+## Gap Analysis And Feature Improvements
+
+The docs surface is strong, but the toolkit still has a few high-value gaps when measured against the current Perception Enma and AngelScript surfaces:
+
+| Gap | Why It Matters | Improvement |
+|---|---|---|
+| Python remains in validator, scaffold, docs-generation, MCP, and test support paths | Native RE tools are Rust-first, but the rest of the CLI still depends on Python for source validation and project workflows | Port `symbol-check`, `verify-project`, `check-answer`, scaffolding, and MCP validators into the Rust command layer, keeping Python only for tests or package compatibility |
+| MCP is documented but not native-backed | The Enma docs expose a local JSON-RPC MCP surface, and agents benefit from a single fast binary | Add `pcx-rs mcp` with `overview`, `api_lookup`, `validate_code`, `validate_answer`, `scaffold_project`, and `validate_project` handlers |
+| Enma and AngelScript language services are separate TypeScript packages | The project supports both bindings, but maintenance and release packaging are split | Share generated API/predefined data and add one cross-language release script that builds both LSPs and the Rust CLI |
+| API drift checks still rely on live Python doc scraping | The upstream docs change frequently, and live CI checks can fail from network instability | Move doc fetch, diff, and provenance generation to Rust with cached upstream snapshots and an explicit `--live` mode |
+| Binary-analysis tools report findings but do not produce PCX-ready remediation artifacts | Analysts still manually turn RE findings into Enma offsets, signatures, and evidence logs | Add direct exporters for `offsets.em`, `evidence.jsonl`, signature health reports, and patch-day migration summaries |
+| AngelScript and Enma examples are broad but not scenario-verified | The docs list APIs, but users need runnable patterns for rendering, memory reads, networking, GUI, and file permissions | Add example projects per API family and dogfood them through `pcx verify-project` in CI |
+| Safety scope is text-only | The AngelScript overview states malware-analysis and education-only use, but tooling does not enforce intent boundaries | Add preflight warnings and metadata fields for project templates, exported reports, and MCP responses so generated artifacts preserve authorized-use context |
 
 ## AI Agent Stack
 

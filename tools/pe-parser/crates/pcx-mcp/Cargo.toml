@@ -1,0 +1,7 @@
+[package]
+name = "pcx-mcp"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+pcx-core = { path = "../pcx-core" }

@@ -1,0 +1,278 @@
+use clap::Parser;
+use pe_parser::api_index::{load_api_index, lookup_symbol, print_lookup_human};
+use std::path::{Path, PathBuf};
+use std::process::Command;
+
+const NATIVE_TOOLS: &[&str] = &[
+    "pe-parser",
+    "api-lookup",
+    "pattern-format-converter",
+    "anti-debug-scanner",
+    "identify-protector",
+    "pe-section-analyzer",
+    "analyze-vmprotect",
+    "dump-strings-xor",
+    "module-export-mapper",
+    "sig-uniqueness-checker",
+    "binary-diff-summary",
+    "offset-diff",
+];
+
+#[derive(Parser)]
+#[command(
+    about = "Rust-first command layer for pcx-ai-toolkit",
+    disable_help_subcommand = true,
+    trailing_var_arg = true
+)]
+struct Args {
+    command: Option<String>,
+    args: Vec<String>,
+}
+
+fn find_repo_root() -> Result<PathBuf, String> {
+    let mut starts = Vec::new();
+    if let Ok(exe) = std::env::current_exe() {
+        starts.push(exe);
+    }
+    if let Ok(cwd) = std::env::current_dir() {
+        starts.push(cwd);
+    }
+    for start in starts {
+        for dir in start.ancestors() {
+            if dir.join("VERSION").exists()
+                && dir.join("knowledge").join("pcx-api-index.json").exists()
+            {
+                return Ok(dir.to_path_buf());
+            }
+        }
+    }
+    Err("could not locate pcx-ai-toolkit repository root".to_string())
+}
+
+fn version(repo_root: &Path) -> String {
+    std::fs::read_to_string(repo_root.join("VERSION"))
+        .map(|s| s.trim().to_string())
+        .unwrap_or_else(|_| "unknown".to_string())
+}
+
+fn print_help(repo_root: &Path) {
+    println!("pcx-ai-toolkit manager CLI v{}", version(repo_root));
+    println!();
+    println!("Usage: pcx <command> [args]");
+    println!();
+    println!("Native Rust commands:");
+    println!("  version");
+    println!("  api <symbol> [--lang enma|angelscript] [--json]");
+    println!("  doctor");
+    for tool in NATIVE_TOOLS {
+        println!("  {tool} [args]");
+    }
+    println!();
+    println!("Compatibility commands delegated to Python until ported:");
+    println!("  setup, update, lint, symbol-check, check-answer, create, verify, verify-project");
+    println!("  build-api-index, check-drift, check-mcp, check-matrix, counts, new");
+}
+
+fn normalize_lang(lang: Option<&str>) -> Result<Option<&str>, String> {
+    match lang {
+        None => Ok(None),
+        Some("enma" | "em" | ".em") => Ok(Some("enma")),
+        Some("angelscript" | "angel-script" | "as" | ".as") => Ok(Some("angelscript")),
+        Some(other) => Err(format!(
+            "unsupported --lang {other:?}; use enma or angelscript"
+        )),
+    }
+}
+
+fn cmd_api(repo_root: &Path, args: &[String]) -> i32 {
+    let mut symbol = None;
+    let mut lang = None;
+    let mut json = false;
+    let mut i = 0usize;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--json" => json = true,
+            "--lang" => {
+                i += 1;
+                if i >= args.len() {
+                    eprintln!("ERROR: --lang requires a value");
+                    return 2;
+                }
+                lang = Some(args[i].as_str());
+            }
+            "-h" | "--help" => {
+                println!("Usage: pcx api <symbol> [--lang enma|angelscript] [--json]");
+                return 0;
+            }
+            value if value.starts_with("--lang=") => {
+                lang = value.split_once('=').map(|(_, v)| v);
+            }
+            value if value.starts_with('-') => {
+                eprintln!("ERROR: unknown option {value}");
+                return 2;
+            }
+            value => {
+                if symbol.is_some() {
+                    eprintln!("ERROR: unexpected argument {value:?}");
+                    return 2;
+                }
+                symbol = Some(value);
+            }
+        }
+        i += 1;
+    }
+    let Some(symbol) = symbol else {
+        eprintln!("ERROR: missing symbol");
+        return 2;
+    };
+    let lang = match normalize_lang(lang) {
+        Ok(lang) => lang,
+        Err(e) => {
+            eprintln!("ERROR: {e}");
+            return 2;
+        }
+    };
+    let index = match load_api_index(repo_root) {
+        Ok(index) => index,
+        Err(e) => {
+            eprintln!("ERROR: {e}");
+            return 2;
+        }
+    };
+    let result = lookup_symbol(&index, symbol, lang);
+    if json {
+        println!("{}", serde_json::to_string_pretty(&result).unwrap());
+    } else {
+        print_lookup_human(&result);
+    }
+    if result.found {
+        0
+    } else {
+        1
+    }
+}
+
+fn cmd_doctor(repo_root: &Path) -> i32 {
+    let mut checks = Vec::new();
+    checks.push((
+        "git installed",
+        Command::new("git").arg("--version").output().is_ok(),
+    ));
+    checks.push((
+        "node installed",
+        Command::new("node").arg("--version").output().is_ok(),
+    ));
+    checks.push((
+        "cargo installed",
+        Command::new("cargo").arg("--version").output().is_ok(),
+    ));
+    checks.push((
+        "knowledge/pcx-api-index.json exists",
+        repo_root
+            .join("knowledge")
+            .join("pcx-api-index.json")
+            .exists(),
+    ));
+    checks.push((
+        "docs/COUNTS.json exists",
+        repo_root.join("docs").join("COUNTS.json").exists(),
+    ));
+    for tool in NATIVE_TOOLS {
+        let ext = if cfg!(windows) { ".exe" } else { "" };
+        checks.push((
+            Box::leak(format!("native {tool} built").into_boxed_str()),
+            repo_root
+                .join("tools")
+                .join("bin")
+                .join(format!("{tool}{ext}"))
+                .exists(),
+        ));
+    }
+    println!(
+        "\npcx-ai-toolkit v{} - Rust Doctor Report\n{}",
+        version(repo_root),
+        "-".repeat(50)
+    );
+    let mut failed = 0;
+    for (label, ok) in &checks {
+        println!("  {:<6} {}", if *ok { "[OK]" } else { "[FAIL]" }, label);
+        if !ok {
+            failed += 1;
+        }
+    }
+    println!("{}", "-".repeat(50));
+    if failed == 0 {
+        println!("All {} checks passed.", checks.len());
+        0
+    } else {
+        println!("{failed}/{} checks failed.", checks.len());
+        1
+    }
+}
+
+fn python_cmd(repo_root: &Path) -> Command {
+    let python = if Command::new("python3").arg("--version").output().is_ok() {
+        "python3"
+    } else {
+        "python"
+    };
+    let mut cmd = Command::new(python);
+    cmd.arg(repo_root.join("tools").join("pcx.py"));
+    cmd
+}
+
+fn run_python_fallback(repo_root: &Path, command: &str, args: &[String]) -> i32 {
+    let status = python_cmd(repo_root).arg(command).args(args).status();
+    match status {
+        Ok(status) => status.code().unwrap_or(1),
+        Err(e) => {
+            eprintln!("ERROR: failed to run Python fallback: {e}");
+            3
+        }
+    }
+}
+
+fn run_native_tool(repo_root: &Path, tool: &str, args: &[String]) -> Option<i32> {
+    let ext = if cfg!(windows) { ".exe" } else { "" };
+    let path = repo_root
+        .join("tools")
+        .join("bin")
+        .join(format!("{tool}{ext}"));
+    if !path.exists() {
+        return None;
+    }
+    let status = Command::new(path).args(args).status().ok()?;
+    Some(status.code().unwrap_or(1))
+}
+
+fn main() {
+    let args = Args::parse();
+    let repo_root = match find_repo_root() {
+        Ok(root) => root,
+        Err(e) => {
+            eprintln!("ERROR: {e}");
+            std::process::exit(2);
+        }
+    };
+    let Some(command) = args.command.as_deref() else {
+        print_help(&repo_root);
+        return;
+    };
+    let command = command.to_ascii_lowercase();
+    let rc = match command.as_str() {
+        "help" | "-h" | "--help" => {
+            print_help(&repo_root);
+            0
+        }
+        "version" | "-v" | "--version" => {
+            println!("pcx-ai-toolkit v{}", version(&repo_root));
+            0
+        }
+        "api" | "api-lookup" => cmd_api(&repo_root, &args.args),
+        "doctor" => cmd_doctor(&repo_root),
+        tool if NATIVE_TOOLS.contains(&tool) => run_native_tool(&repo_root, tool, &args.args)
+            .unwrap_or_else(|| run_python_fallback(&repo_root, tool, &args.args)),
+        other => run_python_fallback(&repo_root, other, &args.args),
+    };
+    std::process::exit(rc);
+}

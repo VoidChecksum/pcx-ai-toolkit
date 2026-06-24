@@ -144,7 +144,21 @@ if (-not $SkipLsp -and $cargo) {
     Write-Host "Rebuilding Rust native tools..."
     $parserDir = Join-Path $ToolkitDir "tools\pe-parser"
     $binDir = Join-Path $ToolkitDir "tools\bin"
-    $rustTools = @("pe-parser", "sig-uniqueness-checker", "binary-diff-summary", "offset-diff")
+    $rustTools = @(
+        "pe-parser",
+        "pcx-rs",
+        "api-lookup",
+        "pattern-format-converter",
+        "sig-uniqueness-checker",
+        "binary-diff-summary",
+        "offset-diff",
+        "anti-debug-scanner",
+        "identify-protector",
+        "pe-section-analyzer",
+        "analyze-vmprotect",
+        "dump-strings-xor",
+        "module-export-mapper"
+    )
     Push-Location $parserDir
     try {
         & cargo build --release 2>&1 | Out-Null

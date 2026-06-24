@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
+import os
 import sys
 from pathlib import Path
 
+repo_root = Path(__file__).resolve().parent.parent
+bin_name = "pcx-rs.exe" if os.name == "nt" else "pcx-rs"
+native = repo_root / "tools" / "bin" / bin_name
+if native.exists():
+    os.execv(str(native), [str(native)] + sys.argv[1:])
+
 # Add REPO_ROOT to sys.path so we can import tools package even when not installed
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(repo_root))
 
 from tools.pcx import main
 

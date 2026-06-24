@@ -3,6 +3,8 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
+pub mod api_index;
+
 #[derive(Serialize, Clone)]
 pub struct Section {
     pub name: String,

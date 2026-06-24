@@ -160,6 +160,32 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
+name = "pcx-cli"
+version = "1.0.0"
+dependencies = [
+ "pcx-core",
+]
+
+[[package]]
+name = "pcx-core"
+version = "1.0.0"
+
+[[package]]
+name = "pcx-mcp"
+version = "1.0.0"
+dependencies = [
+ "pcx-core",
+]
+
+[[package]]
+name = "pcx-re-tools"
+version = "1.0.0"
+dependencies = [
+ "pcx-core",
+ "pe-parser",
+]
+
+[[package]]
 name = "pe-parser"
 version = "1.0.0"
 dependencies = [

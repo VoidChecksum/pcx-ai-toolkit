@@ -22,6 +22,7 @@ import os
 import json
 import argparse
 import re
+import subprocess
 
 
 # ── Detection tables ──────────────────────────────────────────────────────────
@@ -375,6 +376,16 @@ def print_report(result):
 
 
 def main():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'anti-debug-scanner.exe' if os.name == 'nt' else 'anti-debug-scanner'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            sys.exit(res.returncode)
+        except Exception:
+            pass
+
     p = argparse.ArgumentParser(description='Scan a PE for anti-debug surfaces')
     p.add_argument('binary', help='path to PE file')
     p.add_argument('--json', action='store_true', help='emit JSON instead of text')

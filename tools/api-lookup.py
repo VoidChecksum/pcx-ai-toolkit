@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -52,6 +54,16 @@ def _print_human(result: dict[str, Any]) -> None:
 
 
 def main() -> int:
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = "api-lookup.exe" if os.name == "nt" else "api-lookup"
+    binary_path = os.path.join(base_dir, "bin", bin_name)
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            return res.returncode
+        except Exception:
+            pass
+
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("symbol", help="function, method, or type name")
     ap.add_argument("--lang", choices=["enma", "angelscript"], help="restrict lookup to one language")

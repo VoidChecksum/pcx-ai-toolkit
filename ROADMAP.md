@@ -21,6 +21,12 @@ Our goal is to make AI-assisted game hacking and scripting on the Perception.cx 
 
 ## 🚀 Phase 2: Advanced Tooling & DX (Target: Q3 2026)
 
+### 0. Rust-First Toolkit Migration
+- Make the Rust command layer the default for native reverse-engineering tools, API lookup, doctor checks, and binary smoke tests.
+- Port the remaining Python validator/scaffold commands into `pcx-rs`: `symbol-check`, `verify`, `verify-project`, `check-answer`, `create`, `build-api-index`, `check-drift`, `counts`, and provenance generation.
+- Add a native MCP server mode so agent clients can run source lookup, code validation, answer validation, and scaffolding without a Python process.
+- Keep Python wrappers only as compatibility launchers during the transition, then remove them after the Rust CLI reaches feature parity.
+
 ### 1. Package Registry Distribution
 - Publish `pcx-knowledge-mcp` to PyPI to enable direct installation via `pip install pcx-knowledge-mcp` or execution via `uvx`.
 - Submit the VS Code LSP extensions directly to the VS Code Marketplace and Open VSX Registry for automatic updates.
@@ -32,6 +38,8 @@ Our goal is to make AI-assisted game hacking and scripting on the Perception.cx 
 ### 3. Verification & Testing Tools
 - Enhance the `test-discipline` skill with boilerplate test script generation commands (`pcx new test-reader`).
 - Integrate offset change alert scans that automatically alert the user if a pattern resolves to a different instruction size after game updates.
+- Add scenario fixtures for Enma and AngelScript API families: lifecycle, render/custom draw, GUI, Proc, Net, filesystem, Zydis, Unicorn, and MCP.
+- Export Rust RE findings directly to `offsets.em`, `evidence.jsonl`, patch-day signature health summaries, and project verification inputs.
 
 ---
 

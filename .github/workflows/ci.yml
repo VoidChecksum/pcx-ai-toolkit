@@ -77,7 +77,7 @@ jobs:
         run: |
           cargo build --release
           mkdir -p ../bin
-          for tool in pe-parser sig-uniqueness-checker binary-diff-summary offset-diff; do
+          for tool in pe-parser pcx-rs api-lookup pattern-format-converter sig-uniqueness-checker binary-diff-summary offset-diff anti-debug-scanner identify-protector pe-section-analyzer analyze-vmprotect dump-strings-xor module-export-mapper; do
             cp "target/release/$tool" "../bin/$tool"
           done
 

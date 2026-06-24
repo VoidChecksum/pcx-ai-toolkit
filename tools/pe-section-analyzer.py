@@ -16,6 +16,7 @@ import os
 import math
 import json
 import argparse
+import subprocess
 
 
 def entropy(data: bytes) -> float:
@@ -111,6 +112,16 @@ def analyze(filepath):
 
 
 def main():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bin_name = 'pe-section-analyzer.exe' if os.name == 'nt' else 'pe-section-analyzer'
+    binary_path = os.path.join(base_dir, 'bin', bin_name)
+    if os.path.exists(binary_path):
+        try:
+            res = subprocess.run([binary_path] + sys.argv[1:])
+            sys.exit(res.returncode)
+        except Exception:
+            pass
+
     parser = argparse.ArgumentParser(description='PE section analyzer')
     parser.add_argument('binary', help='PE binary to analyze')
     parser.add_argument('--entropy', action='store_true', help='Show entropy bar graph')

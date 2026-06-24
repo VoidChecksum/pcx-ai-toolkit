@@ -147,7 +147,21 @@ fi
 if [ "$SKIP_LSP" -eq 0 ] && command -v cargo &>/dev/null; then
     echo ""
     echo "Rebuilding Rust native tools..."
-    RUST_TOOLS=(pe-parser sig-uniqueness-checker binary-diff-summary offset-diff)
+    RUST_TOOLS=(
+        pe-parser
+        pcx-rs
+        api-lookup
+        pattern-format-converter
+        sig-uniqueness-checker
+        binary-diff-summary
+        offset-diff
+        anti-debug-scanner
+        identify-protector
+        pe-section-analyzer
+        analyze-vmprotect
+        dump-strings-xor
+        module-export-mapper
+    )
     if ( cd "$TOOLKIT_DIR/tools/pe-parser" && cargo build --release ) >/dev/null 2>&1; then
         mkdir -p "$TOOLKIT_DIR/tools/bin"
         copied=0

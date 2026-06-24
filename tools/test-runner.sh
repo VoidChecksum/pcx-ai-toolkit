@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# test-runner.sh — Smoke test all python tools against a mock PE binary.
-#
 # Generates a valid x64 PE binary with imports, exports, and PEB-walk
 # signatures, then runs all tools to verify zero crashes and correct outputs.
 set -euo pipefail
@@ -63,41 +61,45 @@ with open("/tmp/pcx_sigs.json", "w") as f: json.dump(sigs, f)
 
 echo "Running tool smoke tests..."
 
+echo "  0. build native Rust RE tools..."
+(
+    cd "$TOOLKIT_DIR/tools/pe-parser"
+    cargo build --release >/dev/null
+)
+mkdir -p "$TOOLKIT_DIR/tools/bin"
+for tool in pe-parser pcx-rs api-lookup pattern-format-converter \
+    sig-uniqueness-checker binary-diff-summary offset-diff \
+    anti-debug-scanner identify-protector pe-section-analyzer \
+    analyze-vmprotect dump-strings-xor module-export-mapper; do
+    cp "$TOOLKIT_DIR/tools/pe-parser/target/release/$tool" "$TOOLKIT_DIR/tools/bin/$tool"
+done
+
 echo "  1. anti-debug-scanner..."
-python3 "$TOOLKIT_DIR/tools/anti-debug-scanner.py" --json "$TEST_EXE" > /dev/null
+"$TOOLKIT_DIR/tools/bin/anti-debug-scanner" --json "$TEST_EXE" > /dev/null
 
 echo "  2. identify-protector..."
-python3 "$TOOLKIT_DIR/tools/identify-protector.py" --json "$TEST_EXE" > /dev/null
+"$TOOLKIT_DIR/tools/bin/identify-protector" --json "$TEST_EXE" > /dev/null
 
 echo "  3. module-export-mapper..."
-python3 "$TOOLKIT_DIR/tools/module-export-mapper.py" "$TEST_EXE" > /dev/null
+"$TOOLKIT_DIR/tools/bin/module-export-mapper" "$TEST_EXE" > /dev/null
 
 echo "  4. pe-section-analyzer..."
-python3 "$TOOLKIT_DIR/tools/pe-section-analyzer.py" --json "$TEST_EXE" > /dev/null
+"$TOOLKIT_DIR/tools/bin/pe-section-analyzer" --json "$TEST_EXE" > /dev/null
 
 echo "  5. sig-uniqueness-checker..."
-python3 "$TOOLKIT_DIR/tools/sig-uniqueness-checker.py" --json --sig "65 48 8B 04 25 60 00 00 00" "$TEST_EXE" > /dev/null
+"$TOOLKIT_DIR/tools/bin/sig-uniqueness-checker" --json --sig "65 48 8B 04 25 60 00 00 00" "$TEST_EXE" > /dev/null
 
 echo "  6. binary-diff-summary..."
-python3 "$TOOLKIT_DIR/tools/binary-diff-summary.py" --json --old "$TEST_EXE" --new "$TEST_EXE" > /dev/null
+"$TOOLKIT_DIR/tools/bin/binary-diff-summary" --json --old "$TEST_EXE" --new "$TEST_EXE" > /dev/null
 
 echo "  7. offset-diff..."
-python3 "$TOOLKIT_DIR/tools/offset-diff.py" --json --old "$TEST_EXE" --new "$TEST_EXE" --sigs "$SIGS_JSON" > /dev/null
-
-if [ -x "$TOOLKIT_DIR/tools/bin/sig-uniqueness-checker" ] \
-    && [ -x "$TOOLKIT_DIR/tools/bin/binary-diff-summary" ] \
-    && [ -x "$TOOLKIT_DIR/tools/bin/offset-diff" ]; then
-    echo "  7b. native Rust RE tools..."
-    "$TOOLKIT_DIR/tools/bin/sig-uniqueness-checker" --json --sig "65 48 8B 04 25 60 00 00 00" "$TEST_EXE" > /dev/null
-    "$TOOLKIT_DIR/tools/bin/binary-diff-summary" --json --old "$TEST_EXE" --new "$TEST_EXE" > /dev/null
-    "$TOOLKIT_DIR/tools/bin/offset-diff" --json --old "$TEST_EXE" --new "$TEST_EXE" --sigs "$SIGS_JSON" > /dev/null
-fi
+"$TOOLKIT_DIR/tools/bin/offset-diff" --json --old "$TEST_EXE" --new "$TEST_EXE" --sigs "$SIGS_JSON" > /dev/null
 
 echo "  8. dump-strings-xor..."
-python3 "$TOOLKIT_DIR/tools/dump-strings-xor.py" --json "$TEST_EXE" > /dev/null
+"$TOOLKIT_DIR/tools/bin/dump-strings-xor" --json "$TEST_EXE" > /dev/null
 
 echo "  9. pattern-format-converter..."
-python3 "$TOOLKIT_DIR/tools/pattern-format-converter.py" --from ida --to all --pat "48 8B ? ? ? ?" > /dev/null
+"$TOOLKIT_DIR/tools/bin/pattern-format-converter" --from ida --to all --pat "48 8B ? ? ? ?" > /dev/null
 
 echo " 10. resolve-api-hashes..."
 # Run with help to verify it loads and executes
@@ -113,7 +115,7 @@ echo " 13. evidence-log-validator..."
 python3 "$TOOLKIT_DIR/tools/evidence-log-validator.py" --help > /dev/null
 
 echo " 14. analyze-vmprotect..."
-python3 "$TOOLKIT_DIR/tools/analyze-vmprotect.py" --json "$TEST_EXE" > /dev/null
+"$TOOLKIT_DIR/tools/bin/analyze-vmprotect" --json "$TEST_EXE" > /dev/null
 
 echo " 15. build-api-index --check..."
 python3 "$TOOLKIT_DIR/tools/build-api-index.py" --check > /dev/null
