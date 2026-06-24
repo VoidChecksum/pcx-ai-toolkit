@@ -316,3 +316,23 @@ fn native_create_check_answer_and_check_drift_work() {
     assert_eq!(json["mode"], "offline");
     let _ = fs::remove_dir_all(&dir);
 }
+
+#[test]
+fn native_check_drift_json_lists_offline_snapshot() {
+    let out = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["check-drift", "--json", "--limit", "1"])
+        .env("PATH", "")
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stderr),
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(json["mode"], "offline");
+    assert_eq!(json["snapshot"], "docs/PROVENANCE.json");
+    assert_eq!(json["checked"], 1);
+    assert!(json["results"].as_array().unwrap().len() <= 1);
+}
