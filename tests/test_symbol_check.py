@@ -156,6 +156,11 @@ void on_tick(int64 data) {}
                 "semantic_error",
                 "imap<V>",
             ),
+            "pcx_py_unsigned_negative_bad.em": (
+                "int64 main(){uint64 flags = -1; return 1;}\n",
+                "semantic_error",
+                "cast<uint",
+            ),
             "pcx_py_pointer_escape_bad.em": (
                 "int64* leak(){int64 local = 1; return &local;}\n",
                 "semantic_error",

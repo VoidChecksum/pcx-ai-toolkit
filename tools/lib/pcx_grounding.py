@@ -290,6 +290,13 @@ def _validate_enma_semantics(code: str) -> list[dict[str, Any]]:
                 symbol,
                 "Enma map<K,V> uses string keys; use imap<V> for integer keys.",
             ))
+    for match in re.finditer(r"\buint(?:8|16|32|64)\s+\w+\s*=\s*-(?!\s*cast\s*<)", clean):
+        findings.append(_finding(
+            "semantic_error",
+            _line_for_offset(clean, match.start()),
+            "cast<uint",
+            "Enma rejects signed-to-unsigned narrowing without an explicit cast<uint...>(...).",
+        ))
     match = re.search(r"\breturn\s*&", clean)
     if match:
         findings.append(_finding(

@@ -176,6 +176,35 @@ fn enma_semantics(p: &Path, text: &str, findings: &mut Vec<ValidationFinding>) {
         }
         start = key_start + comma_rel + 1;
     }
+    let mut start = 0usize;
+    while let Some(rel) = text[start..].find("uint") {
+        let at = start + rel;
+        let rest = &text[at..];
+        if !(rest.starts_with("uint8")
+            || rest.starts_with("uint16")
+            || rest.starts_with("uint32")
+            || rest.starts_with("uint64"))
+        {
+            start = at + 4;
+            continue;
+        }
+        let stmt_end = rest.find(';').unwrap_or(rest.len());
+        let stmt = &rest[..stmt_end];
+        if let Some(eq) = stmt.find('=') {
+            let rhs = stmt[eq + 1..].trim_start();
+            if rhs.starts_with('-') && !rhs.starts_with("-cast<") {
+                push_semantic(
+                    findings,
+                    p,
+                    text,
+                    at,
+                    "cast<uint",
+                    "Enma rejects signed-to-unsigned narrowing without an explicit cast<uint...>(...).",
+                );
+            }
+        }
+        start = at + stmt_end.max(4);
+    }
     if let Some(at) = text.find("return &") {
         push_semantic(
             findings,

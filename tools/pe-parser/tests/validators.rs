@@ -83,6 +83,17 @@ fn rejects_enma_map_int_keys() {
 }
 
 #[test]
+fn rejects_unsigned_negative_literals() {
+    let p = std::env::temp_dir().join("pcx_unsigned_negative_bad.em");
+    fs::write(&p, "int64 main(){uint64 flags = -1; return 1;}\n").unwrap();
+    let f = symbol_check(&root(), &p).unwrap();
+    assert!(f
+        .iter()
+        .any(|x| x.kind == "semantic_error" && x.symbol == "cast<uint"));
+    let _ = fs::remove_file(p);
+}
+
+#[test]
 fn rejects_returning_address_of_local() {
     let p = std::env::temp_dir().join("pcx_pointer_escape_bad.em");
     fs::write(&p, "int64* leak(){int64 local = 1; return &local;}\n").unwrap();
