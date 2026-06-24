@@ -267,7 +267,7 @@ fn mcp_overview() -> serde_json::Value {
     serde_json::json!({
         "name": "pcx-ai-toolkit",
         "schema_tools": all_tools().len(),
-        "methods": ["overview", "api_lookup", "validate_code", "validate_answer", "validate_project", "scaffold_project"],
+        "methods": ["initialize", "ping", "tools/list", "tools/call", "overview", "api_lookup", "validate_code", "validate_answer", "validate_project", "scaffold_project"],
         "authorized_use": {
             "scope": "owned-lab-ctf-or-authorized-research",
             "no_public_multiplayer_abuse": true,
@@ -455,12 +455,89 @@ fn doc_drift_value(repo_root: &Path, limit: Option<usize>) -> Result<serde_json:
     )
 }
 
+fn mcp_tool_list() -> serde_json::Value {
+    let tools = [
+        ("overview", "Toolkit metadata and authorized-use scope"),
+        ("api_lookup", "Source-backed API symbol lookup"),
+        (
+            "validate_code",
+            "Validate one Enma or AngelScript code string",
+        ),
+        ("validate_answer", "Validate fenced code blocks in markdown"),
+        ("validate_project", "Validate a project directory"),
+        ("scaffold_project", "Create a minimal PCX project"),
+    ];
+    serde_json::json!({
+        "tools": tools.map(|(name, description)| serde_json::json!({
+            "name": name,
+            "description": description,
+            "inputSchema": {"type": "object"}
+        }))
+    })
+}
+
+fn mcp_call_tool(
+    repo_root: &Path,
+    params: &serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    let name = param_str(params, "name").ok_or_else(|| "missing tool name".to_string())?;
+    let arguments = params
+        .get("arguments")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    let result = mcp_result(repo_root, name, &arguments)?;
+    Ok(serde_json::json!({
+        "content": [{
+            "type": "text",
+            "text": serde_json::to_string_pretty(&result).unwrap()
+        }],
+        "structuredContent": result
+    }))
+}
+
+fn mcp_error_code(message: &str) -> i32 {
+    if message.starts_with("unknown MCP method") {
+        -32601
+    } else {
+        -32602
+    }
+}
+
+fn mcp_response(repo_root: &Path, req: serde_json::Value) -> Option<serde_json::Value> {
+    let id = req.get("id").cloned();
+    let method = req.get("method").and_then(|m| m.as_str()).unwrap_or("");
+    if id.is_none() && method.starts_with("notifications/") {
+        return None;
+    }
+    let id = id.unwrap_or(serde_json::Value::Null);
+    let params = req
+        .get("params")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    Some(match mcp_result(repo_root, method, &params) {
+        Ok(result) => json_rpc(id, result),
+        Err(message) => serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": id,
+            "error": {"code": mcp_error_code(&message), "message": message}
+        }),
+    })
+}
+
 fn mcp_result(
     repo_root: &Path,
     method: &str,
     params: &serde_json::Value,
 ) -> Result<serde_json::Value, String> {
     match method {
+        "ping" => Ok(serde_json::json!({})),
+        "initialize" => Ok(serde_json::json!({
+            "protocolVersion": "2024-11-05",
+            "serverInfo": {"name": "pcx-ai-toolkit", "version": version(repo_root)},
+            "capabilities": {"tools": {}}
+        })),
+        "tools/list" => Ok(mcp_tool_list()),
+        "tools/call" => mcp_call_tool(repo_root, params),
         "overview" => Ok(mcp_overview()),
         "api_lookup" => {
             let symbol = param_str(params, "symbol").ok_or_else(|| "missing symbol".to_string())?;
@@ -488,32 +565,36 @@ fn cmd_mcp(repo_root: &Path, args: &[String]) -> i32 {
             eprintln!("ERROR: failed to read stdin: {err}");
             return 2;
         }
-        let req: serde_json::Value = match serde_json::from_str(&input) {
+        let requests = input
+            .lines()
+            .filter(|line| !line.trim().is_empty())
+            .collect::<Vec<_>>();
+        if requests.len() > 1 {
+            for line in requests {
+                let req: serde_json::Value = match serde_json::from_str(line) {
+                    Ok(req) => req,
+                    Err(err) => {
+                        eprintln!("ERROR: invalid JSON request: {err}");
+                        return 2;
+                    }
+                };
+                if let Some(response) = mcp_response(repo_root, req) {
+                    println!("{}", serde_json::to_string(&response).unwrap());
+                }
+            }
+            return 0;
+        }
+        let req: serde_json::Value = match serde_json::from_str(input.trim()) {
             Ok(req) => req,
             Err(err) => {
                 eprintln!("ERROR: invalid JSON request: {err}");
                 return 2;
             }
         };
-        let id = req.get("id").cloned().unwrap_or(serde_json::Value::Null);
-        let method = req.get("method").and_then(|m| m.as_str()).unwrap_or("");
-        let params = req
-            .get("params")
-            .cloned()
-            .unwrap_or_else(|| serde_json::json!({}));
-        match mcp_result(repo_root, method, &params) {
-            Ok(result) => {
-                println!(
-                    "{}",
-                    serde_json::to_string_pretty(&json_rpc(id, result)).unwrap()
-                );
-                return 0;
-            }
-            Err(e) => {
-                eprintln!("ERROR: {e}");
-                return 2;
-            }
+        if let Some(response) = mcp_response(repo_root, req) {
+            println!("{}", serde_json::to_string(&response).unwrap());
         }
+        return 0;
     }
     let Some(method) = args.first().map(|s| s.as_str()) else {
         unreachable!()

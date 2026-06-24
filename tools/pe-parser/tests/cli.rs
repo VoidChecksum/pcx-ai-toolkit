@@ -63,6 +63,59 @@ fn mcp_reads_json_request_from_stdin() {
     );
 }
 
+#[test]
+fn mcp_accepts_line_delimited_requests() {
+    let mut child = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .arg("mcp")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(
+            b"{\"id\":1,\"method\":\"ping\",\"params\":{}}\n{\"method\":\"notifications/initialized\",\"params\":{}}\n{\"id\":2,\"method\":\"overview\",\"params\":{}}\n",
+        )
+        .unwrap();
+    let out = child.wait_with_output().unwrap();
+    assert!(
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let lines = String::from_utf8_lossy(&out.stdout)
+        .lines()
+        .map(|line| serde_json::from_str::<serde_json::Value>(line).unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(lines.len(), 2);
+    assert_eq!(lines[0]["id"], 1);
+    assert_eq!(lines[0]["result"], serde_json::json!({}));
+    assert_eq!(lines[1]["id"], 2);
+    assert_eq!(lines[1]["result"]["name"], "pcx-ai-toolkit");
+}
+
+#[test]
+fn mcp_supports_standard_tools_call() {
+    let response = mcp_call(
+        "tools/call",
+        serde_json::json!({"name":"api_lookup","arguments":{"symbol":"draw_text","language":"enma"}}),
+    );
+    assert_eq!(response["result"]["structuredContent"]["found"], true);
+    assert_eq!(response["result"]["content"][0]["type"], "text");
+}
+
+#[test]
+fn mcp_reports_invalid_params_for_bad_tool_call() {
+    let response = mcp_call("tools/call", serde_json::json!({}));
+    assert_eq!(response["error"]["code"], -32602);
+    assert!(response["error"]["message"]
+        .as_str()
+        .unwrap()
+        .contains("missing tool name"));
+}
+
 fn mcp_call(method: &str, params: serde_json::Value) -> serde_json::Value {
     let mut child = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
         .arg("mcp")

@@ -30,7 +30,7 @@
 Writing Enma?        Load docs/llms-perception-enma.md, then run pcx symbol-check.
 Writing AngelScript? Load docs/llms-perception-angelscript.md, then run pcx verify.
 Need API proof?      Run pcx api <symbol> --lang enma|angelscript.
-Need MCP context?    Run pcx-rs mcp-schema --json or pcx-knowledge-mcp.
+Need MCP context?    Run pcx-rs mcp, pcx-rs mcp-schema --json, or pcx-knowledge-mcp.
 Need RE artifacts?   Use re-importer.py exporters; keep evidence before shipping.
 ```
 
@@ -168,6 +168,7 @@ validate_project(path)
 | Invented API names like `draw_esp()` | `pcx api`, MCP `api_lookup`, and `knowledge/pcx-api-index.json` |
 | Enma lifecycle inside `.as` | `docs/perception/llm-routing.md`, symbol validation, wrong-language detection |
 | Missing Enma imports | `validate_code` missing-import findings for `vec`, `color`, `math`, `json`, and more |
+| Enma semantic traps | Rust `symbol-check` flags integer-keyed `map<K,V>`, escaping `return &local`, and missing `PERM_FILE` for file APIs |
 | Stale docs | provenance, drift checks, `tools/regenerate-docs.py`, regenerated `llms-*` bundles |
 | Forum facts treated as APIs | `knowledge/perception-forum-insights.md` is marked secondary |
 | Regressed validators | `tools/hallucination-eval.py` golden corpus |
@@ -289,13 +290,13 @@ The docs surface is strong, but the toolkit still has a few high-value gaps when
 
 | Gap | Why It Matters | Improvement |
 |---|---|---|
-| Python remains in validator, scaffold, docs-generation, MCP, and test support paths | Native RE tools are Rust-first, but the rest of the CLI still depends on Python for source validation and project workflows | Port `symbol-check`, `verify-project`, `check-answer`, scaffolding, and MCP validators into the Rust command layer, keeping Python only for tests or package compatibility |
-| MCP is documented but not native-backed | The Enma docs expose a local JSON-RPC MCP surface, and agents benefit from a single fast binary | Add `pcx-rs mcp` with `overview`, `api_lookup`, `validate_code`, `validate_answer`, `scaffold_project`, and `validate_project` handlers |
+| Native parity is still incomplete | `symbol-check`, `verify-project`, `check-answer`, `create`, and core MCP handlers now run in Rust, but docs/index generation and some compatibility commands remain Python-backed | Port `build-api-index`, `counts`, provenance/doc drift, and package/update commands only where native speed or release reliability pays for the code |
+| MCP server parity is partial | `pcx-rs mcp` supports line-delimited JSON-RPC plus `initialize`, `ping`, `tools/list`, `tools/call`, and toolkit validation tools, but not Streamable HTTP | Add HTTP transport only if real MCP clients need direct `pcx-rs` attachment instead of stdio |
 | Enma and AngelScript language services are separate TypeScript packages | The project supports both bindings, but maintenance and release packaging are split | Share generated API/predefined data and add one cross-language release script that builds both LSPs and the Rust CLI |
 | API drift checks still rely on live Python doc scraping | The upstream docs change frequently, and live CI checks can fail from network instability | Move doc fetch, diff, and provenance generation to Rust with cached upstream snapshots and an explicit `--live` mode |
-| Binary-analysis tools report findings but do not produce PCX-ready remediation artifacts | Analysts still manually turn RE findings into Enma offsets, signatures, and evidence logs | Add direct exporters for `offsets.em`, `evidence.jsonl`, signature health reports, and patch-day migration summaries |
-| AngelScript and Enma examples are broad but not scenario-verified | The docs list APIs, but users need runnable patterns for rendering, memory reads, networking, GUI, and file permissions | Add example projects per API family and dogfood them through `pcx verify-project` in CI |
-| Safety scope is text-only | The AngelScript overview states malware-analysis and education-only use, but tooling does not enforce intent boundaries | Add preflight warnings and metadata fields for project templates, exported reports, and MCP responses so generated artifacts preserve authorized-use context |
+| Binary-analysis tools report findings but do not produce every PCX-ready remediation artifact | Analysts still manually turn some RE findings into Enma offsets, signatures, and evidence logs | Expand direct exporters for `offsets.em`, `offsets.as`, `evidence.jsonl`, signature health reports, and patch-day migration summaries |
+| Scenario coverage can go deeper | Current fixtures cover the major API families plus Enma JSON/map/file usage, but not every compiler semantic edge | Add tiny red/green scenarios for cast misuse, pointer escape, permissions, OOB traps, and map key constraints |
+| Safety scope is metadata-backed but not policy-enforced | Templates and MCP responses preserve authorized-use context, but tooling does not block all dual-use misuse patterns | Keep metadata in generated artifacts and add narrow denylist checks only for common hallucinated abuse helpers |
 
 ## AI Agent Stack
 

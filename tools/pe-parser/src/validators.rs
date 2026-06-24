@@ -138,6 +138,56 @@ fn enma_imports(text: &str) -> HashSet<String> {
         .collect()
 }
 
+fn push_semantic(
+    findings: &mut Vec<ValidationFinding>,
+    p: &Path,
+    text: &str,
+    offset: usize,
+    symbol: impl Into<String>,
+    message: impl Into<String>,
+) {
+    findings.push(ValidationFinding {
+        file: p.display().to_string(),
+        line: line(text, offset),
+        kind: "semantic_error",
+        symbol: symbol.into(),
+        message: message.into(),
+    });
+}
+
+fn enma_semantics(p: &Path, text: &str, findings: &mut Vec<ValidationFinding>) {
+    let mut start = 0usize;
+    while let Some(rel) = text[start..].find("map<") {
+        let at = start + rel;
+        let key_start = at + "map<".len();
+        let Some(comma_rel) = text[key_start..].find(',') else {
+            break;
+        };
+        let key = text[key_start..key_start + comma_rel].trim();
+        if key != "string" {
+            push_semantic(
+                findings,
+                p,
+                text,
+                at,
+                format!("map<{key}"),
+                "Enma map<K,V> uses string keys; use imap<V> for integer keys.",
+            );
+        }
+        start = key_start + comma_rel + 1;
+    }
+    if let Some(at) = text.find("return &") {
+        push_semantic(
+            findings,
+            p,
+            text,
+            at,
+            "return &",
+            "Enma rejects escaping local addresses; return values or store owned state.",
+        );
+    }
+}
+
 fn forbidden(lang: &str, n: &str) -> Option<&'static str> {
     match (lang, n) {
         ("enma", "register_callback") => {
@@ -166,6 +216,9 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
         let text = clean(&fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))?);
         let user = funcs(&text);
         let imports = enma_imports(&text);
+        if lang == "enma" {
+            enma_semantics(&p, &text, &mut findings);
+        }
         for (n, l) in calls(&text) {
             if matches!(
                 n.as_str(),
@@ -199,6 +252,15 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
                 continue;
             }
             if lang == "enma" {
+                if n.starts_with("fs_") && !text.contains("PERM_FILE") {
+                    findings.push(ValidationFinding {
+                        file: p.display().to_string(),
+                        line: l,
+                        kind: "missing_permission",
+                        symbol: "PERM_FILE".into(),
+                        message: format!("{n} requires PERM_FILE in the script permission set"),
+                    });
+                }
                 if let Some(module) = enma_missing_import(&n) {
                     if !imports.contains(module) {
                         findings.push(ValidationFinding {

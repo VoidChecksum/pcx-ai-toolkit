@@ -66,6 +66,47 @@ fn reports_missing_enma_import() {
         .any(|x| x.kind == "missing_import" && x.symbol == "color"));
     let _ = fs::remove_file(p);
 }
+
+#[test]
+fn rejects_enma_map_int_keys() {
+    let p = std::env::temp_dir().join("pcx_map_key_bad.em");
+    fs::write(
+        &p,
+        "import \"maps\"\nint64 main(){map<int64, int64> counts; return 1;}\n",
+    )
+    .unwrap();
+    let f = symbol_check(&root(), &p).unwrap();
+    assert!(f
+        .iter()
+        .any(|x| x.kind == "semantic_error" && x.symbol == "map<int64"));
+    let _ = fs::remove_file(p);
+}
+
+#[test]
+fn rejects_returning_address_of_local() {
+    let p = std::env::temp_dir().join("pcx_pointer_escape_bad.em");
+    fs::write(&p, "int64* leak(){int64 local = 1; return &local;}\n").unwrap();
+    let f = symbol_check(&root(), &p).unwrap();
+    assert!(f
+        .iter()
+        .any(|x| x.kind == "semantic_error" && x.symbol == "return &"));
+    let _ = fs::remove_file(p);
+}
+
+#[test]
+fn reports_missing_file_permission() {
+    let p = std::env::temp_dir().join("pcx_file_permission_bad.em");
+    fs::write(
+        &p,
+        "import \"file\"\nint64 main(){string x = fs_read_file(\"x.txt\"); return 1;}\n",
+    )
+    .unwrap();
+    let f = symbol_check(&root(), &p).unwrap();
+    assert!(f
+        .iter()
+        .any(|x| x.kind == "missing_permission" && x.symbol == "PERM_FILE"));
+    let _ = fs::remove_file(p);
+}
 #[test]
 fn verify_empty() {
     let d = std::env::temp_dir().join("pcx_empty");
