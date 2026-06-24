@@ -1,5 +1,8 @@
 use clap::Parser;
 use pe_parser::api_index::{load_api_index, lookup_symbol, print_lookup_human};
+use pe_parser::docs_pipeline::{
+    build_provenance, offline_drift_summary, provenance_json, provenance_matches_committed,
+};
 use pe_parser::mcp_schema::all_tools;
 use pe_parser::validators::{symbol_check, verify_project};
 use std::fs;
@@ -75,6 +78,7 @@ fn print_help(repo_root: &Path) {
     println!("  create --name <name> [--language enma|angelscript] [--kind hello] --output <dir>");
     println!("  check-answer <answer.md> [--json]");
     println!("  check-drift [--json] [--limit N]");
+    println!("  build-provenance [--json] [--check]");
     println!("  counts [--json] [--check]");
     println!("  doctor");
     for tool in NATIVE_TOOLS {
@@ -625,17 +629,7 @@ fn scaffold_project_value(
 }
 
 fn doc_drift_value(repo_root: &Path, limit: Option<usize>) -> Result<serde_json::Value, String> {
-    let text =
-        fs::read_to_string(repo_root.join("docs/PROVENANCE.json")).map_err(|e| e.to_string())?;
-    let prov: serde_json::Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
-    let checked = limit.unwrap_or_else(|| {
-        prov.get("drift_checkable")
-            .and_then(|v| v.as_u64())
-            .unwrap_or(0) as usize
-    });
-    Ok(
-        serde_json::json!({"checked": checked, "in_sync": checked, "drift": 0, "fetch_errors": 0, "mode": "offline", "snapshot": "docs/PROVENANCE.json", "results": []}),
-    )
+    offline_drift_summary(repo_root, limit)
 }
 
 fn mcp_tool_list() -> serde_json::Value {
@@ -940,6 +934,99 @@ fn cmd_check_answer(repo_root: &Path, args: &[String]) -> i32 {
     }
 }
 
+fn cmd_build_provenance(repo_root: &Path, args: &[String]) -> i32 {
+    let json = args.iter().any(|a| a == "--json");
+    let check = args.iter().any(|a| a == "--check");
+    if check {
+        match provenance_matches_committed(repo_root) {
+            Ok(true) => match build_provenance(repo_root) {
+                Ok(data) => {
+                    if json {
+                        println!(
+                            "{}",
+                            serde_json::to_string_pretty(&serde_json::json!({
+                                "source": "rust",
+                                "ok": true,
+                                "count": data.count,
+                                "drift_checkable": data.drift_checkable,
+                                "unmapped": data.unmapped,
+                            }))
+                            .unwrap()
+                        );
+                    } else {
+                        println!(
+                            "PROVENANCE.json in sync ({} files, {} drift-checkable).",
+                            data.count, data.drift_checkable
+                        );
+                    }
+                    0
+                }
+                Err(e) => {
+                    eprintln!("ERROR: {e}");
+                    2
+                }
+            },
+            Ok(false) => {
+                eprintln!("PROVENANCE.json is out of sync with the source tree. Regenerate:");
+                eprintln!("  pcx-rs build-provenance");
+                1
+            }
+            Err(e) => {
+                eprintln!("ERROR: {e}");
+                2
+            }
+        }
+    } else if json {
+        match build_provenance(repo_root) {
+            Ok(data) => {
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&serde_json::json!({
+                        "source": "rust",
+                        "count": data.count,
+                        "drift_checkable": data.drift_checkable,
+                        "unmapped": data.unmapped,
+                    }))
+                    .unwrap()
+                );
+                0
+            }
+            Err(e) => {
+                eprintln!("ERROR: {e}");
+                2
+            }
+        }
+    } else {
+        match provenance_json(repo_root) {
+            Ok(text) => match fs::write(repo_root.join("docs/PROVENANCE.json"), text) {
+                Ok(()) => match build_provenance(repo_root) {
+                    Ok(data) => {
+                        println!(
+                            "Wrote docs/PROVENANCE.json — {} files, {} drift-checkable, {} local-only.",
+                            data.count,
+                            data.drift_checkable,
+                            data.unmapped.len()
+                        );
+                        0
+                    }
+                    Err(e) => {
+                        eprintln!("ERROR: {e}");
+                        2
+                    }
+                },
+                Err(e) => {
+                    eprintln!("ERROR: docs/PROVENANCE.json: {e}");
+                    2
+                }
+            },
+            Err(e) => {
+                eprintln!("ERROR: {e}");
+                2
+            }
+        }
+    }
+}
+
 fn cmd_check_drift(repo_root: &Path, args: &[String]) -> i32 {
     let json = args.iter().any(|a| a == "--json");
     let limit = args
@@ -951,7 +1038,10 @@ fn cmd_check_drift(repo_root: &Path, args: &[String]) -> i32 {
             if json {
                 println!("{}", serde_json::to_string_pretty(&v).unwrap());
             } else {
-                println!("offline provenance: {} checked, 0 drift", v["checked"]);
+                println!(
+                    "Offline provenance check: {} tracked, {} present, {} missing.",
+                    v["checked"], v["in_sync"], v["fetch_errors"]
+                );
             }
             0
         }
@@ -1028,6 +1118,7 @@ fn main() {
         "create" | "new" => cmd_create(&repo_root, &args.args),
         "check-answer" => cmd_check_answer(&repo_root, &args.args),
         "check-drift" => cmd_check_drift(&repo_root, &args.args),
+        "build-provenance" => cmd_build_provenance(&repo_root, &args.args),
         "counts" => cmd_counts(&repo_root, &args.args),
         "doctor" => cmd_doctor(&repo_root),
         tool if NATIVE_TOOLS.contains(&tool) => run_native_tool(&repo_root, tool, &args.args)

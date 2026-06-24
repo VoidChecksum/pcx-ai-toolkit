@@ -4,6 +4,7 @@ use std::io::Read;
 use std::path::Path;
 
 pub mod api_index;
+pub mod docs_pipeline;
 pub mod mcp_schema;
 pub mod validators;
 
