@@ -31,6 +31,15 @@ LANG_ALIASES = {
     ".as": "angelscript",
 }
 
+UNSUPPORTED_SYMBOLS_PATH = Path(__file__).resolve().parents[2] / "knowledge" / "unsupported-symbols.json"
+
+def load_unsupported_symbols() -> dict[str, str]:
+    if not UNSUPPORTED_SYMBOLS_PATH.exists():
+        return {}
+    data = json.loads(UNSUPPORTED_SYMBOLS_PATH.read_text(encoding="utf-8"))
+    symbols = data.get("symbols", {}) if isinstance(data, dict) else {}
+    return {str(k): str(v) for k, v in symbols.items()}
+
 FENCE_RE = re.compile(r'^```\s*([A-Za-z_.-]*)[^\n]*\n(.*?)\n```', re.MULTILINE | re.DOTALL)
 
 ENMA_IMPORT_REQUIRED_TYPES = {"vec2", "vec3", "vec4", "color", "quat", "mat4"}
@@ -293,11 +302,22 @@ def validate_code_against_index(
     language_builtins = LANGUAGE_BUILTIN_CALLS.get(language, set())
     forbidden_calls = FORBIDDEN_CALLS_BY_LANGUAGE.get(language, {})
     forbidden_types = FORBIDDEN_TYPES_BY_LANGUAGE.get(language, {})
+    unsupported_symbols = load_unsupported_symbols()
     known_types = known_type_names(index)
     known_functions = known_function_names(index)
     known_methods = known_method_names(index)
 
     for name, line in extract_calls(code, language):
+        if name in unsupported_symbols:
+            findings.append(_finding(
+                "unsupported_symbol",
+                line,
+                name,
+                unsupported_symbols[name],
+                suggestions=lookup_symbol(index, name).get("suggestions", [])[:5],
+            ))
+            continue
+
         if name in forbidden_calls:
             findings.append(_finding(
                 "wrong_language_symbol",

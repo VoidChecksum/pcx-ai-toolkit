@@ -1,5 +1,7 @@
 use clap::Parser;
 use pe_parser::api_index::{load_api_index, lookup_symbol, print_lookup_human};
+use pe_parser::mcp_schema::all_tools;
+use pe_parser::validators::{symbol_check, verify_project};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -26,6 +28,7 @@ const NATIVE_TOOLS: &[&str] = &[
 )]
 struct Args {
     command: Option<String>,
+    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
     args: Vec<String>,
 }
 
@@ -63,6 +66,10 @@ fn print_help(repo_root: &Path) {
     println!("Native Rust commands:");
     println!("  version");
     println!("  api <symbol> [--lang enma|angelscript] [--json]");
+    println!("  mcp-schema [--json]");
+    println!("  symbol-check <path> [--json]");
+    println!("  verify-project <path> [--json] [--allow-placeholders] [--allow-unverified]");
+    println!("  mcp overview|api_lookup <symbol> [--lang enma|angelscript]");
     println!("  doctor");
     for tool in NATIVE_TOOLS {
         println!("  {tool} [args]");
@@ -149,6 +156,135 @@ fn cmd_api(repo_root: &Path, args: &[String]) -> i32 {
         0
     } else {
         1
+    }
+}
+
+fn cmd_mcp_schema(args: &[String]) -> i32 {
+    if args.iter().any(|arg| arg == "--json") {
+        println!("{}", serde_json::to_string_pretty(all_tools()).unwrap());
+    } else {
+        for tool in all_tools() {
+            let h = if tool.takes_handle { " handle" } else { "" };
+            println!("{}{}", tool.name, h);
+        }
+    }
+    0
+}
+fn cmd_symbol_check(repo_root: &Path, args: &[String]) -> i32 {
+    let json = args.iter().any(|a| a == "--json");
+    let Some(path) = args.iter().find(|a| !a.starts_with('-')) else {
+        eprintln!("ERROR: missing path");
+        return 2;
+    };
+    match symbol_check(repo_root, Path::new(path)) {
+        Ok(f) => {
+            if json {
+                println!("{}", serde_json::to_string_pretty(&f).unwrap())
+            } else if f.is_empty() {
+                println!("clean: symbol-check passed")
+            } else {
+                for x in &f {
+                    println!(
+                        "{}:{}: {} {}: {}",
+                        x.file, x.line, x.kind, x.symbol, x.message
+                    )
+                }
+            }
+            if f.is_empty() {
+                0
+            } else {
+                1
+            }
+        }
+        Err(e) => {
+            eprintln!("ERROR: {e}");
+            2
+        }
+    }
+}
+fn cmd_verify_project(repo_root: &Path, args: &[String]) -> i32 {
+    let json = args.iter().any(|a| a == "--json");
+    let allow_p = args.iter().any(|a| a == "--allow-placeholders");
+    let allow_u = args.iter().any(|a| a == "--allow-unverified");
+    let Some(path) = args.iter().find(|a| !a.starts_with('-')) else {
+        eprintln!("ERROR: missing path");
+        return 2;
+    };
+    match verify_project(repo_root, Path::new(path), allow_p, allow_u) {
+        Ok(f) => {
+            if json {
+                println!("{}", serde_json::to_string_pretty(&f).unwrap())
+            } else if f.is_empty() {
+                println!("clean: project verified")
+            } else {
+                for x in &f {
+                    println!(
+                        "{}:{}: {} {}: {}",
+                        x.file, x.line, x.kind, x.symbol, x.message
+                    )
+                }
+            }
+            if f.is_empty() {
+                0
+            } else {
+                1
+            }
+        }
+        Err(e) => {
+            eprintln!("ERROR: {e}");
+            2
+        }
+    }
+}
+fn cmd_mcp(repo_root: &Path, args: &[String]) -> i32 {
+    let Some(method) = args.first().map(|s| s.as_str()) else {
+        eprintln!("ERROR: missing MCP method");
+        return 2;
+    };
+    match method {
+        "overview" => {
+            let payload = serde_json::json!({"name":"pcx-ai-toolkit","schema_tools":all_tools().len(),"methods":["overview","api_lookup","validate_code","validate_answer","validate_project"]});
+            println!("{}", serde_json::to_string_pretty(&payload).unwrap());
+            0
+        }
+        "api_lookup" => {
+            let Some(symbol) = args.get(1).map(|s| s.as_str()) else {
+                eprintln!("ERROR: missing symbol");
+                return 2;
+            };
+            let mut lang = None;
+            let mut i = 2;
+            while i < args.len() {
+                if args[i] == "--lang" {
+                    i += 1;
+                    lang = args.get(i).map(|s| s.as_str())
+                }
+                i += 1;
+            }
+            let lang = match normalize_lang(lang) {
+                Ok(l) => l,
+                Err(e) => {
+                    eprintln!("ERROR: {e}");
+                    return 2;
+                }
+            };
+            let idx = match load_api_index(repo_root) {
+                Ok(i) => i,
+                Err(e) => {
+                    eprintln!("ERROR: {e}");
+                    return 2;
+                }
+            };
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&lookup_symbol(&idx, symbol, lang)).unwrap()
+            );
+            0
+        }
+        _ => {
+            eprintln!("ERROR: unknown MCP method {method}");
+            2
+        }
     }
 }
 
@@ -269,6 +405,10 @@ fn main() {
             0
         }
         "api" | "api-lookup" => cmd_api(&repo_root, &args.args),
+        "mcp" => cmd_mcp(&repo_root, &args.args),
+        "mcp-schema" => cmd_mcp_schema(&args.args),
+        "symbol-check" => cmd_symbol_check(&repo_root, &args.args),
+        "verify-project" | "verify" => cmd_verify_project(&repo_root, &args.args),
         "doctor" => cmd_doctor(&repo_root),
         tool if NATIVE_TOOLS.contains(&tool) => run_native_tool(&repo_root, tool, &args.args)
             .unwrap_or_else(|| run_python_fallback(&repo_root, tool, &args.args)),

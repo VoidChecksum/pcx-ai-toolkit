@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "symbols": {
+    "draw_esp": "Invented helper; use source-backed render APIs such as draw_text/draw_rect.",
+    "lua_pcall": "Lua is outside pcx-ai-toolkit scope; use Enma or AngelScript only."
+  }
+}

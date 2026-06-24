@@ -47,7 +47,24 @@ int64 main() {
         try:
             rc, out, err = _run(str(path))
             self.assertEqual(rc, 1, f"hallucinated draw_esp should fail symbol-check:\n{out}\n{err}")
-            self.assertIn("draw_esp", out)
+            self.assertIn("Invented helper", out)
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_unsupported_symbol_uses_denylist_reason(self):
+        code = """
+int64 main() {
+    draw_esp();
+    return 1;
+}
+"""
+        path = Path("/tmp/pcx_unsupported_symbol_test.em")
+        path.write_text(code, encoding="utf-8")
+        try:
+            rc, out, err = _run(str(path))
+            self.assertEqual(rc, 1, f"denylisted draw_esp should fail symbol-check:\n{out}\n{err}")
+            self.assertIn("unsupported_symbol", out)
+            self.assertIn("Invented helper", out)
         finally:
             path.unlink(missing_ok=True)
 

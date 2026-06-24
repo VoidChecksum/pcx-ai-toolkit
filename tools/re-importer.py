@@ -12,6 +12,9 @@ Outputs:
   as-offsets      AngelScript constants module
   sig-json        JSON signature seed list for offset-diff.py
   evidence        Markdown evidence log skeleton
+  evidence-jsonl  Machine-readable evidence seed log
+  signature-health Markdown signature health seed report
+  patch-summary   Markdown patch-day migration seed summary
 
 The tool does not guess offsets. It preserves input names and marks every claim
 UNVERIFIED unless the source already contains an E-NNN citation in the name/kind.
@@ -167,11 +170,26 @@ def render_evidence(rows: list[dict[str, Any]], source: str) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+
+def render_evidence_jsonl(rows: list[dict[str, Any]], source: str) -> str:
+    return "".join(json.dumps({"id": f"E-{idx:03d}", "name": str(row["name"]), "imported_value": f"0x{int(row['value']):X}", "imported_kind": str(row.get("kind", "symbol")), "source": source, "status": "UNVERIFIED"}) + "\n" for idx, row in enumerate(rows, 1))
+
+def render_signature_health(rows: list[dict[str, Any]], source: str) -> str:
+    lines = [f"# Signature Health Seeds: {source}", ""]
+    lines += [f"- `{row['name']}` at `0x{int(row['value']):X}` — status: `needs_pattern`" for row in rows]
+    return "\n".join(lines).rstrip() + "\n"
+
+def render_patch_summary(rows: list[dict[str, Any]], source: str) -> str:
+    lines = [f"# Patch-Day Migration Summary: {source}", "", "Imported candidates:"]
+    lines += [f"- `{row['name']}`: `0x{int(row['value']):X}` (`{row.get('kind', 'symbol')}`)" for row in rows]
+    lines += ["", "Next: verify each candidate against disassembly or live reads before shipping."]
+    return "\n".join(lines).rstrip() + "\n"
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("input", help="RE export file")
     ap.add_argument("--format", choices=["auto", "ida-names", "ghidra-symbols", "bndb-symbols", "reclass-json"], default="auto")
-    ap.add_argument("--out-format", choices=["enma-offsets", "as-offsets", "sig-json", "evidence"], default="enma-offsets")
+    ap.add_argument("--out-format", choices=["enma-offsets", "as-offsets", "offsets.em", "offsets.as", "sig-json", "evidence", "evidence-jsonl", "signature-health", "patch-summary"], default="enma-offsets")
     ap.add_argument("--module-name", default="offsets")
     ap.add_argument("--out", default="", help="write output file instead of stdout")
     args = ap.parse_args()
@@ -200,8 +218,14 @@ def main() -> int:
         output = render_sig_json(rows)
     elif args.out_format == "evidence":
         output = render_evidence(rows, source_name)
+    elif args.out_format == "evidence-jsonl":
+        output = render_evidence_jsonl(rows, source_name)
+    elif args.out_format == "signature-health":
+        output = render_signature_health(rows, source_name)
+    elif args.out_format == "patch-summary":
+        output = render_patch_summary(rows, source_name)
     else:
-        language = "angelscript" if args.out_format == "as-offsets" else "enma"
+        language = "angelscript" if args.out_format in {"as-offsets", "offsets.as"} else "enma"
         output = render_offsets(rows, language, args.module_name, source_name)
 
     if args.out:

@@ -78,6 +78,7 @@ def load_provenance() -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true", help="exit 1 on any drift/fetch error (CI)")
+    ap.add_argument("--live", action="store_true", help="fetch upstream docs and compare live content")
     ap.add_argument("--only", default=None, help="only check files whose path contains this substring")
     ap.add_argument("--limit", type=int, default=0, help="stop after N checks (0 = all)")
     ap.add_argument("--json", action="store_true", help="emit JSON to stdout")
@@ -91,6 +92,15 @@ def main() -> int:
         targets = [(p, m) for p, m in targets if args.only in p.as_posix()]
     if args.limit:
         targets = targets[: args.limit]
+
+    if not args.live:
+        missing = [p.relative_to(REPO_ROOT).as_posix() for p, _ in targets if not p.exists()]
+        summary = {"checked": len(targets), "in_sync": len(targets) - len(missing), "drift": 0, "fetch_errors": len(missing), "mode": "offline", "results": []}
+        if args.json:
+            print(json.dumps(summary, indent=2))
+        else:
+            print(f"Offline provenance check: {summary['checked']} tracked, {summary['in_sync']} present, {summary['fetch_errors']} missing.")
+        return 1 if args.check and missing else 0
 
     results = []
     drift = 0

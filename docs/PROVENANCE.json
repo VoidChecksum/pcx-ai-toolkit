@@ -1,5 +1,5 @@
 {
-  "count": 122,
+  "count": 125,
   "drift_checkable": 87,
   "files": {
     "docs/AI_AGENT_OPERATING_MANUAL.md": {
@@ -141,6 +141,11 @@
       "drift_check": false,
       "source": "angelcode",
       "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_variable.html"
+    },
+    "docs/distribution-checklist.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
     },
     "docs/enma/UPSTREAM-SUGGESTIONS.md": {
       "drift_check": false,
@@ -611,6 +616,16 @@
       "drift_check": true,
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/enma/zydis-api.md"
+    },
+    "docs/superpowers/plans/2026-06-24-pcx-mcp-schema-mirror.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
     }
   },
   "generated": "2026-06-24",
@@ -618,9 +633,12 @@
     "docs/AI_AGENT_OPERATING_MANUAL.md",
     "docs/CROSS_LANGUAGE.md",
     "docs/FAQ.md",
+    "docs/distribution-checklist.md",
     "docs/enma/UPSTREAM-SUGGESTIONS.md",
     "docs/marketplace-install.md",
     "docs/perception/changelogs.md",
-    "docs/perception/llm-routing.md"
+    "docs/perception/llm-routing.md",
+    "docs/superpowers/plans/2026-06-24-pcx-mcp-schema-mirror.md",
+    "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md"
   ]
 }

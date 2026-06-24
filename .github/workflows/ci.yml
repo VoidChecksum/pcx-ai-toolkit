@@ -81,6 +81,9 @@ jobs:
             cp "target/release/$tool" "../bin/$tool"
           done
 
+      - name: Run Rust tests
+        run: cargo test --manifest-path tools/pe-parser/Cargo.toml
+
       - name: Run smoke tests
         run: ./tools/test-runner.sh
 

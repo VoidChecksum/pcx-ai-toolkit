@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 224**
+**Source files included: 225**
 
 ---
 
@@ -352,6 +352,30 @@ Open a [GitHub Issue](https://github.com/VoidChecksum/pcx-ai-toolkit/issues) wit
 - Run `pcx doctor` for a full environment diagnostic
 - Check [GitHub Discussions](https://github.com/VoidChecksum/pcx-ai-toolkit/discussions) for community help
 - Open an [Issue](https://github.com/VoidChecksum/pcx-ai-toolkit/issues) for bugs
+
+---
+
+## Source: `docs/distribution-checklist.md`
+
+# Distribution Checklist
+
+Safe release/publishing path for pcx-ai-toolkit.
+
+## Binary releases
+
+Build `tools/pe-parser` in CI and upload `pcx-rs` plus native helpers from `tools/bin/`.
+
+## MCP package
+
+Publish `mcp/pcx-knowledge-mcp` as `pcx-knowledge-mcp`; smoke with `python3 mcp/pcx-knowledge-mcp/server.py --help`.
+
+## Editor extensions
+
+Build VS Code/Open VSX packages from `lsp/` after CI validates language-server compile.
+
+## No credentials in repo
+
+Publishing tokens belong in GitHub Actions secrets or local keychains, never committed files.
 
 ---
 

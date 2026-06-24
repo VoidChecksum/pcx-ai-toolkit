@@ -24,6 +24,17 @@
 </div>
 
 ---
+## First Decision
+
+```text
+Writing Enma?        Load docs/llms-perception-enma.md, then run pcx symbol-check.
+Writing AngelScript? Load docs/llms-perception-angelscript.md, then run pcx verify.
+Need API proof?      Run pcx api <symbol> --lang enma|angelscript.
+Need MCP context?    Run pcx-rs mcp-schema --json or pcx-knowledge-mcp.
+Need RE artifacts?   Use re-importer.py exporters; keep evidence before shipping.
+```
+
+Unsupported or hallucinated surfaces live in [`knowledge/unsupported-symbols.json`](knowledge/unsupported-symbols.json) and are rejected by validators when seen.
 
 <table>
 <tr>

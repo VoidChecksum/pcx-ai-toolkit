@@ -135,6 +135,11 @@ def build_project_plan(
             "Keep offsets/signatures in one module",
             "Run pcx verify-project before loading in Perception",
         ],
+        "authorized_use": {
+            "scope": "owned-lab-ctf-or-authorized-research",
+            "requires_evidence": True,
+            "no_public_multiplayer_abuse": True,
+        },
         "docs": docs,
         "skills": skills,
         "commands": [
@@ -192,6 +197,7 @@ def _write_project_metadata(dst: Path, plan: dict[str, Any]) -> list[Path]:
         "validation": plan["commands"],
         "docs": plan["docs"],
         "skills": plan["skills"],
+        "authorized_use": plan["authorized_use"],
     }
     meta_path = dst / "pcx-project.json"
     meta_path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")

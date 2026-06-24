@@ -37,7 +37,7 @@ jobs:
         id: drift
         run: |
           set +e
-          python tools/check-doc-drift.py --json > drift-report.json 2> drift-stderr.txt
+          python tools/check-doc-drift.py --live --json > drift-report.json 2> drift-stderr.txt
           RC=$?
           cat drift-stderr.txt
           # Extract counts from the JSON report for the issue body.
