@@ -24,6 +24,7 @@ class ScenarioCoverageTest(unittest.TestCase):
             "zydis-angelscript/main.as",
             "unicorn-enma/main.em",
             "enma-language-addons/main.em",
+            "enma-filesystem-json/main.em",
             "mcp-answer-validation/answer.md",
         }
         root = REPO_ROOT / "examples" / "scenarios"
