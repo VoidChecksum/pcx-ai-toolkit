@@ -51,6 +51,7 @@ void on_update(int64 data) {
     // Add target-specific reads here after validating every pointer hop.
 }
 
+// Requires process_memory_read permission for ref_process/process reads.
 int64 main() {
     g_proc = ref_process(TARGET_MODULE);
     if (!g_proc.alive()) {
