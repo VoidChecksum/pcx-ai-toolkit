@@ -1,6 +1,7 @@
 ---
 name: engine-unreal-mcp
 description: Use for Unreal live MCP investigations with UObject/GName/vtable evidence.
+license: MIT
 ---
 
 # engine-unreal-mcp

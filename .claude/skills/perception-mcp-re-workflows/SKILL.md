@@ -1,6 +1,7 @@
 ---
 name: perception-mcp-re-workflows
 description: Use for reverse-engineering investigations that need Perception MCP workflow chains and claim/evidence proof.
+license: MIT
 ---
 
 # perception-mcp-re-workflows

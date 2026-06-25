@@ -1,6 +1,7 @@
 ---
 name: perception-mcp-safety
 description: Use before Perception MCP write, allocation, kernel, or broad scan operations to enforce permissions and rollback.
+license: MIT
 ---
 
 # perception-mcp-safety

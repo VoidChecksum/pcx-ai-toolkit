@@ -1,6 +1,7 @@
 ---
 name: evidence-graph
 description: Use when recording, verifying, or rendering machine-readable reverse-engineering claim/evidence graphs.
+license: MIT
 ---
 
 # evidence-graph

@@ -1,6 +1,7 @@
 ---
 name: perception-mcp-session
 description: Use for live Perception MCP sessions: acquiring handles, making calls, retrying stale handles once, recording transcripts, and cleaning up.
+license: MIT
 ---
 
 # perception-mcp-session

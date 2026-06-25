@@ -1,6 +1,7 @@
 ---
 name: engine-unity-il2cpp-mcp
 description: Use for Unity IL2CPP live MCP investigations with GameAssembly and global-metadata evidence.
+license: MIT
 ---
 
 # engine-unity-il2cpp-mcp

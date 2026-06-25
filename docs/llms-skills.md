@@ -943,6 +943,7 @@ Devirtualization is expensive (days to weeks for a single function). Before inve
 ---
 name: engine-source2-mcp
 description: Use for Source 2 live MCP investigations with schema/interface evidence.
+license: MIT
 ---
 
 # engine-source2-mcp
@@ -979,6 +980,7 @@ Every answer must include:
 ---
 name: engine-unity-il2cpp-mcp
 description: Use for Unity IL2CPP live MCP investigations with GameAssembly and global-metadata evidence.
+license: MIT
 ---
 
 # engine-unity-il2cpp-mcp
@@ -1015,6 +1017,7 @@ Every answer must include:
 ---
 name: engine-unreal-mcp
 description: Use for Unreal live MCP investigations with UObject/GName/vtable evidence.
+license: MIT
 ---
 
 # engine-unreal-mcp
@@ -1051,6 +1054,7 @@ Every answer must include:
 ---
 name: evidence-graph
 description: Use when recording, verifying, or rendering machine-readable reverse-engineering claim/evidence graphs.
+license: MIT
 ---
 
 # evidence-graph
@@ -5676,6 +5680,7 @@ The honest answer to many "how do I hide this from Discord" questions is "you ca
 ---
 name: perception-mcp-re-workflows
 description: Use for reverse-engineering investigations that need Perception MCP workflow chains and claim/evidence proof.
+license: MIT
 ---
 
 # perception-mcp-re-workflows
@@ -5712,6 +5717,7 @@ Every answer must include:
 ---
 name: perception-mcp-safety
 description: Use before Perception MCP write, allocation, kernel, or broad scan operations to enforce permissions and rollback.
+license: MIT
 ---
 
 # perception-mcp-safety
@@ -5748,6 +5754,7 @@ Every answer must include:
 ---
 name: perception-mcp-session
 description: Use for live Perception MCP sessions: acquiring handles, making calls, retrying stale handles once, recording transcripts, and cleaning up.
+license: MIT
 ---
 
 # perception-mcp-session

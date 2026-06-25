@@ -1,6 +1,7 @@
 ---
 name: engine-source2-mcp
 description: Use for Source 2 live MCP investigations with schema/interface evidence.
+license: MIT
 ---
 
 # engine-source2-mcp
