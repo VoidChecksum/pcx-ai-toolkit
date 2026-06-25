@@ -157,6 +157,16 @@ npm Trusted Publisher for `pcx-ai-toolkit`:
 - Allowed action: `npm publish`
 - Fallback: add GitHub secret `NPM_TOKEN`; the release workflow passes it as `NODE_AUTH_TOKEN`.
 
+## Easiest Agent Setup
+
+```bash
+pcx prompt --model claude
+pcx agent-install --dry-run
+pcx ai-smoke
+```
+
+Coverage truth is generated in [`docs/COVERAGE.md`](docs/COVERAGE.md) and [`docs/COVERAGE.json`](docs/COVERAGE.json); do not trust stale hand-counted numbers.
+
 ## Anti-Hallucination Pipeline
 
 Use these checks before trusting generated code:

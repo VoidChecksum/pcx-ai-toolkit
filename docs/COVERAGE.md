@@ -4,14 +4,15 @@
 
 ## Summary
 
-- Perception API pages indexed: 20/20
-- Perception API pages present on disk: 20/20
+- Perception API pages indexed: 15
+- API families indexed: 12
 - Symbols indexed: 216
-- API families indexed: 13
-- Symbols with permission metadata: 17/216
+- Symbols with permission metadata: 16
+- Permission rules: 5
 - Deprecated or removed symbols tracked: 0
-- Known hallucinations covered: 7
-- Generated bundle sources: 85
+- Known hallucinations covered: 18
+- Hallucination eval cases: 10
+- Generated bundle sources: 88
 - Drift-checkable sources: 67
 
 ## Indexed API Families
@@ -21,7 +22,6 @@
 - `gui`
 - `input`
 - `lifecycle`
-- `math3d`
 - `net`
 - `proc`
 - `render`
@@ -29,38 +29,3 @@
 - `unicorn`
 - `win`
 - `zydis`
-
-## Perception API Pages
-
-| Page | Exists | In generated surfaces |
-|---|---:|---:|
-| `docs/perception/proc-api.md` | yes | yes |
-| `docs/perception/render-api.md` | yes | yes |
-| `docs/perception/gui-api.md` | yes | yes |
-| `docs/perception/input-api.md` | yes | yes |
-| `docs/perception/cpu-api.md` | yes | yes |
-| `docs/perception/zydis-api.md` | yes | yes |
-| `docs/perception/unicorn-api.md` | yes | yes |
-| `docs/perception/net-api.md` | yes | yes |
-| `docs/perception/win-api.md` | yes | yes |
-| `docs/perception/filesystem-api.md` | yes | yes |
-| `docs/perception/sound-api.md` | yes | yes |
-| `docs/perception/lifecycle-and-routines.md` | yes | yes |
-| `docs/perception/mcp-api.md` | yes | yes |
-| `docs/perception/ide.md` | yes | yes |
-| `docs/perception/extensions-api.md` | yes | yes |
-| `docs/perception/analyzer.md` | yes | yes |
-| `docs/perception/custom-draw-api.md` | yes | yes |
-| `docs/perception/changelogs.md` | yes | yes |
-| `docs/perception/sdk-status.md` | yes | yes |
-| `docs/perception/versioning-and-migration.md` | yes | yes |
-
-## Known Hallucination Seeds
-
-- `aim_at_target`
-- `draw_esp`
-- `get_entity_list`
-- `lua_pcall`
-- `read_view_angles`
-- `world_to_screen`
-- `write_view_angles`

@@ -1,8 +1,13 @@
 {
-  "count": 85,
+  "count": 88,
   "drift_checkable": 67,
   "files": {
     "docs/AI_AGENT_OPERATING_MANUAL.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/COVERAGE.md": {
       "drift_check": false,
       "source": "local",
       "url": null
@@ -397,7 +402,17 @@
       "source": "local",
       "url": null
     },
+    "docs/superpowers/plans/2026-06-25-anti-hallucination-rails.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/superpowers/plans/2026-06-25-auto-publish-release.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/superpowers/plans/2026-06-25-full-anti-hallucination-rollout.md": {
       "drift_check": false,
       "source": "local",
       "url": null
@@ -431,6 +446,7 @@
   "generated": "2026-06-25",
   "unmapped": [
     "docs/AI_AGENT_OPERATING_MANUAL.md",
+    "docs/COVERAGE.md",
     "docs/FAQ.md",
     "docs/distribution-checklist.md",
     "docs/enma/UPSTREAM-SUGGESTIONS.md",
@@ -441,7 +457,9 @@
     "docs/perception/versioning-and-migration.md",
     "docs/superpowers/plans/2026-06-24-pcx-mcp-schema-mirror.md",
     "docs/superpowers/plans/2026-06-24-rust-docs-pipeline.md",
+    "docs/superpowers/plans/2026-06-25-anti-hallucination-rails.md",
     "docs/superpowers/plans/2026-06-25-auto-publish-release.md",
+    "docs/superpowers/plans/2026-06-25-full-anti-hallucination-rollout.md",
     "docs/superpowers/plans/2026-06-25-rust-first-pcx-cli.md",
     "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md",
     "docs/superpowers/specs/2026-06-24-rust-docs-pipeline-design.md",

@@ -37,6 +37,7 @@ TOOL_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOL_DIR / "lib"))
 from pcx_paths import data_root, tool_dir  # noqa: E402
 from pcx_scaffold import available_templates, build_project_plan, scaffold_project, slugify  # noqa: E402
+from pcx_grounding import load_api_index, validate_code_against_index  # noqa: E402
 
 REPO_ROOT = data_root()
 VERSION_FILE = REPO_ROOT / "VERSION"
@@ -385,6 +386,68 @@ def cmd_verify(args: list[str]) -> int:
     return 0
 
 
+
+def cmd_prompt(args: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="pcx prompt")
+    ap.add_argument("--model", default="generic", choices=["generic", "claude", "cursor", "copilot", "cline", "windsurf", "gemini", "openai", "qwen"])
+    ns = ap.parse_args(args)
+    print(f"PCX AI prompt for {ns.model}:")
+    print("""Before writing Perception code:
+1. Load docs/AI_AGENT_OPERATING_MANUAL.md
+2. Load docs/perception/llm-routing.md
+3. Use Enma (.em) only
+4. Load docs/llms-perception-enma.md
+5. Verify every Perception host API and Enma addon symbol with pcx api or MCP api_lookup
+6. Validate code with pcx symbol-check, pcx verify, or MCP validate_code
+If the docs/API index do not prove a symbol exists, say so instead of guessing.""")
+    return 0
+
+
+def cmd_agent_install(args: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="pcx agent-install")
+    ap.add_argument("--write", action="store_true", help="write repo-local agent files where supported")
+    ap.add_argument("--dry-run", action="store_true", help="print targets without writing")
+    ns = ap.parse_args(args)
+    clients = {
+        "claude": "CLAUDE.md / Claude Desktop MCP config",
+        "cursor": ".cursorrules and .cursor/mcp.json",
+        "cline": "cline_mcp_settings.json",
+        "windsurf": ".windsurfrules",
+        "copilot": ".github/copilot-instructions.md",
+        "zed": "mcp/zed-setup.md",
+        "continue": "mcp/continue-setup.md",
+        "aider": "mcp/aider-setup.md",
+    }
+    print("pcx agent-install plan" + (" (write)" if ns.write else " (dry-run)"))
+    for name, target in clients.items():
+        print(f"- {name}: {target}")
+    print("\nCore instruction: run `pcx prompt --model <client>` and configure pcx-knowledge-mcp.")
+    if ns.write:
+        print("No global files were written; use generated snippets from existing mcp/*-setup.md docs.")
+    return 0
+
+
+def cmd_ai_smoke() -> int:
+    index = load_api_index(REPO_ROOT / "knowledge" / "pcx-api-index.json")
+    cases = [
+        ("fake API", "int64 main(){draw_esp();return 1;}", False),
+        ("wrong language", "int64 main(){lua_pcall();return 1;}", False),
+        ("missing import", "int64 main(){vec2 p = vec2(1.0, 2.0);return 1;}", False),
+        ("permission", 'import "file"\nint64 main(){fs_read_file("x");return 1;}', False),
+        ("clean", 'int64 main(){println("ok");return 1;}', True),
+    ]
+    failed = 0
+    for name, code, expected_ok in cases:
+        findings = validate_code_against_index(code, "enma", index, name)
+        ok = not findings
+        status = "PASS" if ok == expected_ok else "FAIL"
+        print(f"[{status}] {name}: expected_ok={expected_ok} actual_ok={ok}")
+        if ok != expected_ok:
+            failed += 1
+            for finding in findings[:3]:
+                print(f"  {finding.get('kind')} {finding.get('symbol')}: {finding.get('message')}")
+    return 1 if failed else 0
+
 def main() -> int:
     desc = f"pcx-ai-toolkit manager CLI v{get_version()}"
     ap = argparse.ArgumentParser(description=desc, usage="pcx <command> [args]")
@@ -393,7 +456,7 @@ def main() -> int:
     ap.add_argument("command", nargs="?", help=(
         "Command to run: setup, update, lint, symbol-check, api, check-answer, "
         "create, build-api-index, verify, verify-project, check-drift, check-mcp, "
-        "check-matrix, counts, version, doctor, new, help"
+        "check-matrix, counts, prompt, agent-install, ai-smoke, version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
     args = ap.parse_args()
@@ -460,6 +523,15 @@ def main() -> int:
 
     if cmd == "doctor":
         return cmd_doctor()
+
+    if cmd == "prompt":
+        return cmd_prompt(sub_args)
+
+    if cmd == "agent-install":
+        return cmd_agent_install(sub_args)
+
+    if cmd == "ai-smoke":
+        return cmd_ai_smoke()
 
     if cmd == "new":
         return cmd_new(sub_args)

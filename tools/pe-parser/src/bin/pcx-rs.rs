@@ -84,6 +84,8 @@ fn print_help(repo_root: &Path) {
     println!("  build-provenance [--json] [--check]");
     println!("  counts [--json] [--check]");
     println!("  update [--plan-json] [--check] [--force]");
+    println!("  prompt [--model claude|cursor|copilot|cline|windsurf|generic]");
+    println!("  ai-smoke");
     println!("  doctor");
     for tool in NATIVE_TOOLS {
         println!("  {tool} [args]");
@@ -1201,6 +1203,54 @@ fn run_native_tool(repo_root: &Path, tool: &str, args: &[String]) -> Option<i32>
     Some(status.code().unwrap_or(1))
 }
 
+fn cmd_prompt(args: &[String]) -> i32 {
+    let mut model = "generic";
+    let mut i = 0usize;
+    while i < args.len() {
+        if args[i] == "--model" && i + 1 < args.len() {
+            model = &args[i + 1];
+            i += 2;
+        } else {
+            i += 1;
+        }
+    }
+    println!("PCX AI prompt for {model}:");
+    println!("Before writing Perception code:");
+    println!("1. Load docs/AI_AGENT_OPERATING_MANUAL.md");
+    println!("2. Load docs/perception/llm-routing.md");
+    println!("3. Use Enma (.em) only");
+    println!("4. Load docs/llms-perception-enma.md");
+    println!("5. Verify every Perception host API and Enma addon symbol with pcx api or MCP api_lookup");
+    println!("6. Validate code with pcx symbol-check, pcx verify, or MCP validate_code");
+    println!("If the docs/API index do not prove a symbol exists, say so instead of guessing.");
+    0
+}
+
+fn cmd_ai_smoke(repo_root: &Path) -> i32 {
+    let cases = [
+        ("fake API", "int64 main(){draw_esp();return 1;}", false),
+        ("wrong language", "int64 main(){lua_pcall();return 1;}", false),
+        ("missing import", "int64 main(){vec2 p = vec2(1.0, 2.0);return 1;}", false),
+        ("permission", "import \\\"file\\\"\nint64 main(){fs_read_file(\\\"x\\\");return 1;}", false),
+        ("clean", "int64 main(){println(\\\"ok\\\");return 1;}", true),
+    ];
+    let mut failed = 0;
+    for (name, code, expected_ok) in cases {
+        let tmp = std::env::temp_dir().join(format!("pcx-ai-smoke-{name}.em").replace(' ', "-"));
+        if std::fs::write(&tmp, code).is_err() {
+            eprintln!("ERROR: failed writing smoke case {name}");
+            return 2;
+        }
+        let findings = symbol_check(repo_root, &tmp).unwrap_or_default();
+        let _ = std::fs::remove_file(&tmp);
+        let ok = findings.is_empty();
+        let status = if ok == expected_ok { "PASS" } else { "FAIL" };
+        println!("[{status}] {name}: expected_ok={expected_ok} actual_ok={ok}");
+        if ok != expected_ok { failed += 1; }
+    }
+    if failed == 0 { 0 } else { 1 }
+}
+
 fn main() {
     let args = Args::parse();
     let repo_root = match find_repo_root() {
@@ -1235,6 +1285,8 @@ fn main() {
         "build-provenance" => cmd_build_provenance(&repo_root, &args.args),
         "counts" => cmd_counts(&repo_root, &args.args),
         "update" => cmd_update(&repo_root, &args.args),
+        "prompt" => cmd_prompt(&args.args),
+        "ai-smoke" => cmd_ai_smoke(&repo_root),
         "doctor" => cmd_doctor(&repo_root),
         tool if NATIVE_TOOLS.contains(&tool) => run_native_tool(&repo_root, tool, &args.args)
             .unwrap_or_else(|| run_python_fallback(&repo_root, tool, &args.args)),

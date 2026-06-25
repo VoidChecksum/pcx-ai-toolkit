@@ -1,12 +1,23 @@
 {
-  "version": 1,
   "symbols": {
+    "CreateThread": "Win32 direct call is not an Enma API; use documented Enma thread addon only where registered.",
+    "GetAsyncKeyState": "Win32 direct call is not an Enma API; use documented Input or Win APIs.",
+    "aim_at_target": "High-level aimbot helper hallucination; not in the Perception API index. Build only authorized educational examples from documented primitives.",
+    "asIScriptContext": "AngelScript SDK surface is outside this toolkit scope; use Enma.",
+    "draw_box": "Invented overlay helper; use documented render primitives such as draw_rect and draw_text.",
     "draw_esp": "Invented helper; use source-backed render APIs such as draw_text/draw_rect.",
-    "lua_pcall": "Lua is outside pcx-ai-toolkit scope; use Enma or AngelScript only.",
-    "read_view_angles": "Common cheat-helper hallucination; not in the Perception API index. Use documented Proc/System APIs and verified offsets instead.",
-    "write_view_angles": "Common cheat-helper hallucination; not in the Perception API index. Use documented Proc APIs only with authorization and verified evidence.",
-    "world_to_screen": "Common overlay helper hallucination; not in the Perception API index. Use documented render/math APIs and project-specific camera data.",
+    "draw_line_3d": "Invented 3D helper; project camera math must be supplied and validated before using 2D render primitives.",
     "get_entity_list": "Common game-specific helper hallucination; not in the Perception API index. Resolve entities from documented Proc APIs plus verified offsets.",
-    "aim_at_target": "High-level aimbot helper hallucination; not in the Perception API index. Build only authorized educational examples from documented primitives."
-  }
+    "get_local_player": "Game-specific helper; not in Perception Enma API index.",
+    "get_module_base": "Use documented Proc module APIs from the source-backed API index instead of generic cheat helper names.",
+    "get_players": "Game-specific entity helper; resolve entities from documented Proc APIs plus verified offsets.",
+    "lua_getglobal": "Lua is outside this toolkit scope; use Enma.",
+    "lua_pcall": "Lua is outside pcx-ai-toolkit scope; use Enma or AngelScript only.",
+    "read_memory": "Use documented Proc read APIs with verified process handles and offsets; do not invent generic helpers.",
+    "read_view_angles": "Common cheat-helper hallucination; not in the Perception API index. Use documented Proc/System APIs and verified offsets instead.",
+    "world_to_screen": "Common overlay helper hallucination; not in the Perception API index. Use documented render/math APIs and project-specific camera data.",
+    "write_memory": "Use documented Proc write APIs only with authorization and verified offsets.",
+    "write_view_angles": "Common cheat-helper hallucination; not in the Perception API index. Use documented Proc APIs only with authorization and verified evidence."
+  },
+  "version": 1
 }

@@ -1,0 +1,50 @@
+{
+  "schema": "pcx-permission-rules-v1",
+  "rules": [
+    {
+      "match": {
+        "prefix": "fs_"
+      },
+      "permissions": [
+        "PERM_FILE"
+      ],
+      "reason": "Enma file addon calls require PERM_FILE."
+    },
+    {
+      "match": {
+        "source_contains": "filesystem-api.md"
+      },
+      "permissions": [
+        "PERM_FILE"
+      ],
+      "reason": "Perception filesystem APIs are sandboxed file I/O."
+    },
+    {
+      "match": {
+        "symbol": "process/allocate_memory"
+      },
+      "permissions": [
+        "virtual_memory_operations"
+      ],
+      "reason": "Runtime MCP allocation is permission-gated."
+    },
+    {
+      "match": {
+        "symbol_contains": "write_memory"
+      },
+      "permissions": [
+        "write_memory"
+      ],
+      "reason": "Process memory writes are permission-gated."
+    },
+    {
+      "match": {
+        "symbol_contains": "kernel"
+      },
+      "permissions": [
+        "kernel_rw_access"
+      ],
+      "reason": "Kernel read/write access is permission-gated."
+    }
+  ]
+}

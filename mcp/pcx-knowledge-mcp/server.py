@@ -500,7 +500,7 @@ def api_lookup(symbol: str, language: str = "") -> str:
 
 
 @mcp.tool()
-def validate_code(code: str, language: str, source_path: str = "") -> str:
+def validate_code(code: str, language: str, source_path: str = "", runtime_mode: str = "project") -> str:
     """Validate a snippet of Enma or AngelScript code against the PCX API index.
 
     Returns a JSON object with {findings: [...], ok: bool}. Each finding has:
@@ -518,7 +518,7 @@ def validate_code(code: str, language: str, source_path: str = "") -> str:
         findings = [{"line": 0, "symbol": "", "kind": "index_missing",
                      "message": f"API index not found at {API_INDEX_FILE}; run `pcx build-api-index`"}]
     else:
-        findings = validate_code_against_index(code, language, index, source_path)
+        findings = validate_code_against_index(code, language, index, source_path, runtime_mode=runtime_mode)
     return json.dumps({"findings": findings, "ok": not findings}, indent=2)
 
 
@@ -535,6 +535,52 @@ def validate_answer(answer: str, source_path: str = "answer.md") -> str:
         return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
     return json.dumps(validate_answer_markdown(answer, index, source_path), indent=2)
 
+
+
+@mcp.tool()
+def search_docs(query: str, category: str = "", limit: int = 10) -> str:
+    """Search docs/knowledge with an optional corpus category filter."""
+    INDEX.ensure()
+    results = INDEX.search(query, limit=max(1, min(limit, 50)))
+    if category:
+        results = [r for r in results if str(r.get("path", "")).startswith(category.rstrip("/") + "/")]
+    return json.dumps(results[:limit], indent=2)
+
+
+@mcp.tool()
+def get_symbol(symbol: str, language: str = "enma") -> str:
+    """Validator-focused alias for api_lookup."""
+    return api_lookup(symbol, language)
+
+
+@mcp.tool()
+def get_examples(api_family: str) -> str:
+    """Return short source-backed examples for one API family."""
+    needle = api_family.lower().strip()
+    INDEX.ensure()
+    hits = [r for r in INDEX.search(needle, limit=20) if any(part in str(r.get("path", "")) for part in ("examples/", "templates/", "docs/perception/"))]
+    return json.dumps({"family": needle, "examples": hits[:8]}, indent=2)
+
+
+@mcp.tool()
+def get_negative_examples(symbol: str = "") -> str:
+    """Return known hallucination examples and repair guidance."""
+    path = REPO_ROOT / "knowledge" / "unsupported-symbols.json"
+    data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"symbols": {}}
+    symbols = data.get("symbols", {})
+    if symbol:
+        symbols = {symbol: symbols.get(symbol, "")} if symbol in symbols else {}
+    return json.dumps({"symbols": symbols}, indent=2)
+
+
+@mcp.tool()
+def why_invalid(code: str, language: str = "enma", runtime_mode: str = "project") -> str:
+    """Validate code and return findings plus one-line fixes."""
+    index = _load_api_index()
+    if index is None:
+        return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
+    findings = validate_code_against_index(code, language, index, "why_invalid", runtime_mode=runtime_mode)
+    return json.dumps({"ok": not findings, "findings": findings}, indent=2)
 
 # ── Project creation and workflow helpers ────────────────────────────────────
 

@@ -29,6 +29,8 @@ LANG_ALIASES = {
 }
 
 UNSUPPORTED_SYMBOLS_PATH = data_root() / "knowledge" / "unsupported-symbols.json"
+PERMISSION_RULES_PATH = data_root() / "knowledge" / "permission-rules.json"
+DEPRECATED_SYMBOLS_PATH = data_root() / "knowledge" / "deprecated-symbols.json"
 
 def load_unsupported_symbols() -> dict[str, str]:
     if not UNSUPPORTED_SYMBOLS_PATH.exists():
@@ -42,6 +44,57 @@ def load_unsupported_symbols() -> dict[str, str]:
         return {}
     symbols = cast(dict[object, object], raw_symbols)
     return {str(k): str(v) for k, v in symbols.items()}
+
+
+def load_permission_rules() -> list[dict[str, Any]]:
+    if not PERMISSION_RULES_PATH.exists():
+        return []
+    raw_data: object = json.loads(PERMISSION_RULES_PATH.read_text(encoding="utf-8"))
+    if not isinstance(raw_data, dict):
+        return []
+    rules = cast(dict[str, object], raw_data).get("rules", [])
+    return cast(list[dict[str, Any]], rules) if isinstance(rules, list) else []
+
+
+def load_deprecated_symbols() -> dict[str, dict[str, str]]:
+    if not DEPRECATED_SYMBOLS_PATH.exists():
+        return {}
+    raw_data: object = json.loads(DEPRECATED_SYMBOLS_PATH.read_text(encoding="utf-8"))
+    if not isinstance(raw_data, dict):
+        return {}
+    raw_symbols = cast(dict[str, object], raw_data).get("symbols", {})
+    if not isinstance(raw_symbols, dict):
+        return {}
+    out: dict[str, dict[str, str]] = {}
+    for key, value in cast(dict[object, object], raw_symbols).items():
+        if isinstance(value, dict):
+            out[str(key)] = {str(k): str(v) for k, v in cast(dict[object, object], value).items()}
+        else:
+            out[str(key)] = {"replacement": "", "reason": str(value)}
+    return out
+
+
+def permissions_for_symbol(symbol: str, sig: dict[str, Any] | None = None) -> list[str]:
+    source = str((sig or {}).get("source", ""))
+    found: list[str] = []
+    for rule in load_permission_rules():
+        match = rule.get("match", {})
+        if not isinstance(match, dict):
+            continue
+        ok = False
+        if match.get("symbol") == symbol:
+            ok = True
+        if str(match.get("prefix", "")) and symbol.startswith(str(match.get("prefix"))):
+            ok = True
+        if str(match.get("symbol_contains", "")) and str(match.get("symbol_contains")) in symbol:
+            ok = True
+        if str(match.get("source_contains", "")) and str(match.get("source_contains")) in source:
+            ok = True
+        if ok:
+            for perm in rule.get("permissions", []):
+                if str(perm) not in found:
+                    found.append(str(perm))
+    return found
 
 FENCE_RE = re.compile(r'^```\s*([A-Za-z_.-]*)[^\n]*\n(.*?)\n```', re.MULTILINE | re.DOTALL)
 
@@ -215,6 +268,8 @@ def lookup_symbol(index: dict[str, Any], symbol: str, language: str | None = Non
                 "kind": sig.get("kind", ""),
                 "source": sig.get("source", ""),
                 "arity": sig.get("arity", 0),
+                "permissions": permissions_for_symbol(symbol, sig),
+                "deprecated": load_deprecated_symbols().get(symbol, {}),
             }
             for sig in sigs
         ],
@@ -281,6 +336,32 @@ def _validate_enma_semantics(code: str) -> list[dict[str, Any]]:
             "return &",
             "Enma rejects escaping local addresses; return values or store owned state.",
         ))
+    pointer_vars = {m.group(1) for m in re.finditer(r"\b\w+(?:\s*<[^>]+>)?\s*\*\s*(\w+)", clean)}
+    for match in re.finditer(r"\b(\w+)\s*=\s*\1\s*[+-]\s*\d+", clean):
+        if match.group(1) not in pointer_vars:
+            continue
+        findings.append(_finding(
+            "semantic_trap",
+            _line_for_offset(clean, match.start()),
+            match.group(1),
+            "Enma does not support C-style pointer arithmetic; use indexed containers or host-validated offsets.",
+        ))
+    for match in re.finditer(r"cast\s*<\s*int64\s*>\s*\(\s*(\w+)\s*\)", clean):
+        if match.group(1) not in pointer_vars:
+            continue
+        findings.append(_finding(
+            "semantic_trap",
+            _line_for_offset(clean, match.start()),
+            "cast<int64>(ptr)",
+            "Do not cast Enma pointers to int64; keep handles/offsets as documented integer values.",
+        ))
+    for match in re.finditer(r"\b([A-Z]\w*)\s+\w+\s*=\s*new\s+\1\s*\(", clean):
+        findings.append(_finding(
+            "semantic_trap",
+            _line_for_offset(clean, match.start()),
+            match.group(1),
+            "Stack/heap mismatch: `T x = new T()` is invalid; use `T* x = new T()` or stack construction.",
+        ))
     return findings
 
 
@@ -304,6 +385,7 @@ def validate_code_against_index(
     index: dict[str, Any],
     source_path: str = "",
     extra_user_functions: set[str] | None = None,
+    runtime_mode: str = "project",
 ) -> list[dict[str, Any]]:
     """Validate Enma code for unknown symbols."""
     if language not in SUPPORTED_LANGUAGES:
@@ -320,6 +402,7 @@ def validate_code_against_index(
     forbidden_calls = FORBIDDEN_CALLS_BY_LANGUAGE.get(language, {})
     forbidden_types = FORBIDDEN_TYPES_BY_LANGUAGE.get(language, {})
     unsupported_symbols = load_unsupported_symbols()
+    deprecated_symbols = load_deprecated_symbols()
     known_types = known_type_names(index)
     known_functions = known_function_names(index)
     known_methods = known_method_names(index)
@@ -332,6 +415,22 @@ def validate_code_against_index(
                 name,
                 unsupported_symbols[name],
                 suggestions=lookup_symbol(index, name).get("suggestions", [])[:5],
+            ))
+            continue
+
+        if name in deprecated_symbols:
+            meta = deprecated_symbols[name]
+            replacement = meta.get("replacement", "")
+            message = f"{name} is deprecated" + (f"; use {replacement}" if replacement else "")
+            findings.append(_finding("deprecated_symbol", line, name, message, replacement=replacement, reason=meta.get("reason", "")))
+            continue
+
+        if runtime_mode == "script_execute" and (name.startswith("gui_") or name in ENMA_MODULE_HINTS.get("thread", set())):
+            findings.append(_finding(
+                "runtime_mode_unsupported",
+                line,
+                name,
+                "Perception script/execute does not register GUI/thread addons; use a project script instead.",
             ))
             continue
 
@@ -359,13 +458,14 @@ def validate_code_against_index(
                     fix=f'import "{provider}";',
                 ))
                 continue
-            if name.startswith("fs_") and "PERM_FILE" not in code:
-                findings.append(_finding(
-                    "missing_permission",
-                    line,
-                    "PERM_FILE",
-                    f"{name} requires PERM_FILE in the script permission set",
-                ))
+            for perm in permissions_for_symbol(name):
+                if perm not in code:
+                    findings.append(_finding(
+                        "missing_permission",
+                        line,
+                        perm,
+                        f"{name} requires {perm} in the script permission set",
+                    ))
 
         lang_sigs = signatures_for(index, name, language)
         any_sigs = signatures_for(index, name)

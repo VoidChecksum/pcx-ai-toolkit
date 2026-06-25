@@ -175,3 +175,10 @@ Native reverse-engineering tools live in [`../tools/pe-parser/`](../tools/pe-par
 | [`../signatures/frostbite/frostbite-patterns.md`](../signatures/frostbite/frostbite-patterns.md) | Frostbite type info, game context, renderer, entity-manager seeds |
 | [`../signatures/redengine/redengine-patterns.md`](../signatures/redengine/redengine-patterns.md) | REDengine RTTI, world/entity, camera, script VM anchors |
 | [`../signatures/godot/godot-patterns.md`](../signatures/godot/godot-patterns.md) | Godot ObjectDB, SceneTree, camera, `.pck` verification anchors |
+
+## Anti-Hallucination Coverage
+
+- [Coverage dashboard](COVERAGE.md)
+- [Machine-readable coverage](COVERAGE.json)
+- [Hallucination regression corpus](../evals/hallucination-regression.json)
+- [Model compatibility matrix](../evals/model-compatibility.json)

@@ -1,6 +1,6 @@
 {
-  "doc_lines": 20426,
-  "docs": 85,
+  "doc_lines": 21687,
+  "docs": 88,
   "engines": 5,
   "knowledge": 26,
   "mcp_tools": 59,
@@ -8,5 +8,5 @@
   "signatures": 11,
   "skills": 24,
   "templates": 18,
-  "tools": 40
+  "tools": 41
 }

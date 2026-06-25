@@ -1,0 +1,31 @@
+{
+  "schema": "pcx-mcp-schema-rules-v1",
+  "rules": [
+    {
+      "kind": "handle_format",
+      "message": "MCP handles must be hex strings to avoid JavaScript 2^53 precision loss."
+    },
+    {
+      "kind": "handle_lifecycle",
+      "message": "MCP handles are per connection; stale or cross-connection handles are invalid."
+    },
+    {
+      "kind": "handle_first",
+      "message": "Tools that operate on handles must take handle as the first parameter."
+    },
+    {
+      "kind": "permission_error",
+      "code": -32001,
+      "message": "Permission-gated MCP calls should map missing permissions to -32001."
+    },
+    {
+      "kind": "invalid_handle_error",
+      "code": -32002,
+      "message": "Invalid MCP handles should map to -32002."
+    },
+    {
+      "kind": "scan_cap",
+      "message": "Scan tools must expose caps/truncation behavior and safe filters such as heap_only or string_module."
+    }
+  ]
+}

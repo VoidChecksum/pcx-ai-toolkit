@@ -49,7 +49,23 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("corpus", nargs="?", default=str(DEFAULT_CORPUS), help="benchmark JSON file")
     ap.add_argument("--json", action="store_true", help="machine-readable output")
+    ap.add_argument("--matrix", help="print a model-compatibility task matrix JSON file")
     args = ap.parse_args()
+
+    if args.matrix:
+        matrix_path = Path(args.matrix)
+        if not matrix_path.is_file():
+            print(f"ERROR: matrix not found: {matrix_path}", file=sys.stderr)
+            return 2
+        matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+        tasks = matrix.get("tasks", [])
+        if args.json:
+            print(json.dumps({"matrix": str(matrix_path), "tasks": tasks}, indent=2))
+        else:
+            for task in tasks:
+                print(f"[TASK] {task.get('name')} must_use={task.get('must_use', [])} must_not_use={task.get('must_not_use', [])} expected_refusal={task.get('expected_refusal', False)}")
+            print(f"Matrix: {len(tasks)} tasks")
+        return 0
 
     corpus_path = Path(args.corpus)
     if not corpus_path.is_file():

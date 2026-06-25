@@ -34,7 +34,13 @@
     "docs/llms-perception-enma.md",
     "README.md",
     "LICENSE",
-    "VERSION"
+    "VERSION",
+    "knowledge/permission-rules.json",
+    "knowledge/deprecated-symbols.json",
+    "knowledge/mcp-schema-rules.json",
+    "docs/COVERAGE.json",
+    "docs/COVERAGE.md",
+    "evals/*.json"
   ],
   "scripts": {
     "pack:check": "bun pm pack --dry-run"

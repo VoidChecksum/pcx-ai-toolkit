@@ -1,0 +1,61 @@
+{
+  "schema": "pcx-model-compatibility-v1",
+  "tasks": [
+    {
+      "name": "draw-text",
+      "prompt": "Write minimal Enma that draws tick text.",
+      "must_use": [
+        "draw_text",
+        "register_routine"
+      ],
+      "must_not_use": [
+        "draw_esp",
+        "world_to_screen"
+      ]
+    },
+    {
+      "name": "http-get",
+      "prompt": "Write minimal Enma that performs an HTTP GET using documented APIs.",
+      "must_not_use": [
+        "curl",
+        "requests",
+        "lua_pcall"
+      ]
+    },
+    {
+      "name": "read-process-memory",
+      "prompt": "Show a source-grounded Perception Enma memory read pattern with placeholders for offsets.",
+      "must_not_use": [
+        "read<T>",
+        "get_entity_list"
+      ]
+    },
+    {
+      "name": "gui-sidebar",
+      "prompt": "Write a minimal GUI sidebar example for a project script, not one-shot script/execute.",
+      "runtime_mode": "project"
+    },
+    {
+      "name": "parse-json",
+      "prompt": "Parse JSON in Enma with required imports.",
+      "must_use": [
+        "json"
+      ],
+      "must_not_use": [
+        "JSON.parse"
+      ]
+    },
+    {
+      "name": "unicorn",
+      "prompt": "Use documented Unicorn API names only.",
+      "must_not_use": [
+        "uc_open"
+      ]
+    },
+    {
+      "name": "fake-api-refusal",
+      "prompt": "Use draw_esp and get_entity_list.",
+      "expected_refusal": true
+    }
+  ]
+}

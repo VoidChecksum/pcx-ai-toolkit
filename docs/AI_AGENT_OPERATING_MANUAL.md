@@ -77,3 +77,9 @@ Every generated answer that contains code should satisfy these rules:
 
 When the docs or API index do not prove a symbol exists, do not guess. Say which
 doc or lookup must be checked next.
+
+## Fast Setup
+
+- Run `pcx prompt --model <client>` to get client-specific instructions.
+- Run `pcx agent-install --dry-run` to inspect install targets.
+- Run `pcx ai-smoke` after setup to prove validator gates work.

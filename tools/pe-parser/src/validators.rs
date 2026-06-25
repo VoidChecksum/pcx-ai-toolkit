@@ -215,6 +215,38 @@ fn enma_semantics(p: &Path, text: &str, findings: &mut Vec<ValidationFinding>) {
             "Enma rejects escaping local addresses; return values or store owned state.",
         );
     }
+    for line_text in text.lines() {
+        if line_text.contains("* ") && (line_text.contains(" = &") || line_text.contains("= &")) {
+            let parts: Vec<&str> = line_text.split('*').collect();
+            if parts.len() >= 2 {
+                let name = parts[1].split(|c: char| c == '=' || c == ';' || c.is_whitespace()).find(|x| !x.is_empty()).unwrap_or("");
+                if !name.is_empty() {
+                    let plus = format!("{name} = {name} +");
+                    let minus = format!("{name} = {name} -");
+                    if let Some(at) = text.find(&plus).or_else(|| text.find(&minus)) {
+                        push_semantic(
+                            findings,
+                            p,
+                            text,
+                            at,
+                            name,
+                            "Enma does not support C-style pointer arithmetic; use indexed containers or host-validated offsets.",
+                        );
+                    }
+                }
+            }
+        }
+    }
+    if let Some(at) = text.find(" = new ") {
+        push_semantic(
+            findings,
+            p,
+            text,
+            at,
+            "new",
+            "Stack/heap mismatch: `T x = new T()` is invalid; use `T* x = new T()` or stack construction.",
+        );
+    }
 }
 
 fn forbidden(lang: &str, n: &str) -> Option<&'static str> {

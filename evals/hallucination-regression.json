@@ -41,6 +41,34 @@
       "mode": "answer",
       "should_pass": true,
       "input": "```enma\nint64 main() {\n    println(\"hello\");\n    return 1;\n}\n```"
+    },
+    {
+      "name": "enma-rejects-draw-box",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){draw_box();return 1;}\n"
+    },
+    {
+      "name": "enma-rejects-get-players",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){get_players();return 1;}\n"
+    },
+    {
+      "name": "enma-rejects-pointer-arithmetic",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){int32 x = 1; int32* p = &x; p = p + 1; return 1;}\n"
+    },
+    {
+      "name": "enma-rejects-new-stack-mismatch",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "class Foo {}\nint64 main(){Foo x = new Foo(); return 1;}\n"
     }
   ]
 }

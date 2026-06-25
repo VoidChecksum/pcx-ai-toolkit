@@ -92,7 +92,8 @@ class DistributionTest(unittest.TestCase):
 
     def test_root_python_package_ships_runtime_data(self):
         pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-        self.assertIn('"knowledge" = ["knowledge/pcx-api-index.json", "knowledge/unsupported-symbols.json"]', pyproject)
+        self.assertIn('"knowledge" = ["knowledge/pcx-api-index.json", "knowledge/unsupported-symbols.json", "knowledge/permission-rules.json", "knowledge/deprecated-symbols.json", "knowledge/mcp-schema-rules.json"]', pyproject)
+        self.assertIn('"evals" = ["evals/*.json"]', pyproject)
         self.assertIn('"templates/full-project"', pyproject)
         self.assertIn('"tools" = ["tools/update-toolkit.sh", "tools/update-toolkit.ps1"]', pyproject)
 

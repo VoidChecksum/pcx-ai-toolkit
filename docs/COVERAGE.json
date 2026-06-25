@@ -1,0 +1,37 @@
+{
+  "api": {
+    "families_indexed": 12,
+    "family_names": [
+      "cpu",
+      "filesystem",
+      "gui",
+      "input",
+      "lifecycle",
+      "net",
+      "proc",
+      "render",
+      "sound",
+      "unicorn",
+      "win",
+      "zydis"
+    ],
+    "perception_api_pages_indexed": 15,
+    "symbols_indexed": 216,
+    "symbols_with_permission_metadata": 16
+  },
+  "deprecated": {
+    "symbols": 0
+  },
+  "hallucinations": {
+    "eval_cases": 10,
+    "known_symbols": 18
+  },
+  "permissions": {
+    "rules": 5
+  },
+  "provenance": {
+    "drift_checkable": 67,
+    "sources": 88
+  },
+  "schema": "pcx-anti-hallucination-coverage-v1"
+}
