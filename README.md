@@ -111,7 +111,11 @@ Update later with one command:
 
 ```bash
 pcx update
+npm install -g pcx-ai-toolkit@latest
+python -m pip install --upgrade pcx-ai-toolkit
 ```
+
+Release publishing uses PyPI Trusted Publisher and npm Trusted Publisher where configured. Workflow filename: `release.yml`.
 
 ## First command by job
 

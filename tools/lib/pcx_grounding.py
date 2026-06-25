@@ -370,8 +370,20 @@ def _split_args(args: str) -> list[str]:
     out: list[str] = []
     depth = 0
     start = 0
+    quote = ""
+    escaped = False
     for i, ch in enumerate(args):
-        if ch in "(<[":
+        if quote:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == quote:
+                quote = ""
+            continue
+        if ch in {"'", '"'}:
+            quote = ch
+        elif ch in "(<[":
             depth += 1
         elif ch in ")>]":
             depth = max(0, depth - 1)
@@ -651,6 +663,11 @@ def validate_code_against_index(
             ))
             continue
 
+        permission_aliases = {
+            "PERM_FILE": {"PERM_FILE", "file_system_access"},
+            "file_system_access": {"PERM_FILE", "file_system_access"},
+        }
+
         if language == "enma":
             provider = next((mod for mod, names in ENMA_MODULE_HINTS.items() if name in names), "")
             if provider:
@@ -669,7 +686,8 @@ def validate_code_against_index(
             meta_permissions = list(meta.get("permissions", [])) if isinstance(meta.get("permissions", []), list) else []
             rule_permissions = permissions_for_symbol(name)
             for perm in _dedupe([*rule_permissions, *[str(p) for p in meta_permissions]]):
-                if perm not in code:
+                aliases = permission_aliases.get(perm, {perm})
+                if not any(alias in code for alias in aliases):
                     findings.append(_finding(
                         "permission_required",
                         line,

@@ -166,8 +166,8 @@ void on_tick(int64 data) {}
             ),
             "pcx_py_file_perm_bad.em": (
                 'import "file"\nint64 main(){return fs_read_file("x.txt").length();}\n',
-                "missing_permission",
-                "PERM_FILE",
+                "permission_required",
+                "file_system_access",
             ),
         }
         for name, (code, kind, expected) in cases.items():
@@ -185,12 +185,12 @@ void on_tick(int64 data) {}
     def test_enma_file_permission_annotation_allowed(self):
         path = Path("/tmp/pcx_py_file_perm_ok.em")
         path.write_text(
-            'import "file"\n// Host must grant PERM_FILE before compile.\nint64 main(){return fs_read_file("x.txt").length();}\n',
+            'import "file"\n// Host must grant file_system_access before compile.\nint64 main(){return fs_read_file("x.txt").length();}\n',
             encoding="utf-8",
         )
         try:
             rc, out, err = _run(str(path))
-            self.assertEqual(rc, 0, f"PERM_FILE host annotation should pass:\n{out}\n{err}")
+            self.assertEqual(rc, 0, f"file_system_access host annotation should pass:\n{out}\n{err}")
         finally:
             path.unlink(missing_ok=True)
 
