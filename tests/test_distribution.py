@@ -42,6 +42,12 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("npm Trusted Publisher", readme)
         self.assertIn("Workflow filename: `release.yml`", readme)
 
+    def test_readme_documents_pcx_update(self):
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("pcx update", readme)
+        self.assertIn("npm install -g pcx-ai-toolkit@latest", readme)
+        self.assertIn("python -m pip install --upgrade pcx-ai-toolkit", readme)
+
     def test_extension_release_uploads_checksummed_vsix(self):
         workflow = REPO_ROOT / ".github" / "workflows" / "release.yml"
         text = workflow.read_text(encoding="utf-8")
@@ -55,6 +61,18 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("Build Rust CLI", text)
         self.assertIn("cargo build --release --bin pcx-rs", text)
         self.assertIn("release-artifacts/pcx-rs", text)
+
+    def test_release_packages_stage_rust_cli_for_registries(self):
+        workflow = REPO_ROOT / ".github" / "workflows" / "release.yml"
+        text = workflow.read_text(encoding="utf-8")
+        self.assertIn("mkdir -p tools/bin", text)
+        self.assertIn("cp tools/pe-parser/target/release/pcx-rs tools/bin/pcx-rs", text)
+        self.assertLess(text.index("cargo build --release --bin pcx-rs"), text.index("python -m build"))
+        self.assertLess(text.index("cargo build --release --bin pcx-rs"), text.index("npm pack --dry-run"))
+
+    def test_root_python_package_ships_rust_cli(self):
+        pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        self.assertIn('"tools/bin" = ["tools/bin/pcx-rs"]', pyproject)
 
     def test_root_python_package_ships_runtime_data(self):
         pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
@@ -70,6 +88,11 @@ class DistributionTest(unittest.TestCase):
         self.assertIn('"pcx": "npm/bin/pcx.js"', package)
         self.assertIn('"knowledge/*.json"', package)
         self.assertIn('"templates/**/*"', package)
+
+    def test_npm_shim_prefers_rust_cli(self):
+        shim = (REPO_ROOT / "npm" / "bin" / "pcx.js").read_text(encoding="utf-8")
+        self.assertIn("pcx-rs", shim)
+        self.assertLess(shim.index("pcx-rs"), shim.index("pcx.py"))
 
 
 if __name__ == "__main__":

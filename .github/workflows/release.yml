@@ -86,6 +86,15 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
+      - name: Build Rust CLI for package
+        working-directory: tools/pe-parser
+        run: cargo build --release --bin pcx-rs
+
+      - name: Stage Rust CLI for package
+        run: |
+          mkdir -p tools/bin
+          cp tools/pe-parser/target/release/pcx-rs tools/bin/pcx-rs
+
       - name: Build root Python package
         run: |
           python -m pip install --upgrade build twine
@@ -120,6 +129,15 @@ jobs:
 
       - name: Use npm trusted publishing CLI
         run: npm install -g npm@latest
+
+      - name: Build Rust CLI for package
+        working-directory: tools/pe-parser
+        run: cargo build --release --bin pcx-rs
+
+      - name: Stage Rust CLI for package
+        run: |
+          mkdir -p tools/bin
+          cp tools/pe-parser/target/release/pcx-rs tools/bin/pcx-rs
 
       - name: Build npm package
         run: |

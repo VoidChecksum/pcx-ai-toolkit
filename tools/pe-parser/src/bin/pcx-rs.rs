@@ -39,6 +39,9 @@ struct Args {
 
 fn find_repo_root() -> Result<PathBuf, String> {
     let mut starts = Vec::new();
+    if let Ok(root) = std::env::var("PCX_TOOLKIT_ROOT") {
+        starts.push(PathBuf::from(root));
+    }
     if let Ok(exe) = std::env::current_exe() {
         starts.push(exe);
     }
@@ -80,13 +83,14 @@ fn print_help(repo_root: &Path) {
     println!("  check-drift [--json] [--limit N]");
     println!("  build-provenance [--json] [--check]");
     println!("  counts [--json] [--check]");
+    println!("  update [--plan-json] [--check] [--force]");
     println!("  doctor");
     for tool in NATIVE_TOOLS {
         println!("  {tool} [args]");
     }
     println!();
     println!("Compatibility commands delegated to Python until ported:");
-    println!("  setup, update, lint");
+    println!("  setup, lint");
     println!("  build-api-index, check-mcp, check-matrix, new");
 }
 
@@ -471,7 +475,7 @@ fn param_str<'a>(params: &'a serde_json::Value, name: &str) -> Option<&'a str> {
 }
 
 fn temp_script_path(language: &str, label: &str) -> PathBuf {
-    let ext = "em";
+    let ext = if language == "angelscript" { "as" } else { "em" };
     std::env::temp_dir().join(format!("pcx_rs_{label}_{}.{}", std::process::id(), ext))
 }
 
@@ -1041,6 +1045,127 @@ fn cmd_check_drift(repo_root: &Path, args: &[String]) -> i32 {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum UpdateMode {
+    Source,
+    Npm,
+    Pypi,
+    Unknown,
+}
+
+fn update_mode(repo_root: &Path) -> UpdateMode {
+    match std::env::var("PCX_UPDATE_MODE").ok().as_deref() {
+        Some("source") => return UpdateMode::Source,
+        Some("npm") => return UpdateMode::Npm,
+        Some("pypi") => return UpdateMode::Pypi,
+        Some(_) => return UpdateMode::Unknown,
+        None => {}
+    }
+    if std::env::var("npm_config_global").is_ok() || std::env::var("npm_execpath").is_ok() {
+        UpdateMode::Npm
+    } else if std::env::var("VIRTUAL_ENV").is_ok() || std::env::var("PIPX_HOME").is_ok() {
+        UpdateMode::Pypi
+    } else if repo_root.join(".git").exists() {
+        UpdateMode::Source
+    } else {
+        UpdateMode::Unknown
+    }
+}
+
+fn default_python() -> String {
+    if Command::new("python3").arg("--version").output().is_ok() {
+        "python3".to_string()
+    } else {
+        "python".to_string()
+    }
+}
+
+fn update_command(mode: &UpdateMode, repo_root: &Path, args: &[String]) -> Option<Vec<String>> {
+    match mode {
+        UpdateMode::Source => {
+            let mut cmd = if cfg!(windows) {
+                vec![
+                    "powershell".to_string(),
+                    "-ExecutionPolicy".to_string(),
+                    "Bypass".to_string(),
+                    "-File".to_string(),
+                    repo_root
+                        .join("tools")
+                        .join("update-toolkit.ps1")
+                        .display()
+                        .to_string(),
+                ]
+            } else {
+                vec![
+                    "bash".to_string(),
+                    repo_root
+                        .join("tools")
+                        .join("update-toolkit.sh")
+                        .display()
+                        .to_string(),
+                ]
+            };
+            cmd.extend(args.iter().cloned());
+            Some(cmd)
+        }
+        UpdateMode::Npm => Some(vec![
+            "npm".to_string(),
+            "install".to_string(),
+            "-g".to_string(),
+            "pcx-ai-toolkit@latest".to_string(),
+        ]),
+        UpdateMode::Pypi => Some(vec![
+            std::env::var("PCX_PYTHON").unwrap_or_else(|_| default_python()),
+            "-m".to_string(),
+            "pip".to_string(),
+            "install".to_string(),
+            "--upgrade".to_string(),
+            "pcx-ai-toolkit".to_string(),
+        ]),
+        UpdateMode::Unknown => None,
+    }
+}
+
+fn update_mode_name(mode: &UpdateMode) -> &'static str {
+    match mode {
+        UpdateMode::Source => "source",
+        UpdateMode::Npm => "npm",
+        UpdateMode::Pypi => "pypi",
+        UpdateMode::Unknown => "unknown",
+    }
+}
+
+fn cmd_update(repo_root: &Path, args: &[String]) -> i32 {
+    let plan_json = args.iter().any(|arg| arg == "--plan-json");
+    let passthrough: Vec<String> = args
+        .iter()
+        .filter(|arg| arg.as_str() != "--plan-json")
+        .cloned()
+        .collect();
+    let mode = update_mode(repo_root);
+    let Some(command) = update_command(&mode, repo_root, &passthrough) else {
+        eprintln!("pcx update: could not detect install mode; use npm install -g pcx-ai-toolkit@latest or python -m pip install --upgrade pcx-ai-toolkit");
+        return 3;
+    };
+    if plan_json {
+        println!(
+            "{}",
+            serde_json::json!({
+                "mode": update_mode_name(&mode),
+                "command": command,
+            })
+        );
+        return 0;
+    }
+    match Command::new(&command[0]).args(&command[1..]).status() {
+        Ok(status) => status.code().unwrap_or(3),
+        Err(err) => {
+            eprintln!("pcx update: failed to run {}: {}", command[0], err);
+            3
+        }
+    }
+}
+
 fn python_cmd(repo_root: &Path) -> Command {
     let python = if Command::new("python3").arg("--version").output().is_ok() {
         "python3"
@@ -1109,6 +1234,7 @@ fn main() {
         "check-drift" => cmd_check_drift(&repo_root, &args.args),
         "build-provenance" => cmd_build_provenance(&repo_root, &args.args),
         "counts" => cmd_counts(&repo_root, &args.args),
+        "update" => cmd_update(&repo_root, &args.args),
         "doctor" => cmd_doctor(&repo_root),
         tool if NATIVE_TOOLS.contains(&tool) => run_native_tool(&repo_root, tool, &args.args)
             .unwrap_or_else(|| run_python_fallback(&repo_root, tool, &args.args)),

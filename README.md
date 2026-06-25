@@ -102,6 +102,7 @@ PyPI:
 ```bash
 python -m pip install pcx-ai-toolkit
 pcx doctor
+pcx update  # later: runs python -m pip install --upgrade pcx-ai-toolkit
 ```
 
 npm / Bun:
@@ -111,6 +112,7 @@ npm install -g pcx-ai-toolkit
 # or
 bun add -g pcx-ai-toolkit
 pcx doctor
+pcx update  # later: runs npm install -g pcx-ai-toolkit@latest
 ```
 
 Source checkout:
@@ -128,6 +130,14 @@ git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
 cd pcx-ai-toolkit
 powershell -ExecutionPolicy Bypass -File setup.ps1
 ```
+
+After publishing, users update with the same command everywhere:
+
+```bash
+pcx update
+```
+
+Source checkouts keep using the git-backed updater; registry installs use their package manager.
 
 Requirements: Git, Python 3.10+, Node.js 18+. Git submodules are required for LSP and `.vsix` packaging.
 

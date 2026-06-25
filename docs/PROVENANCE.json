@@ -1,6 +1,24 @@
 {
-  "count": 81,
+  "generated": "2026-06-25",
+  "count": 83,
   "drift_checkable": 67,
+  "unmapped": [
+    "docs/AI_AGENT_OPERATING_MANUAL.md",
+    "docs/FAQ.md",
+    "docs/distribution-checklist.md",
+    "docs/enma/UPSTREAM-SUGGESTIONS.md",
+    "docs/marketplace-install.md",
+    "docs/perception/changelogs.md",
+    "docs/perception/llm-routing.md",
+    "docs/superpowers/plans/2026-06-24-pcx-mcp-schema-mirror.md",
+    "docs/superpowers/plans/2026-06-24-rust-docs-pipeline.md",
+    "docs/superpowers/plans/2026-06-25-auto-publish-release.md",
+    "docs/superpowers/plans/2026-06-25-rust-first-pcx-cli.md",
+    "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md",
+    "docs/superpowers/specs/2026-06-24-rust-docs-pipeline-design.md",
+    "docs/superpowers/specs/2026-06-25-auto-publish-release-design.md",
+    "docs/superpowers/specs/2026-06-25-rust-first-pcx-cli-design.md"
+  ],
   "files": {
     "docs/AI_AGENT_OPERATING_MANUAL.md": {
       "drift_check": false,
@@ -392,6 +410,11 @@
       "source": "local",
       "url": null
     },
+    "docs/superpowers/plans/2026-06-25-rust-first-pcx-cli.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md": {
       "drift_check": false,
       "source": "local",
@@ -406,22 +429,11 @@
       "drift_check": false,
       "source": "local",
       "url": null
+    },
+    "docs/superpowers/specs/2026-06-25-rust-first-pcx-cli-design.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
     }
-  },
-  "generated": "2026-06-25",
-  "unmapped": [
-    "docs/AI_AGENT_OPERATING_MANUAL.md",
-    "docs/FAQ.md",
-    "docs/distribution-checklist.md",
-    "docs/enma/UPSTREAM-SUGGESTIONS.md",
-    "docs/marketplace-install.md",
-    "docs/perception/changelogs.md",
-    "docs/perception/llm-routing.md",
-    "docs/superpowers/plans/2026-06-24-pcx-mcp-schema-mirror.md",
-    "docs/superpowers/plans/2026-06-24-rust-docs-pipeline.md",
-    "docs/superpowers/plans/2026-06-25-auto-publish-release.md",
-    "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md",
-    "docs/superpowers/specs/2026-06-24-rust-docs-pipeline-design.md",
-    "docs/superpowers/specs/2026-06-25-auto-publish-release-design.md"
-  ]
+  }
 }

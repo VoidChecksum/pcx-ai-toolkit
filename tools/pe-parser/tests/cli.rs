@@ -57,6 +57,139 @@ fn native_build_provenance_json_reports_counts() {
     assert!(json["drift_checkable"].as_u64().unwrap() > 50);
     assert!(json["unmapped"].as_array().unwrap().len() > 0);
 }
+
+#[test]
+fn update_plan_reports_npm_install_command() {
+    let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["update", "--plan-json"])
+        .env("PCX_UPDATE_MODE", "npm")
+        .output()
+        .expect("run pcx-rs update plan");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(json["mode"], "npm");
+    assert_eq!(
+        json["command"],
+        serde_json::json!(["npm", "install", "-g", "pcx-ai-toolkit@latest"])
+    );
+}
+
+#[test]
+fn update_plan_reports_pypi_install_command() {
+    let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["update", "--plan-json"])
+        .env("PCX_UPDATE_MODE", "pypi")
+        .env("PCX_PYTHON", "python-test")
+        .output()
+        .expect("run pcx-rs update plan");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(json["mode"], "pypi");
+    assert_eq!(
+        json["command"],
+        serde_json::json!(["python-test", "-m", "pip", "install", "--upgrade", "pcx-ai-toolkit"])
+    );
+}
+
+#[test]
+fn update_plan_reports_source_shell_command() {
+    let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["update", "--plan-json"])
+        .env("PCX_UPDATE_MODE", "source")
+        .output()
+        .expect("run pcx-rs update plan");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(json["mode"], "source");
+    assert_eq!(json["command"][0], if cfg!(windows) { "powershell" } else { "bash" });
+    assert!(json["command"].as_array().unwrap().iter().any(|part| {
+        part.as_str().unwrap_or("").contains(if cfg!(windows) {
+            "update-toolkit.ps1"
+        } else {
+            "update-toolkit.sh"
+        })
+    }));
+}
+
+#[test]
+fn update_plan_prefers_npm_env_over_git_checkout() {
+    let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["update", "--plan-json"])
+        .env("npm_execpath", "npm-cli.js")
+        .output()
+        .expect("run pcx-rs update plan");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(json["mode"], "npm");
+}
+
+#[test]
+fn update_plan_uses_toolkit_root_env() {
+    let dir = std::env::temp_dir().join("pcx_toolkit_root_env");
+    let _ = fs::remove_dir_all(&dir);
+    fs::create_dir_all(dir.join("knowledge")).unwrap();
+    fs::write(dir.join("VERSION"), "9.9.9\n").unwrap();
+    fs::write(dir.join("knowledge").join("pcx-api-index.json"), "{}\n").unwrap();
+
+    let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["update", "--plan-json"])
+        .env("PCX_TOOLKIT_ROOT", &dir)
+        .env("PCX_UPDATE_MODE", "source")
+        .output()
+        .expect("run pcx-rs update plan");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(
+        json["command"].as_array().unwrap().iter().any(|part| {
+            part.as_str().unwrap_or("").contains(dir.to_str().unwrap())
+        }),
+        "{}",
+        json
+    );
+    let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn update_plan_defaults_pypi_to_python3_when_available() {
+    let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["update", "--plan-json"])
+        .env("PCX_UPDATE_MODE", "pypi")
+        .env_remove("PCX_PYTHON")
+        .output()
+        .expect("run pcx-rs update plan");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let expected = if Command::new("python3").arg("--version").output().is_ok() {
+        "python3"
+    } else {
+        "python"
+    };
+    assert_eq!(json["command"][0], expected);
+}
 #[test]
 fn verify_project_json_reports_summary() {
     let dir = std::env::temp_dir().join("pcx_verify_json_project");

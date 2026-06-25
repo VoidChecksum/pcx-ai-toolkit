@@ -106,6 +106,28 @@ def run_python_tool(tool_name: str, args: list[str]) -> int:
         print(f"Error executing {tool_name}.py: {e}\n", file=sys.stderr)
         return 3
 
+def run_rust_cli_if_available(args: list[str]) -> int | None:
+    """Run packaged Rust CLI when available."""
+    exe = "pcx-rs.exe" if os.name == "nt" else "pcx-rs"
+    candidates = [
+        REPO_ROOT / "tools" / "bin" / exe,
+        REPO_ROOT / "tools" / "pe-parser" / "target" / "release" / exe,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            try:
+                env = os.environ.copy()
+                env.setdefault("PCX_TOOLKIT_ROOT", str(REPO_ROOT))
+                if args[:1] == ["update"] and not (REPO_ROOT / ".git").exists():
+                    env.setdefault("PCX_UPDATE_MODE", "pypi")
+                    env.setdefault("PCX_PYTHON", sys.executable)
+                return int(subprocess.run([str(candidate), *args], env=env).returncode)
+            except Exception as e:
+                print(f"Error executing {candidate.name}: {e}", file=sys.stderr)
+                return 3
+    return None
+
+
 
 def cmd_doctor() -> int:
     """Run a health check across all toolkit components."""
@@ -394,6 +416,9 @@ def main() -> int:
         return run_script("setup", sub_args)
 
     if cmd == "update":
+        rust_code = run_rust_cli_if_available([cmd, *sub_args])
+        if rust_code is not None:
+            return rust_code
         return run_script("update-toolkit", sub_args)
 
     if cmd == "lint":

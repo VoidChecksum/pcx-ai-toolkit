@@ -1,5 +1,7 @@
+import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -58,6 +60,31 @@ class UpdateCommandTest(unittest.TestCase):
                 self.assertIn("Uncommitted changes detected", result.stderr)
             finally:
                 shutil.rmtree(repo.parent)
+
+    @unittest.skipIf(os.name == "nt", "sh stub is POSIX-only")
+    def test_python_cli_delegates_update_to_rust_when_available(self):
+        repo = self._make_repo("update-toolkit.sh")
+        try:
+            shutil.copy(REPO_ROOT / "tools" / "pcx.py", repo / "tools" / "pcx.py")
+            shutil.copytree(REPO_ROOT / "tools" / "lib", repo / "tools" / "lib")
+            bin_dir = repo / "tools" / "bin"
+            bin_dir.mkdir()
+            rust = bin_dir / ("pcx-rs.exe" if os.name == "nt" else "pcx-rs")
+            rust.write_text("#!/usr/bin/env sh\nprintf '%s\n' \"$@\"\n", encoding="utf-8")
+            rust.chmod(0o755)
+
+            result = subprocess.run(
+                [sys.executable, "tools/pcx.py", "update", "--plan-json"],
+                cwd=repo,
+                text=True,
+                capture_output=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("update", result.stdout)
+            self.assertIn("--plan-json", result.stdout)
+        finally:
+            shutil.rmtree(repo.parent)
 
     @unittest.skipUnless(shutil.which("pwsh"), "PowerShell not installed")
     def test_powershell_update_accepts_clean_forced_run(self):
