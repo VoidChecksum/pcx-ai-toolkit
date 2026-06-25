@@ -36,6 +36,17 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}", text)
         self.assertNotIn("_authToken", text)
 
+    def test_release_npm_job_does_not_cache_without_root_lockfile(self):
+        workflow = REPO_ROOT / ".github" / "workflows" / "release.yml"
+        text = workflow.read_text(encoding="utf-8")
+        npm_job = text.split("  publish-npm:", 1)[1].split("  build-visualstudio:", 1)[0]
+        self.assertNotIn('cache: "npm"', npm_job)
+
+    def test_ci_uses_single_internal_link_checker(self):
+        workflow = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+        text = workflow.read_text(encoding="utf-8")
+        self.assertEqual(text.count("python3 tools/check-internal-links.py"), 1)
+
     def test_readme_documents_registry_trusted_publishers(self):
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("PyPI Trusted Publisher", readme)
