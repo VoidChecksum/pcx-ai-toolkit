@@ -84,19 +84,13 @@ fn print_help(repo_root: &Path) {
     for tool in NATIVE_TOOLS {
         println!("  {tool} [args]");
     }
-    println!();
-    println!("Compatibility commands delegated to Python until ported:");
-    println!("  setup, update, lint");
-    println!("  build-api-index, check-mcp, check-matrix, new");
 }
 
 fn normalize_lang(lang: Option<&str>) -> Result<Option<&str>, String> {
     match lang {
         None => Ok(None),
         Some("enma" | "em" | ".em") => Ok(Some("enma")),
-        Some(other) => Err(format!(
-            "unsupported --lang {other:?}; use enma"
-        )),
+        Some(other) => Err(format!("unsupported --lang {other:?}; use enma")),
     }
 }
 
@@ -322,10 +316,7 @@ fn pcx_counts(repo_root: &Path) -> serde_json::Value {
                 .filter_map(Result::ok)
                 .map(|entry| entry.path())
                 .filter(|p| p.is_file())
-                .filter(|p| {
-                    matches!(p.extension().and_then(|e| e.to_str()), Some("py" | "sh"))
-                        || p.file_name().and_then(|n| n.to_str()) == Some("pcx")
-                })
+                .filter(|p| matches!(p.extension().and_then(|e| e.to_str()), Some("sh" | "ps1")))
                 .count()
         })
         .unwrap_or(0);
@@ -470,7 +461,7 @@ fn param_str<'a>(params: &'a serde_json::Value, name: &str) -> Option<&'a str> {
     params.get(name).and_then(|v| v.as_str())
 }
 
-fn temp_script_path(language: &str, label: &str) -> PathBuf {
+fn temp_script_path(_language: &str, label: &str) -> PathBuf {
     let ext = "em";
     std::env::temp_dir().join(format!("pcx_rs_{label}_{}.{}", std::process::id(), ext))
 }
@@ -567,7 +558,8 @@ fn scaffold_project_value(
     params: &serde_json::Value,
 ) -> Result<serde_json::Value, String> {
     let name = param_str(params, "name").unwrap_or("PCX Project");
-    let language = normalize_lang(param_str(params, "language").or(Some("enma")))?.unwrap_or("enma");
+    let language =
+        normalize_lang(param_str(params, "language").or(Some("enma")))?.unwrap_or("enma");
     let kind = param_str(params, "kind").unwrap_or("hello");
     let output = param_str(params, "output")
         .or_else(|| param_str(params, "path"))
@@ -865,7 +857,9 @@ fn cmd_create(repo_root: &Path, args: &[String]) -> i32 {
             let field = key.trim_start_matches('-');
             params[field] = serde_json::Value::String(args[i].clone());
         } else if key == "-h" || key == "--help" {
-            println!("Usage: pcx create --name <name> [--language enma] [--kind hello] --output <dir>");
+            println!(
+                "Usage: pcx create --name <name> [--language enma] [--kind hello] --output <dir>"
+            );
             return 0;
         } else if key.starts_with('-') {
             eprintln!("ERROR: unknown option {key}");
@@ -1041,28 +1035,6 @@ fn cmd_check_drift(repo_root: &Path, args: &[String]) -> i32 {
     }
 }
 
-fn python_cmd(repo_root: &Path) -> Command {
-    let python = if Command::new("python3").arg("--version").output().is_ok() {
-        "python3"
-    } else {
-        "python"
-    };
-    let mut cmd = Command::new(python);
-    cmd.arg(repo_root.join("tools").join("pcx.py"));
-    cmd
-}
-
-fn run_python_fallback(repo_root: &Path, command: &str, args: &[String]) -> i32 {
-    let status = python_cmd(repo_root).arg(command).args(args).status();
-    match status {
-        Ok(status) => status.code().unwrap_or(1),
-        Err(e) => {
-            eprintln!("ERROR: failed to run Python fallback: {e}");
-            3
-        }
-    }
-}
-
 fn run_native_tool(repo_root: &Path, tool: &str, args: &[String]) -> Option<i32> {
     let ext = if cfg!(windows) { ".exe" } else { "" };
     let path = repo_root
@@ -1111,8 +1083,14 @@ fn main() {
         "counts" => cmd_counts(&repo_root, &args.args),
         "doctor" => cmd_doctor(&repo_root),
         tool if NATIVE_TOOLS.contains(&tool) => run_native_tool(&repo_root, tool, &args.args)
-            .unwrap_or_else(|| run_python_fallback(&repo_root, tool, &args.args)),
-        other => run_python_fallback(&repo_root, other, &args.args),
+            .unwrap_or_else(|| {
+                eprintln!("ERROR: native tool '{tool}' is not built; run setup.sh or cargo build --release");
+                3
+            }),
+        other => {
+            eprintln!("ERROR: unknown pcx-rs command '{other}'");
+            2
+        }
     };
     std::process::exit(rc);
 }

@@ -244,7 +244,8 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
                 line: 0,
                 kind: "unsupported_language",
                 symbol: ".as".to_string(),
-                message: "unsupported language: .as/AngelScript is deprecated; use Enma (.em)".to_string(),
+                message: "unsupported language: .as/AngelScript is deprecated; use Enma (.em)"
+                    .to_string(),
             });
             continue;
         }

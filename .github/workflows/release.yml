@@ -1,7 +1,5 @@
 name: Build and Release Toolkit
 
-# Builds Enma VS Code and Visual Studio 2022 extensions plus the Rust CLI, then
-# attaches them to one GitHub Release when a version tag (v*) is pushed.
 on:
   push:
     tags:
@@ -37,7 +35,6 @@ jobs:
           npm run compile
           vsce package --allow-missing-repository --skip-license
 
-
       - name: Collect VS Code artifacts
         run: |
           mkdir -p dist
@@ -49,7 +46,6 @@ jobs:
           name: vs-code-vsix
           path: dist/*.vsix
           retention-days: 1
-
 
   build-rust-cli:
     name: Build Rust CLI
@@ -74,37 +70,6 @@ jobs:
           path: dist/pcx-rs
           retention-days: 1
 
-  publish-pypi:
-    name: Publish root PyPI package
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: "pip"
-
-      - name: Build root Python package
-        run: |
-          python -m pip install --upgrade build twine
-          python -m build
-          twine check dist/*
-
-      - name: Upload root Python package
-        uses: actions/upload-artifact@v4
-        with:
-          name: root-python-package
-          path: dist/*
-          retention-days: 1
-
-      - name: Publish root Python package to PyPI
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist
-
   publish-npm:
     name: Publish npm package
     runs-on: ubuntu-latest
@@ -120,6 +85,15 @@ jobs:
 
       - name: Use npm trusted publishing CLI
         run: npm install -g npm@latest
+
+      - name: Build Rust CLI for package
+        working-directory: tools/pe-parser
+        run: cargo build --release --bin pcx-rs
+
+      - name: Stage package binary
+        run: |
+          mkdir -p tools/bin
+          cp tools/pe-parser/target/release/pcx-rs tools/bin/pcx-rs
 
       - name: Build npm package
         run: |
@@ -137,6 +111,7 @@ jobs:
       - name: Publish npm package
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         run: npm publish
+
   build-visualstudio:
     name: Build Enma Visual Studio 2022 Extension
     runs-on: windows-latest
@@ -159,7 +134,6 @@ jobs:
           npm install
           npm run compile
 
-
       - name: Stage Enma server payload
         shell: pwsh
         run: |
@@ -168,14 +142,11 @@ jobs:
           Copy-Item -Recurse -Force lsp/enma-lsp/bin/*          "$dst/bin/"
           Copy-Item -Recurse -Force lsp/enma-lsp/server/dist/*  "$dst/server/dist/"
 
-
       - name: Restore NuGet packages
-        run: |
-          nuget restore visualstudio/EnmaVS/EnmaVS.csproj -PackagesDirectory packages
+        run: nuget restore visualstudio/EnmaVS/EnmaVS.csproj -PackagesDirectory packages
 
       - name: Build Enma VSIX
         run: msbuild visualstudio/EnmaVS/EnmaVS.csproj /p:Configuration=Release /p:DeployExtension=false /restore
-
 
       - name: Collect VS artifacts
         shell: pwsh
@@ -219,41 +190,16 @@ jobs:
           name: rust-cli
           path: release-artifacts
 
-      - name: List collected artifacts
-        run: ls -lh release-artifacts/
-
-      - name: Generate artifact checksums
-        run: |
-          cd release-artifacts
-          sha256sum *.vsix > SHA256SUMS.txt
-          sha256sum pcx-rs >> SHA256SUMS.txt
-          cat SHA256SUMS.txt
-
-      - name: Create / update GitHub Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            release-artifacts/*.vsix
-            release-artifacts/SHA256SUMS.txt
-            release-artifacts/pcx-rs
+          files: release-artifacts/*
           generate_release_notes: true
           body: |
-            ## PCX Toolkit Release
+            ## pcx-ai-toolkit
 
-            ### VS Code (Drag-and-Drop)
-            1. Download `enma-language-*.vsix`.
-            2. In VS Code, run **Extensions: Install from VSIX...** from the command palette.
-
-            ### Visual Studio 2022
-            1. Download `PcxEnmaVS-*.vsix`.
-            2. Double-click the downloaded file to run the VSIX Installer.
+            Rust CLI and Enma editor extension builds.
 
             ### Package Managers
-            - PyPI: `python -m pip install pcx-ai-toolkit`
             - npm: `npm install -g pcx-ai-toolkit`
             - Bun: `bun add -g pcx-ai-toolkit`
-
-            ### Rust CLI
-            Download `pcx-rs` for native validation, MCP stdio, and API lookup commands.
-
-            All extensions are MIT-licensed builds of [enma-lsp](https://github.com/VoidChecksum/enma-lsp).

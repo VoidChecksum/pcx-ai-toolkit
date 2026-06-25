@@ -2,33 +2,29 @@
 "use strict";
 
 const { spawnSync } = require("node:child_process");
+const fs = require("node:fs");
 const path = require("node:path");
 
 const root = path.resolve(__dirname, "..", "..");
-const script = path.join(root, "tools", "pcx.py");
-const args = process.argv.slice(2);
-const candidates = process.platform === "win32"
-  ? [["py", ["-3"]], ["python", []], ["python3", []]]
-  : [["python3", []], ["python", []]];
+const exe = process.platform === "win32" ? "pcx-rs.exe" : "pcx-rs";
+const candidates = [
+  process.env.PCX_RS,
+  path.join(root, "tools", "bin", exe),
+  path.join(root, "tools", "pe-parser", "target", "release", exe),
+].filter(Boolean);
 
-let lastError = null;
-for (const [command, prefix] of candidates) {
-  const result = spawnSync(command, [...prefix, script, ...args], {
+for (const candidate of candidates) {
+  if (!fs.existsSync(candidate)) continue;
+  const result = spawnSync(candidate, process.argv.slice(2), {
     stdio: "inherit",
-    env: { ...process.env, PCX_TOOLKIT_ROOT: root }
+    env: { ...process.env, PCX_TOOLKIT_ROOT: root },
   });
-
-  if (result.error && result.error.code === "ENOENT") {
-    lastError = result.error;
-    continue;
-  }
   if (result.error) {
-    console.error(`pcx: failed to run ${command}: ${result.error.message}`);
+    console.error(`pcx: failed to run ${candidate}: ${result.error.message}`);
     process.exit(3);
   }
   process.exit(result.status ?? 0);
 }
 
-console.error("pcx: Python 3.10+ is required. Install Python, then retry.");
-if (lastError) console.error(`last error: ${lastError.message}`);
+console.error("pcx: pcx-rs not found. Build it with: cargo build --release --manifest-path tools/pe-parser/Cargo.toml --bin pcx-rs");
 process.exit(3);

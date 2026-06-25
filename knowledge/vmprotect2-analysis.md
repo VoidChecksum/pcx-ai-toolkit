@@ -2,7 +2,7 @@
 
 Practical guide for analyzing binaries protected by **VMProtect 2.x** using the
 open-source **backengineering/vmp2** toolchain, x64dbg VMProtect/ScyllaHide
-plugins, and the `tools/analyze-vmprotect.py` toolkit helper.
+plugins, and the `tools/bin/analyze-vmprotect` toolkit helper.
 
 > **Scope:** Authorized security research only. Use these tools on binaries you
 > own, have explicit permission to test, or are analyzing in a controlled CTF /
@@ -42,7 +42,7 @@ Source: [github.com/backengineering/vmp2](https://github.com/backengineering/vmp
 
 ---
 
-## Triage with `tools/analyze-vmprotect.py`
+## Triage with `tools/bin/analyze-vmprotect`
 
 The toolkit ships a stdlib-only Python script that detects VMP artifacts,
 suggests a tooling chain, and (optionally) shells out to an external `vmemu`
@@ -50,13 +50,13 @@ binary for unpacking.
 
 ```bash
 # Basic analysis (read-only)
-python3 tools/analyze-vmprotect.py target.exe
+python3 tools/bin/analyze-vmprotect target.exe
 
 # JSON output for further automation
-python3 tools/analyze-vmprotect.py --json target.exe
+python3 tools/bin/analyze-vmprotect --json target.exe
 
 # Optional: invoke external vmemu to dump unpacked memory
-python3 tools/analyze-vmprotect.py --run-vmemu --out unpacked.bin target.exe
+python3 tools/bin/analyze-vmprotect --run-vmemu --out unpacked.bin target.exe
 ```
 
 The script reports:
@@ -84,7 +84,7 @@ iz~vmp|VMProtect|protect
 Or use the toolkit script:
 
 ```bash
-python3 tools/analyze-vmprotect.py --json target.exe | jq '.vmprotect_detected, .version_hint'
+python3 tools/bin/analyze-vmprotect --json target.exe | jq '.vmprotect_detected, .version_hint'
 ```
 
 ### 2. Bypass Anti-Debug (Live Debugging)
@@ -110,7 +110,7 @@ This emulates the VMP runtime until the original entry point is reached and
 writes a dumped memory image. The toolkit wrapper can do this for you:
 
 ```bash
-python3 tools/analyze-vmprotect.py --run-vmemu --out unpacked.bin target.exe
+python3 tools/bin/analyze-vmprotect --run-vmemu --out unpacked.bin target.exe
 ```
 
 ### 4. Find VM Bytecode Regions and Handlers
@@ -191,7 +191,7 @@ Some researchers use a dedicated x64dbg VMProtect plugin to speed up VMP work:
 
 | Goal | Best Tool | Notes |
 |------|-----------|-------|
-| Detect / triage VMP | `tools/analyze-vmprotect.py` | Stdlib-only, safe, fast. |
+| Detect / triage VMP | `tools/bin/analyze-vmprotect` | Stdlib-only, safe, fast. |
 | Unpack VMP 2.x | `vmemu` (vmp2) | Requires built `vmp2` suite. |
 | Live anti-debug bypass | `x64dbg + ScyllaHide` | Easiest first step. |
 | Devirtualize VMP 3.x | `NoVmp` / `VTIL-Core` | Static lifting to LLVM/VTIL IR. |

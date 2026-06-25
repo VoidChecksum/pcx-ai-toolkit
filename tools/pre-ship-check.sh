@@ -204,10 +204,10 @@ check_7_offset_citations() {
         emit PASS 7 "All ${total} offsets cite evidence (E-NNN)" ""
     elif [ "$cited" -eq 0 ]; then
         emit FAIL 7 "No offsets cite evidence (0/${total} cited)" \
-             "Run: python3 tools/evidence-log-validator.py <offsets.em> --evidence-dir evidence/"
+             "Add E-NNN evidence citations before shipping."
     else
         emit WARN 7 "${uncited}/${total} offsets lack evidence citation" \
-             "Run: python3 tools/evidence-log-validator.py <offsets.em> --evidence-dir evidence/"
+             "Add E-NNN evidence citations before shipping."
     fi
 }
 
@@ -318,7 +318,7 @@ print_human() {
 }
 
 print_json() {
-    # Build JSON manually to avoid jq/python deps
+    # Build JSON manually to avoid extra dependencies.
     printf '{\n'
     printf '  "project_dir": "%s",\n' "$(printf '%s' "$PROJECT_DIR" | sed 's/"/\\"/g')"
     printf '  "summary": { "pass": %d, "warn": %d, "fail": %d },\n' \

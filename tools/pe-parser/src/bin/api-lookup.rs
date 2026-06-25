@@ -34,9 +34,7 @@ fn normalize_lang(lang: Option<&String>) -> Result<Option<&str>, String> {
     match lang.map(|s| s.as_str()) {
         None => Ok(None),
         Some("enma" | "em" | ".em") => Ok(Some("enma")),
-        Some(other) => Err(format!(
-            "unsupported --lang {other:?}; use enma"
-        )),
+        Some(other) => Err(format!("unsupported --lang {other:?}; use enma")),
     }
 }
 
@@ -63,7 +61,7 @@ fn main() {
             std::process::exit(2);
         }
     };
-    let result = lookup_symbol(&index, &args.symbol, Some("enma"));
+    let result = lookup_symbol(&index, &args.symbol, lang);
     if args.json {
         println!("{}", serde_json::to_string_pretty(&result).unwrap());
     } else {

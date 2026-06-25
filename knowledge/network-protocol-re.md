@@ -224,7 +224,7 @@ The UDP equivalent of TLS. Recognize by similar handshake bytes at datagram star
 Older / simpler games sometimes apply a per-byte XOR with a static or short-rotating key. Recognize by:
 - Entropy is higher than plain text but lower than CSPRNG output (encrypted "looks like noise but not quite as noisy as TLS")
 - Same byte positions across many messages have a repeating value-distribution (a fixed key betrays itself)
-- The XOR key sometimes leaks via the game binary (search `tools/dump-strings-xor.py` for the key recovery angle on the on-disk side)
+- The XOR key sometimes leaks via the game binary (search `tools/bin/dump-strings-xor` for the key recovery angle on the on-disk side)
 
 ### Custom block cipher (AES / similar)
 
@@ -290,7 +290,7 @@ The dissector you wrote for the network protocol is usually directly reusable fo
 - `knowledge/anti-cheat-architecture.md` — the AC side of network telemetry
 - `knowledge/kernel-re-tools.md` — the binary-side counterpart for understanding the game's network code
 - `knowledge/engine-cryengine.md` / `engine-frostbite.md` / etc. — engine-specific network architecture notes
-- `tools/dump-strings-xor.py` — recovers XOR keys from a game binary (the on-disk side of custom-XOR-encrypted protocols)
-- `tools/identify-protector.py` — flags binaries with anti-tamper layers that often also wrap the network code
+- `tools/bin/dump-strings-xor` — recovers XOR keys from a game binary (the on-disk side of custom-XOR-encrypted protocols)
+- `tools/bin/identify-protector` — flags binaries with anti-tamper layers that often also wrap the network code
 - `.claude/skills/re-evidence-log` — the per-binary evidence-citation discipline applies to wire-format field mappings the same way it applies to in-memory ones
 - Wireshark docs — https://www.wireshark.org/docs/ (the comprehensive reference for the toolchain)

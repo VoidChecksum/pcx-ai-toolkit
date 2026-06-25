@@ -129,7 +129,7 @@ end
 
 ### MCP Integration (mcphub.nvim)
 
-To use the `pcx-knowledge-mcp` server from within Neovim, install [mcphub.nvim](https://github.com/ravitemer/mcphub.nvim):
+To use the `pcx-rs mcp` server from within Neovim, install [mcphub.nvim](https://github.com/ravitemer/mcphub.nvim):
 
 ```lua
 {
@@ -140,7 +140,7 @@ To use the `pcx-knowledge-mcp` server from within Neovim, install [mcphub.nvim](
         ["pcx-knowledge"] = {
           command = "python3",
           args = { "-m", "server" },
-          cwd = vim.fn.expand("~/pcx-ai-toolkit/mcp/pcx-knowledge-mcp"),
+          cwd = vim.fn.expand("~/pcx-ai-toolkit/pcx-rs mcp"),
         },
       },
     })

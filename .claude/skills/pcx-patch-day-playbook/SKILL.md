@@ -14,7 +14,7 @@ The ordered triage workflow for when a game update lands and your Perception.cx 
 
 **Trigger when:** the target game updated, sigs return 0, the script throws on first run after a patch, `ref_process().alive()` is fine but reads return garbage, or the user says any of: "broken", "updated", "patch day", "hotfix", "season drop", "DLC dropped".
 
-**Prerequisite:** `knowledge/offset-methodology.md` for sig resolution mechanics, `tools/offset-diff.py` for batch sig diffing between binary versions, `tools/sig-uniqueness-checker.py` for re-sig validation. Also requires that you saved the previous-version binary and the working `offsets.em` *before* the update landed (see Step 1).
+**Prerequisite:** `knowledge/offset-methodology.md` for sig resolution mechanics, `tools/bin/offset-diff` for batch sig diffing between binary versions, `tools/bin/sig-uniqueness-checker` for re-sig validation. Also requires that you saved the previous-version binary and the working `offsets.em` *before* the update landed (see Step 1).
 
 ---
 
@@ -39,7 +39,7 @@ cp "C:/Games/MyGame/MyGame.exe" patch-2026-06-17/MyGame-new.exe
 
 # 2. The OLD binary should already be in your previous snapshot dir.
 #    If you don't have one, the lesson is: make one TODAY before the next patch.
-#    The toolkit's `tools/offset-diff.py` needs both binaries to diff.
+#    The toolkit's `tools/bin/offset-diff` needs both binaries to diff.
 
 # 3. Save the last-known-good offsets:
 cp scripts/offsets.em patch-2026-06-17/offsets-old.em
@@ -48,11 +48,11 @@ cp scripts/offsets.em patch-2026-06-17/offsets-old.em
 #    (in the IDE, copy the error trace; or run `check_script` and capture output)
 ```
 
-**Why:** Without a snapshot, you're guessing what changed. With one, `offset-diff.py` and `radiff2` will tell you exactly which sigs moved, which are still valid, and which are gone. The 30 seconds of snapshotting saves the 2 hours of guesswork.
+**Why:** Without a snapshot, you're guessing what changed. With one, `tools/bin/offset-diff` and `radiff2` will tell you exactly which sigs moved, which are still valid, and which are gone. The 30 seconds of snapshotting saves the 2 hours of guesswork.
 
 ---
 
-## 2. Run `tools/offset-diff.py` Before Editing Anything
+## 2. Run `tools/bin/offset-diff` Before Editing Anything
 
 **Most sigs survive a patch. You want to find the few that didn't — not re-do every one.**
 
@@ -69,7 +69,7 @@ cat > sigs.json <<EOF
 EOF
 
 # Diff:
-python3 tools/offset-diff.py --old patch-old/MyGame.exe \
+tools/bin/offset-diff --old patch-old/MyGame.exe \
                               --new patch-new/MyGame.exe \
                               --sigs sigs.json
 ```
@@ -145,11 +145,11 @@ int64 main() {
 
 **A sig that was unique yesterday may collide today, or vice versa. Don't trust your old sigs after a patch — validate.**
 
-`tools/sig-uniqueness-checker.py` gives a verdict per sig: `UNIQUE`, `AMBIGUOUS`, `STALE`, `BRITTLE`. The `--near-misses N` flag is the killer feature on patch day — it scans for sigs whose first N bytes survive but trailing bytes drift, telling you exactly how to extend or narrow the wildcards.
+`tools/bin/sig-uniqueness-checker` gives a verdict per sig: `UNIQUE`, `AMBIGUOUS`, `STALE`, `BRITTLE`. The `--near-misses N` flag is the killer feature on patch day — it scans for sigs whose first N bytes survive but trailing bytes drift, telling you exactly how to extend or narrow the wildcards.
 
 ```bash
 # Verdict on every sig in your list:
-python3 tools/sig-uniqueness-checker.py patch-new/MyGame.exe \
+tools/bin/sig-uniqueness-checker patch-new/MyGame.exe \
         --sig-file sigs.txt --near-misses 2
 
 # Suppose this prints:
@@ -274,7 +274,7 @@ Not every patch is a patch — sometimes the game shipped a real engine change a
 | Module name changed | Engine swap or major rebrand (CSGO → CS2) | Full re-RE; old offsets are reference-only |
 | Module size changed >30% | Major engine update or large content drop with code refactor | Bisect aggressively; expect 30-50% sig loss |
 | Most sigs `STALE` with no near-miss | Compiler upgrade (Clang version, LTO change) | Re-derive from xrefs; sigs based on RIP-relative globals usually survive better than register-allocation-sensitive ones |
-| `IL2CPP` rebuild signal (Unity titles) | metadata.dat changed → entire struct layout rotated | Re-dump with IL2CPPDumper; use `tools/dumper-to-enma.py` to regenerate `offsets.em` |
+| `IL2CPP` rebuild signal (Unity titles) | metadata.dat changed → entire struct layout rotated | Re-dump with IL2CPPDumper; use `removed dumper-to-enma converter` to regenerate `offsets.em` |
 | Schema system reset (Source 2 titles) | Schema registration order changed at runtime | Offsets are runtime-resolved; sigs for the schema getter are usually stable; revalidate the resolver, not the offsets |
 | New anti-cheat driver loaded | AC vendor pushed an update | See `skill://anti-cheat-re` — driver behavior may have changed, not just code layout |
 
@@ -287,7 +287,7 @@ Not every patch is a patch — sometimes the game shipped a real engine change a
 | # | Step | One-liner |
 |---|---|---|
 | 1 | Snapshot first | Save old binary, old offsets, error log before touching anything |
-| 2 | Diff before editing | `offset-diff.py` triages which sigs survived, moved, lost |
+| 2 | Diff before editing | `tools/bin/offset-diff` triages which sigs survived, moved, lost |
 | 3 | Bisect the cascade | Find the *first* failure, not the loudest |
 | 4 | Re-sig with near-miss check | One-byte drift is the common case — find it in seconds |
 | 5 | Re-verify RIP math | Instruction-length changes silently break resolved addresses |
@@ -296,4 +296,4 @@ Not every patch is a patch — sometimes the game shipped a real engine change a
 
 **Decision:** if Steps 2-5 aren't recovering 70%+ of broken sigs, stop patching and re-RE from scratch via `knowledge/offset-methodology.md`.
 
-**Cross-references:** `skill://pcx-re-discipline` (the rules of RE work), `knowledge/offset-methodology.md` (sig mechanics), `tools/offset-diff.py`, `tools/sig-uniqueness-checker.py`, `tools/dumper-to-enma.py` (for engines with structured dumpers).
+**Cross-references:** `skill://pcx-re-discipline` (the rules of RE work), `knowledge/offset-methodology.md` (sig mechanics), `tools/bin/offset-diff`, `tools/bin/sig-uniqueness-checker`, `removed dumper-to-enma converter` (for engines with structured dumpers).

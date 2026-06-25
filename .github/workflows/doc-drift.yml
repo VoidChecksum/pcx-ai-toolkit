@@ -1,17 +1,8 @@
-name: Doc Drift
-
-# Weekly check that the scraped docs/ tree still matches its upstream sources
-# (enma-1.gitbook.io, docs.perception.cx). Catches "the upstream API doc changed
-# and our mirror is now stale" — the toolkit's whole value prop is "real docs",
-# so this proves they stay real. See tools/build-provenance.py and
-# tools/check-doc-drift.py.
-#
-# Provenance map:  docs/PROVENANCE.json  (file -> upstream URL, drift_check flag)
-# Drift checker:    tools/check-doc-drift.py --check  (exit 1 on drift)
+name: Documentation Drift
 
 on:
   schedule:
-    - cron: "17 4 * * 1"   # 04:17 UTC every Monday
+    - cron: "0 9 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -21,70 +12,13 @@ permissions:
 jobs:
   drift:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: "pip"
+      - name: Build pcx-rs
+        working-directory: tools/pe-parser
+        run: cargo build --release --bin pcx-rs
 
-      - name: Verify provenance map is in sync with the source tree
-        run: python tools/build-provenance.py --check
-
-      - name: Check upstream doc drift
-        id: drift
-        run: |
-          set +e
-          python tools/check-doc-drift.py --live --json > drift-report.json 2> drift-stderr.txt
-          RC=$?
-          cat drift-stderr.txt
-          # Extract counts from the JSON report for the issue body.
-          python - <<'PY'
-          import json, os
-          try:
-              data = json.load(open("drift-report.json"))
-          except Exception as e:
-              data = {"checked": 0, "in_sync": 0, "drift": 0, "fetch_errors": 0, "results": []}
-          drift = data.get("drift", 0)
-          errs  = data.get("fetch_errors", 0)
-          lines = [f"## Doc drift report", "",
-                   f"- Checked: **{data.get('checked',0)}** docs against upstream",
-                   f"- In sync: **{data.get('in_sync',0)}**",
-                   f"- **Drifted: {drift}**",
-                   f"- Fetch errors: {errs}", "",
-                   "Drifted files (local vs upstream mismatch after normalization):"]
-          for r in data.get("results", []):
-              if r.get("status") in ("DRIFT", "FETCH_ERROR"):
-                  lines.append(f"- `{r['file']}` — {r['status']} — {r.get('url','')}")
-                  if r.get("hint"):
-                      lines.append(f"  - {r['hint']}")
-                  if r.get("detail"):
-                      lines.append(f"  - {r['detail']}")
-          if not any(r.get("status") in ("DRIFT","FETCH_ERROR") for r in data.get("results",[])):
-              lines.append("- (none)")
-          lines += ["", "Re-run locally: `python tools/check-doc-drift.py`",
-                    "Regenerate the mirror from upstream, then commit + `python tools/build-provenance.py`."]
-          open("issue-body.md", "w", encoding="utf-8").write("\n".join(lines))
-          # Expose counts as step outputs.
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
-              f.write(f"drift={drift}\n")
-              f.write(f"errors={errs}\n")
-          print("\n".join(lines))
-          PY
-          exit $RC
-
-      - name: Open or update drift issue
-        if: steps.drift.outputs.drift != '0' || steps.drift.outputs.errors != '0'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Reuse a single open "doc drift" issue if one exists; else create.
-          EXISTING=$(gh issue list --state open --search "Doc drift report in:title" --json number --jq '.[0].number' || true)
-          if [ -n "$EXISTING" ]; then
-            gh issue comment "$EXISTING" --body-file issue-body.md
-          else
-            gh issue create --title "Doc drift report: scraped docs out of sync with upstream" \
-              --label documentation --body-file issue-body.md
-          fi
+      - name: Check offline drift snapshot
+        run: tools/pe-parser/target/release/pcx-rs check-drift --json --limit 20

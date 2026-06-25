@@ -1,8 +1,6 @@
 node_modules/
 *.log
 .DS_Store
-__pycache__/
-*.pyc
 # enma-lsp is a git submodule (see .gitmodules) — not ignored.
 # Only ignore the non-submodule LSP checkouts and built packages.
 lsp/LspCpp/

@@ -166,8 +166,8 @@ a shell command and offers its output back into the chat context. The toolkit's
 standalone analysis tools are pure-stdlib CLIs built for exactly this:
 
 ```text
-/run python tools/identify-protector.py /path/to/target.exe
-/run python tools/pe-section-analyzer.py /path/to/target.exe --json
+/run python tools/bin/identify-protector /path/to/target.exe
+/run python tools/bin/pe-section-analyzer /path/to/target.exe --json
 ```
 
 Aider then sees the protector/section report and can reason about it while editing.

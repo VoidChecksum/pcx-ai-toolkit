@@ -41,5 +41,5 @@ manager singletons, and data-driven entity systems instead of one-size offsets.
 ## PCX Workflow
 
 - Build a per-build evidence log before script creation.
-- Use `tools/binary-diff-summary.py` before deciding whether old signatures are reusable.
-- Run `tools/offset-diff.py` on confirmed signatures after every patch.
+- Use `tools/bin/binary-diff-summary` before deciding whether old signatures are reusable.
+- Run `tools/bin/offset-diff` on confirmed signatures after every patch.

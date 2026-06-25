@@ -12,25 +12,25 @@ All notable changes to this toolkit are documented here.
 - **Rust Tools Integration**:
   - Reimplemented the PE parsing core in Rust (`tools/pe-parser`) which compiles to `tools/bin/pe-parser`. It is used by `tools/lib/pe_parse.py` for incredibly fast, memory-safe, out-of-bounds protected PE parsing.
   - Reimplemented `sig-uniqueness-checker` in Rust (`tools/bin/sig-uniqueness-checker`), moving the performance-critical byte pattern scanning and near-miss calculations to compiled native code.
-  - Provided seamless Python fallbacks for all ported tools, ensuring the toolkit remains 100% functional on platforms where Rust/Cargo is not installed.
+  - Provided seamless fallbacks for all ported tools, ensuring the toolkit remains 100% functional on platforms where Rust/Cargo is not installed.
 - **Smoke test suite**:
   - `tools/test-runner.sh` — automates end-to-end smoke testing. Generates a valid mock 16KB x64 PE binary with import/export directories, walks sections, and runs all 13 tools to verify correct functionality and zero crashes.
 - **Version tracking**:
   - Added `VERSION` file containing `"1.16.0"` to the repository root.
 
 ### Changed
-- Refactored 8 PE-consuming python tools to import from the shared `tools.lib.pe_parse` library:
+- Refactored 8 PE-consuming Rust tools to import from the shared `tools.lib.pe_parse` library:
   - `anti-debug-scanner.py`
   - `binary-diff-summary.py`
   - `dump-strings-xor.py`
   - `identify-protector.py`
   - `module-export-mapper.py`
-  - `offset-diff.py`
+  - `tools/bin/offset-diff`
   - `pe-section-analyzer.py`
-  - `sig-uniqueness-checker.py`
+  - `tools/bin/sig-uniqueness-checker`
 - `.github/workflows/ci.yml`:
   - Added syntax validation steps for `update-toolkit.sh` and `update-toolkit.ps1`.
-  - Added compile checks for all python scripts under `tools/` and `tools/lib/`.
+  - Added compile checks for all Rust tools under `tools/` and `tools/lib/`.
   - Added verification that `VERSION` file exists.
 - `setup.sh` & `setup.ps1`:
   - Updated to print the currently installed toolkit version on setup complete.
@@ -53,7 +53,7 @@ Three complementary surfaces let any AI tool reach the toolkit's corpus efficien
 - `docs/llms-knowledge.md` (~350 KB) — all 20 knowledge references concatenated.
 
 **Dynamic surface (MCP server):**
-- `mcp/pcx-knowledge-mcp/` — Python MCP server exposing the corpus as searchable resources. Tools: `search(query, limit)` (keyword search with light TF-IDF scoring), `get_file(path)` (fetch by repo-relative path), `list_files(category)` (enumerate by category), `overview()` (top-level summary). Resources: every file as `file://<repo-path>`. 211 documents indexed; <100 ms cold load, <5 ms warm queries. Pure Python + the official `mcp` SDK (no vector DB, no embedding model, no external service). Install: `pip install -e mcp/pcx-knowledge-mcp/`. Config snippets for Claude Desktop, Cline, Cursor, Continue, Zed in the README.
+- `pcx-rs mcp` — Python MCP server exposing the corpus as searchable resources. Tools: `search(query, limit)` (keyword search with light TF-IDF scoring), `get_file(path)` (fetch by repo-relative path), `list_files(category)` (enumerate by category), `overview()` (top-level summary). Resources: every file as `file://<repo-path>`. 211 documents indexed; <100 ms cold load, <5 ms warm queries. Rust + the official `mcp` SDK (no vector DB, no embedding model, no external service). Install: `pcx-rs mcp`. Config snippets for Claude Desktop, Cline, Cursor, Continue, Zed in the README.
 
 **Generator tool:**
 - `tools/build-llms-index.py` — stdlib-only Python; generates all 7 static bundles from the live source tree. Idempotent (re-running produces byte-identical output). `--check` flag detects drift between committed bundles and current source for CI gating.
@@ -70,7 +70,7 @@ Three complementary surfaces let any AI tool reach the toolkit's corpus efficien
 
 ### Added
 - **1 new RE tool** in `tools/`:
-  - `binary-diff-summary.py` — high-level diff summary between two PE binaries (sister tool to `offset-diff.py`). Per-section table with `%SAME` / `%CHG` / `%NEW` / `%DEL` block counts (4 KB blocks, hash-based set comparison), `.text` classifier: `RECOMPILE` (>95% blocks identical → sigs likely survive, patch-day viable), `REFACTOR` (30-95% → many sigs break), `MAJOR_CHANGE` (<30% → full re-RE). Answers the patch-day prep question "how much did this binary actually change?" before you decide whether to patch or re-RE.
+  - `binary-diff-summary.py` — high-level diff summary between two PE binaries (sister tool to `tools/bin/offset-diff`). Per-section table with `%SAME` / `%CHG` / `%NEW` / `%DEL` block counts (4 KB blocks, hash-based set comparison), `.text` classifier: `RECOMPILE` (>95% blocks identical → sigs likely survive, patch-day viable), `REFACTOR` (30-95% → many sigs break), `MAJOR_CHANGE` (<30% → full re-RE). Answers the patch-day prep question "how much did this binary actually change?" before you decide whether to patch or re-RE.
 - **1 new AI skill** under `.claude/skills/`:
   - `pcx-debug-overlay` (330 lines) — the pattern for shipping diagnostic / profiler / address-dump info as a separate overlay routine gated behind a hotkey. 6 rules: two-overlays-always-separate, five-standard-sections (Process / Sigs / Runtime / Profile / Errors), hotkey-gated-off-by-default, read-only-diagnostics (lab features are separate), atomic counters for cross-routine state via `addon-atomic`, ship-two-builds (production + diagnostic via `#define BUILD_FLAVOR_DEBUG`). Cross-refs `pcx-perf-budget` (profiler recipe) and `gui-design-patterns` ("no debug panel by default").
 - **1 new knowledge reference** under `knowledge/`:
@@ -91,7 +91,7 @@ Three complementary surfaces let any AI tool reach the toolkit's corpus efficien
 - **3 new validation / build tools** in `tools/`:
   - `evidence-log-validator.py` — directly enforces `re-evidence-log` discipline. Cross-checks every offset / sig in an Enma module against per-binary evidence files (`evidence/<hash>.md`): catches offsets without `// E-NNN` citations, evidence entries no offset references (dead entries), and stale `last_verified` dates older than `--max-age-days` (default 180). Output categories `ERROR` / `WARN` / `INFO`; `--strict` promotes warnings to exit 1; `--evidence-dir` validates against all per-binary files at once.
   - `pre-ship-check.sh` — pure-bash implementation of the `script-bundler` Section 4 pre-ship hygiene checklist. 12 checks: hardcoded paths, debug `println` of raw addresses, TODO/FIXME/HACK/XXX markers, `fs_write_file` calls, network calls, suspicious `.emb` string artifacts, offset evidence-citation ratio, placeholder module name in `ref_process`, long commented-out blocks, LICENSE/README/CHANGELOG existence. `--strict` / `--quiet` / `--json` flags; portable across bash 4+ on Linux/macOS/WSL/Git Bash.
-  - `script-linter.py` — light static check for the most-violated 12-guideline rules in `.em` files. Rule 1 (offsets cite evidence), Rule 7 (color/vec at file scope), Rule 11 (tunables without GUI widgets). Excludes offset/sig/stride constants from rule-11 firing via prefix list. Tight false-positive budget — rule 8 (f-suffix) intentionally narrowed by the implementing agent to avoid noise on legitimate `float64`-typed contexts. `--rules N,M` filter; `--severity error,warn,info`; `--json` machine output.
+  - `pcx-rs symbol-check` — light static check for the most-violated 12-guideline rules in `.em` files. Rule 1 (offsets cite evidence), Rule 7 (color/vec at file scope), Rule 11 (tunables without GUI widgets). Excludes offset/sig/stride constants from rule-11 firing via prefix list. Tight false-positive budget — rule 8 (f-suffix) intentionally narrowed by the implementing agent to avoid noise on legitimate `float64`-typed contexts. `--rules N,M` filter; `--severity error,warn,info`; `--json` machine output.
 - **2 new AI skills** under `.claude/skills/`:
   - `ai-pair-programming` (291 lines) — the meta-workflow skill for working with Claude / Cursor / Cline / Aider / Copilot on PCX projects. 7 numbered techniques (read doc before code, cheatsheet first then per-API doc, plan before code on multi-file work, verify sigs with MCP not AI memory, in-prompt guideline reminder, diff-review every multi-file change, re-frame when stuck) plus per-tool quick recipes. Wraps all four IDE drop-ins (CLAUDE / CURSOR / CLINE / COPILOT).
   - `multi-binary-targeting` (444 lines) — one script supporting N game versions / architectures / storefronts / channels. 7 sections: runtime binary identification via `.text` hash, per-binary `offsets-<label>.em` + common `dispatch.em` re-export, sig sets vs hardcoded RVAs, x86 vs x64 abstraction with `ptr_read` helper, storefront detection via DRM-DLL fingerprint, channel variation handling, graceful degradation when no offset set matches. "When NOT to multi-target" heuristic: fork at >30% per-version sig overrides.
@@ -131,14 +131,14 @@ Three complementary surfaces let any AI tool reach the toolkit's corpus efficien
 
 ### Added
 - **4 new RE tools** in `tools/` (stdlib-only Python, matches the existing tool-shape contract):
-  - `offset-diff.py` — diff named sigs between two binary versions. Reads a `sigs.json` list of `{name, pattern, kind: direct|rip, rip_offset, insn_len}` entries, scans both binaries' executable sections, RIP-resolves where requested, prints a status table per sig (`UNCHANGED` / `MOVED` / `LOST_IN_NEW` / `NEW_IN_NEW` / `MULTIPLE_HITS_*`) with the signed delta. JSON output for scripting. **The patch-day workflow's missing tool.**
-  - `sig-uniqueness-checker.py` — verdict per candidate sig: `UNIQUE` (with margin), `AMBIGUOUS` (with all hit addresses + 16-byte context for each), `STALE` (with `--near-misses N` reporting wildcarded variants that do hit), `BRITTLE` (margin=0, one byte from collision). Batch mode via `--sig-file name=sig` lines, section filtering, JSON output. **Closes the "is my sig still good after this patch?" loop in seconds.**
+  - `tools/bin/offset-diff` — diff named sigs between two binary versions. Reads a `sigs.json` list of `{name, pattern, kind: direct|rip, rip_offset, insn_len}` entries, scans both binaries' executable sections, RIP-resolves where requested, prints a status table per sig (`UNCHANGED` / `MOVED` / `LOST_IN_NEW` / `NEW_IN_NEW` / `MULTIPLE_HITS_*`) with the signed delta. JSON output for scripting. **The patch-day workflow's missing tool.**
+  - `tools/bin/sig-uniqueness-checker` — verdict per candidate sig: `UNIQUE` (with margin), `AMBIGUOUS` (with all hit addresses + 16-byte context for each), `STALE` (with `--near-misses N` reporting wildcarded variants that do hit), `BRITTLE` (margin=0, one byte from collision). Batch mode via `--sig-file name=sig` lines, section filtering, JSON output. **Closes the "is my sig still good after this patch?" loop in seconds.**
   - `pattern-format-converter.py` — round-trips byte patterns between 8 formats: `ida`, `ghidra`, `x64dbg`, `ce` (Cheat Engine AOB), `enma` (quoted literal), `cstyle` (`\x..` + mask), `bytes` (Python `b"..."`), `sig_mask` (separate). `--to all` dumps every format at once. Strict validation rejects odd-length hex / unknown chars. **The per-session paper cut.**
   - `dumper-to-enma.py` — converts community-dumper output into a paste-ready `offsets.em` module. Auto-detects Dumper-7 (UE), IL2CPPDumper (Unity, parses `// RVA:` annotations above struct fields), hazedumper (Source-style JSON/YAML), Source2Gen-style flat JSON, and Cheat Engine `.CT` tables. Outputs `const uint64 OFFSET_X = 0x...;` for fields, `const string SIG_Y = "...";` for sigs, category headers per source struct. `--module-name`, `--prefix`, `--out`, `--json`. **Bridges the dumper ecosystem to PCX.**
 - **5 new AI skills** under `.claude/skills/`:
   - `pcx-angelscript-discipline` (406 lines) — AngelScript-specific companion to `game-cheat-guidelines`. 10 numbered rules covering handles vs values (`Type@`), `deref()` requirement, `&out` parameter syntax, `array<T>` / `dictionary` containers, raw RGBA ints in draw calls, `register_callback` signature and hot-reload boundaries. Closes the gap where the AI defaulted to Enma idioms inside `.as` files.
   - `pcx-lua-discipline` (369 lines) — Lua-specific companion. 10 numbered rules: 64-bit integer subtype handling for addresses, `0`-is-truthy versus return-checking, table-as-array-or-map discipline, metatable boundaries for PCX userdata, function-value callback registration, closure-over-loop-variable trap, `pcall` for risky reads, hot-reload-safe globals via the package add-on.
-  - `pcx-patch-day-playbook` (289 lines) — the ordered triage workflow when a game update breaks the script. Seven steps: snapshot first → `offset-diff.py` triage → bisect the cascade (process / base / first-sig / RIP / read in dependency order) → re-sig with `--near-misses` → re-verify RIP math (instruction-length drift is half of patch breakage) → live-target validation → patch-log entry. Decision matrix for when to patch vs when to re-RE from scratch.
+  - `pcx-patch-day-playbook` (289 lines) — the ordered triage workflow when a game update breaks the script. Seven steps: snapshot first → `tools/bin/offset-diff` triage → bisect the cascade (process / base / first-sig / RIP / read in dependency order) → re-sig with `--near-misses` → re-verify RIP math (instruction-length drift is half of patch breakage) → live-target validation → patch-log entry. Decision matrix for when to patch vs when to re-RE from scratch.
   - `pcx-streamproof` (185 lines) — capture compatibility for PCX overlays. Maps the three capture categories (process-internal swap-chain hook / desktop-composited DXGI / signal-level HDMI) against the render surfaces PCX exposes; explains why "OBS Game Capture didn't see it but Discord screenshare does" is a capture-path mismatch, not a bug. Pre-stream checklist, differential-diagnosis script for the "friend on Discord sees my menu" report.
   - `pcx-perf-budget` (323 lines) — turns `game-cheat-guidelines` rule #4 into numeric targets. Per-refresh-rate frame budgets (60 / 120 / 144 / 240 / 360 Hz), per-call cost rules of thumb (cross-process reads = expensive, draws + math = cheap), drop-in `profile_begin/end` recipe using `mono_us()` with fixed bucket accumulators and second-window dumps, read-coalescing examples (single `read_memory` struct-dump vs N scalar reads), cache-what / recompute-what matrix.
 - **5 new knowledge references** under `knowledge/`:
@@ -155,7 +155,7 @@ Three complementary surfaces let any AI tool reach the toolkit's corpus efficien
 ### Changed
 - README — AI Skills count `6` → `11`; directory tree updated to show new tools, skills, knowledge files, and templates; "AI Skills" section enumerates the five new ones with one-line descriptions.
 - `docs/INDEX.md` — added the 5 new knowledge files (4 engines + aimbot-math) under a new "Engine RE References" subsection.
-- `.claude/skills/game-hacking-pcx` — cross-references added to the new skills (angelscript / lua / patch-day / streamproof / perf-budget) and the new tools (`offset-diff.py`, `sig-uniqueness-checker.py`, `pattern-format-converter.py`, `dumper-to-enma.py`).
+- `.claude/skills/game-hacking-pcx` — cross-references added to the new skills (angelscript / lua / patch-day / streamproof / perf-budget) and the new tools (`tools/bin/offset-diff`, `tools/bin/sig-uniqueness-checker`, `pattern-format-converter.py`, `dumper-to-enma.py`).
 
 ## [1.10.0] — 2026-06-17
 
@@ -165,7 +165,7 @@ Three complementary surfaces let any AI tool reach the toolkit's corpus efficien
   - `pe-section-analyzer.py` — per-section entropy analysis with visual bar graph, packed-section detection (VS/RS ratio), writable+executable flags, empty-on-disk sections, overlay detection. Tested on 237MB PE.
   - `resolve-api-hashes.py` — resolve API hashes used by obfuscated binaries for dynamic import resolution. 6 algorithms (ROR13+ADD, CRC32, DJB2, FNV-1a, MurmurHash3-32, SDBM), 1,560 precomputed hashes across 130 common Windows APIs. Batch mode, binary scan mode (finds hash constants in .text).
   - `dump-strings-xor.py` — extract XOR-encrypted strings by brute-forcing single-byte keys (0x01–0xFF), scoring by printable ASCII ratio, filtering junk. Per-section targeting, known-key mode, JSON output.
-  - `install-re-tools.sh` — one-command installer: clones 17 repos (IDA plugins: hrtng, CodeXplorer, ClassInformer, SigMakerEx, FIRST, RevEng.AI, D-810, HashDB, Diaphora; Ghidra: GhidrAssist, BinDiffHelper, Pharos, RevEng.AI; deobf: NoVmp, VTIL, ScyllaHide, Scylla, pe-sieve; sync: ret-sync; sigs: FLIRTDB, sig-database), installs Python packages (capstone, unicorn, keystone, pefile, lief, triton, miasm, floss, frida, angr), copies plugins to `~/.idapro/plugins/` and FLIRT sigs to IDA sig dirs.
+  - `install-re-tools.sh` — one-command installer: clones 17 repos (IDA plugins: hrtng, CodeXplorer, ClassInformer, SigMakerEx, FIRST, RevEng.AI, D-810, HashDB, Diaphora; Ghidra: GhidrAssist, BinDiffHelper, Pharos, RevEng.AI; deobf: NoVmp, VTIL, ScyllaHide, Scylla, pe-sieve; sync: ret-sync; sigs: FLIRTDB, sig-database), installs Rust commands (capstone, unicorn, keystone, pefile, lief, triton, miasm, floss, frida, angr), copies plugins to `~/.idapro/plugins/` and FLIRT sigs to IDA sig dirs.
 
 ## [1.9.0] — 2026-06-17
 

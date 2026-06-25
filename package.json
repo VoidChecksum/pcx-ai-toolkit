@@ -23,14 +23,14 @@
   },
   "files": [
     "npm/bin/pcx.js",
-    "tools/**/*.py",
+    "tools/pe-parser/**/*",
+    "tools/bin/*",
     "tools/**/*.sh",
-    "tools/**/*.ps1",
     "knowledge/*.json",
     "templates/**/*",
     "docs/COUNTS.json",
+    "docs/PROVENANCE.json",
     "docs/llms.txt",
-    "docs/llms-perception-enma.md",
     "README.md",
     "LICENSE",
     "VERSION"

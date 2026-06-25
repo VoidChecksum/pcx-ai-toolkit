@@ -65,7 +65,7 @@ jmp     <vmenter>                ; E9 ?? ?? ?? ??
 
 **Python / toolkit snippet:**
 ```python
-# tools/analyze-vmprotect.py detects these automatically, but you can scan manually:
+# tools/bin/analyze-vmprotect detects these automatically, but you can scan manually:
 import re
 for m in re.finditer(rb'\x68....[\xe8\xe9]....', code_section):
     print(f"possible VMP entry stub at file offset {m.start()}")

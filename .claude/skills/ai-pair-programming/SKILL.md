@@ -153,7 +153,7 @@ The right workflow:
    The MCP runs find_pattern + generate_signature against the live binary.
 
 2. CONFIRM the sig:
-   python3 tools/sig-uniqueness-checker.py game.exe --sig "<the sig>"
+   tools/bin/sig-uniqueness-checker game.exe --sig "<the sig>"
    Verdict: UNIQUE margin=5. Ship it.
 
 3. THEN ask the AI to write the script around the confirmed sig.

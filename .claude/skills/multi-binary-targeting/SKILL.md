@@ -201,7 +201,7 @@ This isolates per-binary churn to `offsets-*.em` and `dispatch.em`. Adding a new
 
 Three modes, in order of preference:
 
-- **Same sig across all builds** (best). The sig matches in every build, RIP-resolves to the right address per build. Only the resolved address differs; the sig string in `offsets-*.em` is identical across files. Verify by running `tools/sig-uniqueness-checker.py` against each binary.
+- **Same sig across all builds** (best). The sig matches in every build, RIP-resolves to the right address per build. Only the resolved address differs; the sig string in `offsets-*.em` is identical across files. Verify by running `tools/bin/sig-uniqueness-checker` against each binary.
 - **Per-build sig variants**. The sig had to drift because the instruction sequence changed in one of the builds. Each `offsets-<label>.em` carries its own sig string; the resolution code is shared.
 - **Per-build hardcoded RVAs** (last resort). The sig can't be made to work across builds (instruction layout too different, or the function was inlined in one build); fall back to RVA constants per build. Brittle — the next patch invalidates the RVA — but works when nothing else does.
 
@@ -246,9 +246,9 @@ Decision tree per offset, per supported build:
 4. None of the above? → re-RE from a closer xref; the current anchor is too unstable.
 ```
 
-Cross-reference `tools/offset-diff.py` and `tools/sig-uniqueness-checker.py` for the validation workflow per build.
+Cross-reference `tools/bin/offset-diff` and `tools/bin/sig-uniqueness-checker` for the validation workflow per build.
 
-**Why:** Hardcoded RVAs are the multi-binary worst case — they invalidate at every patch and must be re-derived per build. Sigs let you ship one offset string that works on N versions, dropping the maintenance per-version to near zero. The choice between "shared sig + per-build RIP" and "per-build sig" is a 5-second `offset-diff.py` check; reach for it before committing.
+**Why:** Hardcoded RVAs are the multi-binary worst case — they invalidate at every patch and must be re-derived per build. Sigs let you ship one offset string that works on N versions, dropping the maintenance per-version to near zero. The choice between "shared sig + per-build RIP" and "per-build sig" is a 5-second `tools/bin/offset-diff` check; reach for it before committing.
 
 ---
 
@@ -452,4 +452,4 @@ The threshold is subjective; the rough rule is "if the dispatch table is more co
 
 **When NOT to multi-target:** >30% of sigs need per-version overrides → fork instead of patching.
 
-**Cross-references:** `knowledge/script-organization-patterns.md` (the layered file structure this skill scales up); `.claude/skills/pcx-patch-day-playbook` (per-patch workflow — the multi-binary case is N patch days run in parallel); `.claude/skills/re-evidence-log` (per-binary evidence files keep claims isolated); `tools/offset-diff.py` (per-build sig validation), `tools/sig-uniqueness-checker.py` (per-build sig verdicts), `tools/dumper-to-enma.py` (regenerate per-build offset modules from updated dumper output).
+**Cross-references:** `knowledge/script-organization-patterns.md` (the layered file structure this skill scales up); `.claude/skills/pcx-patch-day-playbook` (per-patch workflow — the multi-binary case is N patch days run in parallel); `.claude/skills/re-evidence-log` (per-binary evidence files keep claims isolated); `tools/bin/offset-diff` (per-build sig validation), `tools/bin/sig-uniqueness-checker` (per-build sig verdicts), `removed dumper-to-enma converter` (regenerate per-build offset modules from updated dumper output).

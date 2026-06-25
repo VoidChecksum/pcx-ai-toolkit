@@ -141,7 +141,7 @@ explicitly, but never hardcode an absolute address.
 ### Pattern Scanning
 
 - Never generate a sig from memory. Use `mcp:find_pattern` or
-  `python tools/sig-uniqueness-checker.py --sig` on the actual binary.
+  `tools/bin/sig-uniqueness-checker --sig` on the actual binary.
 - Keep sigs in `offsets.*`, named, with a comment describing the instruction.
 - Resolve RIP-relative displacements correctly: `final = hit + insn_len + signed_disp`.
 - Wildcard only the displacement bytes; don't wildcard opcodes that identify the

@@ -8,7 +8,7 @@ Build `tools/pe-parser` in CI and upload `pcx-rs` plus native helpers from `tool
 
 ## MCP package
 
-Publish `mcp/pcx-knowledge-mcp` as `pcx-knowledge-mcp`; smoke with `python3 mcp/pcx-knowledge-mcp/server.py --help`.
+Publish `pcx-rs mcp` as `pcx-rs mcp`; smoke with `python3 pcx-rs mcpserver.py --help`.
 
 ## Editor extensions
 

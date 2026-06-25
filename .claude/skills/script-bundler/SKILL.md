@@ -196,13 +196,13 @@ PRE-SHIP HYGIENE CHECKLIST
     grep -nE 'http_(get|post)|websocket' src/
 
 [ ] No leftover XOR-encrypted strings revealing internal infrastructure
-    (run tools/dump-strings-xor.py against your built .emb to check)
+    (run tools/bin/dump-strings-xor against your built .emb to check)
 
 [ ] All offsets carry `// E-NNN` references into evidence/<hash>.md (per skill://re-evidence-log)
     grep -cE '// E-[0-9]+' offsets.em   # should be > 0
 
 [ ] All sigs verified UNIQUE on the target binary
-    (run tools/sig-uniqueness-checker.py against the offsets file)
+    (run tools/bin/sig-uniqueness-checker against the offsets file)
 
 [ ] Module name in ref_process() is the actual target, not a placeholder
     grep -nE 'ref_process\("' src/
@@ -356,7 +356,7 @@ Run through this every release:
 [ ] No network calls to non-public endpoints
 [ ] No commented-out experimental code blocks
 [ ] All offsets cite an evidence entry (skill://re-evidence-log)
-[ ] All sigs verdict UNIQUE (tools/sig-uniqueness-checker.py)
+[ ] All sigs verdict UNIQUE (tools/bin/sig-uniqueness-checker)
 [ ] Runtime version pinned at top of main.em
 [ ] README.md present, current, recipient-facing
 [ ] LICENSE present and accurate

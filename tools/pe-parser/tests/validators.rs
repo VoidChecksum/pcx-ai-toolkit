@@ -26,7 +26,9 @@ fn rejects_wrong_lang() {
     )
     .unwrap();
     let f = symbol_check(&root(), &p).unwrap();
-    assert!(f.iter().any(|x| x.kind == "unsupported_language" && x.symbol == ".as"));
+    assert!(f
+        .iter()
+        .any(|x| x.kind == "unsupported_language" && x.symbol == ".as"));
     let _ = fs::remove_file(p);
 }
 

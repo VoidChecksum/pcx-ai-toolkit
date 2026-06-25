@@ -14,7 +14,7 @@ The discipline of recording *why* you trust each offset and sig in your project.
 
 **Always active when doing RE work.** Every offset you add, every sig you derive, every struct layout you commit to the project comes with an evidence entry. The cost is one paragraph per claim; the payoff is being able to answer "why do we trust this?" three months later without re-reversing.
 
-**Prerequisite:** `skill://pcx-re-discipline` for the underlying discipline rules; `knowledge/offset-methodology.md` for the sig-derivation mechanics the log entries reference; `tools/sig-uniqueness-checker.py` for the verdict you record alongside each sig.
+**Prerequisite:** `skill://pcx-re-discipline` for the underlying discipline rules; `knowledge/offset-methodology.md` for the sig-derivation mechanics the log entries reference; `tools/bin/sig-uniqueness-checker` for the verdict you record alongside each sig.
 
 ---
 
@@ -91,7 +91,7 @@ The required fields per entry:
 | kind              | RIP-relative pointer (loaded by LEA) |
 | rva               | 0x04A2B100  (resolved from sig hit at 0x00872F40) |
 | sig               | `48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B D8` |
-| sig_uniqueness    | UNIQUE (margin=5, per `tools/sig-uniqueness-checker.py`) |
+| sig_uniqueness    | UNIQUE (margin=5, per `tools/bin/sig-uniqueness-checker`) |
 | xref_source       | Called by `CGameWorld::Update`, identified via string xref "entity_list_full" |
 | derived_via       | Pattern scan + RIP resolve (disp@+3, insn_len=7) |
 | last_verified     | 2026-06-17 |
@@ -269,7 +269,7 @@ stable across patches and is referenced from `offsets.em` and `patch-log.md`.
 | kind              | <RIP-relative pointer / direct address / field offset / sig> |
 | rva               | <0x...> (resolved from sig hit at <0x...>) |
 | sig               | `<bytes>` |
-| sig_uniqueness    | <UNIQUE margin=N / AMBIGUOUS / etc per sig-uniqueness-checker.py> |
+| sig_uniqueness    | <UNIQUE margin=N / AMBIGUOUS / etc per tools/bin/sig-uniqueness-checker> |
 | xref_source       | <function, string xref, or other anchor> |
 | derived_via       | <pattern scan + RIP resolve / SDK header / struct dump / xref walk> |
 | last_verified     | <YYYY-MM-DD> |
@@ -320,4 +320,4 @@ in-memory verification: <date>, <how many instances walked>
 | 5 | Update `last_verified` per successful run | Age is the brittleness signal — six months old is suspect |
 | 6 | Cite negative results too | "Tried and rejected" prevents the next person re-deriving the same dead end |
 
-**Cross-references:** `skill://pcx-re-discipline` (the discipline rules), `skill://pcx-patch-day-playbook` (Step 7 writes a per-patch log entry), `knowledge/offset-methodology.md` (the mechanics being cited), `tools/sig-uniqueness-checker.py` (produces the `sig_uniqueness` field value), `tools/offset-diff.py` (per-patch diff feeds the negative-results section).
+**Cross-references:** `skill://pcx-re-discipline` (the discipline rules), `skill://pcx-patch-day-playbook` (Step 7 writes a per-patch log entry), `knowledge/offset-methodology.md` (the mechanics being cited), `tools/bin/sig-uniqueness-checker` (produces the `sig_uniqueness` field value), `tools/bin/offset-diff` (per-patch diff feeds the negative-results section).

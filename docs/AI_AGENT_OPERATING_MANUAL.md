@@ -16,7 +16,7 @@ toolkit is Enma-only.
 
 1. Read `docs/perception/llm-routing.md`.
 2. Confirm the target is Enma (`.em`).
-3. Load `docs/llms-perception-enma.md`.
+3. Load `docs/enma/llms-language.md` plus the relevant `docs/perception/*.md` API page.
 4. Load the relevant skill:
    - Game cheat work: `game-cheat-script-master`
    - Enma syntax/binding work: `pcx-enma-discipline`
@@ -53,12 +53,12 @@ question.
 Use this sequence in terminal-based workflows:
 
 ```bash
-pcx api draw_text
-pcx api atan2
-pcx symbol-check script.em
-pcx verify script.em
-pcx check-answer answer.md
-python3 tools/check-llm-contract.py
+pcx-rs api draw_text
+pcx-rs api atan2
+pcx-rs symbol-check script.em
+pcx-rs verify script.em
+pcx-rs check-answer answer.md
+pcx-rs mcp-schema --json
 ```
 
 ## Answer Contract

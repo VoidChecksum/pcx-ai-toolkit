@@ -122,7 +122,7 @@ int64 main() {
 
 **Enma uses `float64` (double-precision) as its default floating-point type. A bare literal `1.5` is `float64`. `float32` is explicit: write `float32` literals with the `f` suffix (`0.2f`, `1.5f`) — not `cast<float32>(0.2)`. Render APIs and math use `float64` unless otherwise documented.**
 
-This is the official Enma overview convention — *"Float32 literals: `0.2f`, not `cast<float32>(0.2)`. Required for vertex buffers."* It is also guideline #8 (`f` suffix on float32) and `script-linter.py` rule 8: a `float32` target assigned a bare `float64` literal is flagged. `cast<float32>(x)` is for converting a `float64` *value* (variable/expression), not a literal.
+This is the official Enma overview convention — *"Float32 literals: `0.2f`, not `cast<float32>(0.2)`. Required for vertex buffers."* It is also guideline #8 (`f` suffix on float32) and `pcx-rs symbol-check` rule 8: a `float32` target assigned a bare `float64` literal is flagged. `cast<float32>(x)` is for converting a `float64` *value* (variable/expression), not a literal.
 
 ```cpp
 // Enma — float64 by default, float32 via the f suffix

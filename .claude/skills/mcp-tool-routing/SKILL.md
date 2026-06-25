@@ -206,12 +206,12 @@ Caveat: RTTI is only present in binaries compiled with `/GR` (MSVC) or `-frtti` 
 
 **`process/generate_signature(handle, address, max_length?)`** produces an IDA-style sig from the instruction at `addr`, wildcarding relocatable bytes (RIP-relative displacements, call targets). `max_length` defaults 32; the response carries `is_unique=false` if the length is exhausted without uniqueness.
 
-Pair immediately with `tools/sig-uniqueness-checker.py` (added in this branch) to validate:
+Pair immediately with `tools/bin/sig-uniqueness-checker` (added in this branch) to validate:
 
 ```
 1. process/generate_signature(handle, addr, 16)  → "48 8D 0D ?? ?? ?? ?? E8"
 2. write to a temp file, then:
-3. python3 tools/sig-uniqueness-checker.py game.exe --sig "..."
+3. tools/bin/sig-uniqueness-checker game.exe --sig "..."
 4. read the verdict:
    - UNIQUE margin=5    → ship it
    - AMBIGUOUS, N hits  → regenerate with longer max_length
@@ -223,7 +223,7 @@ Pair immediately with `tools/sig-uniqueness-checker.py` (added in this branch) t
 
 To *use* a sig to find a function in a module you haven't attached to by address, `process/find_function_by_signature(handle, module_base, signature)` AOB-scans `.text` and bounds-walks each hit — heavier than a plain `process/find_pattern`, but it returns function bounds, not just a hit address.
 
-**Why:** The MCP can generate sigs but cannot validate them; the local Python tool can validate sigs but cannot generate them from a live address. The combination is the workflow.
+**Why:** The MCP can generate sigs but cannot validate them; the local Rust tool can validate sigs but cannot generate them from a live address. The combination is the workflow.
 
 ---
 
@@ -257,7 +257,7 @@ Kernel modules?                              → system/list_drivers(max_entries
 
 `process/enum_handles`, `system/info`, and `system/list_drivers` take **no handle** — they query the system, not a referenced process.
 
-For deeper cross-module analysis (which other modules import a specific export from this one), pair with `tools/module-export-mapper.py --consumers <dir>` (added in this branch). The MCP gives you exports + imports per module; the Python tool joins them into a "this DLL is consumed by ..." map.
+For deeper cross-module analysis (which other modules import a specific export from this one), pair with `tools/bin/module-export-mapper --consumers <dir>` (added in this branch). The MCP gives you exports + imports per module; the Rust tool joins them into a "this DLL is consumed by ..." map.
 
 `process/get_modules` is the right call when attaching: it returns the module list including base addresses + sizes, which is what you need for `process/find_pattern` calls bounded to a specific module. Don't iterate `process/list` + `process/list_module_exports` per module yourself — `process/get_modules` returns the full picture in one call.
 
@@ -267,7 +267,7 @@ For deeper cross-module analysis (which other modules import a specific export f
 
 ## 7. Scripting Bridge (Enma)
 
-**The Enma scripting bridge is three tools, none of which takes a `handle`.** They run a script (or return reference text) with their own permissions, independent of any referenced process. The bridge is exactly these three — there are no MCP tools for host file I/O, host text search, host reference finding, internet search, or duplicate script-lifecycle aliases. File reads/writes are NOT MCP tools; do them via the toolkit's standalone Python tools or the Perception IDE.
+**The Enma scripting bridge is three tools, none of which takes a `handle`.** They run a script (or return reference text) with their own permissions, independent of any referenced process. The bridge is exactly these three — there are no MCP tools for host file I/O, host text search, host reference finding, internet search, or duplicate script-lifecycle aliases. File reads/writes are NOT MCP tools; do them via the toolkit's standalone Rust tools or the Perception IDE.
 
 ```
 Need the Enma language + Perception API reference?
@@ -331,11 +331,11 @@ The pattern in PCX scripts: call medium-tier tools in `main()` (one-shot setup),
 | "Map an entity struct" | `process/read_pointer_chain(base, [0, 0])` → `process/read_rtti(vtable_addr)` → `process/analyze_vtable(vtable_addr)` → `process/read_virtual_memory(entity, sizeof)` + client parse (no server-side struct dumper) |
 | "Precise function bounds (stripped binary)" | `process/get_module_by_name(name)` → `process/get_exception_table(module_base)` → look up the RUNTIME_FUNCTION covering `addr` (fallback to `process/find_function_bounds` if no .pdata) |
 | "Snapshot, perform action, diff" | `process/scan_value(type, value)` (baseline hits) → user does in-game action → `process/scan_next(compare:"changed")` (narrow) → `process/diff_memory(addr_a, addr_b, size)` for byte-level before/after on a chosen region (cap 1 MiB). No whole-process snapshot tool. |
-| "Sig + validate" | `process/generate_signature(addr, 16)` → save → `python3 tools/sig-uniqueness-checker.py game.exe --sig "..."` → if margin < 2, regenerate longer |
+| "Sig + validate" | `process/generate_signature(addr, 16)` → save → `tools/bin/sig-uniqueness-checker game.exe --sig "..."` → if margin < 2, regenerate longer |
 | "Sig → function in a new build" | `process/get_module_by_name(name)` → `process/find_function_by_signature(module_base, sig)` → if STALE, broaden the sig and retry |
 | "Which module owns this VA?" | `process/lookup_symbol(address)` → `{module_base, module_name, module_offset, section, nearest_export}` |
 | "Write a one-shot Enma script" | `script/get_context` (once) → `script/validate(source)` (compile-only, all addons) → `script/execute(source)` (run `main()` once; no GUI/thread addons) |
-| "Per-binary diff after patch" | `python3 tools/offset-diff.py --old V1 --new V2 --sigs old_offsets_json` → for each LOST: `process/find_pattern` against V2 with broadened sig → record new sig |
+| "Per-binary diff after patch" | `tools/bin/offset-diff --old V1 --new V2 --sigs old_offsets_json` → for each LOST: `process/find_pattern` against V2 with broadened sig → record new sig |
 
 These compose without ceremony — each call's output is the next call's input. The AI should *reach for the composition* rather than asking "should I call N more tools?" — the workflow is the unit, not the individual call.
 
@@ -369,7 +369,7 @@ These compose without ceremony — each call's output is the next call's input. 
 | Find a function by export name | `process/find_function_by_name(pattern)` | `process/list_module_exports` + client filter |
 | Get class name + parents | `process/read_rtti(vtable_addr)` | `process/analyze_vtable` (use both — RTTI first) |
 | Get vtable layout | `process/analyze_vtable` | `process/read_virtual_memory` + manual deref |
-| Generate a sig | `process/generate_signature` + `tools/sig-uniqueness-checker.py` | hand-crafting bytes |
+| Generate a sig | `process/generate_signature` + `tools/bin/sig-uniqueness-checker` | hand-crafting bytes |
 | List processes | `process/list` (no handle) | — |
 | One process's info | `process/info_by_pid` / `process/info_by_name` (no handle) | — |
 | All modules + bases | `process/get_modules` | `process/info_by_name` + re-walk |
@@ -392,4 +392,4 @@ These compose without ceremony — each call's output is the next call's input. 
 | Run a one-shot script | `script/execute` (no GUI/thread addons) | — |
 | Write target memory | `process/write_virtual_memory` / `write_typed_value` / `write_string` / `copy_memory` / `fill_memory` (all gated `write_memory`) | — |
 
-**Cross-references:** `mcp/perception-mcp-config.json` (authoritative 59-tool list), `mcp/claude-code-setup.md` / `mcp/cursor-setup.md` / `mcp/aider-setup.md` (per-IDE wiring), `tools/sig-uniqueness-checker.py` / `tools/offset-diff.py` / `tools/dumper-to-enma.py` / `tools/module-export-mapper.py` (local CLI tools that pair with MCP calls — file I/O and cross-module joins live here, NOT on the MCP server), `skill://pcx-perf-budget` (call-cost discipline that applies to MCP calls), `skill://re-evidence-log` (E-NNN cross-references record which MCP calls produced each offset).
+**Cross-references:** `mcp/perception-mcp-config.json` (authoritative 59-tool list), `mcp/claude-code-setup.md` / `mcp/cursor-setup.md` / `mcp/aider-setup.md` (per-IDE wiring), `tools/bin/sig-uniqueness-checker` / `tools/bin/offset-diff` / `removed dumper-to-enma converter` / `tools/bin/module-export-mapper` (local CLI tools that pair with MCP calls — file I/O and cross-module joins live here, NOT on the MCP server), `skill://pcx-perf-budget` (call-cost discipline that applies to MCP calls), `skill://re-evidence-log` (E-NNN cross-references record which MCP calls produced each offset).

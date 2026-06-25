@@ -65,7 +65,7 @@ context, identify likely stale docs, and decide which official source to verify.
 
 - 2026-04-01 added and refined IDE agent tools including terminal execution,
   user-waiting, multiple-choice prompts, and note updates. MCP/agent answers
-  should still prefer this repo's `pcx-knowledge-mcp` for deterministic source
+  should still prefer this repo's `pcx-rs mcp` for deterministic source
   lookup and validation.
 - 2026-03-30 and 2026-04-01 describe a redesigned IDE, GitHub Models/Copilot
   integration, and expanded analyzer/reconstruction features. These are product
