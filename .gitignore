@@ -16,6 +16,7 @@ lsp/cpp-language-server/
 .omc/
 .omo/
 docs/superpowers/plans/
+.pcx/
 
 # Local Python test environments and packaging metadata
 .venv/
