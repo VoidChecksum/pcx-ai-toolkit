@@ -374,6 +374,25 @@ def search(query: str, limit: int = 10) -> str:
 
 
 @mcp.tool()
+def hybrid_search(query: str, limit: int = 10) -> str:
+    """Search with optional local vector cache, falling back to keyword search.
+
+    Build cache with: pcx knowledge build-vector-index. Returns the same
+    {path, score, snippet} shape as search(), with title when available.
+    """
+    script = REPO_ROOT / "tools" / "knowledge-index.py"
+    index_path = REPO_ROOT / ".pcx" / "index" / "knowledge-vectors.jsonl"
+    if script.exists() and index_path.exists():
+        try:
+            result = subprocess.run([sys.executable, str(script), "search", query, "--limit", str(limit)], cwd=REPO_ROOT, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                return result.stdout
+        except Exception:
+            pass
+    return search(query, limit)
+
+
+@mcp.tool()
 def get_file(path: str) -> str:
     """Fetch full content of a file by repo-relative path.
 

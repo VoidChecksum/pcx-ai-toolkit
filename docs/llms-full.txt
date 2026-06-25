@@ -34365,6 +34365,20 @@ Some researchers use a dedicated x64dbg VMProtect plugin to speed up VMP work:
 
 ---
 
+
+## 2026 guidance: use vmp2 carefully
+
+The current `backengineering/vmp2` README explicitly warns that identifying
+individual VM handlers is brittle and does not scale across VM architecture
+changes. Treat vmp2 as valuable VMProtect 2 architecture and workflow knowledge,
+not as a dependency to vendor or a guarantee that handler matching alone solves
+devirtualization.
+
+For new tooling, prefer the generic strategy in
+`knowledge/re-workflows/devirtualization-generic.md`: guided symbolic
+evaluation, VM-private constant promotion, constant folding, load/store
+propagation, dead-store elimination, branch folding, virtual-IP tracking, and
+behavioral validation.
 ## Tool Matrix
 
 | Goal | Best Tool | Notes |

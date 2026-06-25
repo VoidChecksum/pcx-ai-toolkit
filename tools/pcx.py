@@ -24,6 +24,9 @@ Usage:
     pcx doctor         # health-check: verify all toolkit components are functional
     pcx new <template> [output_dir]  # scaffold a new project from a template
     pcx new --wizard   # interactive alias for pcx create --wizard
+    pcx knowledge search <query>  # hybrid local corpus search
+    pcx skills recommend <task>   # recommend relevant bundled skills
+    pcx re-plan <task>            # RE workflow planner
 """
 import argparse
 import json
@@ -591,6 +594,15 @@ def main() -> int:
 
     if cmd == "model-eval":
         return run_python_tool("model-eval", sub_args)
+
+    if cmd == "knowledge":
+        return run_python_tool("knowledge-index", sub_args)
+
+    if cmd == "skills":
+        return run_python_tool("skills", sub_args)
+
+    if cmd == "re-plan":
+        return run_python_tool("re-plan", sub_args)
 
     if cmd == "release-check":
         return run_python_tool("release-check", sub_args)

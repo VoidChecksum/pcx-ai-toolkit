@@ -265,6 +265,7 @@ Python-facing CLI tools for validation, generation, and RE; hot binary-analysis 
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/evidence.py): """Evidence graph CLI for RE claims."""
 - [hallucination-eval](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/hallucination-eval.py)
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/identify-protector.py): import os
+- [knowledge-index](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/knowledge-index.py)
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/mock-perception-mcp.py): """Small deterministic Perception MCP mock server for CI and examples."""
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/model-eval.py): """Score model output against PCX compatibility criteria."""
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/module-export-mapper.py): import os
@@ -276,12 +277,14 @@ Python-facing CLI tools for validation, generation, and RE; hot binary-analysis 
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/perception-mcp-record.py): """Record, replay, and summarize Perception MCP JSONL transcripts."""
 - [perception-mcp-session](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/perception-mcp-session.py)
 - [re-importer](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/re-importer.py)
+- [re-plan](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/re-plan.py)
 - [regenerate-docs](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/regenerate-docs.py)
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/release-check.py): """One-command release readiness gate."""
 - [── Hash algorithms ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/resolve-api-hashes.py): def ror13add(name: bytes) -> int:
 - [── Rule registry ─────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/script-linter.py): # rule number -> (severity, one-liner). Severity is fixed per rule, not per hit.
 - [1. Update submodules](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/setup-core.py): print("[..] Checking git submodules...")
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/sig-uniqueness-checker.py): import os
+- [skills](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/skills.py)
 - [symbol-check](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/symbol-check.py)
 - [verify-project](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/verify-project.py)
 
