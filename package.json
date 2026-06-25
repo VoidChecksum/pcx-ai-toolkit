@@ -27,6 +27,7 @@
     "tools/**/*.sh",
     "pcx-bin/pcx-rs*",
     "tools/**/*.ps1",
+    "knowledge/*.json",
     "knowledge/**/*",
     "templates/**/*",
     "docs/**/*.md",
