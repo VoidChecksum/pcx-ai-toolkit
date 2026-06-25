@@ -2,11 +2,13 @@
 
 # Versioning and migration notes
 
+_Last verified: 2026-06-25._
+
 The Perception docs prove current symbol existence, but they do not always prove which historical build first introduced a symbol. Do not infer build compatibility from a current API page alone.
 
 ## Symbol version metadata
 
-Machine-readable symbol metadata lives in [`../../knowledge/perception-symbol-versions.json`](../../knowledge/perception-symbol-versions.json). Unknown dates are explicit:
+Machine-readable symbol metadata lives in [`../../knowledge/perception-symbol-versions.json`](../../knowledge/perception-symbol-versions.json). Narrative version history lives in [`../../knowledge/pcx-version-matrix.md`](../../knowledge/pcx-version-matrix.md). Unknown dates are explicit:
 
 ```json
 {

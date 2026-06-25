@@ -17926,19 +17926,6 @@ Read these upstream Enma pages first if you are new to PCX Enma scripting:
 
 Perception-side entry points live in [Lifecycle and Routines](lifecycle-and-routines.md).
 
-## Before writing Perception Enma scripts
-
-Read these upstream Enma pages first if you are new to PCX Enma scripting:
-
-* [Basics](https://enma-1.gitbook.io/enma/language/basics), types, and casts.
-* [Functions](https://enma-1.gitbook.io/enma/language/functions).
-* [Modules and imports](https://enma-1.gitbook.io/enma/language/modules).
-* [Structs and classes](https://enma-1.gitbook.io/enma/language/structs-and-classes).
-* [Pointers](https://enma-1.gitbook.io/enma/language/pointers). Pointer arithmetic is typed: `p + n` scales by `sizeof(T)`, so use the Proc/CPU APIs for raw byte-offset memory workflows.
-* [Templates](https://enma-1.gitbook.io/enma/language/templates). Some C++-style patterns are unsupported; see this toolkit's [upstream suggestions](../enma/UPSTREAM-SUGGESTIONS.md) for known limits around nested template fields, overloaded function templates, packed strings, and LSP template diagnostics.
-* Addons commonly used by PCX scripts: [Core](https://enma-1.gitbook.io/enma/addons/core), [String](https://enma-1.gitbook.io/enma/addons/strings), [Arrays](https://enma-1.gitbook.io/enma/addons/arrays), [Maps](https://enma-1.gitbook.io/enma/addons/maps), [Math](https://enma-1.gitbook.io/enma/addons/math), [Vec](https://enma-1.gitbook.io/enma/addons/vec), [JSON](https://enma-1.gitbook.io/enma/addons/json), [Bits](https://enma-1.gitbook.io/enma/addons/bits), and [Time](https://enma-1.gitbook.io/enma/addons/time).
-
-Perception-side entry points live in [Lifecycle and Routines](lifecycle-and-routines.md).
 
 ## Conventions
 
@@ -18312,6 +18299,8 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 # SDK status and local development
 
+_Last verified: 2026-06-25._
+
 Perception's Enma SDK is not public yet. The public upstream Enma SDK docs are useful language-runtime background, but they do not define the supported Perception embedding contract.
 
 ## Current support matrix
@@ -18343,11 +18332,18 @@ Perception's Enma SDK is not public yet. The public upstream Enma SDK docs are u
 
 ## Validation examples
 
-CLI:
+If installed as a toolkit command:
 
 ```bash
 pcx api draw_text
 pcx verify-project ./my-script
+```
+
+If running from a repo checkout:
+
+```bash
+python3 tools/api-lookup.py draw_text
+python3 tools/verify-project.py ./my-script
 python3 tools/check-llm-answer.py answer.md
 ```
 
@@ -18620,11 +18616,13 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 # Versioning and migration notes
 
+_Last verified: 2026-06-25._
+
 The Perception docs prove current symbol existence, but they do not always prove which historical build first introduced a symbol. Do not infer build compatibility from a current API page alone.
 
 ## Symbol version metadata
 
-Machine-readable symbol metadata lives in [`../../knowledge/perception-symbol-versions.json`](../../knowledge/perception-symbol-versions.json). Unknown dates are explicit:
+Machine-readable symbol metadata lives in [`../../knowledge/perception-symbol-versions.json`](../../knowledge/perception-symbol-versions.json). Narrative version history lives in [`../../knowledge/pcx-version-matrix.md`](../../knowledge/pcx-version-matrix.md). Unknown dates are explicit:
 
 ```json
 {

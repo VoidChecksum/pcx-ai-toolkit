@@ -2,6 +2,8 @@
 
 # SDK status and local development
 
+_Last verified: 2026-06-25._
+
 Perception's Enma SDK is not public yet. The public upstream Enma SDK docs are useful language-runtime background, but they do not define the supported Perception embedding contract.
 
 ## Current support matrix
@@ -33,11 +35,18 @@ Perception's Enma SDK is not public yet. The public upstream Enma SDK docs are u
 
 ## Validation examples
 
-CLI:
+If installed as a toolkit command:
 
 ```bash
 pcx api draw_text
 pcx verify-project ./my-script
+```
+
+If running from a repo checkout:
+
+```bash
+python3 tools/api-lookup.py draw_text
+python3 tools/verify-project.py ./my-script
 python3 tools/check-llm-answer.py answer.md
 ```
 
