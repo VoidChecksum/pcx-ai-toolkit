@@ -32,6 +32,10 @@ Open as many files as you want. Drag tabs to reorder, middle-click or click the 
 
 Full autocompletion for the Perception.cx API surface in both AngelScript and Lua. Includes function signatures, parameter hints, type info, and namespace-aware resolution (e.g. `sdk::player_t` resolves correctly). Trigger manually with **Ctrl+Space** or let it appear automatically as you type.
 
+**Template diagnostics caveat**
+
+The editor/LSP can parse template definitions, but some template errors only appear after the compiler monomorphizes a concrete instantiation. Missing methods on generic types, constraint-like assumptions, and some syntax errors inside rarely-instantiated template branches may not show as live squiggles. To force checks, instantiate generic helpers in a small test function and use **Verify**.
+
 **Find & Replace**
 
 Open with **Ctrl+F** (find) or **Ctrl+H** (find & replace). Supports regex, case sensitivity, and whole-word matching. Navigate matches with Enter/Shift+Enter or the arrow buttons.

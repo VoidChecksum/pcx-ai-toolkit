@@ -31,6 +31,7 @@ class EnmaDocsCoverageTest(unittest.TestCase):
         data = json.loads((REPO_ROOT / "knowledge" / "perception-symbol-versions.json").read_text(encoding="utf-8"))
         self.assertEqual(data["schema"], 1)
         self.assertRegex(data["last_verified"], r"^\d{4}-\d{2}-\d{2}$")
+        version_re = r"^(unknown|\d{4}-\d{2}-\d{2}(?:\([ab]\))?|<=\d{4}-\d{2}-\d{2}(?:\([ab]\))?|\d{4}-\d{2}-\d{2}-or-earlier)$"
         required = {
             "symbol",
             "introduced",
@@ -51,6 +52,8 @@ class EnmaDocsCoverageTest(unittest.TestCase):
                 self.assertNotIn(row["symbol"], seen)
                 seen.add(row["symbol"])
                 self.assertEqual(row["language"], "enma")
+                self.assertRegex(row["introduced"], version_re)
+                self.assertRegex(row["first_documented"], version_re)
                 self.assertIsInstance(row["permissions"], list)
                 self.assertIsInstance(row["deprecated"], bool)
                 self.assertIsInstance(row["removed"], bool)

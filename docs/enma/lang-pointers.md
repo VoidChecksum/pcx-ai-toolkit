@@ -8,6 +8,28 @@ Storing the address of a local somewhere it could outlive the local is a compile
 
 Pointer ↔ `int64` / `uint64` is implicit (both 8-byte slots, lossless on x64). Useful for handing handles to native APIs and for taking script-side function references via `&fn` (a `pointer` value that converts to `int64` without a cast). The implicit conversion is not a workaround for the escape analyzer - allocation and lifetime rules still apply.
 
+## Process memory is not Enma heap memory
+
+Typed Enma pointers are for Enma heap objects allocated with `new`. Do not model arbitrary target-process addresses as `T*` unless the memory is actually an Enma object. For reverse-engineering byte offsets, keep addresses as `uint64` and use Perception Proc/CPU APIs.
+
+Preferred:
+
+```c
+uint64 entity = base + offsets[i];
+int32 hp = proc.r32(entity + 0x120);
+string name = proc.rs(entity + 0x180, 32);
+```
+
+Do not use typed casts for raw target memory:
+
+```c
+// Invalid / unsafe model for target-process memory.
+Player* p = cast<Player*>(base + offset);
+```
+
+Typed pointer arithmetic scales by `sizeof(T)`: `p + 1` means "next T", not "next byte". Integer-to-pointer assignment is not a byte-offset traversal primitive.
+
+
 ## Allocation & Deletion
 
 ```c

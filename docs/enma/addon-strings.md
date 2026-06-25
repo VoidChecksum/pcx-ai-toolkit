@@ -77,6 +77,29 @@ string u = url_encode("hello world & foo=bar")  // "hello%20world%20%26%20foo%3D
 string p = url_decode("hello%20world")          // "hello world" (also '+' -> ' ')
 ```
 
+## String / char memory layout
+
+Strings are script-managed values, not a layout-compatible view of target-process memory. Treat string contents as text/byte data exposed through string APIs, not as a `char[N]` field you can embed in an Enma struct to mirror a native C/C++ structure.
+
+Current rules for native layout work:
+
+* `char` is `int8` underneath for scalar values and formatting helpers.
+* Script `string` storage is implementation-owned; do not depend on its in-memory layout.
+* `struct { char name[32]; }`-style native layout mirroring is not a supported replacement for reading a target process C string.
+* For process memory, read bytes through the Perception Proc/CPU APIs, stop at NUL yourself, then convert or print the resulting bytes as needed.
+
+Pattern:
+
+```c
+// Prefer explicit process-memory reads for native C strings.
+uint64 name_addr = entity + 0x120;
+string name = proc.rs(name_addr, 32);      // UTF-8, stops at NUL, empty on failure
+
+array<uint8> raw = proc.rvm(name_addr, 32); // use bytes when layout matters
+```
+
+Packed `std::string` / exact native `char[N]` struct parity is tracked as an upstream language/runtime gap.
+
 ## `format(fmt, ...)`
 
 Variadic formatter. Accepts BOTH brace placeholders (`{spec}`) and printf-style placeholders (`%conv`). Use whichever feels natural — they're interchangeable and can mix in the same format string.
