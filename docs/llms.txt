@@ -101,8 +101,10 @@ The Perception.cx host API surface as exposed to Enma.
 - [Proc API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/proc-api.md): All proc natives are auto-registered into every loaded script.
 - [Enma - Overview](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/readme.md): Enma is perception's proprietary full-module AOT and JIT-compiled scripting language. This site covers the APIs perception registers on top of Enma, not the language reference itself. For syntax, type
 - [Render API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/render-api.md): All render natives are auto-registered into every loaded script.
+- [SDK status and local development](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/sdk-status.md): Perception's Enma SDK is not public yet. The public upstream Enma SDK docs are useful language-runtime background, but they do not define the supported Perception embedding contract.
 - [Sound API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/sound-api.md): All sound natives are auto-registered into every loaded script.
 - [Unicorn API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/unicorn-api.md): All unicorn natives are auto-registered into every loaded script.
+- [Versioning and migration notes](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/versioning-and-migration.md): The Perception docs prove current symbol existence, but they do not always prove which historical build first introduced a symbol. Do not infer build compatibility from a current API page alone.
 - [Win API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/win-api.md): All win natives are auto-registered into every loaded script.
 - [Zydis API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/zydis-api.md): All Zydis natives are auto-registered into every loaded script.
 

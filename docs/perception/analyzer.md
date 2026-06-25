@@ -10,6 +10,8 @@ I am also actively working on the **Reconstruct Source** feature shown in the sc
 
 If this feature interests you and you would like to help improve it, please feel free to share suggestions and bug reports.
 
+Operational boundary: treat reconstructed source as analysis output, not as trusted recompilable source. It is best for reading pseudocode, recovering structures, naming modules, and finding unresolved areas. Obfuscated control flow, unusual calling conventions, hand-written assembly, stripped RTTI, packed code, self-modifying code, and failed function boundaries can produce incomplete output or `__asm {}` fallbacks. Report issues with the target architecture, module-loading mode, function address/RVA, and the smallest screenshot or snippet that shows the bad reconstruction.
+
 — **Timefall / Admin**
 
 <div data-with-frame="true"><figure><img src="/files/FZZ90AC37miYmZdG7Xkb" alt=""><figcaption></figcaption></figure></div>
