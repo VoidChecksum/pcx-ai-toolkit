@@ -63,7 +63,7 @@ fn main() {
             std::process::exit(2);
         }
     };
-    let result = lookup_symbol(&index, &args.symbol, Some("enma"));
+    let result = lookup_symbol(&index, &args.symbol, lang);
     if args.json {
         println!("{}", serde_json::to_string_pretty(&result).unwrap());
     } else {

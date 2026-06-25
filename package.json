@@ -25,7 +25,7 @@
     "npm/bin/pcx.js",
     "tools/**/*.py",
     "tools/**/*.sh",
-    "tools/bin/pcx-rs*",
+    "pcx-bin/pcx-rs*",
     "tools/**/*.ps1",
     "knowledge/*.json",
     "templates/**/*",

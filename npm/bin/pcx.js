@@ -9,6 +9,7 @@ const root = path.resolve(__dirname, "..", "..");
 const args = process.argv.slice(2);
 const rustName = process.platform === "win32" ? "pcx-rs.exe" : "pcx-rs";
 const rustCandidates = [
+  path.join(root, "pcx-bin", rustName),
   path.join(root, "tools", "bin", rustName),
   path.join(root, "tools", "pe-parser", "target", "release", rustName)
 ];

@@ -110,6 +110,7 @@ def run_rust_cli_if_available(args: list[str]) -> int | None:
     """Run packaged Rust CLI when available."""
     exe = "pcx-rs.exe" if os.name == "nt" else "pcx-rs"
     candidates = [
+        REPO_ROOT / "pcx-bin" / exe,
         REPO_ROOT / "tools" / "bin" / exe,
         REPO_ROOT / "tools" / "pe-parser" / "target" / "release" / exe,
     ]

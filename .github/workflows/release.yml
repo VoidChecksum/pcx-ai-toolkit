@@ -92,8 +92,8 @@ jobs:
 
       - name: Stage Rust CLI for package
         run: |
-          mkdir -p tools/bin
-          cp tools/pe-parser/target/release/pcx-rs tools/bin/pcx-rs
+          mkdir -p pcx-bin
+          cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs
 
       - name: Build root Python package
         run: |
@@ -136,8 +136,8 @@ jobs:
 
       - name: Stage Rust CLI for package
         run: |
-          mkdir -p tools/bin
-          cp tools/pe-parser/target/release/pcx-rs tools/bin/pcx-rs
+          mkdir -p pcx-bin
+          cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs
 
       - name: Build npm package
         run: |

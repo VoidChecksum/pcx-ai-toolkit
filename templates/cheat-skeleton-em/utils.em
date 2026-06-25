@@ -37,7 +37,7 @@ float64 distance3d(vec3 a, vec3 b) {
     return sqrt(dx*dx + dy*dy + dz*dz);
 }
 
-bool world_to_screen(vec3 world, out vec2 screen) {
+bool project_world_to_screen(vec3 world, out vec2 screen) {
     if (g_view_matrix == 0) return false;
 
     float64 m[16];

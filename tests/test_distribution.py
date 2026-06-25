@@ -65,14 +65,14 @@ class DistributionTest(unittest.TestCase):
     def test_release_packages_stage_rust_cli_for_registries(self):
         workflow = REPO_ROOT / ".github" / "workflows" / "release.yml"
         text = workflow.read_text(encoding="utf-8")
-        self.assertIn("mkdir -p tools/bin", text)
-        self.assertIn("cp tools/pe-parser/target/release/pcx-rs tools/bin/pcx-rs", text)
+        self.assertIn("mkdir -p pcx-bin", text)
+        self.assertIn("cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs", text)
         self.assertLess(text.index("cargo build --release --bin pcx-rs"), text.index("python -m build"))
         self.assertLess(text.index("cargo build --release --bin pcx-rs"), text.index("npm pack --dry-run"))
 
     def test_root_python_package_ships_rust_cli(self):
         pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-        self.assertIn('"tools/bin" = ["tools/bin/pcx-rs"]', pyproject)
+        self.assertIn('"pcx-bin" = ["pcx-bin/pcx-rs"]', pyproject)
 
     def test_root_python_package_ships_runtime_data(self):
         pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
@@ -88,6 +88,7 @@ class DistributionTest(unittest.TestCase):
         self.assertIn('"pcx": "npm/bin/pcx.js"', package)
         self.assertIn('"knowledge/*.json"', package)
         self.assertIn('"templates/**/*"', package)
+        self.assertIn('"pcx-bin/pcx-rs*"', package)
 
     def test_npm_shim_prefers_rust_cli(self):
         shim = (REPO_ROOT / "npm" / "bin" / "pcx.js").read_text(encoding="utf-8")

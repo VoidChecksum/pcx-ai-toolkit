@@ -19079,9 +19079,8 @@ The task is...
     → docs/perception/<area>-api.md for the API that errored, AND
       knowledge/common-patterns.md for any worked example using it.
 
-  Cross-language work (Enma <-> AngelScript)
-    → docs/perception/llm-routing.md and docs/CROSS_LANGUAGE.md first,
-      then the per-language API doc.
+  Unsupported `.as` / AngelScript request
+    → docs/perception/llm-routing.md first; stop and keep the AI contract Enma-only.
 ```
 
 The discipline is per-task, not per-session. A 30-minute session might read 4 different docs — that's fine. Re-loading the cheatsheet at the start of each tool session is also fine; it's small and grounds the AI's API surface.
@@ -19303,7 +19302,7 @@ This is the highest-skill move in AI pair programming — recognizing when "more
 | 6 | Diff-review every multi-file change | Five-minute scan for the 8 high-value pattern matches catches ~90% of violations |
 | 7 | When stuck, change the question | Specific tool-call asks beat "try harder"; the unstuck question is more concrete |
 
-**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 59 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `docs/CROSS_LANGUAGE.md` (Enma vs AngelScript binding split).
+**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 59 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `docs/perception/llm-routing.md` (Enma-only routing contract).
 
 ---
 
@@ -33944,12 +33943,12 @@ import "vec";
 import "math";
 
 // Engine-specific helpers — replace with your target's angle read/write.
-vec2 read_view_angles() {
+vec2 project_read_angles() {
     // placeholder: read from your engine's view-angle address
     return vec2(0, 0);
 }
 
-void write_view_angles(vec2 angles) {
+void project_write_angles(vec2 angles) {
     // placeholder: clamp pitch to [-89, 89] and write to engine memory
 }
 
@@ -33958,7 +33957,7 @@ void aimbot_update(int64 data) {
     if (!key_down(g_aim_key)) { g_aim_target.valid = false; return; }
 
     vec3 local_pos = read_vec3(g_local_player + OFF_POS);
-    vec2 current   = read_view_angles();
+    vec2 current   = project_read_angles();
 
     EntityInfo best;
     float64 best_score = 1e9;
@@ -33987,7 +33986,7 @@ void aimbot_render(int64 data) {
 
     vec3 local_pos = read_vec3(g_local_player + OFF_POS);
     vec2 target = calc_angle(local_pos, g_aim_target.head);
-    vec2 current = read_view_angles();
+    vec2 current = project_read_angles();
 
     float64 yaw_delta   = normalize_delta(target.y - current.y);
     float64 pitch_delta = fclamp(target.x - current.x, -89.0, 89.0);
@@ -33997,7 +33996,7 @@ void aimbot_render(int64 data) {
         current.y + yaw_delta   * g_aim_smooth
     );
 
-    write_view_angles(smoothed);
+    project_write_angles(smoothed);
 }
 
 ---
@@ -34061,8 +34060,8 @@ void esp_render(int64 data) {
         if (!e.valid) continue;
 
         vec2 head2d, feet2d;
-        if (!world_to_screen(e.head, head2d)) continue;
-        if (!world_to_screen(e.pos,  feet2d)) continue;
+        if (!project_world_to_screen(e.head, head2d)) continue;
+        if (!project_world_to_screen(e.pos,  feet2d)) continue;
 
         float64 h = feet2d.y - head2d.y;
         float64 w = h * 0.5;
@@ -34457,7 +34456,7 @@ float64 distance3d(vec3 a, vec3 b) {
     return sqrt(dx*dx + dy*dy + dz*dz);
 }
 
-bool world_to_screen(vec3 world, out vec2 screen) {
+bool project_world_to_screen(vec3 world, out vec2 screen) {
     if (g_view_matrix == 0) return false;
 
     float64 m[16];

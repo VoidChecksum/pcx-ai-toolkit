@@ -124,17 +124,6 @@ Native reverse-engineering tools live in [`../tools/pe-parser/`](../tools/pe-par
 | [`perception/custom-draw-api.md`](perception/custom-draw-api.md) | ~500 | D3D11 GPU pipeline: shaders, buffers, textures, compute, depth testing |
 | [`perception/changelogs.md`](perception/changelogs.md) | ~500 | Complete changelog archive (Feb–June 2026) |
 
-## Perception.cx Platform APIs — AngelScript
-
-24 files, 11,000+ lines total. Located in [`perception/angelscript/`](perception/angelscript/).
-
-Covers: Overview, Life Cycle, Engine, Atomic Types, Proc API, Render API, **Custom Draw API**, GUI API, Input API, System/CPU/Disassembly, Net API, File System, Extended Math, Win API, JSON API, Unicorn, Zydis Encoder, Intrinsics, Mutex, Utilities, Sound, Bit Reinterpret, Engine Specific, CS2 Extended.
-
-## AngelScript Language (Core)
-
-The core AngelScript language manual (the language itself, not the PCX API bindings). 25 files in [`angelscript-lang/`](angelscript-lang/) — scraped from [angelcode.com](https://www.angelcode.com/angelscript/sdk/docs/manual/) under the zlib/libpng license (see [`angelscript-lang/license.md`](angelscript-lang/license.md)).
-
-Covers: overview, license, datatypes, strings, arrays, dictionary, expressions, statements, functions, variables, script classes + properties, inheritance, handles, generics, funcdef, delegate, enums, namespaces, coroutines, add-ons overview + strings/array/dictionary/math. See [`angelscript-lang/INDEX.md`](angelscript-lang/INDEX.md) for the full file list and the deferred pages.
 
 ## Knowledge Base
 

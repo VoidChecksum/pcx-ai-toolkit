@@ -7,12 +7,12 @@ import "vec";
 import "math";
 
 // Engine-specific helpers — replace with your target's angle read/write.
-vec2 read_view_angles() {
+vec2 project_read_angles() {
     // placeholder: read from your engine's view-angle address
     return vec2(0, 0);
 }
 
-void write_view_angles(vec2 angles) {
+void project_write_angles(vec2 angles) {
     // placeholder: clamp pitch to [-89, 89] and write to engine memory
 }
 
@@ -21,7 +21,7 @@ void aimbot_update(int64 data) {
     if (!key_down(g_aim_key)) { g_aim_target.valid = false; return; }
 
     vec3 local_pos = read_vec3(g_local_player + OFF_POS);
-    vec2 current   = read_view_angles();
+    vec2 current   = project_read_angles();
 
     EntityInfo best;
     float64 best_score = 1e9;
@@ -50,7 +50,7 @@ void aimbot_render(int64 data) {
 
     vec3 local_pos = read_vec3(g_local_player + OFF_POS);
     vec2 target = calc_angle(local_pos, g_aim_target.head);
-    vec2 current = read_view_angles();
+    vec2 current = project_read_angles();
 
     float64 yaw_delta   = normalize_delta(target.y - current.y);
     float64 pitch_delta = fclamp(target.x - current.x, -89.0, 89.0);
@@ -60,5 +60,5 @@ void aimbot_render(int64 data) {
         current.y + yaw_delta   * g_aim_smooth
     );
 
-    write_view_angles(smoothed);
+    project_write_angles(smoothed);
 }

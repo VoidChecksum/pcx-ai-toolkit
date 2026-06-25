@@ -33,8 +33,14 @@ UNSUPPORTED_SYMBOLS_PATH = data_root() / "knowledge" / "unsupported-symbols.json
 def load_unsupported_symbols() -> dict[str, str]:
     if not UNSUPPORTED_SYMBOLS_PATH.exists():
         return {}
-    data = json.loads(UNSUPPORTED_SYMBOLS_PATH.read_text(encoding="utf-8"))
-    symbols = data.get("symbols", {}) if isinstance(data, dict) else {}
+    raw_data: object = json.loads(UNSUPPORTED_SYMBOLS_PATH.read_text(encoding="utf-8"))
+    if not isinstance(raw_data, dict):
+        return {}
+    data = cast(dict[str, object], raw_data)
+    raw_symbols = data.get("symbols", {})
+    if not isinstance(raw_symbols, dict):
+        return {}
+    symbols = cast(dict[object, object], raw_symbols)
     return {str(k): str(v) for k, v in symbols.items()}
 
 FENCE_RE = re.compile(r'^```\s*([A-Za-z_.-]*)[^\n]*\n(.*?)\n```', re.MULTILINE | re.DOTALL)
@@ -267,11 +273,11 @@ def _validate_enma_semantics(code: str) -> list[dict[str, Any]]:
             "cast<uint",
             "Enma rejects signed-to-unsigned narrowing without an explicit cast<uint...>(...).",
         ))
-    match = re.search(r"\breturn\s*&", clean)
-    if match:
+    ret_match = re.search(r"\breturn\s*&", clean)
+    if ret_match:
         findings.append(_finding(
             "semantic_error",
-            _line_for_offset(clean, match.start()),
+            _line_for_offset(clean, ret_match.start()),
             "return &",
             "Enma rejects escaping local addresses; return values or store owned state.",
         ))

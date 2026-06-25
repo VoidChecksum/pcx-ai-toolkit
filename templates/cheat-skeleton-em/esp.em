@@ -55,8 +55,8 @@ void esp_render(int64 data) {
         if (!e.valid) continue;
 
         vec2 head2d, feet2d;
-        if (!world_to_screen(e.head, head2d)) continue;
-        if (!world_to_screen(e.pos,  feet2d)) continue;
+        if (!project_world_to_screen(e.head, head2d)) continue;
+        if (!project_world_to_screen(e.pos,  feet2d)) continue;
 
         float64 h = feet2d.y - head2d.y;
         float64 w = h * 0.5;

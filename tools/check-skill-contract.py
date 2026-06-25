@@ -16,7 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SKILL_DIR = REPO_ROOT / ".claude" / "skills"
 AI_DOCS = [
     REPO_ROOT / "docs" / "AI_AGENT_OPERATING_MANUAL.md",
-    REPO_ROOT / "docs" / "CROSS_LANGUAGE.md",
+    REPO_ROOT / "docs" / "perception" / "llm-routing.md",
     REPO_ROOT / "docs" / "FAQ.md",
     REPO_ROOT / "docs" / "INDEX.md",
     REPO_ROOT / "mcp" / "pcx-knowledge-mcp" / "README.md",
