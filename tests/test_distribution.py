@@ -13,6 +13,35 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("pypa/gh-action-pypi-publish", text)
         self.assertNotIn("session_id", text)
 
+    def test_release_publishes_root_pypi_with_trusted_publishing(self):
+        workflow = REPO_ROOT / ".github" / "workflows" / "release.yml"
+        text = workflow.read_text(encoding="utf-8")
+        self.assertIn("id-token: write", text)
+        self.assertIn("Build root Python package", text)
+        self.assertIn("python -m build", text)
+        self.assertIn("twine check dist/*", text)
+        self.assertIn("pypa/gh-action-pypi-publish@release/v1", text)
+        self.assertIn("packages-dir: dist", text)
+        self.assertNotIn("TWINE_PASSWORD", text)
+        self.assertNotIn("password:", text)
+
+    def test_release_publishes_npm_with_trusted_publishing(self):
+        workflow = REPO_ROOT / ".github" / "workflows" / "release.yml"
+        text = workflow.read_text(encoding="utf-8")
+        self.assertIn("Build npm package", text)
+        self.assertIn('node-version: "24"', text)
+        self.assertIn("npm-version", text)
+        self.assertIn("npm pack --dry-run", text)
+        self.assertIn("npm publish", text)
+        self.assertNotIn("NODE_AUTH_TOKEN", text)
+        self.assertNotIn("NPM_TOKEN", text)
+
+    def test_readme_documents_registry_trusted_publishers(self):
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("PyPI Trusted Publisher", readme)
+        self.assertIn("npm Trusted Publisher", readme)
+        self.assertIn("Workflow filename: `release.yml`", readme)
+
     def test_extension_release_uploads_checksummed_vsix(self):
         workflow = REPO_ROOT / ".github" / "workflows" / "release.yml"
         text = workflow.read_text(encoding="utf-8")

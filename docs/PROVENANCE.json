@@ -1,5 +1,5 @@
 {
-  "count": 129,
+  "count": 131,
   "drift_checkable": 89,
   "files": {
     "docs/AI_AGENT_OPERATING_MANUAL.md": {
@@ -637,12 +637,22 @@
       "source": "local",
       "url": null
     },
+    "docs/superpowers/plans/2026-06-25-auto-publish-release.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md": {
       "drift_check": false,
       "source": "local",
       "url": null
     },
     "docs/superpowers/specs/2026-06-24-rust-docs-pipeline-design.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/superpowers/specs/2026-06-25-auto-publish-release-design.md": {
       "drift_check": false,
       "source": "local",
       "url": null
@@ -660,7 +670,9 @@
     "docs/perception/llm-routing.md",
     "docs/superpowers/plans/2026-06-24-pcx-mcp-schema-mirror.md",
     "docs/superpowers/plans/2026-06-24-rust-docs-pipeline.md",
+    "docs/superpowers/plans/2026-06-25-auto-publish-release.md",
     "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md",
-    "docs/superpowers/specs/2026-06-24-rust-docs-pipeline-design.md"
+    "docs/superpowers/specs/2026-06-24-rust-docs-pipeline-design.md",
+    "docs/superpowers/specs/2026-06-25-auto-publish-release-design.md"
   ]
 }

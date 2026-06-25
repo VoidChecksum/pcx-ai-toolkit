@@ -144,6 +144,21 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 
 Requirements: Git, Python 3.10+, Node.js 18+. Git submodules are required for LSP and `.vsix` packaging.
 
+## Registry Publishing Setup
+
+For automatic package publishing from GitHub Actions, configure trusted publishers once in each registry.
+
+PyPI Trusted Publisher for `pcx-ai-toolkit`:
+- Owner: `VoidChecksum`
+- Repository: `pcx-ai-toolkit`
+- Workflow filename: `release.yml`
+
+npm Trusted Publisher for `pcx-ai-toolkit`:
+- Owner/user: `VoidChecksum`
+- Repository: `pcx-ai-toolkit`
+- Workflow filename: `release.yml`
+- Allowed action: `npm publish`
+
 ## Anti-Hallucination Pipeline
 
 Use these checks before trusting generated code:
