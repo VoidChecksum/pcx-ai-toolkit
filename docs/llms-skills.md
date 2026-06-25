@@ -1587,11 +1587,11 @@ Perception platform.
 
 **The only authoritative sources for PCX API names are the two upstream docs:**
 
-1. `https://docs.perception.cx/perception/enma/overview` — Enma API surface
-2. `https://docs.perception.cx/perception/angel-script/overview` — AngelScript API surface
+1. `https://docs.perception.cx/perception/enma/readme.md` — Enma API surface
+2. `https://docs.perception.cx/perception/angelscript/overview.md` — AngelScript API surface
 
 Use the `.md` variant of any sub-page (e.g. `https://docs.perception.cx/perception/enma/proc-api.md`,
-`https://docs.perception.cx/perception/angel-script/render-api.md`) for structured markdown.
+`https://docs.perception.cx/perception/angelscript/render-api.md`) for structured markdown.
 The local `docs/` tree is a drift-checked mirror of these upstream pages; when in doubt, trust
 the live upstream version.
 
@@ -1701,7 +1701,7 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 ## How To Use These Docs
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
-2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/overview` and read the relevant `.md` sub-page
+2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/readme.md` and read the relevant `.md` sub-page
 3. **If asked for AngelScript or `.as`**: stop — this toolkit is Enma-only
 4. **If unsure about a type, function, or parameter**: read the upstream doc, don't guess
 5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
@@ -1711,7 +1711,7 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 
 You must NEVER invent a PCX or Enma API name. Every function,
 method, type, and import you use must come from one of:
-  - `https://docs.perception.cx/perception/enma/overview` and its sub-pages,
+  - `https://docs.perception.cx/perception/enma/readme.md` and its sub-pages,
   - `knowledge/pcx-api-index.json` (via `pcx symbol-check` or the
     `mcp:pcx-knowledge` `validate_code` tool),
   - a user-defined function declared in the same script.

@@ -2,8 +2,7 @@
 """Build knowledge/pcx-api-index.json from source-backed PCX language docs.
 
 Authoritative roots:
-  1. https://docs.perception.cx/perception/enma/overview  (Enma API surface)
-     Markdown equivalent: https://docs.perception.cx/perception/enma/readme.md
+  1. https://docs.perception.cx/perception/enma/readme.md  (Enma API surface)
   2. Local mirrors of official Enma language/add-on references.
 
 Only official/live PCX pages and checked-in official language mirrors contribute
@@ -169,7 +168,6 @@ def _discover_sub_pages() -> list[str]:
         href = urllib.parse.urldefrag(m.group(2).strip())[0]
         if href.startswith(ENMA_PREFIX) and href.endswith(".md"):
             paths.add(href)
-
 
     return sorted(paths)
 

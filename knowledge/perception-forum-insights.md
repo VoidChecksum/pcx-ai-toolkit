@@ -31,11 +31,13 @@ context, identify likely stale docs, and decide which official source to verify.
 ## Enma Rollout Signals
 
 - Enma is Perception's own script language and is positioned as the next major
-  PCX development path. Load `docs/perception/enma` and the generated Enma
-  context pack before answering Enma questions.
+  PCX development path. Load `docs/perception/readme.md`,
+  `docs/perception/lifecycle-and-routines.md`, and the generated Enma context
+  pack before answering Enma questions.
 - The forum announcement points to both the Enma GitBook and the Perception Enma
   docs. If the forum and local mirror disagree, verify against
-  `docs/perception/enma` or the live official docs before asserting behavior.
+  `docs/perception/readme.md` plus the relevant `docs/perception/*.md` API page,
+  or the live official docs before asserting behavior.
 - The announcement describes Enma as native-compiled rather than interpreted.
   For LLM routing, prefer Enma-specific lifecycle, imports, value types, and
   compile-time semantics over AngelScript habits.
@@ -95,7 +97,7 @@ context, identify likely stale docs, and decide which official source to verify.
 ## LLM Routing Implications
 
 - For Enma tasks: load `docs/perception/llm-routing.md`,
-  `docs/llms-perception-enma.md`, `docs/perception/enma`, and the Enma skill.
+  `docs/llms-perception-enma.md`, `docs/perception/readme.md`, and the Enma skill.
 - For forum/changelog/overlay/client questions: load this file after the
   official docs. Never let this file override exact symbol signatures.
 - For all code-bearing answers: finish with `pcx check-answer` or MCP

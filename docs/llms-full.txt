@@ -20572,11 +20572,11 @@ Perception platform.
 
 **The only authoritative sources for PCX API names are the two upstream docs:**
 
-1. `https://docs.perception.cx/perception/enma/overview` — Enma API surface
-2. `https://docs.perception.cx/perception/angel-script/overview` — AngelScript API surface
+1. `https://docs.perception.cx/perception/enma/readme.md` — Enma API surface
+2. `https://docs.perception.cx/perception/angelscript/overview.md` — AngelScript API surface
 
 Use the `.md` variant of any sub-page (e.g. `https://docs.perception.cx/perception/enma/proc-api.md`,
-`https://docs.perception.cx/perception/angel-script/render-api.md`) for structured markdown.
+`https://docs.perception.cx/perception/angelscript/render-api.md`) for structured markdown.
 The local `docs/` tree is a drift-checked mirror of these upstream pages; when in doubt, trust
 the live upstream version.
 
@@ -20686,7 +20686,7 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 ## How To Use These Docs
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
-2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/overview` and read the relevant `.md` sub-page
+2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/readme.md` and read the relevant `.md` sub-page
 3. **If asked for AngelScript or `.as`**: stop — this toolkit is Enma-only
 4. **If unsure about a type, function, or parameter**: read the upstream doc, don't guess
 5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
@@ -20696,7 +20696,7 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 
 You must NEVER invent a PCX or Enma API name. Every function,
 method, type, and import you use must come from one of:
-  - `https://docs.perception.cx/perception/enma/overview` and its sub-pages,
+  - `https://docs.perception.cx/perception/enma/readme.md` and its sub-pages,
   - `knowledge/pcx-api-index.json` (via `pcx symbol-check` or the
     `mcp:pcx-knowledge` `validate_code` tool),
   - a user-defined function declared in the same script.
@@ -31471,41 +31471,34 @@ array<uint64> p.scan_pointer(target_addr, heap_only);
 
 # PCX Documentation Roots
 
-The only authoritative sources for Perception.cx scripting APIs are these two
-documentation trees on `docs.perception.cx`:
+The authoritative source for Perception.cx scripting APIs in this toolkit is
+the Enma documentation tree on `docs.perception.cx`:
 
 1. **Enma (Perception.cx Enma API)**  
-   Canonical entry point: `https://docs.perception.cx/perception/enma/overview`  
-   Markdown equivalent (when GitBook exposes it): `https://docs.perception.cx/perception/enma/readme.md`  
+   Canonical entry point: `https://docs.perception.cx/perception/enma/readme.md`  
    Sub-pages follow the convention: `https://docs.perception.cx/perception/enma/<page>.md`
-
-2. **AngelScript (Perception.cx AngelScript API)**  
-   Canonical entry point: `https://docs.perception.cx/perception/angel-script/overview`  
-   Markdown equivalent: `https://docs.perception.cx/perception/angel-script/overview.md`  
-   Sub-pages follow the convention: `https://docs.perception.cx/perception/angel-script/<page>.md`
 
 ## What this means
 
-- Every PCX API symbol used in generated code must be traceable to one of these
-  two trees, or to the generated `knowledge/pcx-api-index.json` that is built
-  from those trees.
+- Every PCX API symbol used in generated code must be traceable to this Enma
+  tree, or to the generated `knowledge/pcx-api-index.json` that is built from it.
 - Do not use the local `docs/` copy as a primary authority; it is a drift-checked
   mirror. If a local doc and the live upstream disagree, the live upstream wins.
 - The Enma *language* reference (grammar, types, addons) lives at
   `https://enma-1.gitbook.io/enma/` and is referenced for language semantics,
-  but the PCX API surface itself comes only from the two roots above.
+  but the PCX API surface itself comes only from the Enma root above.
 
 ## Navigating the trees
 
 GitBook exposes a structured index at `https://docs.perception.cx/perception/llms.txt`.
-Use it to discover the exact sub-page paths under each root. In code, prefer
+Use it to discover the exact sub-page paths under the Enma root. In code, prefer
 fetching the `.md` variant of any page so the model receives structured
 markdown rather than rendered HTML.
 
 ## Generated index
 
 `knowledge/pcx-api-index.json` is derived by scanning the local mirrors of the
-pages under these two roots (plus the Enma addon docs that the Enma API
+pages under this root (plus the Enma addon docs that the Enma API
 references). It exists so tools like `pcx symbol-check` and the
 `mcp:pcx-knowledge` `validate_code` tool can catch invented API names without
 performing a live fetch on every keystroke.
@@ -31926,11 +31919,13 @@ context, identify likely stale docs, and decide which official source to verify.
 ## Enma Rollout Signals
 
 - Enma is Perception's own script language and is positioned as the next major
-  PCX development path. Load `docs/perception/enma` and the generated Enma
-  context pack before answering Enma questions.
+  PCX development path. Load `docs/perception/readme.md`,
+  `docs/perception/lifecycle-and-routines.md`, and the generated Enma context
+  pack before answering Enma questions.
 - The forum announcement points to both the Enma GitBook and the Perception Enma
   docs. If the forum and local mirror disagree, verify against
-  `docs/perception/enma` or the live official docs before asserting behavior.
+  `docs/perception/readme.md` plus the relevant `docs/perception/*.md` API page,
+  or the live official docs before asserting behavior.
 - The announcement describes Enma as native-compiled rather than interpreted.
   For LLM routing, prefer Enma-specific lifecycle, imports, value types, and
   compile-time semantics over AngelScript habits.
@@ -31990,7 +31985,7 @@ context, identify likely stale docs, and decide which official source to verify.
 ## LLM Routing Implications
 
 - For Enma tasks: load `docs/perception/llm-routing.md`,
-  `docs/llms-perception-enma.md`, `docs/perception/enma`, and the Enma skill.
+  `docs/llms-perception-enma.md`, `docs/perception/readme.md`, and the Enma skill.
 - For forum/changelog/overlay/client questions: load this file after the
   official docs. Never let this file override exact symbol signatures.
 - For all code-bearing answers: finish with `pcx check-answer` or MCP
