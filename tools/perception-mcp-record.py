@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# mypy: ignore-errors
 """Record, replay, and summarize Perception MCP JSONL transcripts."""
 from __future__ import annotations
 

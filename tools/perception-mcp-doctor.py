@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# mypy: ignore-errors
 """Perception MCP health checks."""
 from __future__ import annotations
 

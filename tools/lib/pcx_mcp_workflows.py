@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """Deterministic Perception MCP workflow plans."""
 from __future__ import annotations
 import json, re

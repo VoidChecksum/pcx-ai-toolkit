@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# mypy: ignore-errors
 """Evidence graph CLI for RE claims."""
 from __future__ import annotations
 

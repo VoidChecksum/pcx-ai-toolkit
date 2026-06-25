@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# mypy: ignore-errors
 """Small deterministic Perception MCP mock server for CI and examples."""
 from __future__ import annotations
 

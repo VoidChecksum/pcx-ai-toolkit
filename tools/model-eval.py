@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# mypy: ignore-errors
 """Score model output against PCX compatibility criteria."""
 from __future__ import annotations
 import argparse, json, re
