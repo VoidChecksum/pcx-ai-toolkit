@@ -14,7 +14,10 @@ SCHEMA = "pcx-evidence-graph-v1"
 def load(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise SystemExit(f"missing evidence graph: {path}")
-    return json.loads(path.read_text(encoding="utf-8"))
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise SystemExit(f"invalid evidence graph: {path}")
+    return data
 
 
 def save(path: Path, data: dict[str, Any]) -> None:
@@ -110,7 +113,7 @@ def main() -> int:
     p = sub.add_parser("stale"); p.add_argument("--max-age-days", type=int, default=30); p.set_defaults(func=cmd_stale)
     p = sub.add_parser("graph"); p.add_argument("--format", default="mermaid"); p.set_defaults(func=cmd_graph)
     args = ap.parse_args()
-    return args.func(args)
+    return int(args.func(args))
 
 if __name__ == "__main__":
     raise SystemExit(main())

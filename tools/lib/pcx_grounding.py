@@ -86,9 +86,13 @@ def load_symbol_metadata() -> dict[str, dict[str, Any]]:
     if not isinstance(raw_symbols, list):
         return {}
     out: dict[str, dict[str, Any]] = {}
-    for row in raw_symbols:
-        if isinstance(row, dict) and row.get("symbol"):
-            out[str(row["symbol"])] = cast(dict[str, Any], row)
+    for item in cast(list[object], raw_symbols):
+        if not isinstance(item, dict):
+            continue
+        row = cast(dict[str, Any], item)
+        symbol = row.get("symbol")
+        if symbol:
+            out[str(symbol)] = row
     return out
 
 
@@ -99,17 +103,22 @@ def permissions_for_symbol(symbol: str, sig: dict[str, Any] | None = None) -> li
     source = str((sig or {}).get("source", ""))
     found: list[str] = []
     for rule in load_permission_rules():
-        match = rule.get("match", {})
-        if not isinstance(match, dict):
+        raw_match = rule.get("match", {})
+        if not isinstance(raw_match, dict):
             continue
+        match = cast(dict[str, Any], raw_match)
         ok = False
-        if match.get("symbol") == symbol:
+        exact = str(match.get("symbol", ""))
+        prefix = str(match.get("prefix", ""))
+        contains = str(match.get("symbol_contains", ""))
+        source_contains = str(match.get("source_contains", ""))
+        if exact == symbol:
             ok = True
-        if str(match.get("prefix", "")) and symbol.startswith(str(match.get("prefix"))):
+        if prefix and symbol.startswith(prefix):
             ok = True
-        if str(match.get("symbol_contains", "")) and str(match.get("symbol_contains")) in symbol:
+        if contains and contains in symbol:
             ok = True
-        if str(match.get("source_contains", "")) and str(match.get("source_contains")) in source:
+        if source_contains and source_contains in source:
             ok = True
         if ok:
             for perm in rule.get("permissions", []):

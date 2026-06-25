@@ -67,7 +67,7 @@ for key, (triggers, title, tools) in EXTRA.items():
 def _pick(task: str) -> str:
     text = task.lower()
     scores = {name: sum(1 for word in spec["triggers"] if word in text) for name, spec in WORKFLOWS.items()}
-    return max(scores, key=scores.get) if max(scores.values()) else "attach_read"
+    return max(scores, key=lambda name: scores[name]) if max(scores.values()) else "attach_read"
 
 
 def _apply_capabilities(spec: dict[str, Any], capabilities: set[str]) -> tuple[list[dict[str, Any]], list[str]]:

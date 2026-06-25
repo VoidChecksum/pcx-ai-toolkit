@@ -1,0 +1,70 @@
+name: Auto Release
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: auto-release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (github.event.workflow_run.conclusion == 'success' &&
+         github.event.workflow_run.head_branch == 'main')
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Configure release git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Compute and apply version bump
+        id: bump
+        run: |
+          python3 tools/auto-release.py --apply --json > /tmp/pcx-release.json
+          cat /tmp/pcx-release.json
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          data = json.load(open('/tmp/pcx-release.json'))
+          for key, value in data.items():
+              print(f"{key}={str(value).lower() if isinstance(value, bool) else value}")
+          PY
+
+      - name: Commit release metadata
+        if: steps.bump.outputs.released == 'true'
+        run: |
+          git add VERSION package.json pyproject.toml CHANGELOG.md
+          git commit -m "chore(release): ${{ steps.bump.outputs.tag }}"
+          git tag -a "${{ steps.bump.outputs.tag }}" -m "${{ steps.bump.outputs.tag }}"
+          git push origin HEAD:main "${{ steps.bump.outputs.tag }}"
+
+      - name: Dispatch package/release build
+        if: steps.bump.outputs.released == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
+        run: gh workflow run release.yml --ref "${{ steps.bump.outputs.tag }}"
+
+      - name: Nothing to release
+        if: steps.bump.outputs.released != 'true'
+        run: echo "No feat/fix/BREAKING CHANGE commits since last release tag."

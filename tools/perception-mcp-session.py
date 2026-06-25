@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
 from perception_mcp_client import PerceptionMcpClient, Transcript, normalize_hex  # noqa: E402
@@ -13,11 +14,12 @@ from perception_mcp_client import PerceptionMcpClient, Transcript, normalize_hex
 STATE = Path(".pcx-mcp-session.json")
 
 
-def load_state() -> dict:
-    return json.loads(STATE.read_text()) if STATE.exists() else {}
+def load_state() -> dict[str, Any]:
+    data = json.loads(STATE.read_text()) if STATE.exists() else {}
+    return data if isinstance(data, dict) else {}
 
 
-def save_state(data: dict) -> None:
+def save_state(data: dict[str, Any]) -> None:
     STATE.write_text(json.dumps(data, indent=2) + "\n")
 
 
@@ -41,8 +43,8 @@ def cmd_start(args: argparse.Namespace) -> int:
     return 0
 
 
-def parse_kv(items: list[str]) -> dict:
-    out = {}
+def parse_kv(items: list[str]) -> dict[str, Any]:
+    out: dict[str, Any] = {}
     for item in items:
         if "=" not in item:
             raise SystemExit(f"expected key=value: {item}")
@@ -86,7 +88,7 @@ def main() -> int:
     p = sub.add_parser("status"); p.set_defaults(func=cmd_status)
     p = sub.add_parser("cleanup"); p.add_argument("--url"); p.add_argument("--target"); p.add_argument("--transcript", default=""); p.set_defaults(func=cmd_cleanup)
     args = ap.parse_args()
-    return args.func(args)
+    return int(args.func(args))
 
 if __name__ == "__main__":
     raise SystemExit(main())

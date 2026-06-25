@@ -6,10 +6,18 @@ import argparse
 import json
 from collections import Counter
 from pathlib import Path
+from typing import Any
 
 
-def read_rows(path: Path) -> list[dict]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+def read_rows(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
 
 
 def cmd_replay(args: argparse.Namespace) -> int:
@@ -43,7 +51,7 @@ def main() -> int:
     p = sub.add_parser("replay"); p.add_argument("file", type=Path); p.add_argument("--dry-run", action="store_true"); p.set_defaults(func=cmd_replay)
     p = sub.add_parser("summarize"); p.add_argument("file", type=Path); p.set_defaults(func=cmd_summarize)
     args = ap.parse_args()
-    return args.func(args)
+    return int(args.func(args))
 
 if __name__ == "__main__":
     raise SystemExit(main())

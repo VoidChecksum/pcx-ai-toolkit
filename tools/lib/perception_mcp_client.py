@@ -6,7 +6,7 @@ import time
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 WRITE_TOOLS = {"process/write_virtual_memory", "process/write_typed_value", "process/write_string", "process/copy_memory", "process/fill_memory", "process/allocate_memory"}
@@ -49,10 +49,13 @@ class PerceptionMcpClient:
         payload = json.dumps({"jsonrpc": "2.0", "id": self.rpc_id, "method": method, "params": params}).encode()
         req = urllib.request.Request(self.url, data=payload, headers={"content-type": "application/json"})
         with urllib.request.urlopen(req, timeout=10) as resp:
-            return json.loads(resp.read().decode())
+            data = json.loads(resp.read().decode())
+        if not isinstance(data, dict):
+            raise RuntimeError("JSON-RPC response was not an object")
+        return cast(dict[str, Any], data)
 
     def call_tool(self, tool: str, arguments: dict[str, Any] | None = None, retry_stale: bool = True) -> Any:
-        args = dict(arguments or {})
+        args: dict[str, Any] = dict(arguments or {})
         if self.handle and "handle" in args:
             args["handle"] = normalize_hex(args["handle"])
         if tool in WRITE_TOOLS:
@@ -76,7 +79,12 @@ class PerceptionMcpClient:
     def start(self) -> str:
         result = self.call_tool("process/reference_by_name", {"name": self.target}, retry_stale=False)
         if isinstance(result, dict):
-            self.handle = normalize_hex(result.get("handle") or result.get("content", [{}])[0].get("text", ""))
+            data = cast(dict[str, Any], result)
+            content = data.get("content")
+            text = ""
+            if isinstance(content, list) and content and isinstance(content[0], dict):
+                text = str(cast(dict[str, Any], content[0]).get("text", ""))
+            self.handle = normalize_hex(str(data.get("handle") or text))
         else:
             self.handle = normalize_hex(str(result))
         self.transcript.handle = self.handle
