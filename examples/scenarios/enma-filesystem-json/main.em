@@ -1,7 +1,7 @@
 import "json";
 import "file";
 
-// Host must grant file_system_access before compiling this script.
+// Host must grant PERM_FILE / file_system_access before compiling this script.
 
 int64 main() {
     string path = "pcx-scenario.json";
