@@ -1,4 +1,5 @@
 # mypy: ignore-errors
+# pyright: reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportArgumentType=false, reportOperatorIssue=false, reportCallIssue=false, reportUnknownVariableType=false, reportUnknownParameterType=false
 """Deterministic Perception MCP workflow plans."""
 from __future__ import annotations
 import json, re
