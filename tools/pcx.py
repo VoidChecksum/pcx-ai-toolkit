@@ -448,6 +448,34 @@ def cmd_ai_smoke() -> int:
                 print(f"  {finding.get('kind')} {finding.get('symbol')}: {finding.get('message')}")
     return 1 if failed else 0
 
+def cmd_plan(args: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="pcx plan")
+    ap.add_argument("task", nargs="*", help="task description")
+    ap.add_argument("--weak-model", action="store_true", help="emit a constrained weak-model workflow")
+    ns = ap.parse_args(args)
+    task = " ".join(ns.task).strip() or "Perception Enma task"
+    if ns.weak_model:
+        print("Weak-model plan")
+        print(f"Task: {task}")
+        print("Use:")
+        print("- docs/AI_AGENT_OPERATING_MANUAL.md")
+        print("- docs/perception/llm-routing.md")
+        print("- docs/llms-perception-enma.md")
+        print("- docs/model-guides/weak-local-models.md")
+        print("Rules:")
+        print("- choose a template first; do not free-form scaffold")
+        print("- use only symbols returned by pcx api / api_lookup")
+        print("- validate every code block before adding another file")
+        print("- no inferred offsets or undocumented helper functions")
+        print("Then run:")
+        print("- pcx verify <file.em>")
+        print("- pcx verify-project <project>")
+        return 0
+    print(f"Plan: {task}")
+    print("Use: pcx plan --weak-model \"<task>\" for constrained local/weak LLMs.")
+    return 0
+
+
 def cmd_docs_check() -> int:
     """Run source regeneration, drift, eval, and focused tests before shipping."""
     commands = [
@@ -476,7 +504,7 @@ def main() -> int:
                     version=f"pcx-ai-toolkit v{get_version()}")
     ap.add_argument("command", nargs="?", help=(
         "Command to run: setup, update, lint, symbol-check, api, check-answer, "
-        "create, build-api-index, verify, verify-project, docs-check, check-drift, "
+        "create, build-api-index, verify, verify-project, plan, docs-check, check-drift, "
         "check-mcp, check-matrix, counts, prompt, agent-install, ai-smoke, version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
@@ -556,6 +584,9 @@ def main() -> int:
 
     if cmd in ("docs-check", "doc-check"):
         return cmd_docs_check()
+
+    if cmd == "plan":
+        return cmd_plan(sub_args)
 
     if cmd == "new":
         return cmd_new(sub_args)

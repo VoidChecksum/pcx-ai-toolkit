@@ -4,11 +4,24 @@
   "title": "Perception Enma symbol version metadata",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "last_verified", "notes", "symbols"],
+  "required": [
+    "schema",
+    "last_verified",
+    "notes",
+    "symbols"
+  ],
   "properties": {
-    "schema": {"type": "integer", "const": 1},
-    "last_verified": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
-    "notes": {"type": "string"},
+    "schema": {
+      "type": "integer",
+      "const": 1
+    },
+    "last_verified": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "notes": {
+      "type": "string"
+    },
     "symbols": {
       "type": "array",
       "items": {
@@ -35,47 +48,187 @@
           "signature",
           "return_type",
           "params",
+          "permission_notes",
+          "type_shape",
+          "constant_value",
+          "callback_shape",
           "deprecated",
           "removed",
           "replacement",
           "notes"
         ],
         "properties": {
-          "symbol": {"type": "string", "minLength": 1},
-          "introduced": {"type": "string", "pattern": "^(unknown|\\d{4}-\\d{2}-\\d{2}(?:\\([ab]\\))?|<=\\d{4}-\\d{2}-\\d{2}(?:\\([ab]\\))?|\\d{4}-\\d{2}-\\d{2}-or-earlier)$"},
-          "first_documented": {"type": "string", "pattern": "^(unknown|\\d{4}-\\d{2}-\\d{2}(?:\\([ab]\\))?|<=\\d{4}-\\d{2}-\\d{2}(?:\\([ab]\\))?|\\d{4}-\\d{2}-\\d{2}-or-earlier)$"},
-          "source": {"type": "string", "minLength": 1},
-          "changelog_source": {"type": ["string", "null"]},
-          "language": {"type": "string", "const": "enma"},
-          "api_family": {"type": "string", "minLength": 1},
-          "permissions": {"type": "array", "items": {"type": "string"}},
-          "failure_modes": {"type": "array", "items": {"type": "string"}},
-          "return_sentinel": {"type": ["string", "null"]},
-          "requires_context": {"type": ["string", "null"]},
-          "side_effects": {"type": "array", "items": {"type": "string"}},
-          "threading": {"type": "string", "enum": ["main", "routine", "render", "any", "unknown"]},
-          "source_anchor": {"type": ["string", "null"]},
-          "line_start": {"type": ["integer", "null"], "minimum": 1},
-          "line_end": {"type": ["integer", "null"], "minimum": 1},
-          "kind": {"type": "string", "enum": ["function", "method", "type", "constant", "enum", "callback", "page"]},
-          "signature": {"type": ["string", "null"]},
-          "return_type": {"type": ["string", "null"]},
+          "symbol": {
+            "type": "string",
+            "minLength": 1
+          },
+          "introduced": {
+            "type": "string",
+            "pattern": "^(unknown|\\d{4}-\\d{2}-\\d{2}(?:\\([ab]\\))?|<=\\d{4}-\\d{2}-\\d{2}(?:\\([ab]\\))?|\\d{4}-\\d{2}-\\d{2}-or-earlier)$"
+          },
+          "first_documented": {
+            "type": "string",
+            "pattern": "^(unknown|\\d{4}-\\d{2}-\\d{2}(?:\\([ab]\\))?|<=\\d{4}-\\d{2}-\\d{2}(?:\\([ab]\\))?|\\d{4}-\\d{2}-\\d{2}-or-earlier)$"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "changelog_source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "const": "enma"
+          },
+          "api_family": {
+            "type": "string",
+            "minLength": 1
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "failure_modes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "return_sentinel": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "requires_context": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "side_effects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "threading": {
+            "type": "string",
+            "enum": [
+              "main",
+              "routine",
+              "render",
+              "any",
+              "unknown"
+            ]
+          },
+          "source_anchor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "line_start": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "line_end": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "function",
+              "method",
+              "type",
+              "constant",
+              "enum",
+              "callback",
+              "page"
+            ]
+          },
+          "signature": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "return_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "params": {
             "type": "array",
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["name", "type"],
+              "required": [
+                "name",
+                "type"
+              ],
               "properties": {
-                "name": {"type": "string", "minLength": 1},
-                "type": {"type": "string", "minLength": 1}
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "type": {
+                  "type": "string",
+                  "minLength": 1
+                }
               }
             }
           },
-          "deprecated": {"type": "boolean"},
-          "removed": {"type": "boolean"},
-          "replacement": {"type": ["string", "null"]},
-          "notes": {"type": "string"}
+          "deprecated": {
+            "type": "boolean"
+          },
+          "removed": {
+            "type": "boolean"
+          },
+          "replacement": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          },
+          "permission_notes": {
+            "type": "string"
+          },
+          "type_shape": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "constant_value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "callback_shape": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
         }
       }
     }

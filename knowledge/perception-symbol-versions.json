@@ -30,8 +30,8 @@
       ],
       "threading": "any",
       "source_anchor": "#alloc_vm",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 221,
+      "line_end": 224,
       "kind": "method",
       "signature": "uint64 proc.alloc_vm(uint64)",
       "return_type": "uint64",
@@ -40,7 +40,11 @@
           "name": "arg1",
           "type": "uint64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires process_memory_write. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "ampm",
@@ -55,14 +59,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#ampm",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 42,
+      "line_end": 45,
       "kind": "function",
       "signature": "string ampm(int64)",
       "return_type": "string",
@@ -71,7 +77,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "bind_structured_buffer",
@@ -91,12 +101,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#bind_structured_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 202,
+      "line_end": 205,
       "kind": "function",
       "signature": "int64 bind_structured_buffer(int64, int32, int32)",
       "return_type": "int64",
@@ -113,7 +123,11 @@
           "name": "arg3",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "capture_backbuffer",
@@ -133,12 +147,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#capture_backbuffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 204,
+      "line_end": 207,
       "kind": "function",
       "signature": "int64 capture_backbuffer(int32)",
       "return_type": "int64",
@@ -147,7 +161,11 @@
           "name": "arg1",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "cb",
@@ -162,14 +180,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#cb",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 84,
+      "line_end": 87,
       "kind": "function",
       "signature": "int64 cb(int64)",
       "return_type": "int64",
@@ -178,7 +199,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "clip_pop",
@@ -198,16 +223,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#clip_pop",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 70,
+      "line_end": 73,
       "kind": "function",
       "signature": "int64 clip_pop()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "clip_push",
@@ -227,12 +256,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#clip_push",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 69,
+      "line_end": 72,
       "kind": "function",
       "signature": "int64 clip_push(vec2, vec2)",
       "return_type": "int64",
@@ -245,7 +274,11 @@
           "name": "arg2",
           "type": "vec2"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "copy_from_clipboard",
@@ -260,18 +293,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#copy_from_clipboard",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 57,
+      "line_end": 60,
       "kind": "function",
       "signature": "string copy_from_clipboard()",
       "return_type": "string",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "copy_to_clipboard",
@@ -286,14 +325,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#copy_to_clipboard",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 56,
+      "line_end": 59,
       "kind": "function",
       "signature": "bool copy_to_clipboard(string)",
       "return_type": "bool",
@@ -302,7 +343,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "cpu_active",
@@ -317,18 +362,25 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#cpu_active",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 86,
+      "line_end": 89,
       "kind": "function",
       "signature": "cpu_t cpu_active()",
       "return_type": "cpu_t",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "cpu_brand",
@@ -343,18 +395,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#cpu_brand",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 13,
+      "line_end": 16,
       "kind": "function",
       "signature": "string cpu_brand()",
       "return_type": "string",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "cpu_create",
@@ -369,18 +427,25 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#cpu_create",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 29,
+      "line_end": 32,
       "kind": "function",
       "signature": "cpu_t cpu_create()",
       "return_type": "cpu_t",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "cpu_create_process",
@@ -395,14 +460,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#cpu_create_process",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 30,
+      "line_end": 33,
       "kind": "function",
       "signature": "cpu_t cpu_create_process(proc_t, bool)",
       "return_type": "cpu_t",
@@ -415,7 +483,11 @@
           "name": "arg2",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "cpu_vendor",
@@ -430,18 +502,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#cpu_vendor",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 12,
+      "line_end": 15,
       "kind": "function",
       "signature": "string cpu_vendor()",
       "return_type": "string",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_bitmap",
@@ -461,12 +539,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_bitmap",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 56,
+      "line_end": 59,
       "kind": "function",
       "signature": "int64 create_bitmap(array)",
       "return_type": "int64",
@@ -475,7 +553,11 @@
           "name": "arg1",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_blend_state",
@@ -495,12 +577,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_blend_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 109,
+      "line_end": 112,
       "kind": "function",
       "signature": "int64 create_blend_state(int32, int32, int32, int32, int32, int32)",
       "return_type": "int64",
@@ -529,7 +611,11 @@
           "name": "arg6",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_compute_shader",
@@ -549,12 +635,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_compute_shader",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 87,
+      "line_end": 90,
       "kind": "function",
       "signature": "int64 create_compute_shader(string)",
       "return_type": "int64",
@@ -563,7 +649,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_constant_buffer",
@@ -583,12 +673,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_constant_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 100,
+      "line_end": 103,
       "kind": "function",
       "signature": "int64 create_constant_buffer(uint32)",
       "return_type": "int64",
@@ -597,7 +687,11 @@
           "name": "arg1",
           "type": "uint32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_default_frame",
@@ -617,12 +711,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_default_frame",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 141,
+      "line_end": 144,
       "kind": "function",
       "signature": "frame_t create_default_frame(string, vec2, vec2, layer_t)",
       "return_type": "frame_t",
@@ -643,7 +737,11 @@
           "name": "arg4",
           "type": "layer_t"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_depth_buffer",
@@ -663,12 +761,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_depth_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 132,
+      "line_end": 135,
       "kind": "function",
       "signature": "int64 create_depth_buffer(uint32, uint32)",
       "return_type": "int64",
@@ -681,7 +779,11 @@
           "name": "arg2",
           "type": "uint32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_depth_stencil_state",
@@ -701,12 +803,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_depth_stencil_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 113,
+      "line_end": 116,
       "kind": "function",
       "signature": "int64 create_depth_stencil_state(bool, bool, int32)",
       "return_type": "int64",
@@ -723,7 +825,11 @@
           "name": "arg3",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_draggable_frame",
@@ -743,12 +849,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_draggable_frame",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 143,
+      "line_end": 146,
       "kind": "function",
       "signature": "frame_t create_draggable_frame(string, vec2, vec2, layer_t)",
       "return_type": "frame_t",
@@ -769,7 +875,11 @@
           "name": "arg4",
           "type": "layer_t"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_file_picker",
@@ -789,12 +899,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_file_picker",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 240,
+      "line_end": 243,
       "kind": "function",
       "signature": "file_picker_t create_file_picker(string, string, string, bool)",
       "return_type": "file_picker_t",
@@ -815,7 +925,11 @@
           "name": "arg4",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_font",
@@ -835,12 +949,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_font",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 54,
+      "line_end": 57,
       "kind": "function",
       "signature": "int64 create_font(string, float64, bool, bool, array)",
       "return_type": "int64",
@@ -865,7 +979,11 @@
           "name": "arg5",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_font_mem",
@@ -885,12 +1003,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_font_mem",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 55,
+      "line_end": 58,
       "kind": "function",
       "signature": "int64 create_font_mem(string, float64, array, bool, bool, array)",
       "return_type": "int64",
@@ -919,7 +1037,11 @@
           "name": "arg6",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_frame",
@@ -939,12 +1061,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_frame",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 139,
+      "line_end": 142,
       "kind": "function",
       "signature": "frame_t create_frame(string, vec2, vec2, layer_t)",
       "return_type": "frame_t",
@@ -965,7 +1087,11 @@
           "name": "arg4",
           "type": "layer_t"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_index_buffer",
@@ -985,12 +1111,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_index_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 98,
+      "line_end": 101,
       "kind": "function",
       "signature": "int64 create_index_buffer(uint32, bool, bool)",
       "return_type": "int64",
@@ -1007,7 +1133,11 @@
           "name": "arg3",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_layer",
@@ -1027,12 +1157,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_layer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 169,
+      "line_end": 172,
       "kind": "function",
       "signature": "layer_t create_layer(string, bool, bool)",
       "return_type": "layer_t",
@@ -1049,7 +1179,11 @@
           "name": "arg3",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_menu",
@@ -1069,16 +1203,20 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_menu",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 201,
+      "line_end": 204,
       "kind": "function",
       "signature": "menu_t create_menu()",
       "return_type": "menu_t",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_mesh_raw",
@@ -1098,12 +1236,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_mesh_raw",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 147,
+      "line_end": 150,
       "kind": "function",
       "signature": "int64 create_mesh_raw(array, uint32, uint32, array, uint32, bool)",
       "return_type": "int64",
@@ -1132,7 +1270,11 @@
           "name": "arg6",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_popup",
@@ -1152,12 +1294,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_popup",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 144,
+      "line_end": 147,
       "kind": "function",
       "signature": "frame_t create_popup(string, vec2, vec2, layer_t)",
       "return_type": "frame_t",
@@ -1178,7 +1320,11 @@
           "name": "arg4",
           "type": "layer_t"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_rasterizer_state",
@@ -1198,12 +1344,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_rasterizer_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 115,
+      "line_end": 118,
       "kind": "function",
       "signature": "int64 create_rasterizer_state(int32, int32, bool)",
       "return_type": "int64",
@@ -1220,7 +1366,11 @@
           "name": "arg3",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_render_target",
@@ -1240,12 +1390,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_render_target",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 130,
+      "line_end": 133,
       "kind": "function",
       "signature": "int64 create_render_target(uint32, uint32)",
       "return_type": "int64",
@@ -1258,7 +1408,11 @@
           "name": "arg2",
           "type": "uint32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_sampler",
@@ -1278,12 +1432,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_sampler",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 111,
+      "line_end": 114,
       "kind": "function",
       "signature": "int64 create_sampler(int32, int32, int32)",
       "return_type": "int64",
@@ -1300,7 +1454,11 @@
           "name": "arg3",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_shader",
@@ -1320,12 +1478,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_shader",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 85,
+      "line_end": 88,
       "kind": "function",
       "signature": "int64 create_shader(string, string, string)",
       "return_type": "int64",
@@ -1342,7 +1500,11 @@
           "name": "arg3",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_sidebar_section",
@@ -1362,12 +1524,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_sidebar_section",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 17,
+      "line_end": 20,
       "kind": "function",
       "signature": "sidebar_section_t create_sidebar_section(string, string)",
       "return_type": "sidebar_section_t",
@@ -1380,7 +1542,11 @@
           "name": "arg2",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_sidebar_separator",
@@ -1400,16 +1566,20 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_sidebar_separator",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 18,
+      "line_end": 21,
       "kind": "function",
       "signature": "void create_sidebar_separator()",
       "return_type": "void",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_structured_buffer",
@@ -1429,12 +1599,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_structured_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 102,
+      "line_end": 105,
       "kind": "function",
       "signature": "int64 create_structured_buffer(uint32, uint32, bool, bool)",
       "return_type": "int64",
@@ -1455,7 +1625,11 @@
           "name": "arg4",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_texture",
@@ -1475,12 +1649,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_texture",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 134,
+      "line_end": 137,
       "kind": "function",
       "signature": "int64 create_texture(uint32, uint32, array)",
       "return_type": "int64",
@@ -1497,7 +1671,11 @@
           "name": "arg3",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_vertex_buffer",
@@ -1517,12 +1695,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_vertex_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 96,
+      "line_end": 99,
       "kind": "function",
       "signature": "int64 create_vertex_buffer(uint32, uint32, bool)",
       "return_type": "int64",
@@ -1539,7 +1717,11 @@
           "name": "arg3",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "create_widget",
@@ -1559,12 +1741,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#create_widget",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 183,
+      "line_end": 186,
       "kind": "function",
       "signature": "widget_t create_widget(frame_t, string, int64, bool)",
       "return_type": "widget_t",
@@ -1585,7 +1767,11 @@
           "name": "arg4",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_bind_constant_buffer",
@@ -1605,12 +1791,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_bind_constant_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 198,
+      "line_end": 201,
       "kind": "function",
       "signature": "int64 custom_bind_constant_buffer(int64, array, int32, int32)",
       "return_type": "int64",
@@ -1631,7 +1817,11 @@
           "name": "arg4",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_bind_rt_as_texture",
@@ -1651,12 +1841,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_bind_rt_as_texture",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 191,
+      "line_end": 194,
       "kind": "function",
       "signature": "int64 custom_bind_rt_as_texture(int64, int32)",
       "return_type": "int64",
@@ -1669,7 +1859,11 @@
           "name": "arg2",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_bind_texture",
@@ -1689,12 +1883,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_bind_texture",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 197,
+      "line_end": 200,
       "kind": "function",
       "signature": "int64 custom_bind_texture(int64, int64, int32)",
       "return_type": "int64",
@@ -1711,7 +1905,11 @@
           "name": "arg3",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_clear_depth_buffer",
@@ -1731,12 +1929,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_clear_depth_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 201,
+      "line_end": 204,
       "kind": "function",
       "signature": "int64 custom_clear_depth_buffer(int64)",
       "return_type": "int64",
@@ -1745,7 +1943,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_clear_render_target",
@@ -1765,12 +1967,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_clear_render_target",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 200,
+      "line_end": 203,
       "kind": "function",
       "signature": "int64 custom_clear_render_target(int64, float64, float64, float64, float64)",
       "return_type": "int64",
@@ -1795,7 +1997,11 @@
           "name": "arg5",
           "type": "float64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_draw",
@@ -1815,12 +2021,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_draw",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 165,
+      "line_end": 168,
       "kind": "function",
       "signature": "int64 custom_draw(int64, int64, array, uint32, int32, int64, int64, int64, int32, int64, array, int32)",
       "return_type": "int64",
@@ -1873,7 +2079,11 @@
           "name": "arg12",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_draw_indexed",
@@ -1893,12 +2103,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_draw_indexed",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 169,
+      "line_end": 172,
       "kind": "function",
       "signature": "int64 custom_draw_indexed(int64, int64, array, uint32, int64, array, uint32, int32, int64, int64, int64, int32, int64, array, int32)",
       "return_type": "int64",
@@ -1963,7 +2173,11 @@
           "name": "arg15",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_reset_render_target",
@@ -1983,16 +2197,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_reset_render_target",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 190,
+      "line_end": 193,
       "kind": "function",
       "signature": "int64 custom_reset_render_target()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_reset_viewport",
@@ -2012,16 +2230,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_reset_viewport",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 196,
+      "line_end": 199,
       "kind": "function",
       "signature": "int64 custom_reset_viewport()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_restore_state",
@@ -2041,16 +2263,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_restore_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 192,
+      "line_end": 195,
       "kind": "function",
       "signature": "int64 custom_restore_state()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_set_depth_stencil_state",
@@ -2070,12 +2296,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_set_depth_stencil_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 193,
+      "line_end": 196,
       "kind": "function",
       "signature": "int64 custom_set_depth_stencil_state(int64)",
       "return_type": "int64",
@@ -2084,7 +2310,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_set_rasterizer_state",
@@ -2104,12 +2334,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_set_rasterizer_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 194,
+      "line_end": 197,
       "kind": "function",
       "signature": "int64 custom_set_rasterizer_state(int64)",
       "return_type": "int64",
@@ -2118,7 +2348,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_set_render_target",
@@ -2138,12 +2372,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_set_render_target",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 188,
+      "line_end": 191,
       "kind": "function",
       "signature": "int64 custom_set_render_target(int64)",
       "return_type": "int64",
@@ -2152,7 +2386,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_set_render_target_ext",
@@ -2172,12 +2410,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_set_render_target_ext",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 189,
+      "line_end": 192,
       "kind": "function",
       "signature": "int64 custom_set_render_target_ext(int64, int64)",
       "return_type": "int64",
@@ -2190,7 +2428,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_set_viewport",
@@ -2210,12 +2452,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_set_viewport",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 195,
+      "line_end": 198,
       "kind": "function",
       "signature": "int64 custom_set_viewport(float64, float64, float64, float64)",
       "return_type": "int64",
@@ -2236,7 +2478,11 @@
           "name": "arg4",
           "type": "float64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "custom_update_texture",
@@ -2256,12 +2502,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#custom_update_texture",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 199,
+      "line_end": 202,
       "kind": "function",
       "signature": "int64 custom_update_texture(int64, uint32, uint32, uint32, uint32, array)",
       "return_type": "int64",
@@ -2290,7 +2536,11 @@
           "name": "arg6",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "day_name",
@@ -2305,14 +2555,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#day_name",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 39,
+      "line_end": 42,
       "kind": "function",
       "signature": "string day_name(int64)",
       "return_type": "string",
@@ -2321,7 +2573,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_blend_state",
@@ -2341,12 +2597,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_blend_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 110,
+      "line_end": 113,
       "kind": "function",
       "signature": "int64 destroy_blend_state(int64)",
       "return_type": "int64",
@@ -2355,7 +2611,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_compute_shader",
@@ -2375,12 +2635,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_compute_shader",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 88,
+      "line_end": 91,
       "kind": "function",
       "signature": "int64 destroy_compute_shader(int64)",
       "return_type": "int64",
@@ -2389,7 +2649,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_constant_buffer",
@@ -2409,12 +2673,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_constant_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 101,
+      "line_end": 104,
       "kind": "function",
       "signature": "int64 destroy_constant_buffer(int64)",
       "return_type": "int64",
@@ -2423,7 +2687,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_depth_buffer",
@@ -2443,12 +2711,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_depth_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 133,
+      "line_end": 136,
       "kind": "function",
       "signature": "int64 destroy_depth_buffer(int64)",
       "return_type": "int64",
@@ -2457,7 +2725,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_depth_stencil_state",
@@ -2477,12 +2749,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_depth_stencil_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 114,
+      "line_end": 117,
       "kind": "function",
       "signature": "int64 destroy_depth_stencil_state(int64)",
       "return_type": "int64",
@@ -2491,7 +2763,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_index_buffer",
@@ -2511,12 +2787,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_index_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 99,
+      "line_end": 102,
       "kind": "function",
       "signature": "int64 destroy_index_buffer(int64)",
       "return_type": "int64",
@@ -2525,7 +2801,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_mesh",
@@ -2545,12 +2825,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_mesh",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 150,
+      "line_end": 153,
       "kind": "function",
       "signature": "int64 destroy_mesh(int64)",
       "return_type": "int64",
@@ -2559,7 +2839,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_rasterizer_state",
@@ -2579,12 +2863,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_rasterizer_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 116,
+      "line_end": 119,
       "kind": "function",
       "signature": "int64 destroy_rasterizer_state(int64)",
       "return_type": "int64",
@@ -2593,7 +2877,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_render_target",
@@ -2613,12 +2901,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_render_target",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 131,
+      "line_end": 134,
       "kind": "function",
       "signature": "int64 destroy_render_target(int64)",
       "return_type": "int64",
@@ -2627,7 +2915,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_sampler",
@@ -2647,12 +2939,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_sampler",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 112,
+      "line_end": 115,
       "kind": "function",
       "signature": "int64 destroy_sampler(int64)",
       "return_type": "int64",
@@ -2661,7 +2953,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_shader",
@@ -2681,12 +2977,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_shader",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 86,
+      "line_end": 89,
       "kind": "function",
       "signature": "int64 destroy_shader(int64)",
       "return_type": "int64",
@@ -2695,7 +2991,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_structured_buffer",
@@ -2715,12 +3015,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_structured_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 103,
+      "line_end": 106,
       "kind": "function",
       "signature": "int64 destroy_structured_buffer(int64)",
       "return_type": "int64",
@@ -2729,7 +3029,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_texture",
@@ -2749,12 +3053,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_texture",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 135,
+      "line_end": 138,
       "kind": "function",
       "signature": "int64 destroy_texture(int64)",
       "return_type": "int64",
@@ -2763,7 +3067,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "destroy_vertex_buffer",
@@ -2783,12 +3091,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#destroy_vertex_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 97,
+      "line_end": 100,
       "kind": "function",
       "signature": "int64 destroy_vertex_buffer(int64)",
       "return_type": "int64",
@@ -2797,7 +3105,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "dispatch_compute",
@@ -2817,12 +3129,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#dispatch_compute",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 178,
+      "line_end": 181,
       "kind": "function",
       "signature": "int64 dispatch_compute(int64, uint32, uint32, uint32)",
       "return_type": "int64",
@@ -2843,7 +3155,11 @@
           "name": "arg4",
           "type": "uint32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_arc",
@@ -2863,12 +3179,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_arc",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 37,
+      "line_end": 40,
       "kind": "function",
       "signature": "int64 draw_arc(vec2, vec2, float64, float64, color, float64, bool)",
       "return_type": "int64",
@@ -2901,7 +3217,11 @@
           "name": "arg7",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_bitmap",
@@ -2921,12 +3241,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_bitmap",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 41,
+      "line_end": 44,
       "kind": "function",
       "signature": "int64 draw_bitmap(int64, vec2, vec2, color, bool)",
       "return_type": "int64",
@@ -2951,7 +3271,11 @@
           "name": "arg5",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_circle",
@@ -2971,12 +3295,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_circle",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 36,
+      "line_end": 39,
       "kind": "function",
       "signature": "int64 draw_circle(vec2, float64, color, float64, bool)",
       "return_type": "int64",
@@ -3001,7 +3325,11 @@
           "name": "arg5",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_four_corner_gradient",
@@ -3021,12 +3349,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_four_corner_gradient",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 39,
+      "line_end": 42,
       "kind": "function",
       "signature": "int64 draw_four_corner_gradient(vec2, vec2, color, color, color, color, float64)",
       "return_type": "int64",
@@ -3059,7 +3387,11 @@
           "name": "arg7",
           "type": "float64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_line",
@@ -3079,12 +3411,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_line",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 35,
+      "line_end": 38,
       "kind": "function",
       "signature": "int64 draw_line(vec2, vec2, color, float64)",
       "return_type": "int64",
@@ -3105,7 +3437,11 @@
           "name": "arg4",
           "type": "float64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_mesh",
@@ -3125,12 +3461,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_mesh",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 174,
+      "line_end": 177,
       "kind": "function",
       "signature": "int64 draw_mesh(int64, int64, int32, int64, int64, int64, int32, int64, array, int32)",
       "return_type": "int64",
@@ -3175,7 +3511,11 @@
           "name": "arg10",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_polygon",
@@ -3195,12 +3535,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_polygon",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 40,
+      "line_end": 43,
       "kind": "function",
       "signature": "int64 draw_polygon(array, uint32, color, float64, bool)",
       "return_type": "int64",
@@ -3225,7 +3565,11 @@
           "name": "arg5",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_rect",
@@ -3245,12 +3589,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_rect",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 33,
+      "line_end": 36,
       "kind": "function",
       "signature": "int64 draw_rect(vec2, vec2, color, float64, float64, uint8)",
       "return_type": "int64",
@@ -3279,7 +3623,11 @@
           "name": "arg6",
           "type": "uint8"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_rect_filled",
@@ -3299,12 +3647,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_rect_filled",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 21,
+      "line_end": 24,
       "kind": "function",
       "signature": "int64 draw_rect_filled(vec2, vec2, color, float64, uint8)",
       "return_type": "int64",
@@ -3329,7 +3677,11 @@
           "name": "arg5",
           "type": "uint8"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_text",
@@ -3349,12 +3701,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_text",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 42,
+      "line_end": 45,
       "kind": "function",
       "signature": "int64 draw_text(string, vec2, color, int64, int32, color, float64)",
       "return_type": "int64",
@@ -3387,7 +3739,11 @@
           "name": "arg7",
           "type": "float64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "draw_triangle",
@@ -3407,12 +3763,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#draw_triangle",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 38,
+      "line_end": 41,
       "kind": "function",
       "signature": "int64 draw_triangle(vec2, vec2, vec2, color, float64, bool)",
       "return_type": "int64",
@@ -3441,7 +3797,11 @@
           "name": "arg6",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "Filesystem API",
@@ -3470,12 +3830,16 @@
       ],
       "threading": "any",
       "source_anchor": "#Filesystem API",
-      "line_start": null,
-      "line_end": null,
-      "kind": "function",
+      "line_start": 3,
+      "line_end": 6,
+      "kind": "page",
       "signature": null,
       "return_type": null,
-      "params": []
+      "params": [],
+      "type_shape": "Documentation page for filesystem APIs.",
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "find_window",
@@ -3490,14 +3854,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#find_window",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 28,
+      "line_end": 31,
       "kind": "function",
       "signature": "int64 find_window(string)",
       "return_type": "int64",
@@ -3506,7 +3872,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "float32",
@@ -3535,9 +3905,9 @@
       ],
       "threading": "any",
       "source_anchor": "#float32",
-      "line_start": null,
-      "line_end": null,
-      "kind": "function",
+      "line_start": 40,
+      "line_end": 43,
+      "kind": "type",
       "signature": "reads source bytes as float32(promoted)",
       "return_type": "reads source bytes as",
       "params": [
@@ -3545,7 +3915,11 @@
           "name": "arg1",
           "type": "promoted"
         }
-      ]
+      ],
+      "type_shape": "Enma type `float32` documented by docs/perception/proc-api.md",
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires process_memory_read. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "free_vm",
@@ -3574,8 +3948,8 @@
       ],
       "threading": "any",
       "source_anchor": "#free_vm",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 222,
+      "line_end": 225,
       "kind": "method",
       "signature": "bool proc.free_vm(uint64)",
       "return_type": "bool",
@@ -3584,7 +3958,11 @@
           "name": "arg1",
           "type": "uint64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires process_memory_write. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_append_file",
@@ -3613,8 +3991,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_append_file",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 31,
+      "line_end": 34,
       "kind": "function",
       "signature": "bool fs_append_file(string, string)",
       "return_type": "bool",
@@ -3627,7 +4005,11 @@
           "name": "arg2",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_append_file_binary",
@@ -3656,8 +4038,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_append_file_binary",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 33,
+      "line_end": 36,
       "kind": "function",
       "signature": "bool fs_append_file_binary(string, array)",
       "return_type": "bool",
@@ -3670,7 +4052,11 @@
           "name": "arg2",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_create_directory",
@@ -3699,8 +4085,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_create_directory",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 26,
+      "line_end": 29,
       "kind": "function",
       "signature": "bool fs_create_directory(string)",
       "return_type": "bool",
@@ -3709,7 +4095,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_create_file",
@@ -3738,8 +4128,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_create_file",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 25,
+      "line_end": 28,
       "kind": "function",
       "signature": "bool fs_create_file(string, string)",
       "return_type": "bool",
@@ -3752,7 +4142,11 @@
           "name": "arg2",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_delete_directory",
@@ -3781,8 +4175,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_delete_directory",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 28,
+      "line_end": 31,
       "kind": "function",
       "signature": "bool fs_delete_directory(string)",
       "return_type": "bool",
@@ -3791,7 +4185,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_delete_file",
@@ -3820,8 +4218,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_delete_file",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 28,
+      "line_end": 31,
       "kind": "function",
       "signature": "bool fs_delete_file(string)",
       "return_type": "bool",
@@ -3830,7 +4228,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_dir_exists",
@@ -3859,8 +4261,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_dir_exists",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 27,
+      "line_end": 30,
       "kind": "function",
       "signature": "bool fs_dir_exists(string)",
       "return_type": "bool",
@@ -3869,7 +4271,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_file_exists",
@@ -3898,8 +4304,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_file_exists",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 27,
+      "line_end": 30,
       "kind": "function",
       "signature": "bool fs_file_exists(string)",
       "return_type": "bool",
@@ -3908,7 +4314,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_file_size",
@@ -3937,8 +4347,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_file_size",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 29,
+      "line_end": 32,
       "kind": "function",
       "signature": "int64 fs_file_size(string)",
       "return_type": "int64",
@@ -3947,7 +4357,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_list_all",
@@ -3976,8 +4390,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_list_all",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 34,
+      "line_end": 37,
       "kind": "function",
       "signature": "array fs_list_all(string)",
       "return_type": "array",
@@ -3986,7 +4400,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_list_dirs",
@@ -4015,8 +4433,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_list_dirs",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 34,
+      "line_end": 37,
       "kind": "function",
       "signature": "array fs_list_dirs(string)",
       "return_type": "array",
@@ -4025,7 +4443,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_list_files",
@@ -4054,8 +4476,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_list_files",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 34,
+      "line_end": 37,
       "kind": "function",
       "signature": "array fs_list_files(string)",
       "return_type": "array",
@@ -4064,7 +4486,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_read_file",
@@ -4093,8 +4519,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_read_file",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 30,
+      "line_end": 33,
       "kind": "function",
       "signature": "string fs_read_file(string)",
       "return_type": "string",
@@ -4103,7 +4529,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_read_file_binary",
@@ -4132,8 +4562,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_read_file_binary",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 32,
+      "line_end": 35,
       "kind": "function",
       "signature": "array fs_read_file_binary(string)",
       "return_type": "array",
@@ -4142,7 +4572,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_write_file",
@@ -4171,8 +4605,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_write_file",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 31,
+      "line_end": 34,
       "kind": "function",
       "signature": "bool fs_write_file(string, string)",
       "return_type": "bool",
@@ -4185,7 +4619,11 @@
           "name": "arg2",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "fs_write_file_binary",
@@ -4214,8 +4652,8 @@
       ],
       "threading": "any",
       "source_anchor": "#fs_write_file_binary",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 33,
+      "line_end": 36,
       "kind": "function",
       "signature": "bool fs_write_file_binary(string, array)",
       "return_type": "bool",
@@ -4228,7 +4666,11 @@
           "name": "arg2",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires file_system_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "get_all_hwnds",
@@ -4243,18 +4685,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_all_hwnds",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 27,
+      "line_end": 30,
       "kind": "function",
       "signature": "array get_all_hwnds()",
       "return_type": "array",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_char_advance",
@@ -4274,12 +4722,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_char_advance",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 52,
+      "line_end": 55,
       "kind": "function",
       "signature": "int32 get_char_advance(int64, uint32)",
       "return_type": "int32",
@@ -4292,7 +4740,11 @@
           "name": "arg2",
           "type": "uint32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_default_layer",
@@ -4312,16 +4764,20 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_default_layer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 170,
+      "line_end": 173,
       "kind": "function",
       "signature": "layer_t get_default_layer()",
       "return_type": "layer_t",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_focused_frame",
@@ -4341,16 +4797,20 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_focused_frame",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 160,
+      "line_end": 163,
       "kind": "function",
       "signature": "frame_t get_focused_frame()",
       "return_type": "frame_t",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_font18",
@@ -4370,16 +4830,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_font18",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 58,
+      "line_end": 61,
       "kind": "function",
       "signature": "int64 get_font18()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_font20",
@@ -4399,16 +4863,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_font20",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 59,
+      "line_end": 62,
       "kind": "function",
       "signature": "int64 get_font20()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_font24",
@@ -4428,16 +4896,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_font24",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 60,
+      "line_end": 63,
       "kind": "function",
       "signature": "int64 get_font24()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_font28",
@@ -4457,16 +4929,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_font28",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 61,
+      "line_end": 64,
       "kind": "function",
       "signature": "int64 get_font28()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_fps",
@@ -4486,16 +4962,20 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_fps",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 79,
+      "line_end": 82,
       "kind": "function",
       "signature": "float64 get_fps()",
       "return_type": "float64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_key_name",
@@ -4510,14 +4990,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_key_name",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 50,
+      "line_end": 53,
       "kind": "function",
       "signature": "string get_key_name(int64)",
       "return_type": "string",
@@ -4526,7 +5008,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_key_state",
@@ -4541,14 +5027,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_key_state",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 47,
+      "line_end": 50,
       "kind": "function",
       "signature": "key_state_t get_key_state(int64)",
       "return_type": "key_state_t",
@@ -4557,7 +5045,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_keys_down",
@@ -4572,18 +5064,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_keys_down",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 48,
+      "line_end": 51,
       "kind": "function",
       "signature": "array get_keys_down()",
       "return_type": "array",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mesh_bounds_max_x",
@@ -4603,12 +5101,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_mesh_bounds_max_x",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 157,
+      "line_end": 160,
       "kind": "function",
       "signature": "float64 get_mesh_bounds_max_x(int64)",
       "return_type": "float64",
@@ -4617,7 +5115,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mesh_bounds_max_y",
@@ -4637,12 +5139,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_mesh_bounds_max_y",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 158,
+      "line_end": 161,
       "kind": "function",
       "signature": "float64 get_mesh_bounds_max_y(int64)",
       "return_type": "float64",
@@ -4651,7 +5153,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mesh_bounds_max_z",
@@ -4671,12 +5177,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_mesh_bounds_max_z",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 159,
+      "line_end": 162,
       "kind": "function",
       "signature": "float64 get_mesh_bounds_max_z(int64)",
       "return_type": "float64",
@@ -4685,7 +5191,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mesh_bounds_min_x",
@@ -4705,12 +5215,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_mesh_bounds_min_x",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 154,
+      "line_end": 157,
       "kind": "function",
       "signature": "float64 get_mesh_bounds_min_x(int64)",
       "return_type": "float64",
@@ -4719,7 +5229,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mesh_bounds_min_y",
@@ -4739,12 +5253,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_mesh_bounds_min_y",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 155,
+      "line_end": 158,
       "kind": "function",
       "signature": "float64 get_mesh_bounds_min_y(int64)",
       "return_type": "float64",
@@ -4753,7 +5267,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mesh_bounds_min_z",
@@ -4773,12 +5291,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_mesh_bounds_min_z",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 156,
+      "line_end": 159,
       "kind": "function",
       "signature": "float64 get_mesh_bounds_min_z(int64)",
       "return_type": "float64",
@@ -4787,7 +5305,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mesh_index_count",
@@ -4807,12 +5329,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_mesh_index_count",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 152,
+      "line_end": 155,
       "kind": "function",
       "signature": "int64 get_mesh_index_count(int64)",
       "return_type": "int64",
@@ -4821,7 +5343,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mesh_stride",
@@ -4841,12 +5367,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_mesh_stride",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 153,
+      "line_end": 156,
       "kind": "function",
       "signature": "float64 get_mesh_stride(int64)",
       "return_type": "float64",
@@ -4855,7 +5381,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mesh_vert_count",
@@ -4875,12 +5405,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_mesh_vert_count",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 151,
+      "line_end": 154,
       "kind": "function",
       "signature": "int64 get_mesh_vert_count(int64)",
       "return_type": "int64",
@@ -4889,7 +5419,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mouse_delta",
@@ -4904,18 +5438,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_mouse_delta",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 16,
+      "line_end": 19,
       "kind": "function",
       "signature": "vec2 get_mouse_delta()",
       "return_type": "vec2",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mouse_delta_desktop",
@@ -4930,18 +5470,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_mouse_delta_desktop",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 17,
+      "line_end": 20,
       "kind": "function",
       "signature": "vec2 get_mouse_delta_desktop()",
       "return_type": "vec2",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mouse_pos",
@@ -4956,18 +5502,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_mouse_pos",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 14,
+      "line_end": 17,
       "kind": "function",
       "signature": "vec2 get_mouse_pos()",
       "return_type": "vec2",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_mouse_pos_desktop",
@@ -4982,18 +5534,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_mouse_pos_desktop",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 15,
+      "line_end": 18,
       "kind": "function",
       "signature": "vec2 get_mouse_pos_desktop()",
       "return_type": "vec2",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_recent_key_input",
@@ -5008,18 +5566,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_recent_key_input",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 49,
+      "line_end": 52,
       "kind": "function",
       "signature": "string get_recent_key_input()",
       "return_type": "string",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_scroll_delta",
@@ -5034,18 +5598,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_scroll_delta",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 21,
+      "line_end": 24,
       "kind": "function",
       "signature": "float64 get_scroll_delta()",
       "return_type": "float64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_text_height",
@@ -5065,12 +5635,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_text_height",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 51,
+      "line_end": 54,
       "kind": "function",
       "signature": "float64 get_text_height(int64, string, int32, int32)",
       "return_type": "float64",
@@ -5091,7 +5661,11 @@
           "name": "arg4",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_text_width",
@@ -5111,12 +5685,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_text_width",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 50,
+      "line_end": 53,
       "kind": "function",
       "signature": "float64 get_text_width(int64, string, int32, int32)",
       "return_type": "float64",
@@ -5137,7 +5711,11 @@
           "name": "arg4",
           "type": "int32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_texture_height",
@@ -5157,12 +5735,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_texture_height",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 139,
+      "line_end": 142,
       "kind": "function",
       "signature": "float64 get_texture_height(int64)",
       "return_type": "float64",
@@ -5171,7 +5749,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_texture_width",
@@ -5191,12 +5773,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_texture_width",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 138,
+      "line_end": 141,
       "kind": "function",
       "signature": "float64 get_texture_width(int64)",
       "return_type": "float64",
@@ -5205,7 +5787,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_theme_color",
@@ -5225,12 +5811,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_theme_color",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 252,
+      "line_end": 255,
       "kind": "function",
       "signature": "color get_theme_color(int64)",
       "return_type": "color",
@@ -5239,7 +5825,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_tickcount64",
@@ -5254,18 +5844,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#get_tickcount64",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 22,
+      "line_end": 25,
       "kind": "function",
       "signature": "int64 get_tickcount64()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_view_height",
@@ -5285,16 +5881,20 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_view_height",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 77,
+      "line_end": 80,
       "kind": "function",
       "signature": "float64 get_view_height()",
       "return_type": "float64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_view_scale",
@@ -5314,16 +5914,20 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_view_scale",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 78,
+      "line_end": 81,
       "kind": "function",
       "signature": "float64 get_view_scale()",
       "return_type": "float64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_view_width",
@@ -5343,16 +5947,20 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#get_view_width",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 76,
+      "line_end": 79,
       "kind": "function",
       "signature": "float64 get_view_width()",
       "return_type": "float64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_window_class",
@@ -5367,14 +5975,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_window_class",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 46,
+      "line_end": 49,
       "kind": "function",
       "signature": "string get_window_class(int64)",
       "return_type": "string",
@@ -5383,7 +5993,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_window_height",
@@ -5398,14 +6012,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_window_height",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 40,
+      "line_end": 43,
       "kind": "function",
       "signature": "int64 get_window_height(int64)",
       "return_type": "int64",
@@ -5414,7 +6030,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_window_pos",
@@ -5429,14 +6049,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_window_pos",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 41,
+      "line_end": 44,
       "kind": "function",
       "signature": "vec2 get_window_pos(int64)",
       "return_type": "vec2",
@@ -5445,7 +6067,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_window_process_id",
@@ -5460,14 +6086,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_window_process_id",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 49,
+      "line_end": 52,
       "kind": "function",
       "signature": "int64 get_window_process_id(int64)",
       "return_type": "int64",
@@ -5476,7 +6104,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_window_size",
@@ -5491,14 +6123,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_window_size",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 42,
+      "line_end": 45,
       "kind": "function",
       "signature": "vec2 get_window_size(int64)",
       "return_type": "vec2",
@@ -5507,7 +6141,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_window_thread_id",
@@ -5522,14 +6160,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_window_thread_id",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 48,
+      "line_end": 51,
       "kind": "function",
       "signature": "int64 get_window_thread_id(int64)",
       "return_type": "int64",
@@ -5538,7 +6178,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_window_title",
@@ -5553,14 +6197,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_window_title",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 45,
+      "line_end": 48,
       "kind": "function",
       "signature": "string get_window_title(int64)",
       "return_type": "string",
@@ -5569,7 +6215,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "get_window_width",
@@ -5584,14 +6234,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#get_window_width",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 39,
+      "line_end": 42,
       "kind": "function",
       "signature": "int64 get_window_width(int64)",
       "return_type": "int64",
@@ -5600,7 +6252,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "gui_active",
@@ -5620,16 +6276,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "false",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#gui_active",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 262,
+      "line_end": 265,
       "kind": "function",
       "signature": "bool gui_active()",
       "return_type": "bool",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "heartbeat",
@@ -5644,18 +6304,25 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_callback",
+        "runtime_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#heartbeat",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 108,
+      "line_end": 111,
       "kind": "function",
       "signature": "void heartbeat()",
       "return_type": "void",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "hour12",
@@ -5670,14 +6337,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#hour12",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 41,
+      "line_end": 44,
       "kind": "function",
       "signature": "int64 hour12(int64)",
       "return_type": "int64",
@@ -5686,7 +6355,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "http_get",
@@ -5715,8 +6388,8 @@
       ],
       "threading": "any",
       "source_anchor": "#http_get",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 12,
+      "line_end": 15,
       "kind": "function",
       "signature": "http_response_t http_get(string, int64)",
       "return_type": "http_response_t",
@@ -5729,7 +6402,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires network_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "http_post",
@@ -5758,8 +6435,8 @@
       ],
       "threading": "any",
       "source_anchor": "#http_post",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 15,
+      "line_end": 18,
       "kind": "function",
       "signature": "http_response_t http_post(string, string, string, int64)",
       "return_type": "http_response_t",
@@ -5780,7 +6457,11 @@
           "name": "arg4",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires network_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "is_dark_theme",
@@ -5800,16 +6481,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "false",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#is_dark_theme",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 250,
+      "line_end": 253,
       "kind": "function",
       "signature": "bool is_dark_theme()",
       "return_type": "bool",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "is_foreground_window",
@@ -5824,14 +6509,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#is_foreground_window",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 43,
+      "line_end": 46,
       "kind": "function",
       "signature": "bool is_foreground_window(int64)",
       "return_type": "bool",
@@ -5840,7 +6527,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "is_hovered",
@@ -5855,14 +6546,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#is_hovered",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 20,
+      "line_end": 23,
       "kind": "function",
       "signature": "bool is_hovered(vec2, vec2)",
       "return_type": "bool",
@@ -5875,7 +6568,11 @@
           "name": "arg2",
           "type": "vec2"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "is_window_active",
@@ -5890,14 +6587,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#is_window_active",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 44,
+      "line_end": 47,
       "kind": "function",
       "signature": "bool is_window_active(int64)",
       "return_type": "bool",
@@ -5906,7 +6605,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "key_down",
@@ -5921,14 +6624,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#key_down",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 36,
+      "line_end": 39,
       "kind": "function",
       "signature": "bool key_down(int64)",
       "return_type": "bool",
@@ -5937,7 +6642,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "key_fired",
@@ -5952,14 +6661,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#key_fired",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 38,
+      "line_end": 41,
       "kind": "function",
       "signature": "bool key_fired(int64)",
       "return_type": "bool",
@@ -5968,7 +6679,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "key_prev_down",
@@ -5983,14 +6698,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#key_prev_down",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 41,
+      "line_end": 44,
       "kind": "function",
       "signature": "bool key_prev_down(int64)",
       "return_type": "bool",
@@ -5999,7 +6716,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "key_raw_down",
@@ -6014,14 +6735,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#key_raw_down",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 37,
+      "line_end": 40,
       "kind": "function",
       "signature": "bool key_raw_down(int64)",
       "return_type": "bool",
@@ -6030,7 +6753,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "key_singlepress",
@@ -6045,14 +6772,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#key_singlepress",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 40,
+      "line_end": 43,
       "kind": "function",
       "signature": "bool key_singlepress(int64)",
       "return_type": "bool",
@@ -6061,7 +6790,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "key_toggle",
@@ -6076,14 +6809,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#key_toggle",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 39,
+      "line_end": 42,
       "kind": "function",
       "signature": "bool key_toggle(int64)",
       "return_type": "bool",
@@ -6092,7 +6827,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "layer_count",
@@ -6112,16 +6851,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#layer_count",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 171,
+      "line_end": 174,
       "kind": "function",
       "signature": "int64 layer_count()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "load_mesh",
@@ -6141,12 +6884,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#load_mesh",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 148,
+      "line_end": 151,
       "kind": "function",
       "signature": "int64 load_mesh(string)",
       "return_type": "int64",
@@ -6155,7 +6898,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "load_mesh_mem",
@@ -6175,12 +6922,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#load_mesh_mem",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 149,
+      "line_end": 152,
       "kind": "function",
       "signature": "int64 load_mesh_mem(array)",
       "return_type": "int64",
@@ -6189,7 +6936,11 @@
           "name": "arg1",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "load_sound",
@@ -6204,14 +6955,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#load_sound",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 17,
+      "line_end": 20,
       "kind": "function",
       "signature": "sound_t load_sound(string)",
       "return_type": "sound_t",
@@ -6220,7 +6974,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "load_texture",
@@ -6240,12 +6998,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#load_texture",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 136,
+      "line_end": 139,
       "kind": "function",
       "signature": "int64 load_texture(string)",
       "return_type": "int64",
@@ -6254,7 +7012,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "load_texture_mem",
@@ -6274,12 +7036,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#load_texture_mem",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 137,
+      "line_end": 140,
       "kind": "function",
       "signature": "int64 load_texture_mem(array)",
       "return_type": "int64",
@@ -6288,7 +7050,11 @@
           "name": "arg1",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "mat4.readas_*",
@@ -6303,18 +7069,29 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#mat4readas_*",
-      "line_start": null,
-      "line_end": null,
-      "kind": "function",
-      "signature": null,
-      "return_type": null,
-      "params": []
+      "line_start": 1,
+      "line_end": 1,
+      "kind": "method",
+      "signature": "T mat4.readas_*(int32 index)",
+      "return_type": "T",
+      "params": [
+        {
+          "name": "index",
+          "type": "int32"
+        }
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "mat4.writeas_*",
@@ -6329,18 +7106,33 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#mat4writeas_*",
-      "line_start": null,
-      "line_end": null,
-      "kind": "function",
-      "signature": null,
-      "return_type": null,
-      "params": []
+      "line_start": 1,
+      "line_end": 1,
+      "kind": "method",
+      "signature": "void mat4.writeas_*(int32 index, T value)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "index",
+          "type": "int32"
+        },
+        {
+          "name": "value",
+          "type": "T"
+        }
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "month_name",
@@ -6355,14 +7147,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#month_name",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 40,
+      "line_end": 43,
       "kind": "function",
       "signature": "string month_name(int64)",
       "return_type": "string",
@@ -6371,7 +7165,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "mouse_left_click",
@@ -6386,18 +7184,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#mouse_left_click",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 80,
+      "line_end": 83,
       "kind": "function",
       "signature": "void mouse_left_click()",
       "return_type": "void",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "mouse_middle_click",
@@ -6412,18 +7216,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#mouse_middle_click",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 82,
+      "line_end": 85,
       "kind": "function",
       "signature": "void mouse_middle_click()",
       "return_type": "void",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "mouse_move",
@@ -6438,14 +7248,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#mouse_move",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 78,
+      "line_end": 81,
       "kind": "function",
       "signature": "void mouse_move(int64, int64)",
       "return_type": "void",
@@ -6458,7 +7270,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "mouse_move_relative",
@@ -6473,14 +7289,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#mouse_move_relative",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 79,
+      "line_end": 82,
       "kind": "function",
       "signature": "void mouse_move_relative(int64, int64)",
       "return_type": "void",
@@ -6493,7 +7311,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "mouse_movement_received",
@@ -6508,18 +7330,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#mouse_movement_received",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 19,
+      "line_end": 22,
       "kind": "function",
       "signature": "bool mouse_movement_received()",
       "return_type": "bool",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "mouse_right_click",
@@ -6534,18 +7362,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#mouse_right_click",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 81,
+      "line_end": 84,
       "kind": "function",
       "signature": "void mouse_right_click()",
       "return_type": "void",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "mouse_scroll",
@@ -6560,14 +7394,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#mouse_scroll",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 83,
+      "line_end": 86,
       "kind": "function",
       "signature": "void mouse_scroll(int64)",
       "return_type": "void",
@@ -6576,7 +7412,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "Net API",
@@ -6605,12 +7445,16 @@
       ],
       "threading": "any",
       "source_anchor": "#Net API",
-      "line_start": null,
-      "line_end": null,
-      "kind": "function",
+      "line_start": 3,
+      "line_end": 6,
+      "kind": "page",
       "signature": null,
       "return_type": null,
-      "params": []
+      "params": [],
+      "type_shape": "Documentation page for net APIs.",
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires network_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "now_millisecond",
@@ -6625,18 +7469,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#now_millisecond",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 38,
+      "line_end": 41,
       "kind": "function",
       "signature": "int64 now_millisecond()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "perf_frequency",
@@ -6651,18 +7501,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#perf_frequency",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 21,
+      "line_end": 24,
       "kind": "function",
       "signature": "int64 perf_frequency()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "perf_time",
@@ -6677,18 +7533,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#perf_time",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 20,
+      "line_end": 23,
       "kind": "function",
       "signature": "int64 perf_time()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "post_message",
@@ -6703,14 +7565,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#post_message",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 50,
+      "line_end": 53,
       "kind": "function",
       "signature": "bool post_message(int64, int64, int64, int64)",
       "return_type": "bool",
@@ -6731,7 +7595,11 @@
           "name": "arg4",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "rdtsc",
@@ -6746,18 +7614,24 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#rdtsc",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 19,
+      "line_end": 22,
       "kind": "function",
       "signature": "int64 rdtsc()",
       "return_type": "int64",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "ref_process",
@@ -6786,8 +7660,8 @@
       ],
       "threading": "any",
       "source_anchor": "#ref_process",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 7,
+      "line_end": 10,
       "kind": "function",
       "signature": "proc_t ref_process(uint32)",
       "return_type": "proc_t",
@@ -6796,7 +7670,11 @@
           "name": "arg1",
           "type": "uint32"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires process_memory_read. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "register_routine",
@@ -6811,14 +7689,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_callback",
+        "runtime_error"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "routine",
       "source_anchor": "#register_routine",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 30,
+      "line_end": 33,
       "kind": "function",
       "signature": "int64 register_routine(int64, int64)",
       "return_type": "int64",
@@ -6831,7 +7712,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": "void fn(int64 data) for routines; int64 main() entrypoint returns 1 to stay loaded.",
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "send_char",
@@ -6846,14 +7731,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#send_char",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 71,
+      "line_end": 74,
       "kind": "function",
       "signature": "bool send_char(int64, string)",
       "return_type": "bool",
@@ -6866,7 +7753,11 @@
           "name": "arg2",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "send_key",
@@ -6881,14 +7772,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#send_key",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 72,
+      "line_end": 75,
       "kind": "function",
       "signature": "bool send_key(int64, int64)",
       "return_type": "bool",
@@ -6901,7 +7794,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "send_mouse_input",
@@ -6916,14 +7813,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#send_mouse_input",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 84,
+      "line_end": 87,
       "kind": "function",
       "signature": "void send_mouse_input(int64, int64, int64, int64)",
       "return_type": "void",
@@ -6944,7 +7843,11 @@
           "name": "arg4",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "set_dark_theme",
@@ -6964,12 +7867,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#set_dark_theme",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 251,
+      "line_end": 254,
       "kind": "function",
       "signature": "void set_dark_theme(bool)",
       "return_type": "void",
@@ -6978,7 +7881,11 @@
           "name": "arg1",
           "type": "bool"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "set_foreground_window",
@@ -6993,14 +7900,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#set_foreground_window",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 47,
+      "line_end": 50,
       "kind": "function",
       "signature": "bool set_foreground_window(int64)",
       "return_type": "bool",
@@ -7009,7 +7918,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "set_theme_color",
@@ -7029,12 +7942,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#set_theme_color",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 253,
+      "line_end": 256,
       "kind": "function",
       "signature": "void set_theme_color(int64, color)",
       "return_type": "void",
@@ -7047,7 +7960,11 @@
           "name": "arg2",
           "type": "color"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "set_thread_priority",
@@ -7062,14 +7979,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "any",
       "source_anchor": "#set_thread_priority",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 65,
+      "line_end": 68,
       "kind": "function",
       "signature": "bool set_thread_priority(thread_priority)",
       "return_type": "bool",
@@ -7078,7 +7997,11 @@
           "name": "arg1",
           "type": "thread_priority"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "show_toast",
@@ -7098,12 +8021,12 @@
         "invalid_handle"
       ],
       "return_sentinel": null,
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#show_toast",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 261,
+      "line_end": 264,
       "kind": "function",
       "signature": "void show_toast(toast_kind, string, string)",
       "return_type": "void",
@@ -7120,7 +8043,11 @@
           "name": "arg3",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "stop_all_sounds",
@@ -7135,18 +8062,25 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#stop_all_sounds",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 50,
+      "line_end": 53,
       "kind": "function",
       "signature": "void stop_all_sounds()",
       "return_type": "void",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "take_int",
@@ -7161,14 +8095,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_callback",
+        "runtime_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#take_int",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 109,
+      "line_end": 112,
       "kind": "function",
       "signature": "void take_int(int64)",
       "return_type": "void",
@@ -7177,7 +8114,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "take_ptr",
@@ -7192,14 +8133,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_callback",
+        "runtime_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#take_ptr",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 110,
+      "line_end": 113,
       "kind": "function",
       "signature": "void take_ptr(int64)",
       "return_type": "void",
@@ -7208,7 +8152,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "test_3arg",
@@ -7223,14 +8171,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_callback",
+        "runtime_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#test_3arg",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 111,
+      "line_end": 114,
       "kind": "function",
       "signature": "void test_3arg(int64, int64, int64)",
       "return_type": "void",
@@ -7247,7 +8198,11 @@
           "name": "arg3",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "udp_create",
@@ -7276,12 +8231,16 @@
       ],
       "threading": "any",
       "source_anchor": "#udp_create",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 86,
+      "line_end": 89,
       "kind": "function",
       "signature": "udp_t udp_create()",
       "return_type": "udp_t",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires network_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "ui_is_focused",
@@ -7301,16 +8260,20 @@
         "invalid_handle"
       ],
       "return_sentinel": "false",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#ui_is_focused",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 161,
+      "line_end": 164,
       "kind": "function",
       "signature": "bool ui_is_focused()",
       "return_type": "bool",
-      "params": []
+      "params": [],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "unregister_routine",
@@ -7325,14 +8288,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_callback",
+        "runtime_error"
+      ],
       "return_sentinel": "false",
       "requires_context": null,
       "side_effects": [],
       "threading": "routine",
       "source_anchor": "#unregister_routine",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 31,
+      "line_end": 34,
       "kind": "function",
       "signature": "bool unregister_routine(int64)",
       "return_type": "bool",
@@ -7341,7 +8307,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": "void fn(int64 data) for routines; int64 main() entrypoint returns 1 to stay loaded.",
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "update_structured_buffer",
@@ -7361,12 +8331,12 @@
         "invalid_handle"
       ],
       "return_sentinel": "0",
-      "requires_context": null,
+      "requires_context": "render/routine context",
       "side_effects": [],
       "threading": "render",
       "source_anchor": "#update_structured_buffer",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 203,
+      "line_end": 206,
       "kind": "function",
       "signature": "int64 update_structured_buffer(int64, array)",
       "return_type": "int64",
@@ -7379,7 +8349,11 @@
           "name": "arg2",
           "type": "array"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "win_key_down",
@@ -7394,14 +8368,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#win_key_down",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 67,
+      "line_end": 70,
       "kind": "function",
       "signature": "void win_key_down(int64)",
       "return_type": "void",
@@ -7410,7 +8386,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "win_key_press",
@@ -7425,14 +8405,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#win_key_press",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 69,
+      "line_end": 72,
       "kind": "function",
       "signature": "void win_key_press(int64, int64)",
       "return_type": "void",
@@ -7445,7 +8427,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "win_key_up",
@@ -7460,14 +8446,16 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "target_unavailable"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#win_key_up",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 68,
+      "line_end": 71,
       "kind": "function",
       "signature": "void win_key_up(int64)",
       "return_type": "void",
@@ -7476,7 +8464,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "ws_connect",
@@ -7505,8 +8497,8 @@
       ],
       "threading": "any",
       "source_anchor": "#ws_connect",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 56,
+      "line_end": 59,
       "kind": "function",
       "signature": "ws_t ws_connect(string, int64)",
       "return_type": "ws_t",
@@ -7519,7 +8511,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "Requires network_access. Handle permission-denied failure modes explicitly."
     },
     {
       "symbol": "zydis_decoded_to_request",
@@ -7534,14 +8530,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#zydis_decoded_to_request",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 40,
+      "line_end": 43,
       "kind": "function",
       "signature": "zydis_req_t zydis_decoded_to_request(array, int64)",
       "return_type": "zydis_req_t",
@@ -7554,7 +8553,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "zydis_disasm",
@@ -7569,14 +8572,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#zydis_disasm",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 58,
+      "line_end": 61,
       "kind": "function",
       "signature": "array zydis_disasm(array, int64)",
       "return_type": "array",
@@ -7589,7 +8595,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "zydis_encode",
@@ -7604,14 +8614,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#zydis_encode",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 37,
+      "line_end": 40,
       "kind": "function",
       "signature": "array zydis_encode(zydis_req_t)",
       "return_type": "array",
@@ -7620,7 +8633,11 @@
           "name": "arg1",
           "type": "zydis_req_t"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "zydis_encode_absolute",
@@ -7635,14 +8652,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#zydis_encode_absolute",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 38,
+      "line_end": 41,
       "kind": "function",
       "signature": "array zydis_encode_absolute(zydis_req_t, int64)",
       "return_type": "array",
@@ -7655,7 +8675,11 @@
           "name": "arg2",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "zydis_mnemonic_from_string",
@@ -7670,14 +8694,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#zydis_mnemonic_from_string",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 18,
+      "line_end": 21,
       "kind": "function",
       "signature": "int64 zydis_mnemonic_from_string(string)",
       "return_type": "int64",
@@ -7686,7 +8713,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "zydis_mnemonic_to_string",
@@ -7701,14 +8732,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#zydis_mnemonic_to_string",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 49,
+      "line_end": 52,
       "kind": "function",
       "signature": "string zydis_mnemonic_to_string(int64)",
       "return_type": "string",
@@ -7717,7 +8751,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "zydis_nop_fill",
@@ -7732,14 +8770,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": null,
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#zydis_nop_fill",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 39,
+      "line_end": 42,
       "kind": "function",
       "signature": "array zydis_nop_fill(int64)",
       "return_type": "array",
@@ -7748,7 +8789,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "zydis_register_from_string",
@@ -7763,14 +8808,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": "0",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#zydis_register_from_string",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 51,
+      "line_end": 54,
       "kind": "function",
       "signature": "int64 zydis_register_from_string(string)",
       "return_type": "int64",
@@ -7779,7 +8827,11 @@
           "name": "arg1",
           "type": "string"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     },
     {
       "symbol": "zydis_register_to_string",
@@ -7794,14 +8846,17 @@
       "removed": false,
       "replacement": null,
       "notes": "",
-      "failure_modes": [],
+      "failure_modes": [
+        "invalid_input",
+        "decode_error"
+      ],
       "return_sentinel": "empty string",
       "requires_context": null,
       "side_effects": [],
       "threading": "unknown",
       "source_anchor": "#zydis_register_to_string",
-      "line_start": null,
-      "line_end": null,
+      "line_start": 52,
+      "line_end": 55,
       "kind": "function",
       "signature": "string zydis_register_to_string(int64)",
       "return_type": "string",
@@ -7810,7 +8865,11 @@
           "name": "arg1",
           "type": "int64"
         }
-      ]
+      ],
+      "type_shape": null,
+      "constant_value": null,
+      "callback_shape": null,
+      "permission_notes": "No special permission required."
     }
   ]
 }

@@ -1,5 +1,6 @@
 // main.em — entry point. Wires the modules together and registers routines.
 // Bundle order matters: globals -> offsets -> feature -> menu -> main.
+// Requires process_memory_read permission for ref_process/process reads.
 
 import "globals";
 import "offsets";

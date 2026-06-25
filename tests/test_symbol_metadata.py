@@ -46,6 +46,12 @@ class SymbolMetadataTest(unittest.TestCase):
             "return_type",
             "params",
         })
+        self.assertGreaterEqual(symbol_required, {
+            "permission_notes",
+            "type_shape",
+            "constant_value",
+            "callback_shape",
+        })
 
     def test_symbol_rows_are_complete_and_source_backed(self):
         self.assertEqual(self.data["schema"], 1)
@@ -79,6 +85,13 @@ class SymbolMetadataTest(unittest.TestCase):
                 if row["signature"] is not None:
                     self.assertIsInstance(row["signature"], str)
                     self.assertTrue(row["signature"].strip())
+                self.assertIsInstance(row["permission_notes"], str)
+                if row["type_shape"] is not None:
+                    self.assertIsInstance(row["type_shape"], str)
+                if row["constant_value"] is not None:
+                    self.assertIsInstance(row["constant_value"], str)
+                if row["callback_shape"] is not None:
+                    self.assertIsInstance(row["callback_shape"], str)
                 self.assertTrue((REPO_ROOT / row["source"]).exists())
                 if row["changelog_source"] is not None:
                     self.assertTrue((REPO_ROOT / row["changelog_source"]).exists())

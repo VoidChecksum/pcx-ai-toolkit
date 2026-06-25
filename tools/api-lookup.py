@@ -53,6 +53,10 @@ def _print_human(result: dict[str, Any]) -> None:
         for sig in signatures:
             print(f"  - [{sig.get('language')}] {sig.get('text')}")
             print(f"    source: {sig.get('source')}")
+            if sig.get("citation"):
+                print(f"    citation: {sig.get('citation')}")
+    if result.get("citation"):
+        print(f"citation: {result.get('citation')}")
 
 
 def main() -> int:

@@ -1,0 +1,60 @@
+{
+  "schema": "pcx-repair-templates-v1",
+  "templates": {
+    "unknown_call": {
+      "message": "Symbol is not in the source-backed Perception Enma API index.",
+      "repair": "Run pcx api <intended-symbol> and replace the call with a documented API.",
+      "example": "pcx api draw_text"
+    },
+    "unsupported_symbol": {
+      "message": "Symbol matches a known LLM hallucination or wrong binding.",
+      "repair": "Use the repair message from knowledge/unsupported-symbols.json and verify the replacement with api_lookup.",
+      "example": "draw_esp(...) -> compose documented draw_rect/draw_text calls."
+    },
+    "wrong_routine_api": {
+      "message": "Enma uses register_routine, not register_callback.",
+      "repair": "register_routine(cast<int64>(fn), data);",
+      "example": "void fn(int64 data) { ... }\nint64 main() { register_routine(cast<int64>(fn), 0); return 1; }"
+    },
+    "routine_missing_cast": {
+      "message": "Routine function handles must be cast to int64.",
+      "repair": "register_routine(cast<int64>(fn), data);",
+      "example": "register_routine(cast<int64>(tick), 0);"
+    },
+    "invalid_routine_signature": {
+      "message": "Routine callbacks must accept one int64 data parameter.",
+      "repair": "void fn(int64 data) { ... }",
+      "example": "void tick(int64 data) { println(\"tick\"); }"
+    },
+    "argument_shape_mismatch": {
+      "message": "Argument has the wrong rough type shape.",
+      "repair": "Wrap raw coordinates/colors with the documented constructor.",
+      "example": "draw_text(\"hi\", vec2(20.0, 20.0), color(255,255,255,255), get_font20(), 0, color(0,0,0,0), 0.0);"
+    },
+    "argument_count_mismatch": {
+      "message": "Call arity does not match the source-backed signature.",
+      "repair": "Use api_lookup to copy the exact documented parameter list.",
+      "example": "pcx api draw_rect"
+    },
+    "missing_import": {
+      "message": "Symbol requires an Enma addon import.",
+      "repair": "Add the exact Enma import shown in the finding.",
+      "example": "import \"vec\";\nimport \"color\";"
+    },
+    "permission_required": {
+      "message": "API needs an explicit project/script permission or authorization note.",
+      "repair": "Declare the permission and handle permission-denied failure modes.",
+      "example": "// requires: file_system_access"
+    },
+    "unchecked_failure_sentinel": {
+      "message": "API can return an ambiguous sentinel on failure.",
+      "repair": "Check existence/status/permission before trusting sentinel values.",
+      "example": "if (!fs_file_exists(path)) { println(\"missing config\"); return 0; }"
+    },
+    "wrong_context": {
+      "message": "API is being used outside its documented runtime context.",
+      "repair": "Move the call into a registered routine/render context or choose a context-safe API.",
+      "example": "void render(int64 data) { /* draw calls */ }"
+    }
+  }
+}

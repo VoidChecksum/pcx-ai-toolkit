@@ -4,14 +4,22 @@
 
 ## Summary
 
-- Perception API pages indexed: 15
+- Perception API pages indexed: 20
+- Total Perception pages indexed: 20/20
+- Core Enma API pages indexed: 13/13
+- Platform/tooling pages indexed: 5/5
+- Metadata/status pages indexed: 2/2
 - API families indexed: 12
 - Symbols indexed: 216
-- Symbols with permission metadata: 26
+- Symbols with explicit permission metadata: 216
+- Symbols requiring non-empty permissions: 26
+- Callable symbols with signatures: 213/213
+- Non-callable symbols with shape metadata: 3/3
+- Symbols with failure metadata: 216
 - Permission rules: 5
 - Deprecated or removed symbols tracked: 0
-- Known hallucinations covered: 18
-- Hallucination eval cases: 53
+- Known hallucinations covered: 114
+- Hallucination eval cases: 150
 - Generated bundle sources: 88
 - Drift-checkable sources: 67
 
@@ -20,13 +28,56 @@
 | Metric | Current | Target | Status |
 |---|---:|---:|---|
 | Symbols indexed | 216 | 216 | pass |
-| Symbols with permission metadata | 26 | 216 | fail |
-| Symbols with signatures | 212 | 216 | fail |
-| Symbols with failure metadata | 136 | 216 | fail |
-| Known hallucinations covered | 18 | 100 | fail |
-| Eval cases | 53 | 150 | fail |
-| Eval cases with expected findings | 51 | 100 | fail |
-| API pages indexed | 15 | 20 | fail |
+| Symbols with explicit permission metadata | 216 | 216 | pass |
+| Callable symbols with signatures | 213 | 213 | pass |
+| Non-callable symbols with shape metadata | 3 | 3 | pass |
+| Symbols with failure metadata | 216 | 216 | pass |
+| Known hallucinations covered | 114 | 100 | pass |
+| Eval cases | 150 | 150 | pass |
+| Eval cases with expected findings | 143 | 100 | pass |
+| Total Perception pages indexed | 20 | 20 | pass |
+
+## Perception Page Classes
+
+| Class | Current | Target | Missing |
+|---|---:|---:|---|
+| Core Enma API pages | 13 | 13 | none |
+| Platform/tooling pages | 5 | 5 | none |
+| Metadata/status pages | 2 | 2 | none |
+
+## Per-Family Coverage
+
+| Family | Symbols | Signatures/shapes | Permissions | Failures | Eval mentions |
+|---|---:|---:|---:|---:|---:|
+| cpu | 12 | 12 | 12 | 12 | 0 |
+| filesystem | 17 | 17 | 17 | 17 | 1 |
+| gui | 20 | 20 | 20 | 20 | 26 |
+| input | 17 | 17 | 17 | 17 | 0 |
+| lifecycle | 6 | 6 | 6 | 6 | 5 |
+| math3d | 2 | 2 | 2 | 2 | 0 |
+| net | 5 | 5 | 5 | 5 | 6 |
+| proc | 4 | 4 | 4 | 4 | 8 |
+| render | 90 | 90 | 90 | 90 | 10 |
+| sound | 2 | 2 | 2 | 2 | 0 |
+| unicorn | 4 | 4 | 4 | 4 | 0 |
+| win | 28 | 28 | 28 | 28 | 6 |
+| zydis | 9 | 9 | 9 | 9 | 0 |
+
+## Missing Permission Metadata
+
+- none
+
+## Missing Failure Metadata
+
+- none
+
+## Missing Callable Signatures
+
+- none
+
+## Missing Non-Callable Shape Metadata
+
+- none
 
 ## Indexed API Families
 

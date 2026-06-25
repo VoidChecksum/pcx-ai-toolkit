@@ -1,5 +1,5 @@
 // menu.em — config, keybinds, save/load
-// Host must grant PERM_FILE before compiling this script.
+// Host must grant PERM_FILE / file_system_access before compiling this script.
 #pragma once
 
 import "globals";

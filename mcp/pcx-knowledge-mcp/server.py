@@ -471,6 +471,7 @@ def recommend_context(task: str, language: str = "") -> str:
 # ── API grounding and code validation ─────────────────────────────────────────
 
 API_INDEX_FILE = REPO_ROOT / "knowledge" / "pcx-api-index.json"
+REPAIR_TEMPLATES_FILE = REPO_ROOT / "knowledge" / "repair-templates.json"
 API_INDEX_CACHE: dict | None = None
 
 
@@ -711,7 +712,13 @@ def explain_finding(finding_json: str, language: str = "") -> str:
     symbol = str(finding.get("symbol", ""))
     message = str(finding.get("message", ""))
     fix = str(finding.get("fix", ""))
-    advice = {
+    templates: dict[str, Any] = {}
+    if REPAIR_TEMPLATES_FILE.exists():
+        raw = json.loads(REPAIR_TEMPLATES_FILE.read_text(encoding="utf-8"))
+        if isinstance(raw, dict) and isinstance(raw.get("templates"), dict):
+            templates = raw["templates"]
+    template = templates.get(kind, {}) if isinstance(templates.get(kind, {}), dict) else {}
+    advice = str(template.get("repair") or {
         "missing_import": "Add the exact Enma import shown in `fix`, then re-run validate_code.",
         "unknown_call": "Do not invent this API. Use api_lookup for the intended operation and replace the call with a documented symbol.",
         "unknown_type": "Use the language-specific type documented for this binding; check llm-routing before porting types across languages.",
@@ -719,13 +726,17 @@ def explain_finding(finding_json: str, language: str = "") -> str:
         "wrong_language_type": "Replace the type with the selected language's documented equivalent.",
         "placeholder": "Replace scaffold placeholder text with target-specific evidence-backed logic before shipping.",
         "unverified": "Convert UNVERIFIED claims into E-NNN evidence entries before shipping.",
-    }.get(kind, "Read the referenced source/signature, apply the smallest code change, then re-run validation.")
+    }.get(kind, "Read the referenced source/signature, apply the smallest code change, then re-run validation."))
     return json.dumps({
         "language": language,
         "kind": kind,
         "symbol": symbol,
         "message": message,
-        "fix": fix,
+        "reason": template.get("message", message),
+        "source": finding.get("citation", finding.get("source", "")),
+        "fix": fix or template.get("repair", ""),
+        "minimal_patch": template.get("repair", fix),
+        "example": template.get("example", ""),
         "next_action": advice,
     }, indent=2)
 

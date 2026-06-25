@@ -1,5 +1,7 @@
 {
   "api": {
+    "callable_symbols": 213,
+    "callable_symbols_with_signatures": 213,
     "families_indexed": 12,
     "family_names": [
       "cpu",
@@ -15,19 +17,152 @@
       "win",
       "zydis"
     ],
-    "perception_api_pages_indexed": 15,
+    "noncallable_symbols": 3,
+    "noncallable_symbols_with_shape": 3,
+    "pages": {
+      "core": {
+        "current": 13,
+        "missing": [],
+        "target": 13
+      },
+      "metadata": {
+        "current": 2,
+        "missing": [],
+        "target": 2
+      },
+      "platform": {
+        "current": 5,
+        "missing": [],
+        "target": 5
+      },
+      "total_current": 20,
+      "total_target": 20
+    },
+    "perception_api_pages_indexed": 20,
     "symbols_indexed": 216,
-    "symbols_with_failure_modes": 136,
-    "symbols_with_permission_metadata": 26,
-    "symbols_with_signatures": 212
+    "symbols_requiring_permissions": 26,
+    "symbols_with_explicit_permission_metadata": 216,
+    "symbols_with_failure_metadata": 216
   },
   "deprecated": {
     "symbols": 0
   },
+  "families": [
+    {
+      "eval_cases": 0,
+      "failures": 12,
+      "family": "cpu",
+      "permissions": 12,
+      "signatures": 12,
+      "symbols": 12
+    },
+    {
+      "eval_cases": 1,
+      "failures": 17,
+      "family": "filesystem",
+      "permissions": 17,
+      "signatures": 17,
+      "symbols": 17
+    },
+    {
+      "eval_cases": 26,
+      "failures": 20,
+      "family": "gui",
+      "permissions": 20,
+      "signatures": 20,
+      "symbols": 20
+    },
+    {
+      "eval_cases": 0,
+      "failures": 17,
+      "family": "input",
+      "permissions": 17,
+      "signatures": 17,
+      "symbols": 17
+    },
+    {
+      "eval_cases": 5,
+      "failures": 6,
+      "family": "lifecycle",
+      "permissions": 6,
+      "signatures": 6,
+      "symbols": 6
+    },
+    {
+      "eval_cases": 0,
+      "failures": 2,
+      "family": "math3d",
+      "permissions": 2,
+      "signatures": 2,
+      "symbols": 2
+    },
+    {
+      "eval_cases": 6,
+      "failures": 5,
+      "family": "net",
+      "permissions": 5,
+      "signatures": 5,
+      "symbols": 5
+    },
+    {
+      "eval_cases": 8,
+      "failures": 4,
+      "family": "proc",
+      "permissions": 4,
+      "signatures": 4,
+      "symbols": 4
+    },
+    {
+      "eval_cases": 10,
+      "failures": 90,
+      "family": "render",
+      "permissions": 90,
+      "signatures": 90,
+      "symbols": 90
+    },
+    {
+      "eval_cases": 0,
+      "failures": 2,
+      "family": "sound",
+      "permissions": 2,
+      "signatures": 2,
+      "symbols": 2
+    },
+    {
+      "eval_cases": 0,
+      "failures": 4,
+      "family": "unicorn",
+      "permissions": 4,
+      "signatures": 4,
+      "symbols": 4
+    },
+    {
+      "eval_cases": 6,
+      "failures": 28,
+      "family": "win",
+      "permissions": 28,
+      "signatures": 28,
+      "symbols": 28
+    },
+    {
+      "eval_cases": 0,
+      "failures": 9,
+      "family": "zydis",
+      "permissions": 9,
+      "signatures": 9,
+      "symbols": 9
+    }
+  ],
   "hallucinations": {
-    "eval_cases": 53,
-    "eval_cases_with_expected_findings": 51,
-    "known_symbols": 18
+    "eval_cases": 150,
+    "eval_cases_with_expected_findings": 143,
+    "known_symbols": 114
+  },
+  "missing": {
+    "callable_signatures": [],
+    "failure_metadata": [],
+    "noncallable_shapes": [],
+    "permission_metadata": []
   },
   "permissions": {
     "rules": 5
@@ -36,5 +171,5 @@
     "drift_checkable": 67,
     "sources": 88
   },
-  "schema": "pcx-anti-hallucination-coverage-v1"
+  "schema": "pcx-anti-hallucination-coverage-v2"
 }

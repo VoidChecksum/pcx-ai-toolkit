@@ -1,4 +1,5 @@
 // main.em — entry point and routine registration
+// Requires process_memory_read permission for ref_process/process reads.
 import "globals";
 import "offsets";
 import "utils";

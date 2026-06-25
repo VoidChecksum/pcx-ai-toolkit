@@ -31,6 +31,7 @@ LANG_ALIASES = {
 UNSUPPORTED_SYMBOLS_PATH = data_root() / "knowledge" / "unsupported-symbols.json"
 PERMISSION_RULES_PATH = data_root() / "knowledge" / "permission-rules.json"
 DEPRECATED_SYMBOLS_PATH = data_root() / "knowledge" / "deprecated-symbols.json"
+SYMBOL_METADATA_PATH = data_root() / "knowledge" / "perception-symbol-versions.json"
 
 def load_unsupported_symbols() -> dict[str, str]:
     if not UNSUPPORTED_SYMBOLS_PATH.exists():
@@ -73,6 +74,26 @@ def load_deprecated_symbols() -> dict[str, dict[str, str]]:
             out[str(key)] = {"replacement": "", "reason": str(value)}
     return out
 
+
+
+def load_symbol_metadata() -> dict[str, dict[str, Any]]:
+    if not SYMBOL_METADATA_PATH.exists():
+        return {}
+    raw_data: object = json.loads(SYMBOL_METADATA_PATH.read_text(encoding="utf-8"))
+    if not isinstance(raw_data, dict):
+        return {}
+    raw_symbols = cast(dict[str, object], raw_data).get("symbols", [])
+    if not isinstance(raw_symbols, list):
+        return {}
+    out: dict[str, dict[str, Any]] = {}
+    for row in raw_symbols:
+        if isinstance(row, dict) and row.get("symbol"):
+            out[str(row["symbol"])] = cast(dict[str, Any], row)
+    return out
+
+
+def symbol_metadata(symbol: str) -> dict[str, Any]:
+    return load_symbol_metadata().get(symbol, {})
 
 def permissions_for_symbol(symbol: str, sig: dict[str, Any] | None = None) -> list[str]:
     source = str((sig or {}).get("source", ""))
@@ -255,12 +276,26 @@ def lookup_symbol(index: dict[str, Any], symbol: str, language: str | None = Non
     languages = sorted(languages_for_symbol(index, symbol))
     suggestions = difflib.get_close_matches(symbol, sorted(all_symbol_names(index)), n=8, cutoff=0.62)
     type_match = symbol in known_type_names(index)
+    meta = symbol_metadata(symbol)
+    citation = ""
+    if meta.get("source") and meta.get("line_start") and meta.get("line_end"):
+        citation = f"{meta['source']}:{meta['line_start']}-{meta['line_end']}"
     return {
         "symbol": symbol,
         "language": language or "",
-        "found": bool(sigs or type_match),
-        "type": type_match,
-        "languages": languages,
+        "found": bool(sigs or type_match or meta),
+        "type": type_match or meta.get("kind") == "type",
+        "languages": languages or ([str(meta.get("language"))] if meta.get("language") else []),
+        "source": meta.get("source", ""),
+        "source_anchor": meta.get("source_anchor"),
+        "line_start": meta.get("line_start"),
+        "line_end": meta.get("line_end"),
+        "citation": citation,
+        "permissions": meta.get("permissions", []),
+        "permission_notes": meta.get("permission_notes", ""),
+        "failure_modes": meta.get("failure_modes", []),
+        "return_sentinel": meta.get("return_sentinel"),
+        "requires_context": meta.get("requires_context"),
         "signatures": [
             {
                 "text": signature_text(sig),
@@ -268,7 +303,11 @@ def lookup_symbol(index: dict[str, Any], symbol: str, language: str | None = Non
                 "kind": sig.get("kind", ""),
                 "source": sig.get("source", ""),
                 "arity": sig.get("arity", 0),
-                "permissions": permissions_for_symbol(symbol, sig),
+                "permissions": meta.get("permissions", permissions_for_symbol(symbol, sig)),
+                "source_anchor": meta.get("source_anchor"),
+                "line_start": meta.get("line_start"),
+                "line_end": meta.get("line_end"),
+                "citation": citation,
                 "deprecated": load_deprecated_symbols().get(symbol, {}),
             }
             for sig in sigs
@@ -298,6 +337,17 @@ def _finding(kind: str, line: int, symbol: str, message: str, **extra: Any) -> d
     }
     out.update({k: v for k, v in extra.items() if v not in (None, [], {}, "")})
     return out
+
+def _dedupe(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for item in items:
+        if item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
+
 
 
 def _line_for_offset(text: str, offset: int) -> int:
@@ -604,14 +654,37 @@ def validate_code_against_index(
                     fix=f'import "{provider}";',
                 ))
                 continue
-            for perm in permissions_for_symbol(name):
+            meta = symbol_metadata(name)
+            meta_permissions = list(meta.get("permissions", [])) if isinstance(meta.get("permissions", []), list) else []
+            rule_permissions = permissions_for_symbol(name)
+            for perm in _dedupe([*rule_permissions, *[str(p) for p in meta_permissions]]):
                 if perm not in code:
                     findings.append(_finding(
-                        "missing_permission",
+                        "permission_required",
                         line,
-                        perm,
-                        f"{name} requires {perm} in the script permission set",
+                        name,
+                        f"{name} requires {perm}; declare or document that permission before use.",
+                        permission=perm,
                     ))
+            sentinel = meta.get("return_sentinel")
+            has_guard = name.startswith("fs_read") and "fs_file_exists" in code
+            if sentinel and not has_guard and re.search(rf"=\s*{name}\s*\(", code):
+                findings.append(_finding(
+                    "unchecked_failure_sentinel",
+                    line,
+                    name,
+                    f"{name} can signal failure with {sentinel}; check documented failure modes before trusting the value.",
+                    sentinel=sentinel,
+                ))
+            required_context = meta.get("requires_context")
+            if required_context and runtime_mode == "script_execute":
+                findings.append(_finding(
+                    "wrong_context",
+                    line,
+                    name,
+                    f"{name} requires {required_context}; script_execute may not provide that context.",
+                    requires_context=required_context,
+                ))
 
         lang_sigs = signatures_for(index, name, language)
         any_sigs = signatures_for(index, name)

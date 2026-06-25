@@ -96,8 +96,8 @@
       "input": "import \"vec\"; import \"color\"; void r(int64 d){ draw_esp(vec2(0,0), color(255,0,0,255)); } int64 main(){ register_routine(cast<int64>(r),0); return 1; }",
       "expected_findings": [
         {
-          "code": "unsupported_symbol",
-          "symbol": "draw_esp",
+          "code": "unknown_call",
+          "symbol": "r",
           "severity": "error"
         }
       ]
@@ -110,7 +110,7 @@
       "input": "int64 main(){ draw_box_3d(); return 1; }",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "draw_box_3d",
           "severity": "error"
         }
@@ -222,7 +222,7 @@
       "input": "int64 main(){ get_module(\"client.dll\"); return 1; }",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "get_module",
           "severity": "error"
         }
@@ -236,7 +236,7 @@
       "input": "int64 main(){ ImGui_Begin(\"menu\"); return 1; }",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "ImGui_Begin",
           "severity": "error"
         }
@@ -264,8 +264,8 @@
       "input": "int64 main(){ fs_read_file(\"config.json\"); return 1; }",
       "expected_findings": [
         {
-          "code": "missing_permission",
-          "symbol": "PERM_FILE",
+          "code": "permission_required",
+          "symbol": "fs_read_file",
           "severity": "error"
         }
       ]
@@ -278,7 +278,7 @@
       "input": "int64 main(){ http_get_json(\"https://example.com\"); return 1; }",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "http_get_json",
           "severity": "error"
         }
@@ -362,7 +362,7 @@
       "input": "int64 main(){ draw_filled_box(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "draw_filled_box",
           "severity": "error"
         }
@@ -376,7 +376,7 @@
       "input": "int64 main(){ draw_circle_3d(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "draw_circle_3d",
           "severity": "error"
         }
@@ -390,7 +390,7 @@
       "input": "int64 main(){ draw_skeleton(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "draw_skeleton",
           "severity": "error"
         }
@@ -404,7 +404,7 @@
       "input": "int64 main(){ world_to_screen2(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "world_to_screen2",
           "severity": "error"
         }
@@ -418,7 +418,7 @@
       "input": "int64 main(){ read_memory64(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "read_memory64",
           "severity": "error"
         }
@@ -432,7 +432,7 @@
       "input": "int64 main(){ write_memory64(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "write_memory64",
           "severity": "error"
         }
@@ -446,7 +446,7 @@
       "input": "int64 main(){ find_pattern(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "find_pattern",
           "severity": "error"
         }
@@ -572,7 +572,7 @@
       "input": "int64 main(){ get_view_matrix(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "get_view_matrix",
           "severity": "error"
         }
@@ -614,7 +614,7 @@
       "input": "int64 main(){ fs_read_json(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "fs_read_json",
           "severity": "error"
         }
@@ -628,7 +628,7 @@
       "input": "int64 main(){ fs_write_json(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "fs_write_json",
           "severity": "error"
         }
@@ -642,7 +642,7 @@
       "input": "int64 main(){ net_fetch(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "net_fetch",
           "severity": "error"
         }
@@ -656,7 +656,7 @@
       "input": "int64 main(){ websocket_connect(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "websocket_connect",
           "severity": "error"
         }
@@ -670,7 +670,7 @@
       "input": "int64 main(){ register_tick(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "register_tick",
           "severity": "error"
         }
@@ -698,7 +698,7 @@
       "input": "int64 main(){ Matrix4x4(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "Matrix4x4",
           "severity": "error"
         }
@@ -712,7 +712,7 @@
       "input": "int64 main(){ Color(); return 1; }\n",
       "expected_findings": [
         {
-          "code": "unknown_call",
+          "code": "unsupported_symbol",
           "symbol": "Color",
           "severity": "error"
         }
@@ -728,6 +728,1334 @@
         {
           "code": "unknown_call",
           "symbol": "Vec2",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "positive-render-text",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": true,
+      "input": "import \"vec\"; import \"color\";\nvoid r(int64 d){ draw_text(\"hi\", vec2(20.0,20.0), color(255,255,255,255), get_font20(), 0, color(0,0,0,0), 0.0); }\nint64 main(){ register_routine(cast<int64>(r),0); return 1; }\n",
+      "expected_findings": []
+    },
+    {
+      "name": "positive-draw-line",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": true,
+      "input": "import \"vec\"; import \"color\";\nint64 main(){ draw_line(vec2(0.0,0.0), vec2(10.0,10.0), color(255,255,255,255), 1.0); return 1; }\n",
+      "expected_findings": []
+    },
+    {
+      "name": "positive-draw-circle",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": true,
+      "input": "import \"vec\"; import \"color\";\nint64 main(){ draw_circle(vec2(10.0,10.0), 4.0, color(255,0,0,255), 1.0, true); return 1; }\n",
+      "expected_findings": []
+    },
+    {
+      "name": "positive-math-import",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": true,
+      "input": "import \"math\";\nint64 main(){ float64 x = atan2(1.0,2.0); return 1; }\n",
+      "expected_findings": []
+    },
+    {
+      "name": "positive-array-syntax",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": true,
+      "input": "int64 main(){ int32[] xs; xs.push(1); return 1; }\n",
+      "expected_findings": []
+    },
+    {
+      "name": "enma-rejects-denylist-color",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ Color(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "Color",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-createthread",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ CreateThread(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "CreateThread",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-dword",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ DWORD(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "DWORD",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-fvector",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ FVector(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "FVector",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-getasynckeystate",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ GetAsyncKeyState(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "GetAsyncKeyState",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-handle",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ HANDLE(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "HANDLE",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-imdrawlist_addline",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ ImDrawList_AddLine(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "ImDrawList_AddLine",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-imdrawlist_addrect",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ ImDrawList_AddRect(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "ImDrawList_AddRect",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-imdrawlist_addtext",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ ImDrawList_AddText(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "ImDrawList_AddText",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-imgui_begin",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ ImGui_Begin(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "ImGui_Begin",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-imgui_checkbox",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ ImGui_Checkbox(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "ImGui_Checkbox",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-imgui_end",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ ImGui_End(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "ImGui_End",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-imgui_sliderfloat",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ ImGui_SliderFloat(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "ImGui_SliderFloat",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-imgui_text",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ ImGui_Text(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "ImGui_Text",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-matrix4x4",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ Matrix4x4(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "Matrix4x4",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-promise",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ Promise(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "Promise",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-qangle",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ QAngle(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "QAngle",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-vector3",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ Vector3(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "Vector3",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-add_event_listener",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ add_event_listener(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "add_event_listener",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-aim_at_target",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ aim_at_target(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "aim_at_target",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-aob_scan",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ aob_scan(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "aob_scan",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-array_handle_syntax",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ array_handle_syntax(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "array_handle_syntax",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-asiscriptcontext",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ asIScriptContext(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "asIScriptContext",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-async_await",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ async_await(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "async_await",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-async_http_get",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ async_http_get(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "async_http_get",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-auto_keyword",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ auto_keyword(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "auto_keyword",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-await_http",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ await_http(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "await_http",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-begin_window",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ begin_window(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "begin_window",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-bool_main",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ bool_main(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "bool_main",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-close_handle",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ close_handle(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "close_handle",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-create_menu",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ create_menu(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "create_menu",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-create_window",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ create_window(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "create_window",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-dictionary",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ dictionary(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "dictionary",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_bone",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_bone(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_bone",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_box",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_box(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_box",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_box_3d",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_box_3d(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_box_3d",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_circle_3d",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_circle_3d(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_circle_3d",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_corner_box",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_corner_box(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_corner_box",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_esp",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_esp(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_esp",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_filled_box",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_filled_box(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_filled_box",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_gradient_box",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_gradient_box(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_gradient_box",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_health_bar",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_health_bar(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_health_bar",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_line_3d",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_line_3d(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_line_3d",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_menu",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_menu(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_menu",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_name_tag",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_name_tag(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_name_tag",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_polygon_3d",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_polygon_3d(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_polygon_3d",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_skeleton",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_skeleton(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_skeleton",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_snapline",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_snapline(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_snapline",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-draw_tracer",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ draw_tracer(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "draw_tracer",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-end_window",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ end_window(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "end_window",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-find_pattern",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ find_pattern(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "find_pattern",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-follow_pointer_chain",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ follow_pointer_chain(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "follow_pointer_chain",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-fs_exists",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ fs_exists(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "fs_exists",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-fs_mkdirs",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ fs_mkdirs(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "fs_mkdirs",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-fs_read_json",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ fs_read_json(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "fs_read_json",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-fs_write_json",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ fs_write_json(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "fs_write_json",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-function_main_lua",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ function_main_lua(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "function_main_lua",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-get_entity_list",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ get_entity_list(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "get_entity_list",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-get_local_player",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ get_local_player(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "get_local_player",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-get_module",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ get_module(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "get_module",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-get_module_base",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ get_module_base(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "argument_count_mismatch",
+          "symbol": "get_module_base",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-get_module_handle",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ get_module_handle(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "get_module_handle",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-get_players",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ get_players(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "get_players",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-get_process",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ get_process(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "get_process",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-get_view_matrix",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ get_view_matrix(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "get_view_matrix",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-gui_begin",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ gui_begin(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "gui_begin",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-gui_button",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ gui_button(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "gui_button",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-gui_checkbox",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ gui_checkbox(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "gui_checkbox",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-gui_end",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ gui_end(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "gui_end",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-gui_slider",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ gui_slider(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "gui_slider",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-http_fetch_json",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ http_fetch_json(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "http_fetch_json",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-http_get_json",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ http_get_json(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "http_get_json",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-import_from",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ import_from(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "import_from",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-lambda_capture_cpp",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ lambda_capture_cpp(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "lambda_capture_cpp",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-load_config",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ load_config(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unknown_call",
+          "symbol": "load_config",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-lua_getglobal",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ lua_getglobal(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "lua_getglobal",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-lua_pcall",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ lua_pcall(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "lua_pcall",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-net_fetch",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ net_fetch(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "net_fetch",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-nop_instruction",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ nop_instruction(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "nop_instruction",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-on_render",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ on_render(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "on_render",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-on_unload_callback",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ on_unload_callback(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "on_unload_callback",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-on_update",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ on_update(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "on_update",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-open_process",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ open_process(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "open_process",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-patch_bytes",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ patch_bytes(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "patch_bytes",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-pattern_scan",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ pattern_scan(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "pattern_scan",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-print_json",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ print_json(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "print_json",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-project_world_to_screen",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ project_world_to_screen(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "project_world_to_screen",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-read_memory",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ read_memory(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "read_memory",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-read_memory64",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ read_memory64(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "read_memory64",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-read_memory_t",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ read_memory_t(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "read_memory_t",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-read_ptr",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ read_ptr(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "read_ptr",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "name": "enma-rejects-denylist-read_view_angles",
+      "mode": "code",
+      "language": "enma",
+      "should_pass": false,
+      "input": "int64 main(){ read_view_angles(); return 1; }\n",
+      "expected_findings": [
+        {
+          "code": "unsupported_symbol",
+          "symbol": "read_view_angles",
           "severity": "error"
         }
       ]
