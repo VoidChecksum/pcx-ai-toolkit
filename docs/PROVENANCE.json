@@ -1,5 +1,5 @@
 {
-  "count": 88,
+  "count": 102,
   "drift_checkable": 67,
   "files": {
     "docs/AI_AGENT_OPERATING_MANUAL.md": {
@@ -282,6 +282,11 @@
       "source": "local",
       "url": null
     },
+    "docs/model-guides/weak-local-models.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/perception/analyzer.md": {
       "drift_check": true,
       "source": "gitbook",
@@ -342,6 +347,46 @@
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/enma/mcp-api.md"
     },
+    "docs/perception/mcp-error-recovery.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/perception/mcp-safety-policy.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/perception/mcp-script-bridge.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/perception/mcp-tool-reference.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/perception/mcp-transcripts/attach-and-read.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/perception/mcp-transcripts/string-xref.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/perception/mcp-transcripts/validate-script.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/perception/mcp-workflows.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/perception/net-api.md": {
       "drift_check": true,
       "source": "gitbook",
@@ -372,6 +417,16 @@
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/enma/sound-api.md"
     },
+    "docs/perception/support-matrix.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/perception/two-mcp-workflow.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/perception/unicorn-api.md": {
       "drift_check": true,
       "source": "gitbook",
@@ -392,36 +447,6 @@
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/enma/zydis-api.md"
     },
-    "docs/superpowers/plans/2026-06-24-pcx-mcp-schema-mirror.md": {
-      "drift_check": false,
-      "source": "local",
-      "url": null
-    },
-    "docs/superpowers/plans/2026-06-24-rust-docs-pipeline.md": {
-      "drift_check": false,
-      "source": "local",
-      "url": null
-    },
-    "docs/superpowers/plans/2026-06-25-anti-hallucination-rails.md": {
-      "drift_check": false,
-      "source": "local",
-      "url": null
-    },
-    "docs/superpowers/plans/2026-06-25-auto-publish-release.md": {
-      "drift_check": false,
-      "source": "local",
-      "url": null
-    },
-    "docs/superpowers/plans/2026-06-25-full-anti-hallucination-rollout.md": {
-      "drift_check": false,
-      "source": "local",
-      "url": null
-    },
-    "docs/superpowers/plans/2026-06-25-rust-first-pcx-cli.md": {
-      "drift_check": false,
-      "source": "local",
-      "url": null
-    },
     "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md": {
       "drift_check": false,
       "source": "local",
@@ -441,6 +466,51 @@
       "drift_check": false,
       "source": "local",
       "url": null
+    },
+    "docs/tasks/custom-draw.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/tasks/filesystem-config.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/tasks/gui-config.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/tasks/net-http.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/tasks/pattern-scan.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/tasks/proc-read.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/tasks/render-overlay.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/tasks/unicorn-emulation.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/tasks/zydis-disasm.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
     }
   },
   "generated": "2026-06-25",
@@ -451,19 +521,33 @@
     "docs/distribution-checklist.md",
     "docs/enma/UPSTREAM-SUGGESTIONS.md",
     "docs/marketplace-install.md",
+    "docs/model-guides/weak-local-models.md",
     "docs/perception/changelogs.md",
     "docs/perception/llm-routing.md",
+    "docs/perception/mcp-error-recovery.md",
+    "docs/perception/mcp-safety-policy.md",
+    "docs/perception/mcp-script-bridge.md",
+    "docs/perception/mcp-tool-reference.md",
+    "docs/perception/mcp-transcripts/attach-and-read.md",
+    "docs/perception/mcp-transcripts/string-xref.md",
+    "docs/perception/mcp-transcripts/validate-script.md",
+    "docs/perception/mcp-workflows.md",
     "docs/perception/sdk-status.md",
+    "docs/perception/support-matrix.md",
+    "docs/perception/two-mcp-workflow.md",
     "docs/perception/versioning-and-migration.md",
-    "docs/superpowers/plans/2026-06-24-pcx-mcp-schema-mirror.md",
-    "docs/superpowers/plans/2026-06-24-rust-docs-pipeline.md",
-    "docs/superpowers/plans/2026-06-25-anti-hallucination-rails.md",
-    "docs/superpowers/plans/2026-06-25-auto-publish-release.md",
-    "docs/superpowers/plans/2026-06-25-full-anti-hallucination-rollout.md",
-    "docs/superpowers/plans/2026-06-25-rust-first-pcx-cli.md",
     "docs/superpowers/specs/2026-06-24-pcx-toolkit-improvement-series-design.md",
     "docs/superpowers/specs/2026-06-24-rust-docs-pipeline-design.md",
     "docs/superpowers/specs/2026-06-25-auto-publish-release-design.md",
-    "docs/superpowers/specs/2026-06-25-rust-first-pcx-cli-design.md"
+    "docs/superpowers/specs/2026-06-25-rust-first-pcx-cli-design.md",
+    "docs/tasks/custom-draw.md",
+    "docs/tasks/filesystem-config.md",
+    "docs/tasks/gui-config.md",
+    "docs/tasks/net-http.md",
+    "docs/tasks/pattern-scan.md",
+    "docs/tasks/proc-read.md",
+    "docs/tasks/render-overlay.md",
+    "docs/tasks/unicorn-emulation.md",
+    "docs/tasks/zydis-disasm.md"
   ]
 }
