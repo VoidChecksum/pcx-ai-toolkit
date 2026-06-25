@@ -1,5 +1,35 @@
 # Changelog
 
+## v1.17.0 - 2026-06-25
+
+- fix(examples): document process permissions
+- fix(ci): satisfy native permission gate
+- fix(ci): restore validation fixtures
+- fix(skills): add license metadata
+- fix(validation): allow local routines
+- fix(ci): refresh generated docs
+- feat(ci): automate releases from main
+- feat: operationalize perception mcp workflows
+- chore: ignore local session artifacts
+- chore: remove session plan artifacts
+- feat: add perception mcp workflow planner
+- feat: deepen anti-hallucination coverage
+- fix: relax validator shape checks
+- docs: redesign README
+- feat: harden anti-hallucination evals
+- feat: add anti-hallucination rails
+- Merge remote-tracking branch 'origin/main' into docs/enma-gap-fixes
+- feat(docs): add coverage rails
+- Merge pull request #8 from VoidChecksum/docs/enma-gap-fixes
+- docs: clarify Enma language limitations
+- Merge pull request #7 from VoidChecksum/docs/enma-gap-fixes
+- docs: clarify Enma documentation gaps
+- Merge pull request #6 from VoidChecksum/docs/enma-gap-fixes
+- docs: clarify Enma documentation gaps
+- Merge pull request #5 from VoidChecksum/docs/enma-gap-fixes
+- docs: clarify Enma documentation gaps
+- ci: skip existing registry releases
+
 All notable changes to this toolkit are documented here.
 
 ## [1.16.0] — 2026-06-18
