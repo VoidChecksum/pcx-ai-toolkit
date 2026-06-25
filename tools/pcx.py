@@ -33,10 +33,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-VERSION_FILE = REPO_ROOT / "VERSION"
-sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
+TOOL_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(TOOL_DIR / "lib"))
+from pcx_paths import data_root, tool_dir  # noqa: E402
 from pcx_scaffold import available_templates, build_project_plan, scaffold_project, slugify  # noqa: E402
+
+REPO_ROOT = data_root()
+VERSION_FILE = REPO_ROOT / "VERSION"
 
 # ANSI colors (disabled on Windows if not supported)
 def _supports_color() -> bool:
@@ -90,7 +93,7 @@ def run_script(script_name: str, args: list[str]) -> int:
 
 def run_python_tool(tool_name: str, args: list[str]) -> int:
     """Run a python tool in the tools/ subdirectory using the current interpreter."""
-    tool_path = REPO_ROOT / "tools" / f"{tool_name}.py"
+    tool_path = tool_dir() / f"{tool_name}.py"
     if not tool_path.exists():
         print(f"Error: Python tool {tool_name}.py not found.", file=sys.stderr)
         return 2

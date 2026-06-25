@@ -110,6 +110,24 @@ If code crosses this table without source proof, treat it as wrong.
 
 ## Quick Start
 
+PyPI:
+
+```bash
+python -m pip install pcx-ai-toolkit
+pcx doctor
+```
+
+npm / Bun:
+
+```bash
+npm install -g pcx-ai-toolkit
+# or
+bun add -g pcx-ai-toolkit
+pcx doctor
+```
+
+Source checkout:
+
 ```bash
 git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
 cd pcx-ai-toolkit

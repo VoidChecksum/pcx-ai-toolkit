@@ -1,0 +1,49 @@
+{
+  "name": "pcx-ai-toolkit",
+  "version": "1.16.0",
+  "description": "Source-grounded Enma and AngelScript toolkit for Perception.cx",
+  "license": "MIT",
+  "homepage": "https://github.com/VoidChecksum/pcx-ai-toolkit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VoidChecksum/pcx-ai-toolkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/VoidChecksum/pcx-ai-toolkit/issues"
+  },
+  "keywords": [
+    "perception",
+    "enma",
+    "angelscript",
+    "pcx",
+    "ai-toolkit",
+    "game-scripting"
+  ],
+  "bin": {
+    "pcx": "npm/bin/pcx.js"
+  },
+  "files": [
+    "npm/bin/pcx.js",
+    "tools/**/*.py",
+    "tools/**/*.sh",
+    "tools/**/*.ps1",
+    "knowledge/*.json",
+    "templates/**/*",
+    "docs/COUNTS.json",
+    "docs/llms.txt",
+    "docs/llms-perception-enma.md",
+    "docs/llms-perception-angelscript.md",
+    "README.md",
+    "LICENSE",
+    "VERSION"
+  ],
+  "scripts": {
+    "pack:check": "bun pm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

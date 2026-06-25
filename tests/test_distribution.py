@@ -27,6 +27,21 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("cargo build --release --bin pcx-rs", text)
         self.assertIn("release-artifacts/pcx-rs", text)
 
+    def test_root_python_package_ships_runtime_data(self):
+        pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        self.assertIn('"knowledge" = ["knowledge/pcx-api-index.json", "knowledge/unsupported-symbols.json"]', pyproject)
+        self.assertIn('"templates/full-project"', pyproject)
+        self.assertIn('"tools" = ["tools/update-toolkit.sh", "tools/update-toolkit.ps1"]', pyproject)
+
+    def test_npm_package_exposes_pcx_bin_for_node_and_bun(self):
+        package = (REPO_ROOT / "package.json").read_text(encoding="utf-8")
+        launcher = REPO_ROOT / "npm" / "bin" / "pcx.js"
+        self.assertTrue(launcher.exists(), "missing npm pcx launcher")
+        self.assertIn('"name": "pcx-ai-toolkit"', package)
+        self.assertIn('"pcx": "npm/bin/pcx.js"', package)
+        self.assertIn('"knowledge/*.json"', package)
+        self.assertIn('"templates/**/*"', package)
+
 
 if __name__ == "__main__":
     unittest.main()

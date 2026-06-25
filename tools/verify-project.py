@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+TOOL_DIR = Path(__file__).resolve().parent
 
 
 def collect_scripts(root: Path) -> list[Path]:
@@ -74,11 +74,11 @@ def verify_project(root: Path, allow_placeholders: bool, allow_unverified: bool)
     has_as = any(p.suffix.lower() == ".as" for p in scripts)
 
     if has_em:
-        steps.append(run_tool([sys.executable, str(REPO_ROOT / "tools" / "script-linter.py"), "--strict", str(target)]))
+        steps.append(run_tool([sys.executable, str(TOOL_DIR / "script-linter.py"), "--strict", str(target)]))
     if has_as:
-        steps.append(run_tool([sys.executable, str(REPO_ROOT / "tools" / "as-linter.py"), "--strict", str(target)]))
+        steps.append(run_tool([sys.executable, str(TOOL_DIR / "as-linter.py"), "--strict", str(target)]))
 
-    steps.append(run_tool([sys.executable, str(REPO_ROOT / "tools" / "symbol-check.py"), str(target)]))
+    steps.append(run_tool([sys.executable, str(TOOL_DIR / "symbol-check.py"), str(target)]))
 
     evidence_dir = target / "evidence" if target.is_dir() else target.parent / "evidence"
     evidence_files = [p for p in evidence_dir.glob("*.md") if p.name.lower() != "readme.md"] if evidence_dir.is_dir() else []

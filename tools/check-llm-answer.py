@@ -17,11 +17,13 @@ import sys
 from pathlib import Path
 from typing import Any, cast
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-INDEX_FILE = REPO_ROOT / "knowledge" / "pcx-api-index.json"
-
-sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
+TOOL_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(TOOL_DIR / "lib"))
+from pcx_paths import data_root  # noqa: E402
 from pcx_grounding import load_api_index, validate_answer_markdown  # noqa: E402
+
+REPO_ROOT = data_root()
+INDEX_FILE = REPO_ROOT / "knowledge" / "pcx-api-index.json"
 
 
 def check_answer(path: Path) -> dict[str, Any]:

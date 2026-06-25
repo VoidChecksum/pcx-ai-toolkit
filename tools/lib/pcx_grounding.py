@@ -18,6 +18,8 @@ from pcx_parser import (
     extract_enma_imports,
     extract_function_defs,
 )
+from pcx_paths import data_root
+
 
 SUPPORTED_LANGUAGES = {"enma", "angelscript"}
 
@@ -31,7 +33,7 @@ LANG_ALIASES = {
     ".as": "angelscript",
 }
 
-UNSUPPORTED_SYMBOLS_PATH = Path(__file__).resolve().parents[2] / "knowledge" / "unsupported-symbols.json"
+UNSUPPORTED_SYMBOLS_PATH = data_root() / "knowledge" / "unsupported-symbols.json"
 
 def load_unsupported_symbols() -> dict[str, str]:
     if not UNSUPPORTED_SYMBOLS_PATH.exists():

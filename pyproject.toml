@@ -57,7 +57,7 @@ version = "1.16.0"
 description = "Source-grounded Enma and AngelScript toolkit for Perception.cx"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 dependencies = []
 
 [project.scripts]
@@ -69,3 +69,15 @@ Issues = "https://github.com/VoidChecksum/pcx-ai-toolkit/issues"
 
 [tool.setuptools]
 packages = ["tools", "tools.lib"]
+include-package-data = true
+
+[tool.setuptools.data-files]
+"." = ["VERSION", "README.md", "LICENSE"]
+"knowledge" = ["knowledge/pcx-api-index.json", "knowledge/unsupported-symbols.json"]
+"templates" = ["templates/*.em", "templates/*.md"]
+"templates/full-project" = ["templates/full-project/*.em"]
+"templates/full-project-as" = ["templates/full-project-as/*.as", "templates/full-project-as/*.md"]
+"templates/cheat-skeleton-em" = ["templates/cheat-skeleton-em/*.em", "templates/cheat-skeleton-em/*.md"]
+"templates/cheat-skeleton-as" = ["templates/cheat-skeleton-as/*.as", "templates/cheat-skeleton-as/*.md"]
+"docs" = ["docs/COUNTS.json", "docs/llms.txt", "docs/llms-perception-enma.md", "docs/llms-perception-angelscript.md"]
+"tools" = ["tools/update-toolkit.sh", "tools/update-toolkit.ps1"]
