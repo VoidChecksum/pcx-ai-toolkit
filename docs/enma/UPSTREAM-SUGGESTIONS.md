@@ -10,6 +10,17 @@ The following recommendations are compiled based on the development of the
 Perception.cx (PCX) AI scripting toolkit, focusing on reverse engineering
 ergonomics, template parity, and tooling enhancement.
 
+## Status tracker
+
+| Gap | Runtime status | Docs status | Next action |
+|---|---|---|---|
+| Nested template fields / unordered maps | open | key-space clarified in Maps; unsupported patterns documented in Templates | keep examples current with compiler behavior |
+| Byte-wise pointer arithmetic | open | overview and Pointers explain typed scaling and Proc byte-offset workflow | add language support if upstream accepts it |
+| Overloaded function templates | open | unsupported arity-selected pattern documented in Templates | add compiler support or keep helper-name workaround |
+| Character packing / string layout | open | Strings documents non-layout-compatible string/char guidance | publish exact packing rules when runtime supports packed strings |
+| LSP template inference | open | IDE documents monomorphization-only diagnostics | improve LSP template instantiation diagnostics |
+
+
 ## 1. Nesting & Nested Template Fields (Unordered Maps/Sets)
 
 * Issue: Enma currently lacks std::unordered_map and std::unordered_set because

@@ -103,6 +103,17 @@ The following recommendations are compiled based on the development of the
 Perception.cx (PCX) AI scripting toolkit, focusing on reverse engineering
 ergonomics, template parity, and tooling enhancement.
 
+## Status tracker
+
+| Gap | Runtime status | Docs status | Next action |
+|---|---|---|---|
+| Nested template fields / unordered maps | open | key-space clarified in Maps; unsupported patterns documented in Templates | keep examples current with compiler behavior |
+| Byte-wise pointer arithmetic | open | overview and Pointers explain typed scaling and Proc byte-offset workflow | add language support if upstream accepts it |
+| Overloaded function templates | open | unsupported arity-selected pattern documented in Templates | add compiler support or keep helper-name workaround |
+| Character packing / string layout | open | Strings documents non-layout-compatible string/char guidance | publish exact packing rules when runtime supports packed strings |
+| LSP template inference | open | IDE documents monomorphization-only diagnostics | improve LSP template instantiation diagnostics |
+
+
 ## 1. Nesting & Nested Template Fields (Unordered Maps/Sets)
 
 * Issue: Enma currently lacks std::unordered_map and std::unordered_set because
@@ -1107,6 +1118,19 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 Registered with `register_addon_map(engine)`.
 
+## Supported key space
+
+Today the registered hash-map surface is intentionally narrow:
+
+| Container | Keys | Use for |
+|-----------|------|---------|
+| `map<string, V>` | `string` | Names, labels, small dictionaries |
+| `imap<V>` | `int64` | Entity IDs, hashes, handles, hot scalar lookups |
+| `sorted_map<K, V>` | comparable `K` | Ordered maps where the sorted-map addon supports the key type |
+
+Do not use `map<int64, V>`; use `imap<V>` instead. Some nested-template field patterns still fail when they require transitive instantiation of a template field inside another template. Keep cache/entity maps flat unless you have compiled the exact container shape.
+
+
 ## Creation
 
 ```c
@@ -1146,7 +1170,7 @@ for (string k, int64 v : m) { ... }
 
 ## imap — int64-keyed hash map
 
-Companion to `map<K, V>` for int64 keys. Same hash-based O(1) ops, but the key is an int64 directly. Headline use case: pair with constexpr FNV-1a to avoid string compares in hot loops.
+Companion to string-keyed `map<string, V>` for int64 keys. Same hash-based O(1) ops, but the key is an int64 directly. Headline use case: pair with constexpr FNV-1a to avoid string compares in hot loops.
 
 ```c
 imap<int64> tbl;                         // typed declaration; default-constructs
@@ -1212,11 +1236,11 @@ class W {
 }
 ```
 
-Same for `map<K,V>`, `sorted_map<K,V>`, and other addon-registered container types: typed declarations on classes with or without user ctors default-construct.
+Same for `map<string,V>`, `imap<V>`, `sorted_map<K,V>`, and other addon-registered container types: typed declarations on classes with or without user ctors default-construct.
 
 ## Class / struct as V
 
-`map<K, T>` and `imap<T>` accept user-defined class or struct types as V. Class instances are heap-allocated reference handles — mutating an instance fetched via `get` flows back into the map (alias semantics, like C++ references). To clone, use `*pt` (deref).
+`map<string, T>` and `imap<T>` accept user-defined class or struct types as V. Class instances are heap-allocated reference handles — mutating an instance fetched via `get` flows back into the map (alias semantics, like C++ references). To clone, use `*pt` (deref).
 
 ```c
 class Player {
@@ -2006,6 +2030,29 @@ string d = base64_decode("aGVsbG8=")  // "hello"
 string u = url_encode("hello world & foo=bar")  // "hello%20world%20%26%20foo%3Dbar"
 string p = url_decode("hello%20world")          // "hello world" (also '+' -> ' ')
 ```
+
+## String / char memory layout
+
+Strings are script-managed values, not a layout-compatible view of target-process memory. Treat string contents as text/byte data exposed through string APIs, not as a `char[N]` field you can embed in an Enma struct to mirror a native C/C++ structure.
+
+Current rules for native layout work:
+
+* `char` is `int8` underneath for scalar values and formatting helpers.
+* Script `string` storage is implementation-owned; do not depend on its in-memory layout.
+* `struct { char name[32]; }`-style native layout mirroring is not a supported replacement for reading a target process C string.
+* For process memory, read bytes through the Perception Proc/CPU APIs, stop at NUL yourself, then convert or print the resulting bytes as needed.
+
+Pattern:
+
+```c
+// Prefer explicit process-memory reads for native C strings.
+uint64 name_addr = entity + 0x120;
+string name = proc.rs(name_addr, 32);      // UTF-8, stops at NUL, empty on failure
+
+array<uint8> raw = proc.rvm(name_addr, 32); // use bytes when layout matters
+```
+
+Packed `std::string` / exact native `char[N]` struct parity is tracked as an upstream language/runtime gap.
 
 ## `format(fmt, ...)`
 
@@ -4018,6 +4065,28 @@ Storing the address of a local somewhere it could outlive the local is a compile
 
 Pointer ↔ `int64` / `uint64` is implicit (both 8-byte slots, lossless on x64). Useful for handing handles to native APIs and for taking script-side function references via `&fn` (a `pointer` value that converts to `int64` without a cast). The implicit conversion is not a workaround for the escape analyzer - allocation and lifetime rules still apply.
 
+## Process memory is not Enma heap memory
+
+Typed Enma pointers are for Enma heap objects allocated with `new`. Do not model arbitrary target-process addresses as `T*` unless the memory is actually an Enma object. For reverse-engineering byte offsets, keep addresses as `uint64` and use Perception Proc/CPU APIs.
+
+Preferred:
+
+```c
+uint64 entity = base + offsets[i];
+int32 hp = proc.r32(entity + 0x120);
+string name = proc.rs(entity + 0x180, 32);
+```
+
+Do not use typed casts for raw target memory:
+
+```c
+// Invalid / unsafe model for target-process memory.
+Player* p = cast<Player*>(base + offset);
+```
+
+Typed pointer arithmetic scales by `sizeof(T)`: `p + 1` means "next T", not "next byte". Integer-to-pointer assignment is not a byte-offset traversal primitive.
+
+
 ## Allocation & Deletion
 
 ```c
@@ -5655,6 +5724,36 @@ struct SetLike { }
 ```
 
 Use concrete helper functions or document the methods a template expects. Type errors surface when the compiler monomorphizes the template for a concrete `T`.
+
+## Known unsupported template patterns
+
+### Arity-selected overloaded function templates
+
+Do not port recursive C++ variadic-template overload patterns directly. Overloaded function templates selected by call arity are not supported as a base-case mechanism.
+
+Not supported:
+
+```cpp
+template<typename T>
+void visit(T x) { }
+
+template<typename T, typename... Rest>
+void visit(T x, Rest... rest) {
+    visit(x);
+    visit(rest...);
+}
+```
+
+Use explicit helper names, concrete overloads, or a simple loop/container-based API instead:
+
+```cpp
+template<typename T>
+void visit_one(T x) { }
+```
+
+### Transitive template field instantiation
+
+Some outer-template fields whose type is another template instantiation do not auto-instantiate transitively. Prefer flat fields or concrete wrapper types when a nested container field fails to compile.
 
 ## Templated Base Classes
 
@@ -16212,6 +16311,10 @@ Open as many files as you want. Drag tabs to reorder, middle-click or click the 
 **IntelliSense**
 
 Full autocompletion for the Perception.cx API surface in both AngelScript and Lua. Includes function signatures, parameter hints, type info, and namespace-aware resolution (e.g. `sdk::player_t` resolves correctly). Trigger manually with **Ctrl+Space** or let it appear automatically as you type.
+
+**Template diagnostics caveat**
+
+The editor/LSP can parse template definitions, but some template errors only appear after the compiler monomorphizes a concrete instantiation. Missing methods on generic types, constraint-like assumptions, and some syntax errors inside rarely-instantiated template branches may not show as live squiggles. To force checks, instantiate generic helpers in a small test function and use **Verify**.
 
 **Find & Replace**
 

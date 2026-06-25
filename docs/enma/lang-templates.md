@@ -93,6 +93,36 @@ struct SetLike { }
 
 Use concrete helper functions or document the methods a template expects. Type errors surface when the compiler monomorphizes the template for a concrete `T`.
 
+## Known unsupported template patterns
+
+### Arity-selected overloaded function templates
+
+Do not port recursive C++ variadic-template overload patterns directly. Overloaded function templates selected by call arity are not supported as a base-case mechanism.
+
+Not supported:
+
+```cpp
+template<typename T>
+void visit(T x) { }
+
+template<typename T, typename... Rest>
+void visit(T x, Rest... rest) {
+    visit(x);
+    visit(rest...);
+}
+```
+
+Use explicit helper names, concrete overloads, or a simple loop/container-based API instead:
+
+```cpp
+template<typename T>
+void visit_one(T x) { }
+```
+
+### Transitive template field instantiation
+
+Some outer-template fields whose type is another template instantiation do not auto-instantiate transitively. Prefer flat fields or concrete wrapper types when a nested container field fails to compile.
+
 ## Templated Base Classes
 
 A class can inherit from a template instantiation:

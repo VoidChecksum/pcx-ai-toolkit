@@ -4,6 +4,19 @@
 
 Registered with `register_addon_map(engine)`.
 
+## Supported key space
+
+Today the registered hash-map surface is intentionally narrow:
+
+| Container | Keys | Use for |
+|-----------|------|---------|
+| `map<string, V>` | `string` | Names, labels, small dictionaries |
+| `imap<V>` | `int64` | Entity IDs, hashes, handles, hot scalar lookups |
+| `sorted_map<K, V>` | comparable `K` | Ordered maps where the sorted-map addon supports the key type |
+
+Do not use `map<int64, V>`; use `imap<V>` instead. Some nested-template field patterns still fail when they require transitive instantiation of a template field inside another template. Keep cache/entity maps flat unless you have compiled the exact container shape.
+
+
 ## Creation
 
 ```c
@@ -43,7 +56,7 @@ for (string k, int64 v : m) { ... }
 
 ## imap — int64-keyed hash map
 
-Companion to `map<K, V>` for int64 keys. Same hash-based O(1) ops, but the key is an int64 directly. Headline use case: pair with constexpr FNV-1a to avoid string compares in hot loops.
+Companion to string-keyed `map<string, V>` for int64 keys. Same hash-based O(1) ops, but the key is an int64 directly. Headline use case: pair with constexpr FNV-1a to avoid string compares in hot loops.
 
 ```c
 imap<int64> tbl;                         // typed declaration; default-constructs
@@ -109,11 +122,11 @@ class W {
 }
 ```
 
-Same for `map<K,V>`, `sorted_map<K,V>`, and other addon-registered container types: typed declarations on classes with or without user ctors default-construct.
+Same for `map<string,V>`, `imap<V>`, `sorted_map<K,V>`, and other addon-registered container types: typed declarations on classes with or without user ctors default-construct.
 
 ## Class / struct as V
 
-`map<K, T>` and `imap<T>` accept user-defined class or struct types as V. Class instances are heap-allocated reference handles — mutating an instance fetched via `get` flows back into the map (alias semantics, like C++ references). To clone, use `*pt` (deref).
+`map<string, T>` and `imap<T>` accept user-defined class or struct types as V. Class instances are heap-allocated reference handles — mutating an instance fetched via `get` flows back into the map (alias semantics, like C++ references). To clone, use `*pt` (deref).
 
 ```c
 class Player {
