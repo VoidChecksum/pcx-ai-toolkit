@@ -15,7 +15,11 @@ def main() -> int:
     checks=[
       ('markdown links', [py,'-m','unittest','tests.test_all_markdown_links']),
       ('docs drift', [py,'tools/check-doc-drift.py']),
-      ('generated freshness', [py,'tools/pcx.py','docs-check']),
+      ('api index', [py,'tools/build-api-index.py','--check']),
+      ('llms index', [py,'tools/build-llms-index.py','--check']),
+      ('coverage dashboard', [py,'tools/build-coverage-dashboard.py','--check']),
+      ('internal links tool', [py,'tools/check-internal-links.py']),
+      ('hallucination eval', [py,'tools/hallucination-eval.py']),
       ('mcp config', [py,'tools/check-mcp-config.py','--check']),
       ('mcp workflows', [py,'tools/check-mcp-workflows.py','--json']),
       ('task docs', [py,'-m','unittest','tests.test_task_docs']),
