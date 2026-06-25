@@ -505,9 +505,9 @@ def cmd_docs_check() -> int:
         [sys.executable, str(TOOL_DIR / "check-internal-links.py")],
         [sys.executable, str(TOOL_DIR / "check-doc-drift.py")],
         [sys.executable, str(TOOL_DIR / "hallucination-eval.py")],
-        [sys.executable, "-m", "pytest", "tests/test_symbol_metadata.py"],
-        [sys.executable, "-m", "pytest", "tests/test_mcp_validate_code.py"],
-        [sys.executable, "-m", "pytest", "tests/test_coverage_dashboard.py"],
+        [sys.executable, "-m", "unittest", "tests.test_symbol_metadata"],
+        [sys.executable, "-m", "unittest", "tests.test_mcp_validate_code"],
+        [sys.executable, "-m", "unittest", "tests.test_coverage_dashboard"],
     ]
     for command in commands:
         print("+ " + " ".join(command))

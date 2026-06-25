@@ -29,9 +29,12 @@ const NATIVE_TOOLS: &[&str] = &[
 #[command(
     about = "Rust-first command layer for pcx-ai-toolkit",
     disable_help_subcommand = true,
+    disable_help_flag = true,
+    disable_version_flag = true,
     trailing_var_arg = true
 )]
 struct Args {
+    #[arg(allow_hyphen_values = true)]
     command: Option<String>,
     #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
     args: Vec<String>,

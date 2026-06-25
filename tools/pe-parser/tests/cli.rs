@@ -5,6 +5,36 @@ use std::{
 };
 
 #[test]
+fn version_flag_reports_toolkit_version() {
+    let out = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .arg("--version")
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stderr),
+        String::from_utf8_lossy(&out.stdout)
+    );
+    assert!(String::from_utf8_lossy(&out.stdout).contains("pcx-ai-toolkit v"));
+}
+
+#[test]
+fn help_flag_reports_pcx_help() {
+    let out = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .arg("--help")
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&out.stderr),
+        String::from_utf8_lossy(&out.stdout)
+    );
+    assert!(String::from_utf8_lossy(&out.stdout).contains("pcx-ai-toolkit manager CLI"));
+}
+
+#[test]
 fn native_counts_json_does_not_need_python() {
     let out = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
         .args(["counts", "--json"])
