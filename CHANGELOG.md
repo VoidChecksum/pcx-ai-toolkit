@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.20.3 - 2026-06-25
+
+- fix: harden pcx update checks
+
 ## v1.20.2 - 2026-06-25
 
 - fix: publish npm on release dispatch
