@@ -99,7 +99,7 @@ The Perception.cx host API surface as exposed to Enma.
 - [MCP API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/mcp-api.md): Perception's MCP server exposes the proc-API surface as JSON-RPC tools that any Model Context Protocol client (Claude Code, Cline, Continue, ...) can call.
 - [Net API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/net-api.md): All net natives are auto-registered into every loaded script.
 - [Proc API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/proc-api.md): All proc natives are auto-registered into every loaded script.
-- [Enma - Overview](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/readme.md): Enma is perception's proprietary full-module AOT and JIT-compiled scripting language. This site covers the APIs perception registers on top of Enma. For the language itself see enma docs.
+- [Enma - Overview](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/readme.md): Enma is perception's proprietary full-module AOT and JIT-compiled scripting language. This site covers the APIs perception registers on top of Enma, not the language reference itself. For syntax, type
 - [Render API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/render-api.md): All render natives are auto-registered into every loaded script.
 - [Sound API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/sound-api.md): All sound natives are auto-registered into every loaded script.
 - [Unicorn API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/unicorn-api.md): All unicorn natives are auto-registered into every loaded script.
