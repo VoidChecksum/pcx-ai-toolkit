@@ -109,6 +109,116 @@ fn update_plan_reports_npm_install_command() {
 }
 
 #[test]
+fn update_plan_reports_check_support() {
+    let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["update", "--plan-json", "--check"])
+        .env("PCX_UPDATE_MODE", "npm")
+        .output()
+        .expect("run pcx-rs update plan");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let json: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(json["mode"], "npm");
+    assert_eq!(json["check_supported"], true);
+    assert_eq!(
+        json["command"],
+        serde_json::json!(["npm", "install", "-g", "pcx-ai-toolkit@latest"])
+    );
+}
+
+#[test]
+fn npm_update_check_reports_up_to_date() {
+    let dir = std::env::temp_dir().join("pcx_npm_update_check");
+    let bin = dir.join("bin");
+    let root = dir.join("toolkit");
+    let _ = fs::remove_dir_all(&dir);
+    fs::create_dir_all(&bin).unwrap();
+    fs::create_dir_all(root.join("knowledge")).unwrap();
+    fs::write(root.join("VERSION"), "1.20.2\n").unwrap();
+    fs::write(root.join("knowledge").join("pcx-api-index.json"), "{}\n").unwrap();
+    let npm = bin.join(if cfg!(windows) { "npm.cmd" } else { "npm" });
+    fs::write(
+        &npm,
+        if cfg!(windows) {
+            "@echo off\r\necho 1.20.2\r\n"
+        } else {
+            "#!/usr/bin/env sh\nprintf '1.20.2\\n'\n"
+        },
+    )
+    .unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = fs::metadata(&npm).unwrap().permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&npm, perms).unwrap();
+    }
+    let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["update", "--check"])
+        .env("PCX_UPDATE_MODE", "npm")
+        .env("PCX_TOOLKIT_ROOT", &root)
+        .env("PCX_NPM", &npm)
+        .output()
+        .expect("run pcx-rs update check");
+    assert!(
+        output.status.success(),
+        "{}{}",
+        String::from_utf8_lossy(&output.stderr),
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(String::from_utf8_lossy(&output.stdout).contains("Up to date (1.20.2)"));
+    let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn npm_update_check_reports_available_update() {
+    let dir = std::env::temp_dir().join("pcx_npm_update_available");
+    let bin = dir.join("bin");
+    let root = dir.join("toolkit");
+    let _ = fs::remove_dir_all(&dir);
+    fs::create_dir_all(&bin).unwrap();
+    fs::create_dir_all(root.join("knowledge")).unwrap();
+    fs::write(root.join("VERSION"), "1.20.1\n").unwrap();
+    fs::write(root.join("knowledge").join("pcx-api-index.json"), "{}\n").unwrap();
+    let npm = bin.join(if cfg!(windows) { "npm.cmd" } else { "npm" });
+    fs::write(
+        &npm,
+        if cfg!(windows) {
+            "@echo off\r\necho 1.20.2\r\n"
+        } else {
+            "#!/usr/bin/env sh\nprintf '1.20.2\\n'\n"
+        },
+    )
+    .unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = fs::metadata(&npm).unwrap().permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&npm, perms).unwrap();
+    }
+    let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
+        .args(["update", "--check"])
+        .env("PCX_UPDATE_MODE", "npm")
+        .env("PCX_TOOLKIT_ROOT", &root)
+        .env("PCX_NPM", &npm)
+        .output()
+        .expect("run pcx-rs update check");
+    assert_eq!(
+        output.status.code(),
+        Some(1),
+        "{}{}",
+        String::from_utf8_lossy(&output.stderr),
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(String::from_utf8_lossy(&output.stdout).contains("Update available: 1.20.1 -> 1.20.2"));
+    let _ = fs::remove_dir_all(&dir);
+}
+
+#[test]
 fn update_plan_reports_pypi_install_command() {
     let output = Command::new(env!("CARGO_BIN_EXE_pcx-rs"))
         .args(["update", "--plan-json"])

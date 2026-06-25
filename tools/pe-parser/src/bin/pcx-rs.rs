@@ -1086,6 +1086,11 @@ fn default_python() -> String {
 }
 
 fn update_command(mode: &UpdateMode, repo_root: &Path, args: &[String]) -> Option<Vec<String>> {
+    let passthrough: Vec<String> = args
+        .iter()
+        .filter(|arg| arg.as_str() != "--check")
+        .cloned()
+        .collect();
     match mode {
         UpdateMode::Source => {
             let mut cmd = if cfg!(windows) {
@@ -1119,15 +1124,128 @@ fn update_command(mode: &UpdateMode, repo_root: &Path, args: &[String]) -> Optio
             "-g".to_string(),
             "pcx-ai-toolkit@latest".to_string(),
         ]),
-        UpdateMode::Pypi => Some(vec![
-            std::env::var("PCX_PYTHON").unwrap_or_else(|_| default_python()),
-            "-m".to_string(),
-            "pip".to_string(),
-            "install".to_string(),
-            "--upgrade".to_string(),
-            "pcx-ai-toolkit".to_string(),
-        ]),
+        UpdateMode::Pypi => {
+            let mut cmd = vec![
+                std::env::var("PCX_PYTHON").unwrap_or_else(|_| default_python()),
+                "-m".to_string(),
+                "pip".to_string(),
+                "install".to_string(),
+                "--upgrade".to_string(),
+                "pcx-ai-toolkit".to_string(),
+            ];
+            cmd.extend(passthrough);
+            Some(cmd)
+        }
         UpdateMode::Unknown => None,
+    }
+}
+
+fn parse_version_parts(version: &str) -> Vec<u64> {
+    version
+        .split(|c: char| !c.is_ascii_digit())
+        .filter(|part| !part.is_empty())
+        .map(|part| part.parse::<u64>().unwrap_or(0))
+        .collect()
+}
+
+fn version_cmp(local: &str, remote: &str) -> std::cmp::Ordering {
+    let left = parse_version_parts(local);
+    let right = parse_version_parts(remote);
+    let len = left.len().max(right.len());
+    for i in 0..len {
+        let a = *left.get(i).unwrap_or(&0);
+        let b = *right.get(i).unwrap_or(&0);
+        match a.cmp(&b) {
+            std::cmp::Ordering::Equal => {}
+            other => return other,
+        }
+    }
+    std::cmp::Ordering::Equal
+}
+
+fn npm_latest_version() -> Result<String, String> {
+    let npm = std::env::var("PCX_NPM").unwrap_or_else(|_| "npm".to_string());
+    let out = Command::new(npm)
+        .args(["view", "pcx-ai-toolkit", "version"])
+        .output()
+        .map_err(|err| format!("failed to run npm: {err}"))?;
+    if !out.status.success() {
+        let stderr = String::from_utf8_lossy(&out.stderr).trim().to_string();
+        return Err(if stderr.is_empty() {
+            "npm registry lookup failed".to_string()
+        } else {
+            stderr
+        });
+    }
+    Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
+}
+
+fn pypi_check_command() -> Vec<String> {
+    vec![
+        std::env::var("PCX_PYTHON").unwrap_or_else(|_| default_python()),
+        "-m".to_string(),
+        "pip".to_string(),
+        "index".to_string(),
+        "versions".to_string(),
+        "pcx-ai-toolkit".to_string(),
+    ]
+}
+
+fn update_check_command(mode: &UpdateMode, repo_root: &Path) -> Option<Vec<String>> {
+    match mode {
+        UpdateMode::Source => update_command(mode, repo_root, &["--check".to_string()]),
+        UpdateMode::Npm => Some(vec![
+            std::env::var("PCX_NPM").unwrap_or_else(|_| "npm".to_string()),
+            "view".to_string(),
+            "pcx-ai-toolkit".to_string(),
+            "version".to_string(),
+        ]),
+        UpdateMode::Pypi => Some(pypi_check_command()),
+        UpdateMode::Unknown => None,
+    }
+}
+
+fn cmd_update_check(mode: &UpdateMode, repo_root: &Path) -> i32 {
+    match mode {
+        UpdateMode::Npm => match npm_latest_version() {
+            Ok(latest) => {
+                let current = version(repo_root);
+                if version_cmp(&current, &latest).is_lt() {
+                    println!("Update available: {current} -> {latest}");
+                    1
+                } else {
+                    println!("Up to date ({current})");
+                    0
+                }
+            }
+            Err(err) => {
+                eprintln!("pcx update --check: {err}");
+                3
+            }
+        },
+        UpdateMode::Pypi => {
+            let cmd = pypi_check_command();
+            match Command::new(&cmd[0]).args(&cmd[1..]).status() {
+                Ok(status) => status.code().unwrap_or(3),
+                Err(err) => {
+                    eprintln!("pcx update --check: failed to run {}: {}", cmd[0], err);
+                    3
+                }
+            }
+        }
+        UpdateMode::Source | UpdateMode::Unknown => {
+            let Some(command) = update_command(mode, repo_root, &["--check".to_string()]) else {
+                eprintln!("pcx update: could not detect install mode; use npm install -g pcx-ai-toolkit@latest or python -m pip install --upgrade pcx-ai-toolkit");
+                return 3;
+            };
+            match Command::new(&command[0]).args(&command[1..]).status() {
+                Ok(status) => status.code().unwrap_or(3),
+                Err(err) => {
+                    eprintln!("pcx update --check: failed to run {}: {}", command[0], err);
+                    3
+                }
+            }
+        }
     }
 }
 
@@ -1139,9 +1257,9 @@ fn update_mode_name(mode: &UpdateMode) -> &'static str {
         UpdateMode::Unknown => "unknown",
     }
 }
-
 fn cmd_update(repo_root: &Path, args: &[String]) -> i32 {
     let plan_json = args.iter().any(|arg| arg == "--plan-json");
+    let check_only = args.iter().any(|arg| arg == "--check");
     let passthrough: Vec<String> = args
         .iter()
         .filter(|arg| arg.as_str() != "--plan-json")
@@ -1152,18 +1270,29 @@ fn cmd_update(repo_root: &Path, args: &[String]) -> i32 {
         eprintln!("pcx update: could not detect install mode; use npm install -g pcx-ai-toolkit@latest or python -m pip install --upgrade pcx-ai-toolkit");
         return 3;
     };
+    let check_command = update_check_command(&mode, repo_root);
     if plan_json {
         println!(
             "{}",
             serde_json::json!({
                 "mode": update_mode_name(&mode),
                 "command": command,
+                "check_command": check_command,
+                "check_supported": check_command.is_some(),
             })
         );
         return 0;
     }
+    if check_only {
+        return cmd_update_check(&mode, repo_root);
+    }
     match Command::new(&command[0]).args(&command[1..]).status() {
-        Ok(status) => status.code().unwrap_or(3),
+        Ok(status) => {
+            if !status.success() && mode == UpdateMode::Npm {
+                eprintln!("pcx update: npm update failed. If this is EACCES, set a user npm prefix or run: npm install -g pcx-ai-toolkit@latest --force");
+            }
+            status.code().unwrap_or(3)
+        }
         Err(err) => {
             eprintln!("pcx update: failed to run {}: {}", command[0], err);
             3
