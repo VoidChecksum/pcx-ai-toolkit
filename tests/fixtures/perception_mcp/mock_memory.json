@@ -1,0 +1,5 @@
+{
+  "values": {"0x401000:u32": 1337},
+  "strings": {"PlayerHealth": ["0x401234"]},
+  "functions": {"0x401234": {"start": "0x401200", "end": "0x401280"}}
+}

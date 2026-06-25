@@ -14,7 +14,7 @@ Search a bounded module region for an evidence-backed byte signature, then disas
 
 No addon import is required for Proc pattern scan APIs.
 
-## Exact symbols
+## API
 
 `ref_process`, `proc_t.get_module_base`, `proc_t.get_module_size`, `proc_t.find_code_pattern`, `proc_t.find_all_code_patterns`.
 
@@ -22,7 +22,7 @@ No addon import is required for Proc pattern scan APIs.
 
 Process read access is required. Kernel ranges require `kernel_rw_access`; keep scans inside a user-mode module unless explicitly authorized.
 
-## Enma example
+## Minimal code
 
 ```enma
 // Requires process_memory_read permission.

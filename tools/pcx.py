@@ -522,7 +522,7 @@ def main() -> int:
     ap.add_argument("command", nargs="?", help=(
         "Command to run: setup, update, lint, symbol-check, api, check-answer, "
         "create, build-api-index, verify, verify-project, plan, mcp-plan, mcp-session, "
-        "mcp-record, mcp-replay, mcp-summarize, evidence, docs-check, check-drift, "
+        "mcp-record, mcp-replay, mcp-summarize, evidence, model-eval, docs-check, check-drift, "
         "check-mcp, check-matrix, counts, prompt, agent-install, ai-smoke, version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
@@ -588,6 +588,9 @@ def main() -> int:
 
     if cmd == "evidence":
         return run_python_tool("evidence", sub_args)
+
+    if cmd == "model-eval":
+        return run_python_tool("model-eval", sub_args)
 
     if cmd == "mcp-doctor":
         return run_python_tool("perception-mcp-doctor", sub_args)

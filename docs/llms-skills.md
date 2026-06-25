@@ -973,6 +973,13 @@ Every answer must include:
 - validation step
 - stop condition
 
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
+
 ---
 
 ## Source: `.claude/skills/engine-unity-il2cpp-mcp/SKILL.md`
@@ -1009,6 +1016,13 @@ Every answer must include:
 - cleanup step
 - validation step
 - stop condition
+
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
 
 ---
 
@@ -1047,6 +1061,13 @@ Every answer must include:
 - validation step
 - stop condition
 
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
+
 ---
 
 ## Source: `.claude/skills/evidence-graph/SKILL.md`
@@ -1083,6 +1104,13 @@ Every answer must include:
 - cleanup step
 - validation step
 - stop condition
+
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
 
 ---
 
@@ -2717,6 +2745,23 @@ These compose without ceremony — each call's output is the next call's input. 
 | Write target memory | `process/write_virtual_memory` / `write_typed_value` / `write_string` / `copy_memory` / `fill_memory` (all gated `write_memory`) | — |
 
 **Cross-references:** `mcp/perception-mcp-config.json` (authoritative 59-tool list), `mcp/claude-code-setup.md` / `mcp/cursor-setup.md` / `mcp/aider-setup.md` (per-IDE wiring), `tools/sig-uniqueness-checker.py` / `tools/offset-diff.py` / `tools/dumper-to-enma.py` / `tools/module-export-mapper.py` (local CLI tools that pair with MCP calls — file I/O and cross-module joins live here, NOT on the MCP server), `skill://pcx-perf-budget` (call-cost discipline that applies to MCP calls), `skill://re-evidence-log` (E-NNN cross-references record which MCP calls produced each offset).
+
+## Required inputs
+- target process or artifact
+- requested workflow goal
+- permission assumptions
+
+## Output contract
+- chosen workflow
+- tools or docs used
+- evidence and validation steps
+
+## Stop conditions
+Stop when required capability is missing, authorization is unclear, or validation fails twice.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
 
 ---
 
@@ -5710,6 +5755,13 @@ Every answer must include:
 - validation step
 - stop condition
 
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
+
 ---
 
 ## Source: `.claude/skills/perception-mcp-safety/SKILL.md`
@@ -5747,6 +5799,13 @@ Every answer must include:
 - validation step
 - stop condition
 
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
+
 ---
 
 ## Source: `.claude/skills/perception-mcp-session/SKILL.md`
@@ -5783,6 +5842,13 @@ Every answer must include:
 - cleanup step
 - validation step
 - stop condition
+
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
 
 ---
 

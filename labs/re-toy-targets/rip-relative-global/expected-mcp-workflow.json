@@ -1,0 +1,9 @@
+{
+  "workflow": "attach_read",
+  "target": "toy-target",
+  "checks": [
+    "record transcript",
+    "import evidence",
+    "verify evidence"
+  ]
+}

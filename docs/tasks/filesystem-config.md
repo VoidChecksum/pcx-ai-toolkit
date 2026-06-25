@@ -13,7 +13,7 @@ Read and write a simple config file without treating empty strings as proof of m
 
 `import "file";` and `import "strings";`
 
-## Exact symbols
+## API
 
 `fs_file_exists`, `fs_read_file`, `fs_write_file`, `string.split`.
 
@@ -21,7 +21,7 @@ Read and write a simple config file without treating empty strings as proof of m
 
 Requires `PERM_FILE` / `file_system_access`. Use relative paths; do not use absolute paths or `..` unless the host explicitly allows them.
 
-## Enma example
+## Minimal code
 
 ```enma
 // Requires PERM_FILE / file_system_access.

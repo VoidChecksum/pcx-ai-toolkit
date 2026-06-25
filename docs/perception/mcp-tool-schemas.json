@@ -28,6 +28,17 @@
           "name": "process/list",
           "arguments": {}
         }
+      },
+      "returns_schema": {
+        "type": "object",
+        "required": [
+          "processes"
+        ],
+        "properties": {
+          "processes": {
+            "type": "array"
+          }
+        }
       }
     },
     {
@@ -60,6 +71,16 @@
             "pid": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -92,6 +113,16 @@
             "name": "target.exe"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -124,6 +155,16 @@
             "pid": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -156,6 +197,21 @@
             "name": "target.exe"
           }
         }
+      },
+      "returns_schema": {
+        "type": "object",
+        "required": [
+          "handle"
+        ],
+        "properties": {
+          "handle": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]+$"
+          },
+          "pid": {
+            "type": "integer"
+          }
+        }
       }
     },
     {
@@ -186,6 +242,16 @@
           "name": "process/dereference",
           "arguments": {}
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -214,6 +280,16 @@
           "name": "process/cleanup_references",
           "arguments": {}
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -242,6 +318,16 @@
           "name": "process/list_references",
           "arguments": {}
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -278,6 +364,16 @@
             "size": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -316,6 +412,16 @@
             "data": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -348,6 +454,21 @@
           "arguments": {
             "handle": "0xHANDLE",
             "address": "0x7ff700001234"
+          }
+        }
+      },
+      "returns_schema": {
+        "type": "object",
+        "required": [
+          "valid"
+        ],
+        "properties": {
+          "valid": {
+            "type": "boolean"
+          },
+          "address": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]+$"
           }
         }
       }
@@ -384,6 +505,18 @@
             "handle": "0xHANDLE",
             "address": "0x7ff700001234",
             "type": "u32"
+          }
+        }
+      },
+      "returns_schema": {
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {},
+          "type": {
+            "type": "string"
           }
         }
       }
@@ -426,6 +559,16 @@
             "value": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -464,6 +607,16 @@
             "encoding": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -506,6 +659,16 @@
             "null_terminate": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -546,6 +709,16 @@
             "size": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -586,6 +759,16 @@
             "byte": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -622,6 +805,16 @@
             "offsets": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -660,6 +853,16 @@
             "max_instructions": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -692,6 +895,16 @@
             "handle": "0xHANDLE"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -724,6 +937,16 @@
             "handle": "0xHANDLE"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -756,6 +979,26 @@
           "arguments": {
             "handle": "0xHANDLE",
             "name": "target.exe"
+          }
+        }
+      },
+      "returns_schema": {
+        "type": "object",
+        "required": [
+          "base",
+          "size",
+          "name"
+        ],
+        "properties": {
+          "base": {
+            "type": "string",
+            "pattern": "^0x[0-9a-fA-F]+$"
+          },
+          "size": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
           }
         }
       }
@@ -794,6 +1037,16 @@
             "export_name": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -830,6 +1083,16 @@
             "import_name": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -864,6 +1127,16 @@
             "module_base": "0x7ff700001234"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -898,6 +1171,16 @@
             "module_base": "0x7ff700001234"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -932,6 +1215,16 @@
             "module_base": "0x7ff700001234"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -966,6 +1259,16 @@
             "module_base": "0x7ff700001234"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1004,6 +1307,16 @@
             "encoding": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1040,6 +1353,16 @@
             "max_entries": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1076,6 +1399,16 @@
             "directory": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1110,6 +1443,16 @@
             "address": "0x7ff700001234"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1144,6 +1487,16 @@
             "heap_only": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1180,6 +1533,16 @@
             "size": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1216,6 +1579,16 @@
             "address": "0x7ff700001234"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1254,6 +1627,16 @@
             "signature": "48 8B ?? ??"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1292,6 +1675,16 @@
             "signature": "48 8B ?? ??"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1332,6 +1725,16 @@
             "heap_only": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1372,6 +1775,16 @@
             "max": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1410,6 +1823,16 @@
             "heap_only": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1446,6 +1869,16 @@
             "heap_only": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1482,6 +1915,16 @@
             "target_address": "0x7ff700001234"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1524,6 +1967,16 @@
             "string_module": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1560,6 +2013,16 @@
             "max_length": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1598,6 +2061,16 @@
             "size": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1636,6 +2109,16 @@
             "scan_forward": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1672,6 +2155,16 @@
             "signature": "48 8B ?? ??"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1708,6 +2201,16 @@
             "max_entries": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1742,6 +2245,16 @@
             "vtable_address": "0x7ff700001234"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1776,6 +2289,16 @@
             "address": "0x7ff700001234"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1814,6 +2337,16 @@
             "max_results": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1848,6 +2381,16 @@
             "max_entries": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1876,6 +2419,16 @@
           "name": "system/info",
           "arguments": {}
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1910,6 +2463,16 @@
             "max_entries": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1942,6 +2505,16 @@
             "handle": "0xHANDLE"
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -1976,6 +2549,16 @@
             "max_bytes": 32
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     },
     {
@@ -2001,6 +2584,20 @@
         "params": {
           "name": "script/get_context",
           "arguments": {}
+        }
+      },
+      "returns_schema": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string"
+          },
+          "addons": {
+            "type": "array"
+          },
+          "permissions": {
+            "type": "array"
+          }
         }
       }
     },
@@ -2030,6 +2627,20 @@
           "name": "script/validate",
           "arguments": {
             "source": "..."
+          }
+        }
+      },
+      "returns_schema": {
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "diagnostics": {
+            "type": "array"
           }
         }
       }
@@ -2062,6 +2673,16 @@
             "source": "..."
           }
         }
+      },
+      "returns_schema": {
+        "type": [
+          "object",
+          "array",
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
       }
     }
   ]

@@ -14,7 +14,7 @@ Attach to a target process, resolve a module base, validate an evidence-backed a
 
 No addon import is required for `proc_t` / `ref_process`; Proc is registered by Perception.
 
-## Exact symbols
+## API
 
 `ref_process`, `proc_t.alive`, `proc_t.get_module_base`, `proc_t.is_valid_address`, `proc_t.r32`.
 
@@ -22,7 +22,7 @@ No addon import is required for `proc_t` / `ref_process`; Proc is registered by 
 
 Requires process memory read access in the host. Kernel fields require `kernel_rw_access`; this example does not use kernel fields. Failed reads return `0`, not exceptions.
 
-## Enma example
+## Minimal code
 
 ```enma
 // Requires process_memory_read permission.

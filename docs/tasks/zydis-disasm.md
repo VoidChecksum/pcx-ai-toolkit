@@ -13,7 +13,7 @@ Use documented Zydis helpers to encode, decode, and display instructions without
 
 No import is required for Zydis API registration in Perception scripts.
 
-## Exact symbols
+## API
 
 `zydis_req_t`, `zydis_mnemonic_from_string`, `zydis_register_from_string`, `zydis_encode`, `zydis_disasm`, `zydis_nop_fill`.
 
@@ -21,7 +21,7 @@ No import is required for Zydis API registration in Perception scripts.
 
 Encoding/disassembly of byte arrays does not require memory write permission. Patching target memory with encoded bytes does require `write_memory` through MCP or host-gated write APIs.
 
-## Enma example
+## Minimal code
 
 ```enma
 int64 main() {

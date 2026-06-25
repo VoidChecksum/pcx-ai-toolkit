@@ -14,7 +14,7 @@ Build a sidebar GUI, bind widget callbacks, and keep runtime state separate from
 
 `import "color";`, `import "file";`, and `import "strings";` when parsing text config.
 
-## Exact symbols
+## API
 
 `create_sidebar_section`, `checkbox_t`, `slider_t`, `colorpicker_t`, `fs_file_exists`, `fs_read_file`, `fs_write_file`.
 
@@ -22,7 +22,7 @@ Build a sidebar GUI, bind widget callbacks, and keep runtime state separate from
 
 GUI calls need no special permission. Config persistence requires `PERM_FILE` / `file_system_access`.
 
-## Enma example
+## Minimal code
 
 ```enma
 // Requires PERM_FILE / file_system_access for save/load.

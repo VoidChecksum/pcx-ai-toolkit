@@ -1,0 +1,30 @@
+{
+  "schema": "pcx-evidence-graph-v1",
+  "target": {
+    "process": "toy-target"
+  },
+  "claims": [
+    {
+      "id": "C-001",
+      "claim": "rip-relative-global evidence",
+      "status": "candidate",
+      "evidence": [
+        "E-001"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E-001",
+      "type": "address_validation",
+      "tool": "process/is_valid_address",
+      "params": {
+        "address": "0x401000"
+      },
+      "result": {
+        "valid": true
+      },
+      "error": null
+    }
+  ]
+}

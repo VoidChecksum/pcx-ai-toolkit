@@ -30,3 +30,10 @@ Every answer must include:
 - cleanup step
 - validation step
 - stop condition
+
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support

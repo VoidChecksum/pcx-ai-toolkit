@@ -12,7 +12,7 @@ Make a bounded HTTP request and handle status `0` as transport/permission failur
 
 No extra import is required beyond the Net API registration in Perception scripts.
 
-## Exact symbols
+## API
 
 `http_get`, `http_post`, `http_response_t.status`, `http_response_t.ok`, `http_response_t.body`.
 
@@ -20,7 +20,7 @@ No extra import is required beyond the Net API registration in Perception script
 
 Requires host network/API permission when Perception gates outbound requests. Never assume exceptions or async/await.
 
-## Enma example
+## Minimal code
 
 ```enma
 // Requires network_access permission.

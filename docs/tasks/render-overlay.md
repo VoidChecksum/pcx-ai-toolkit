@@ -13,7 +13,7 @@ Draw a long-lived overlay routine using documented Render APIs and Perception li
 
 `import "vec";` and `import "color";`
 
-## Exact symbols
+## API
 
 `register_routine`, `draw_text`, `draw_rect`, `draw_line`, `vec2`, `color`, `get_font20`.
 
@@ -21,7 +21,7 @@ Draw a long-lived overlay routine using documented Render APIs and Perception li
 
 No special permission for basic render calls. Render work belongs in a registered routine, not a fake `on_render` callback.
 
-## Enma example
+## Minimal code
 
 ```enma
 import "vec";

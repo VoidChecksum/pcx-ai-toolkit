@@ -1,13 +1,429 @@
 {
   "schema": "pcx-perception-mcp-workflow-evals-v1",
   "cases": [
-    {"name": "string xref uses string refs", "task": "find xrefs to PlayerHealth", "workflow": "string_xref", "must_include": ["process/find_string_refs"], "must_not_include": ["process/find_pattern"]},
-    {"name": "pattern search bounded", "task": "resolve byte pattern to function", "workflow": "pattern_function", "must_include": ["process/find_all_patterns", "process/find_function_bounds"]},
-    {"name": "script validation context first", "task": "validate an Enma script", "workflow": "script_validate", "must_include": ["script/get_context", "script/validate"]},
-    {"name": "pointer chain validates leaf", "task": "validate pointer chain", "workflow": "pointer_chain", "must_include": ["process/read_pointer_chain", "process/is_valid_address"]},
-    {"name": "permission denied stops write", "task": "patch safe write bytes", "workflow": "patch_safe_write", "must_warn": ["explicit write_memory permission"]},
-    {"name": "module inventory maps modules", "task": "module inventory", "workflow": "module_inventory", "must_include": ["process/get_module_list"]},
-    {"name": "rtti analysis uses vtable and rtti", "task": "rtti class analysis", "workflow": "rtti_class_analysis", "must_include": ["process/analyze_vtable", "process/read_rtti"]},
-    {"name": "capability fallback warns", "task": "find string refs", "workflow": "string_xref", "capabilities": ["process/reference_by_name", "process/get_module_by_name", "process/dereference"], "must_warn": ["fallback"]}
+    {
+      "name": "string xref uses string refs",
+      "task": "find xrefs to PlayerHealth",
+      "workflow": "string_xref",
+      "must_include": [
+        "process/find_string_refs"
+      ],
+      "must_not_include": [
+        "process/find_pattern"
+      ]
+    },
+    {
+      "name": "pattern search bounded",
+      "task": "resolve byte pattern to function",
+      "workflow": "pattern_function",
+      "must_include": [
+        "process/find_all_patterns",
+        "process/find_function_bounds"
+      ]
+    },
+    {
+      "name": "script validation context first",
+      "task": "validate an Enma script",
+      "workflow": "script_validate",
+      "must_include": [
+        "script/get_context",
+        "script/validate"
+      ]
+    },
+    {
+      "name": "pointer chain validates leaf",
+      "task": "validate pointer chain",
+      "workflow": "pointer_chain",
+      "must_include": [
+        "process/read_pointer_chain",
+        "process/is_valid_address"
+      ]
+    },
+    {
+      "name": "permission denied stops write",
+      "task": "patch safe write bytes",
+      "workflow": "patch_safe_write",
+      "must_warn": [
+        "explicit write_memory permission"
+      ]
+    },
+    {
+      "name": "module inventory maps modules",
+      "task": "module inventory",
+      "workflow": "module_inventory",
+      "must_include": [
+        "process/get_module_list"
+      ]
+    },
+    {
+      "name": "rtti analysis uses vtable and rtti",
+      "task": "rtti class analysis",
+      "workflow": "rtti_class_analysis",
+      "must_include": [
+        "process/analyze_vtable",
+        "process/read_rtti"
+      ]
+    },
+    {
+      "name": "capability fallback warns",
+      "task": "find string refs",
+      "workflow": "string_xref",
+      "must_warn": [
+        "fallback"
+      ],
+      "capabilities": [
+        "process/reference_by_name",
+        "process/get_module_by_name",
+        "process/dereference"
+      ]
+    },
+    {
+      "name": "heap value scan",
+      "task": "heap value scan for health",
+      "workflow": "heap_value_scan",
+      "must_include": [
+        "process/scan_value"
+      ]
+    },
+    {
+      "name": "scan next narrowing",
+      "task": "scan next narrow previous results",
+      "workflow": "scan_next_narrowing",
+      "must_include": [
+        "process/scan_next"
+      ]
+    },
+    {
+      "name": "diff memory",
+      "task": "diff memory changed bytes",
+      "workflow": "diff_memory",
+      "must_include": [
+        "process/diff_memory"
+      ]
+    },
+    {
+      "name": "vtable analysis",
+      "task": "vtable virtual method analysis",
+      "workflow": "vtable_analysis",
+      "must_include": [
+        "process/analyze_vtable"
+      ]
+    },
+    {
+      "name": "import export analysis",
+      "task": "import export IAT EAT analysis",
+      "workflow": "import_export_analysis",
+      "must_include": [
+        "process/list_module_exports",
+        "process/list_module_imports"
+      ]
+    },
+    {
+      "name": "exception table bounds",
+      "task": "exception unwind function bounds",
+      "workflow": "exception_table_bounds",
+      "must_include": [
+        "process/find_function_bounds"
+      ]
+    },
+    {
+      "name": "driver listing permission",
+      "task": "driver listing permission",
+      "workflow": "driver_listing_permission",
+      "must_include": [
+        "system/list_drivers"
+      ]
+    },
+    {
+      "name": "allocation workflow",
+      "task": "allocation scratchpad workflow",
+      "workflow": "allocation_scratchpad",
+      "must_include": [
+        "process/allocate_memory",
+        "process/free_memory"
+      ],
+      "must_warn": [
+        "write_memory"
+      ]
+    },
+    {
+      "name": "patch rollback",
+      "task": "patch rollback restore patch",
+      "workflow": "patch_rollback",
+      "must_include": [
+        "process/write_virtual_memory"
+      ],
+      "must_warn": [
+        "rollback"
+      ]
+    },
+    {
+      "name": "stale handle recovery",
+      "task": "stale handle recovery reacquire",
+      "workflow": "stale_handle_recovery",
+      "must_include": [
+        "process/reference_by_name",
+        "process/read_typed_value"
+      ]
+    },
+    {
+      "name": "target not found recovery",
+      "task": "target not found recovery",
+      "workflow": "target_not_found_recovery",
+      "must_include": [
+        "process/list",
+        "process/reference_by_name"
+      ]
+    },
+    {
+      "name": "broad scan safety",
+      "task": "broad heap value scan",
+      "workflow": "heap_value_scan",
+      "must_include": [
+        "process/scan_value"
+      ],
+      "must_warn": [
+        "Broad/full user-space"
+      ]
+    },
+    {
+      "name": "full user-space scan warning",
+      "task": "full user-space scan value",
+      "workflow": "heap_value_scan",
+      "must_include": [
+        "process/scan_value"
+      ],
+      "must_warn": [
+        "Broad/full user-space"
+      ]
+    },
+    {
+      "name": "script execute warning",
+      "task": "script execute GUI thread warning",
+      "workflow": "script_validate",
+      "must_include": [
+        "script/execute"
+      ],
+      "must_warn": [
+        "GUI/thread"
+      ]
+    },
+    {
+      "name": "missing find string refs fallback",
+      "task": "find string refs fallback",
+      "workflow": "string_xref",
+      "must_include": [
+        "process/scan_string",
+        "process/find_xrefs"
+      ],
+      "must_not_include": [
+        "process/find_string_refs"
+      ],
+      "must_warn": [
+        "fallback"
+      ],
+      "capabilities": [
+        "process/reference_by_name",
+        "process/get_module_by_name",
+        "process/dereference"
+      ]
+    },
+    {
+      "name": "missing read rtti fallback",
+      "task": "rtti class analysis fallback",
+      "workflow": "rtti_class_analysis",
+      "must_include": [
+        "process/analyze_vtable",
+        "process/lookup_symbol"
+      ],
+      "must_not_include": [
+        "process/read_rtti"
+      ],
+      "must_warn": [
+        "fallback"
+      ],
+      "capabilities": [
+        "process/reference_by_name",
+        "process/get_module_by_name",
+        "process/analyze_vtable",
+        "process/find_xrefs",
+        "process/disassemble",
+        "process/dereference"
+      ]
+    },
+    {
+      "name": "variant 1 string xref uses string refs",
+      "task": "find xrefs to PlayerHealth please",
+      "workflow": "string_xref",
+      "must_include": [
+        "process/find_string_refs"
+      ]
+    },
+    {
+      "name": "variant 2 pattern search bounded",
+      "task": "resolve byte pattern to function please",
+      "workflow": "pattern_function",
+      "must_include": [
+        "process/find_all_patterns"
+      ]
+    },
+    {
+      "name": "variant 3 script validation context first",
+      "task": "validate an Enma script please",
+      "workflow": "script_validate",
+      "must_include": [
+        "script/get_context"
+      ]
+    },
+    {
+      "name": "variant 4 pointer chain validates leaf",
+      "task": "validate pointer chain please",
+      "workflow": "pointer_chain",
+      "must_include": [
+        "process/read_pointer_chain"
+      ]
+    },
+    {
+      "name": "variant 5 permission denied stops write",
+      "task": "patch safe write bytes please",
+      "workflow": "patch_safe_write",
+      "must_warn": [
+        "explicit write_memory permission"
+      ]
+    },
+    {
+      "name": "variant 6 module inventory maps modules",
+      "task": "module inventory please",
+      "workflow": "module_inventory",
+      "must_include": [
+        "process/get_module_list"
+      ]
+    },
+    {
+      "name": "variant 7 rtti analysis uses vtable and rtti",
+      "task": "rtti class analysis please",
+      "workflow": "rtti_class_analysis",
+      "must_include": [
+        "process/analyze_vtable"
+      ]
+    },
+    {
+      "name": "variant 8 capability fallback warns",
+      "task": "find string refs please",
+      "workflow": "string_xref",
+      "must_warn": [
+        "fallback"
+      ],
+      "capabilities": [
+        "process/reference_by_name",
+        "process/get_module_by_name",
+        "process/dereference"
+      ]
+    },
+    {
+      "name": "variant 9 heap value scan",
+      "task": "heap value scan for health please",
+      "workflow": "heap_value_scan",
+      "must_include": [
+        "process/scan_value"
+      ]
+    },
+    {
+      "name": "variant 10 scan next narrowing",
+      "task": "scan next narrow previous results please",
+      "workflow": "scan_next_narrowing",
+      "must_include": [
+        "process/scan_next"
+      ]
+    },
+    {
+      "name": "variant 11 diff memory",
+      "task": "diff memory changed bytes please",
+      "workflow": "diff_memory",
+      "must_include": [
+        "process/diff_memory"
+      ]
+    },
+    {
+      "name": "variant 12 vtable analysis",
+      "task": "vtable virtual method analysis please",
+      "workflow": "vtable_analysis",
+      "must_include": [
+        "process/analyze_vtable"
+      ]
+    },
+    {
+      "name": "variant 13 import export analysis",
+      "task": "import export IAT EAT analysis please",
+      "workflow": "import_export_analysis",
+      "must_include": [
+        "process/list_module_exports"
+      ]
+    },
+    {
+      "name": "variant 14 exception table bounds",
+      "task": "exception unwind function bounds please",
+      "workflow": "exception_table_bounds",
+      "must_include": [
+        "process/find_function_bounds"
+      ]
+    },
+    {
+      "name": "variant 15 driver listing permission",
+      "task": "driver listing permission please",
+      "workflow": "driver_listing_permission",
+      "must_include": [
+        "system/list_drivers"
+      ]
+    },
+    {
+      "name": "variant 16 allocation workflow",
+      "task": "allocation scratchpad workflow please",
+      "workflow": "allocation_scratchpad",
+      "must_include": [
+        "process/allocate_memory"
+      ],
+      "must_warn": [
+        "write_memory"
+      ]
+    },
+    {
+      "name": "variant 17 patch rollback",
+      "task": "patch rollback restore patch please",
+      "workflow": "patch_rollback",
+      "must_include": [
+        "process/write_virtual_memory"
+      ],
+      "must_warn": [
+        "rollback"
+      ]
+    },
+    {
+      "name": "variant 18 stale handle recovery",
+      "task": "stale handle recovery reacquire please",
+      "workflow": "stale_handle_recovery",
+      "must_include": [
+        "process/reference_by_name"
+      ]
+    },
+    {
+      "name": "variant 19 target not found recovery",
+      "task": "target not found recovery please",
+      "workflow": "target_not_found_recovery",
+      "must_include": [
+        "process/list"
+      ]
+    },
+    {
+      "name": "variant 20 broad scan safety",
+      "task": "broad heap value scan please",
+      "workflow": "heap_value_scan",
+      "must_include": [
+        "process/scan_value"
+      ],
+      "must_warn": [
+        "Broad/full user-space"
+      ]
+    }
   ]
 }

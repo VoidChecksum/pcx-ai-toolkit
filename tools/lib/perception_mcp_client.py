@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import json
 import time
+import uuid
 import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, cast
 
-
 WRITE_TOOLS = {"process/write_virtual_memory", "process/write_typed_value", "process/write_string", "process/copy_memory", "process/fill_memory", "process/allocate_memory"}
+NO_AUTO_HANDLE = {"process/list", "process/reference_by_name", "process/reference_by_pid", "process/info_by_name", "process/info_by_pid", "process/cleanup_references", "process/list_references"}
 
 
 def normalize_hex(value: str) -> str:
@@ -26,11 +27,24 @@ class Transcript:
     path: Path | None = None
     target: str = ""
     handle: str = ""
+    session_id: str = field(default_factory=lambda: uuid.uuid4().hex)
 
-    def write(self, tool: str, params: dict[str, Any], result: Any, error: Any, elapsed_ms: float) -> None:
+    def write(self, tool: str, params: dict[str, Any], result: Any, error: Any, elapsed_ms: float, *, bytes_in: int = 0, bytes_out: int = 0) -> None:
         if not self.path:
             return
-        row = {"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "tool": tool, "params": params, "result": result, "error": error, "elapsed_ms": round(elapsed_ms, 3), "handle": self.handle, "target": self.target}
+        row = {
+            "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "session_id": self.session_id,
+            "target": self.target,
+            "handle": self.handle,
+            "tool": tool,
+            "params": params,
+            "result": result,
+            "error": error,
+            "elapsed_ms": round(elapsed_ms, 3),
+            "bytes_in": bytes_in,
+            "bytes_out": bytes_out,
+        }
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(row, sort_keys=True) + "\n")
@@ -43,13 +57,18 @@ class PerceptionMcpClient:
     transcript: Transcript = field(default_factory=Transcript)
     rpc_id: int = 0
     handle: str = ""
+    last_bytes_in: int = 0
+    last_bytes_out: int = 0
 
     def rpc(self, method: str, params: dict[str, Any]) -> dict[str, Any]:
         self.rpc_id += 1
         payload = json.dumps({"jsonrpc": "2.0", "id": self.rpc_id, "method": method, "params": params}).encode()
+        self.last_bytes_in = len(payload)
         req = urllib.request.Request(self.url, data=payload, headers={"content-type": "application/json"})
         with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode())
+            raw = resp.read()
+        self.last_bytes_out = len(raw)
+        data = json.loads(raw.decode())
         if not isinstance(data, dict):
             raise RuntimeError("JSON-RPC response was not an object")
         return cast(dict[str, Any], data)
@@ -74,7 +93,9 @@ class PerceptionMcpClient:
             result = response.get("result")
             return result
         finally:
-            self.transcript.write(tool, args, result, error, (time.perf_counter() - start) * 1000)
+            self.transcript.handle = self.handle or self.transcript.handle
+            self.transcript.target = self.target or self.transcript.target
+            self.transcript.write(tool, args, result, error, (time.perf_counter() - start) * 1000, bytes_in=self.last_bytes_in, bytes_out=self.last_bytes_out)
 
     def start(self) -> str:
         result = self.call_tool("process/reference_by_name", {"name": self.target}, retry_stale=False)

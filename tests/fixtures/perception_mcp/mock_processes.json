@@ -1,0 +1,4 @@
+{
+  "processes": [{"name": "game.exe", "pid": 1234, "handle": "0x1000"}],
+  "modules": [{"name": "game.exe", "base": "0x400000", "size": "0x100000", "text_start": "0x401000", "text_size": "0x2000"}]
+}

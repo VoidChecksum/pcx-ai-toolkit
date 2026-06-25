@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 178**
+**Source files included: 179**
 
 ---
 
@@ -365,6 +365,52 @@ Open a [GitHub Issue](https://github.com/VoidChecksum/pcx-ai-toolkit/issues) wit
 - Run `pcx doctor` for a full environment diagnostic
 - Check [GitHub Discussions](https://github.com/VoidChecksum/pcx-ai-toolkit/discussions) for community help
 - Open an [Issue](https://github.com/VoidChecksum/pcx-ai-toolkit/issues) for bugs
+
+---
+
+## Source: `docs/WORKFLOW_COOKBOOK.md`
+
+# Workflow Cookbook
+
+Intent-first index for PCX, Perception MCP, RE workflows, task docs, and skills.
+
+## I want to inspect a process
+
+- Start with `docs/tasks/proc-read.md`.
+- Plan: `pcx mcp-plan "attach and read typed value" --target game.exe`.
+- Live support: `pcx mcp-doctor --url http://127.0.0.1:42069/mcp --target game.exe --deep`.
+
+## I want to find a string xref
+
+- Read `knowledge/mcp-workflows/string-xref.md` and `docs/perception/mcp-workflows.md`.
+- Plan: `pcx mcp-plan "find xrefs to PlayerHealth" --target game.exe`.
+- Record evidence: `pcx mcp-record --url http://127.0.0.1:42069/mcp --target game.exe --out session.jsonl`.
+
+## I want to create an overlay
+
+- Use `docs/tasks/render-overlay.md`, `docs/tasks/custom-draw.md`, and `docs/perception/overlay-api.md`.
+- Validate snippets with `pcx check-answer docs/tasks/render-overlay.md`.
+
+## I want to validate Enma
+
+- Use `docs/perception/mcp-script-bridge.md`.
+- Plan: `pcx mcp-plan "validate an Enma script"`.
+- Minimal live check: `script/get_context` before `script/validate`.
+
+## I want to recover after a patch
+
+- Use `knowledge/re-workflows/patch-day.md` and `knowledge/offset-methodology.md`.
+- Plan: `pcx mcp-plan "patch rollback restore patch" --permissions write_memory`.
+
+## I want to use Source 2
+
+- Use `.claude/skills/engine-source2-mcp/SKILL.md` and `knowledge/mcp-workflows/source2.md`.
+
+## I want to record evidence
+
+- Record: `pcx mcp-record --url http://127.0.0.1:42069/mcp --target game.exe --out session.jsonl`.
+- Import: `pcx evidence import-transcript session.jsonl --claim C-001 --out evidence.json`.
+- Verify: `pcx evidence --file evidence.json verify`.
 
 ---
 
@@ -19338,18 +19384,18 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 # Perception Support Matrix
 
-| Surface | Status | Docs | Validation | Examples | Known gaps | Last verified |
-|---|---|---|---|---|---|---|
-| Enma scripts | supported | `docs/perception/llm-routing.md` | `pcx verify` | templates, task docs | no full compiler in pcx | 2026-06-25 |
-| Perception IDE | documented | `docs/perception/ide.md` | doc drift | IDE docs | runtime availability varies | 2026-06-25 |
-| Perception Analyzer | documented | `docs/perception/analyzer.md` | doc drift | analyzer docs | limited local automation | 2026-06-25 |
-| Perception runtime MCP | operational docs | `docs/perception/mcp-api.md` | MCP contract tests | schema/examples | live server needed for E2E | 2026-06-25 |
-| pcx knowledge MCP | supported | `docs/perception/two-mcp-workflow.md` | unit tests | planner docs | static knowledge only | 2026-06-25 |
-| CLI validators | supported | `docs/AI_AGENT_OPERATING_MANUAL.md` | pytest/docs-check | task docs | heuristic parser | 2026-06-25 |
-| Templates | supported | `templates/` | project workflow tests | scaffold templates | not every task has template | 2026-06-25 |
-| Skills | supported | `.claude/skills/` | skill contract checks | operational skills | agent runtime varies | 2026-06-25 |
-| Weak-model workflow | supported | `docs/model-guides/weak-local-models.md` | prompt smoke | `pcx plan --weak-model` | conservative by design | 2026-06-25 |
-| Task docs | supported | `docs/tasks/` | `pcx check-answer` | 9 task guides | not full app tutorials | 2026-06-25 |
+| Surface | Docs | Examples | Tests | Live support | Known gaps |
+|---|---:|---:|---:|---:|---|
+| Enma APIs | complete | high | high | yes | version granularity |
+| Perception MCP | high | medium | high | yes | live parity depends on server version |
+| Knowledge MCP | high | high | high | yes | semantic search optional |
+| RE workflows | medium | medium | medium | partial | needs more labs |
+| Skills | medium | low | contract | n/a | output contracts still coarse |
+| Task docs | high | high | high | n/a | not full app tutorials |
+| Evidence graph | medium | medium | high | n/a | renderer is Mermaid-only |
+| Model compatibility | medium | medium | medium | n/a | scoring is heuristic |
+
+Last verified: 2026-06-25.
 
 ---
 
@@ -20826,6 +20872,13 @@ Every answer must include:
 - validation step
 - stop condition
 
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
+
 ---
 
 ## Source: `.claude/skills/engine-unity-il2cpp-mcp/SKILL.md`
@@ -20862,6 +20915,13 @@ Every answer must include:
 - cleanup step
 - validation step
 - stop condition
+
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
 
 ---
 
@@ -20900,6 +20960,13 @@ Every answer must include:
 - validation step
 - stop condition
 
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
+
 ---
 
 ## Source: `.claude/skills/evidence-graph/SKILL.md`
@@ -20936,6 +21003,13 @@ Every answer must include:
 - cleanup step
 - validation step
 - stop condition
+
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
 
 ---
 
@@ -22570,6 +22644,23 @@ These compose without ceremony — each call's output is the next call's input. 
 | Write target memory | `process/write_virtual_memory` / `write_typed_value` / `write_string` / `copy_memory` / `fill_memory` (all gated `write_memory`) | — |
 
 **Cross-references:** `mcp/perception-mcp-config.json` (authoritative 59-tool list), `mcp/claude-code-setup.md` / `mcp/cursor-setup.md` / `mcp/aider-setup.md` (per-IDE wiring), `tools/sig-uniqueness-checker.py` / `tools/offset-diff.py` / `tools/dumper-to-enma.py` / `tools/module-export-mapper.py` (local CLI tools that pair with MCP calls — file I/O and cross-module joins live here, NOT on the MCP server), `skill://pcx-perf-budget` (call-cost discipline that applies to MCP calls), `skill://re-evidence-log` (E-NNN cross-references record which MCP calls produced each offset).
+
+## Required inputs
+- target process or artifact
+- requested workflow goal
+- permission assumptions
+
+## Output contract
+- chosen workflow
+- tools or docs used
+- evidence and validation steps
+
+## Stop conditions
+Stop when required capability is missing, authorization is unclear, or validation fails twice.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
 
 ---
 
@@ -25563,6 +25654,13 @@ Every answer must include:
 - validation step
 - stop condition
 
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
+
 ---
 
 ## Source: `.claude/skills/perception-mcp-safety/SKILL.md`
@@ -25600,6 +25698,13 @@ Every answer must include:
 - validation step
 - stop condition
 
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
+
 ---
 
 ## Source: `.claude/skills/perception-mcp-session/SKILL.md`
@@ -25636,6 +25741,13 @@ Every answer must include:
 - cleanup step
 - validation step
 - stop condition
+
+## Trigger/use conditions
+Use when the user task needs this skill's named MCP or evidence workflow surface.
+
+## Validation commands
+- `pcx mcp-plan "<task>"`
+- `pcx mcp-doctor --url <url> --deep` for live Perception MCP support
 
 ---
 

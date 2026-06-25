@@ -13,7 +13,7 @@ Submit custom geometry through documented custom draw handles without inventing 
 
 `import "color";` and `import "vec";` for basic render helpers; custom draw vertex arrays use `float32[]`.
 
-## Exact symbols
+## API
 
 `custom_draw`, `TOPO_TRIANGLE_LIST`, `draw_triangle`, `vec2`, `color`.
 
@@ -21,7 +21,7 @@ Submit custom geometry through documented custom draw handles without inventing 
 
 No special permission for rendering. Handles from create/load calls are encrypted `int64`; pass them back unchanged.
 
-## Enma example
+## Minimal code
 
 ```enma
 import "vec";

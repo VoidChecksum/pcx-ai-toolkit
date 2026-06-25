@@ -13,7 +13,7 @@ Emulate a small byte sequence in a controlled CPU sandbox and keep live process 
 
 No import is required for Unicorn/Zydis API registration in Perception scripts.
 
-## Exact symbols
+## API
 
 Use the Unicorn CPU object/functions documented in `docs/perception/unicorn-api.md`, plus `zydis_req_t`, `zydis_encode`, and `zydis_register_from_string` for generated code bytes.
 
@@ -21,7 +21,7 @@ Use the Unicorn CPU object/functions documented in `docs/perception/unicorn-api.
 
 Emulation itself is local to the emulator. Reading bytes from a live process before emulating still requires process read permission; writing back requires explicit write permission.
 
-## Enma example
+## Minimal code
 
 ```enma
 int64 main() {
