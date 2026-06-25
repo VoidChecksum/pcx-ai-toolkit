@@ -21,6 +21,7 @@ See `docs/INDEX.md` for the complete file index. The most useful single-file con
 Top-level operating manuals, FAQ, and routing references for AI tools using this repo.
 
 - [AI Agent Operating Manual](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/AI_AGENT_OPERATING_MANUAL.md): This is the shortest safe workflow for any LLM or MCP-aware agent working with
+- [PCX Anti-Hallucination Coverage](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/COVERAGE.md)
 - [Frequently Asked Questions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/FAQ.md): A quick reference for common issues and questions when using pcx-ai-toolkit.
 - [Distribution Checklist](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/distribution-checklist.md): Safe release/publishing path for pcx-ai-toolkit.
 - [Extension Installation Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/marketplace-install.md): Two VS Code extensions are available for pcx-ai-toolkit:
@@ -230,6 +231,7 @@ Python-facing CLI tools for validation, generation, and RE; hot binary-analysis 
 - [.text classifier thresholds (block-level identical %, raw-size delta %).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/binary-diff-summary.py): RECOMPILEMINSAME = 70.0
 - [── Upstream endpoints ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-api-index.py): ENMAROOTURL = "https://docs.perception.cx/perception/enma/readme.md"
 - [Exclude only the generated bundles sitting directly under docs/.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-counts.py): if p.parent == (REPOROOT / "docs") and p.name.startswith("llms-"):
+- [build-coverage-dashboard](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-coverage-dashboard.py)
 - [── Repo layout ──────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-llms-index.py): REPOROOT = Path(file).resolve().parent.parent
 - [Files / dirs that are generated or local-only — never a drift source.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-provenance.py): EXCLUDENAMES = {"INDEX.md"}
 - [Show a short, useful diff hint (first differing normalized line).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-doc-drift.py): locallines = localnorm.splitlines()
