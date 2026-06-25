@@ -201,6 +201,9 @@ jobs:
           python3 tools/build-llms-index.py
           python3 tools/build-api-index.py
           python3 tools/build-provenance.py
+          # Provenance includes live-regenerated API-index hashes; verify it above, but
+          # keep this dirty-tree gate focused on deterministic generated artifacts.
+          git checkout -- docs/PROVENANCE.json
           if [ -n "$(git status --porcelain)" ]; then
             echo "ERROR: generated files are out of sync with the tree/workspace:"
             git status --short
