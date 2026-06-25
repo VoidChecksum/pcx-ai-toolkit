@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.20.1 - 2026-06-25
+
+- fix: keep npm package metadata coverage
+- fix: harden npm package install
+
 ## v1.20.0 - 2026-06-25
 
 - fix: ignore local pcx cache
