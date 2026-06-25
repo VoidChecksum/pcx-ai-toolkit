@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.20.0 - 2026-06-25
+
+- fix: ignore local pcx cache
+- feat: add knowledge skills quality layer
+
 ## v1.19.0 - 2026-06-25
 
 - fix: stabilize generated-file dirty check
