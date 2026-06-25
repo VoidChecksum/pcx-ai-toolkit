@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 170**
+**Source files included: 178**
 
 ---
 
@@ -19334,6 +19334,25 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 ---
 
+## Source: `docs/perception/support-matrix.md`
+
+# Perception Support Matrix
+
+| Surface | Status | Docs | Validation | Examples | Known gaps | Last verified |
+|---|---|---|---|---|---|---|
+| Enma scripts | supported | `docs/perception/llm-routing.md` | `pcx verify` | templates, task docs | no full compiler in pcx | 2026-06-25 |
+| Perception IDE | documented | `docs/perception/ide.md` | doc drift | IDE docs | runtime availability varies | 2026-06-25 |
+| Perception Analyzer | documented | `docs/perception/analyzer.md` | doc drift | analyzer docs | limited local automation | 2026-06-25 |
+| Perception runtime MCP | operational docs | `docs/perception/mcp-api.md` | MCP contract tests | schema/examples | live server needed for E2E | 2026-06-25 |
+| pcx knowledge MCP | supported | `docs/perception/two-mcp-workflow.md` | unit tests | planner docs | static knowledge only | 2026-06-25 |
+| CLI validators | supported | `docs/AI_AGENT_OPERATING_MANUAL.md` | pytest/docs-check | task docs | heuristic parser | 2026-06-25 |
+| Templates | supported | `templates/` | project workflow tests | scaffold templates | not every task has template | 2026-06-25 |
+| Skills | supported | `.claude/skills/` | skill contract checks | operational skills | agent runtime varies | 2026-06-25 |
+| Weak-model workflow | supported | `docs/model-guides/weak-local-models.md` | prompt smoke | `pcx plan --weak-model` | conservative by design | 2026-06-25 |
+| Task docs | supported | `docs/tasks/` | `pcx check-answer` | 9 task guides | not full app tutorials | 2026-06-25 |
+
+---
+
 ## Source: `docs/perception/two-mcp-workflow.md`
 
 # Two-MCP Workflow
@@ -20769,6 +20788,150 @@ Devirtualization is expensive (days to weeks for a single function). Before inve
 | 4 | Devirtualize | Find dispatcher → identify components → trace → lift → verify |
 | 5 | Protector tricks | Know Themida's VMs, VMP's mutation+encryption, OLLVM's CFF+MBA |
 | 6 | Skip when possible | Black-box the VM, hook boundaries, patch around it |
+
+---
+
+## Source: `.claude/skills/engine-source2-mcp/SKILL.md`
+
+---
+name: engine-source2-mcp
+description: Use for Source 2 live MCP investigations with schema/interface evidence.
+---
+
+# engine-source2-mcp
+
+Use for Source 2 live MCP investigations with schema/interface evidence.
+
+## Required inputs
+- target process/module
+- task or claim
+- permission assumptions
+- available Perception MCP tools/capabilities
+
+## Workflow
+1. Load `docs/perception/two-mcp-workflow.md`.
+2. Load `docs/perception/mcp-workflows.md` and `docs/perception/mcp-safety-policy.md`.
+3. If engine-specific, load the matching `knowledge/mcp-workflows/*.md` page.
+4. Plan with `pcx mcp-plan` before live calls.
+5. Record evidence IDs and cleanup handles.
+
+## Output contract
+Every answer must include:
+- MCP tools used or planned
+- handle lifecycle
+- permission assumptions
+- evidence IDs
+- cleanup step
+- validation step
+- stop condition
+
+---
+
+## Source: `.claude/skills/engine-unity-il2cpp-mcp/SKILL.md`
+
+---
+name: engine-unity-il2cpp-mcp
+description: Use for Unity IL2CPP live MCP investigations with GameAssembly and global-metadata evidence.
+---
+
+# engine-unity-il2cpp-mcp
+
+Use for Unity IL2CPP live MCP investigations with GameAssembly and global-metadata evidence.
+
+## Required inputs
+- target process/module
+- task or claim
+- permission assumptions
+- available Perception MCP tools/capabilities
+
+## Workflow
+1. Load `docs/perception/two-mcp-workflow.md`.
+2. Load `docs/perception/mcp-workflows.md` and `docs/perception/mcp-safety-policy.md`.
+3. If engine-specific, load the matching `knowledge/mcp-workflows/*.md` page.
+4. Plan with `pcx mcp-plan` before live calls.
+5. Record evidence IDs and cleanup handles.
+
+## Output contract
+Every answer must include:
+- MCP tools used or planned
+- handle lifecycle
+- permission assumptions
+- evidence IDs
+- cleanup step
+- validation step
+- stop condition
+
+---
+
+## Source: `.claude/skills/engine-unreal-mcp/SKILL.md`
+
+---
+name: engine-unreal-mcp
+description: Use for Unreal live MCP investigations with UObject/GName/vtable evidence.
+---
+
+# engine-unreal-mcp
+
+Use for Unreal live MCP investigations with UObject/GName/vtable evidence.
+
+## Required inputs
+- target process/module
+- task or claim
+- permission assumptions
+- available Perception MCP tools/capabilities
+
+## Workflow
+1. Load `docs/perception/two-mcp-workflow.md`.
+2. Load `docs/perception/mcp-workflows.md` and `docs/perception/mcp-safety-policy.md`.
+3. If engine-specific, load the matching `knowledge/mcp-workflows/*.md` page.
+4. Plan with `pcx mcp-plan` before live calls.
+5. Record evidence IDs and cleanup handles.
+
+## Output contract
+Every answer must include:
+- MCP tools used or planned
+- handle lifecycle
+- permission assumptions
+- evidence IDs
+- cleanup step
+- validation step
+- stop condition
+
+---
+
+## Source: `.claude/skills/evidence-graph/SKILL.md`
+
+---
+name: evidence-graph
+description: Use when recording, verifying, or rendering machine-readable reverse-engineering claim/evidence graphs.
+---
+
+# evidence-graph
+
+Use when recording, verifying, or rendering machine-readable reverse-engineering claim/evidence graphs.
+
+## Required inputs
+- target process/module
+- task or claim
+- permission assumptions
+- available Perception MCP tools/capabilities
+
+## Workflow
+1. Load `docs/perception/two-mcp-workflow.md`.
+2. Load `docs/perception/mcp-workflows.md` and `docs/perception/mcp-safety-policy.md`.
+3. If engine-specific, load the matching `knowledge/mcp-workflows/*.md` page.
+4. Plan with `pcx mcp-plan` before live calls.
+5. Record evidence IDs and cleanup handles.
+
+## Output contract
+Every answer must include:
+- MCP tools used or planned
+- handle lifecycle
+- permission assumptions
+- evidence IDs
+- cleanup step
+- validation step
+- stop condition
 
 ---
 
@@ -25358,6 +25521,114 @@ The honest answer to many "how do I hide this from Discord" questions is "you ca
 | 6 | Differential diagnosis | "Friend on Discord sees X" almost always = capture-path mismatch, not a script bug |
 
 **Cross-references:** `docs/perception/render-api.md` (authoritative surface list for your PCX version), `knowledge/anti-cheat-architecture.md` (per-AC screenshot mechanisms), `skill://anti-cheat-re` (detection-surface methodology), `skill://pcx-perf-budget` (overlay render cost considerations for streamers running on a single-PC topology).
+
+---
+
+## Source: `.claude/skills/perception-mcp-re-workflows/SKILL.md`
+
+---
+name: perception-mcp-re-workflows
+description: Use for reverse-engineering investigations that need Perception MCP workflow chains and claim/evidence proof.
+---
+
+# perception-mcp-re-workflows
+
+Use for reverse-engineering investigations that need Perception MCP workflow chains and claim/evidence proof.
+
+## Required inputs
+- target process/module
+- task or claim
+- permission assumptions
+- available Perception MCP tools/capabilities
+
+## Workflow
+1. Load `docs/perception/two-mcp-workflow.md`.
+2. Load `docs/perception/mcp-workflows.md` and `docs/perception/mcp-safety-policy.md`.
+3. If engine-specific, load the matching `knowledge/mcp-workflows/*.md` page.
+4. Plan with `pcx mcp-plan` before live calls.
+5. Record evidence IDs and cleanup handles.
+
+## Output contract
+Every answer must include:
+- MCP tools used or planned
+- handle lifecycle
+- permission assumptions
+- evidence IDs
+- cleanup step
+- validation step
+- stop condition
+
+---
+
+## Source: `.claude/skills/perception-mcp-safety/SKILL.md`
+
+---
+name: perception-mcp-safety
+description: Use before Perception MCP write, allocation, kernel, or broad scan operations to enforce permissions and rollback.
+---
+
+# perception-mcp-safety
+
+Use before Perception MCP write, allocation, kernel, or broad scan operations to enforce permissions and rollback.
+
+## Required inputs
+- target process/module
+- task or claim
+- permission assumptions
+- available Perception MCP tools/capabilities
+
+## Workflow
+1. Load `docs/perception/two-mcp-workflow.md`.
+2. Load `docs/perception/mcp-workflows.md` and `docs/perception/mcp-safety-policy.md`.
+3. If engine-specific, load the matching `knowledge/mcp-workflows/*.md` page.
+4. Plan with `pcx mcp-plan` before live calls.
+5. Record evidence IDs and cleanup handles.
+
+## Output contract
+Every answer must include:
+- MCP tools used or planned
+- handle lifecycle
+- permission assumptions
+- evidence IDs
+- cleanup step
+- validation step
+- stop condition
+
+---
+
+## Source: `.claude/skills/perception-mcp-session/SKILL.md`
+
+---
+name: perception-mcp-session
+description: Use for live Perception MCP sessions: acquiring handles, making calls, retrying stale handles once, recording transcripts, and cleaning up.
+---
+
+# perception-mcp-session
+
+Use for live Perception MCP sessions: acquiring handles, making calls, retrying stale handles once, recording transcripts, and cleaning up.
+
+## Required inputs
+- target process/module
+- task or claim
+- permission assumptions
+- available Perception MCP tools/capabilities
+
+## Workflow
+1. Load `docs/perception/two-mcp-workflow.md`.
+2. Load `docs/perception/mcp-workflows.md` and `docs/perception/mcp-safety-policy.md`.
+3. If engine-specific, load the matching `knowledge/mcp-workflows/*.md` page.
+4. Plan with `pcx mcp-plan` before live calls.
+5. Record evidence IDs and cleanup handles.
+
+## Output contract
+Every answer must include:
+- MCP tools used or planned
+- handle lifecycle
+- permission assumptions
+- evidence IDs
+- cleanup step
+- validation step
+- stop condition
 
 ---
 

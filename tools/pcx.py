@@ -482,9 +482,14 @@ def cmd_mcp_plan(args: list[str]) -> int:
     ap.add_argument("task", nargs="*", help="Perception MCP task description")
     ap.add_argument("--target", default="", help="target process name, e.g. game.exe")
     ap.add_argument("--permissions", default="", help="space/comma-separated granted permissions")
+    ap.add_argument("--capabilities", default="", help="JSON file with available MCP tools")
     ns = ap.parse_args(args)
     task = " ".join(ns.task).strip() or "attach and read typed value"
-    print(plan_perception_mcp_json(task, ns.target, ns.permissions))
+    capabilities = []
+    if ns.capabilities:
+        data = json.loads(Path(ns.capabilities).read_text(encoding="utf-8"))
+        capabilities = data.get("tools", data if isinstance(data, list) else [])
+    print(plan_perception_mcp_json(task, ns.target, ns.permissions, capabilities))
     return 0
 
 
@@ -516,7 +521,8 @@ def main() -> int:
                     version=f"pcx-ai-toolkit v{get_version()}")
     ap.add_argument("command", nargs="?", help=(
         "Command to run: setup, update, lint, symbol-check, api, check-answer, "
-        "create, build-api-index, verify, verify-project, plan, mcp-plan, docs-check, check-drift, "
+        "create, build-api-index, verify, verify-project, plan, mcp-plan, mcp-session, "
+        "mcp-record, mcp-replay, mcp-summarize, evidence, docs-check, check-drift, "
         "check-mcp, check-matrix, counts, prompt, agent-install, ai-smoke, version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
@@ -572,6 +578,19 @@ def main() -> int:
 
     if cmd in ("mcp-plan", "plan-mcp"):
         return cmd_mcp_plan(sub_args)
+
+    if cmd == "mcp-session":
+        return run_python_tool("perception-mcp-session", sub_args)
+
+    if cmd in ("mcp-record", "mcp-replay", "mcp-summarize"):
+        tool_args = [cmd.removeprefix("mcp-"), *sub_args]
+        return run_python_tool("perception-mcp-record", tool_args)
+
+    if cmd == "evidence":
+        return run_python_tool("evidence", sub_args)
+
+    if cmd == "mcp-doctor":
+        return run_python_tool("perception-mcp-doctor", sub_args)
 
     if cmd == "check-drift":
         return run_python_tool("check-doc-drift", sub_args)

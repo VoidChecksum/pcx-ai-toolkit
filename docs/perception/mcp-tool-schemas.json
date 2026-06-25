@@ -15,7 +15,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -39,7 +45,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -65,7 +77,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -91,7 +109,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -117,7 +141,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -143,7 +173,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -165,7 +201,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -187,7 +229,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -213,7 +261,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -245,7 +299,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -274,7 +334,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -303,7 +369,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -336,7 +408,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -368,7 +446,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -403,7 +487,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -438,7 +528,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -472,7 +568,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -503,7 +605,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -534,7 +642,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -563,7 +677,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -589,7 +709,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -616,7 +742,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -645,7 +777,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -675,7 +813,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -704,7 +848,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -732,7 +882,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -760,7 +916,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -788,7 +950,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -818,7 +986,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -849,7 +1023,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -879,7 +1059,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -908,7 +1094,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -936,7 +1128,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -966,7 +1164,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -996,7 +1200,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1026,7 +1236,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1058,7 +1274,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1091,7 +1313,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1125,7 +1353,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1158,7 +1392,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1189,7 +1429,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1219,7 +1465,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1252,7 +1504,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1285,7 +1543,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1316,7 +1580,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1348,7 +1618,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1379,7 +1655,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1409,7 +1691,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1438,7 +1726,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1466,7 +1760,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1496,7 +1796,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "high",
+      "cost": {
+        "tier": "high",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1526,7 +1832,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1551,7 +1863,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "cheap",
+      "cost": {
+        "tier": "cheap",
+        "round_trips": 1,
+        "max_bytes": 65536,
+        "safe_in_loop": true,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1577,7 +1895,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1603,7 +1927,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1630,7 +1960,13 @@
         "-32003",
         "-32004"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1653,7 +1989,13 @@
         "-32602",
         "-32603"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1675,7 +2017,13 @@
         "-32602",
         "-32603"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {
@@ -1699,7 +2047,13 @@
         "-32602",
         "-32603"
       ],
-      "cost": "medium",
+      "cost": {
+        "tier": "medium",
+        "round_trips": 1,
+        "max_bytes": 1048576,
+        "safe_in_loop": false,
+        "default_timeout_ms": 5000
+      },
       "example": {
         "method": "tools/call",
         "params": {

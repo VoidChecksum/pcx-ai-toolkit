@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VoidChecksum/pcx-ai-toolkit/schemas/pcx-evidence-graph.schema.json",
+  "title": "PCX evidence graph",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "target",
+    "claims",
+    "evidence"
+  ],
+  "properties": {
+    "schema": {
+      "const": "pcx-evidence-graph-v1"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "process"
+      ],
+      "properties": {
+        "process": {
+          "type": "string"
+        },
+        "module": {
+          "type": "string"
+        },
+        "build": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "claim",
+          "status",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^C-[0-9]{3,}$"
+          },
+          "claim": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "candidate",
+              "confirmed",
+              "stale",
+              "rejected"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "type",
+          "tool",
+          "params"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^E-[0-9]{3,}$"
+          },
+          "type": {
+            "type": "string"
+          },
+          "tool": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object"
+          },
+          "result": {
+            "type": "object"
+          },
+          "error": {
+            "type": [
+              "object",
+              "string",
+              "null"
+            ]
+          },
+          "ts": {
+            "type": "string"
+          },
+          "elapsed_ms": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}
