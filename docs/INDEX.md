@@ -121,10 +121,10 @@ Native reverse-engineering tools live in [`../tools/pe-parser/`](../tools/pe-par
 | [`perception/ide.md`](perception/ide.md) | 585 | Perception IDE: editor, AI chat, tools, extensions |
 | [`perception/extensions-api.md`](perception/extensions-api.md) | 371 | Extension development API |
 | [`perception/analyzer.md`](perception/analyzer.md) | 370 | Perception Analyzer |
-| [`perception/custom-draw-api.md`](perception/custom-draw-api.md) | ~500 | D3D11 GPU pipeline: shaders, buffers, textures, compute, depth testing |
-| [`perception/changelogs.md`](perception/changelogs.md) | ~500 | Complete changelog archive (Feb–June 2026) |
-| [`perception/sdk-status.md`](perception/sdk-status.md) | ~70 | Perception Enma SDK publication status and supported local workflow |
-| [`perception/versioning-and-migration.md`](perception/versioning-and-migration.md) | ~45 | Symbol version metadata, Enma feature-version gaps, and legacy migration patterns |
+| [`perception/custom-draw-api.md`](perception/custom-draw-api.md) | 359 | D3D11 GPU pipeline: shaders, buffers, textures, compute, depth testing |
+| [`perception/changelogs.md`](perception/changelogs.md) | 433 | Complete changelog archive (Feb–June 2026) |
+| [`perception/sdk-status.md`](perception/sdk-status.md) | 61 | Perception Enma SDK publication status and supported local workflow |
+| [`perception/versioning-and-migration.md`](perception/versioning-and-migration.md) | 42 | Symbol version metadata, Enma feature-version gaps, and legacy migration patterns |
 
 
 ## Knowledge Base

@@ -6091,6 +6091,10 @@ Two same-day Universal API posts are disambiguated as the changelog does — `(a
 or per-API docs document it, the row reads `<= <earliest dated release that references it>`
 or `unknown` — never a guessed date.
 
+Machine-readable seed metadata for public Perception symbols lives in
+`knowledge/perception-symbol-versions.json`. Keep that JSON and this narrative matrix
+cross-linked: JSON is for tooling; this file is for historical context and rationale.
+
 ---
 
 ## How to Use This File
