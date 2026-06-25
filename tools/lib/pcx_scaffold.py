@@ -1,4 +1,4 @@
-"""Project scaffolding helpers for Perception.cx Enma and AngelScript.
+"""Project scaffolding helpers for Perception.cx Enma.
 
 The CLI and MCP server both use this module so project creation stays
 deterministic and testable.  It intentionally copies from checked-in templates
@@ -23,10 +23,6 @@ LANG_ALIASES = {
     "enma": "enma",
     "em": "enma",
     ".em": "enma",
-    "angelscript": "angelscript",
-    "angel-script": "angelscript",
-    "as": "angelscript",
-    ".as": "angelscript",
 }
 
 
@@ -46,15 +42,13 @@ TEMPLATE_SPECS: tuple[TemplateSpec, ...] = (
     TemplateSpec("enma", "aimbot", "aimbot-skeleton.em", "Single-file Enma aimbot scaffold", "aimbot-skeleton.em"),
     TemplateSpec("enma", "minimap", "minimap.em", "Single-file Enma radar/minimap scaffold", "minimap.em"),
     TemplateSpec("enma", "hello", "hello-world.em", "Minimal Enma lifecycle starter", "hello-world.em"),
-    TemplateSpec("angelscript", "full", "full-project-as", "Multi-file AngelScript feature scaffold", "main.as"),
-    TemplateSpec("angelscript", "cheat", "cheat-skeleton-as", "Full AngelScript ESP/aim/radar/trigger scaffold", "main.as"),
 )
 
 
 def normalize_language(language: str) -> str:
     lang = LANG_ALIASES.get(language.strip().lower())
     if not lang:
-        raise ValueError(f"unsupported language: {language}; expected enma or angelscript")
+        raise ValueError(f"unsupported language: {language}; use enma")
     return lang
 
 
@@ -115,12 +109,8 @@ def build_project_plan(
         "knowledge/offset-methodology.md",
     ]
     skills = ["game-cheat-script-master", "pcx-re-discipline", "re-evidence-log"]
-    if spec.language == "enma":
-        docs.extend(["docs/llms-perception-enma.md", "docs/perception/lifecycle-and-routines.md"])
-        skills.append("pcx-enma-discipline")
-    else:
-        docs.extend(["docs/llms-perception-angelscript.md", "docs/perception/angelscript/life-cycle.md"])
-        skills.append("pcx-angelscript-discipline")
+    docs.extend(["docs/llms-perception-enma.md", "docs/perception/lifecycle-and-routines.md"])
+    skills.append("pcx-enma-discipline")
 
     return {
         "name": name,
@@ -145,7 +135,7 @@ def build_project_plan(
         "docs": docs,
         "skills": skills,
         "commands": [
-            f"pcx api <symbol> --lang {spec.language}",
+            "pcx api <symbol>",
             "pcx verify-project . --allow-placeholders --allow-unverified",
             "pcx check-answer answer.md",
         ],
@@ -177,7 +167,7 @@ def _replace_target_process(paths: list[Path], target_process: str) -> None:
     if not target_process or target_process == "game.exe":
         return
     for path in paths:
-        if path.suffix.lower() not in {".em", ".as", ".md", ".json"}:
+        if path.suffix.lower() not in {".em", ".md", ".json"}:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         updated = text.replace('"game.exe"', json.dumps(target_process))

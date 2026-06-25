@@ -1,3 +1,5 @@
+Start here: `docs/perception/llm-routing.md`.
+
 # Cursor Rules — Perception.cx Scripting
 
 Drop-in project rules for Cursor (the IDE), parallel to `CLAUDE.md` but tailored for Cursor's context system.
@@ -6,13 +8,10 @@ Drop-in project rules for Cursor (the IDE), parallel to `CLAUDE.md` but tailored
 
 ## Project Context
 
-- Languages: Enma (`.em`) and AngelScript (`.as`). Enma is the primary scripting language.
 - Platform: Perception.cx. Scripts attach to a game process, read state, and draw an overlay.
 - **Read the relevant doc before writing any API call.** Point Cursor at these with `@`:
-  - Routing first: `@docs/perception/llm-routing.md` (choose Enma vs AngelScript before using API names)
   - Enma language: `@docs/enma/llms-language.md` (complete single-page reference)
   - PCX Enma APIs: `@docs/perception/` (proc, render, gui, input, cpu, zydis, unicorn, net, win, fs, sound, lifecycle, mcp)
-  - PCX AngelScript APIs: `@docs/perception/angelscript/`
   - Quick references: `@knowledge/enma-cheatsheet.md`, `@knowledge/pcx-api-cheatsheet.md`
   - Common patterns: `@knowledge/common-patterns.md`
 
@@ -76,7 +75,6 @@ How to work (not what the code looks like) is in `rules/KARPATHY.md`. The short 
 
 ## What Cursor Does Best Here
 
-- **Tab completion for `.em`/`.as`** — sharp once the Enma and AngelScript language servers are wired (see the LSP step in `mcp/cursor-setup.md`); without that, completions fall back to generic text.
 - **`@` referencing docs by path** — pull the exact API page into context before generating a call, e.g. `@docs/perception/render.md` before writing `draw_*`, instead of letting the model guess signatures.
 - **AI Composer for multi-file edits** — adding a feature means a new file under `features/` plus a routine registration in `main.em` and a GUI section in `menu.em`. Composer handles that spread while respecting one-feature-per-file; reject any diff that folds the new feature into an existing module.
 - **`.cursorrules` persistence** — these standards apply to every generation automatically, so prompts can stay short ("add a distance-filtered box ESP") and still produce code that null-checks chains, suffixes float32, and binds tunables to GUI widgets.

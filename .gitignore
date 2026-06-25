@@ -3,7 +3,7 @@ node_modules/
 .DS_Store
 __pycache__/
 *.pyc
-# enma-lsp and angel-lsp-pcx are git submodules (see .gitmodules) — not ignored.
+# enma-lsp is a git submodule (see .gitmodules) — not ignored.
 # Only ignore the non-submodule LSP checkouts and built packages.
 lsp/LspCpp/
 lsp/cpp-language-server/

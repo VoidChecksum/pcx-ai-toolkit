@@ -1,7 +1,6 @@
 """Source-grounded PCX API lookup and validation helpers.
 
-The API index is generated from the official Perception Enma and AngelScript
-docs.  This module keeps all hallucination checks on that generated contract so
+The API index is generated from the official Perception Enma docs.  This module keeps all hallucination checks on that generated contract so
 CLI tools and MCP tools report the same findings and source URLs.
 """
 from __future__ import annotations
@@ -21,16 +20,12 @@ from pcx_parser import (
 from pcx_paths import data_root
 
 
-SUPPORTED_LANGUAGES = {"enma", "angelscript"}
+SUPPORTED_LANGUAGES = {"enma"}
 
 LANG_ALIASES = {
     "enma": "enma",
     "em": "enma",
     ".em": "enma",
-    "angelscript": "angelscript",
-    "angel-script": "angelscript",
-    "as": "angelscript",
-    ".as": "angelscript",
 }
 
 UNSUPPORTED_SYMBOLS_PATH = data_root() / "knowledge" / "unsupported-symbols.json"
@@ -118,16 +113,6 @@ LANGUAGE_BUILTIN_CALLS: dict[str, set[str]] = {
         "print", "println", "time_ms", "assert", "heap_collect", "heap_count",
         "set_budget", "set_memory_budget", "register_event", "fire_event", "clear_events",
     },
-    "angelscript": {
-        "log", "log_error", "log_console", "log_console_error",
-        "sin", "cos", "tan", "asin", "acos", "atan", "atan2",
-        "sqrt", "pow", "abs", "min", "max", "fmod",
-        "round", "floor", "ceil", "clamp",
-        "formatInt", "formatFloat",
-        "length", "isEmpty", "resize", "reserve", "insertAt", "removeAt",
-        "insertLast", "removeLast", "sortAsc", "sortDesc", "sort", "reverse",
-        "find", "findByRef", "substr", "findFirst", "findLast", "split",
-    },
 }
 
 FORBIDDEN_CALLS_BY_LANGUAGE: dict[str, dict[str, str]] = {
@@ -137,28 +122,11 @@ FORBIDDEN_CALLS_BY_LANGUAGE: dict[str, dict[str, str]] = {
         "get_view": "AngelScript viewport helper; use get_view_width() and get_view_height()",
         "deref": "AngelScript handle cleanup; Enma proc_t is RAII-managed",
     },
-    "angelscript": {
-        "register_routine": "Enma lifecycle; use register_callback(fn, interval, data_index)",
-        "println": "Enma logging; use log(...) in AngelScript",
-        "get_view_width": "Enma viewport helper; use get_view(width, height) out-params",
-        "get_view_height": "Enma viewport helper; use get_view(width, height) out-params",
-        "vec2": "Enma value type; use AngelScript API shapes from docs/perception/angelscript/",
-        "vec3": "Enma value type; use AngelScript API shapes from docs/perception/angelscript/",
-        "vec4": "Enma value type; use AngelScript API shapes from docs/perception/angelscript/",
-        "color": "Enma value type; AngelScript render calls usually take raw RGBA args",
-    },
 }
 
 FORBIDDEN_TYPES_BY_LANGUAGE: dict[str, dict[str, str]] = {
     "enma": {
         "dictionary": "AngelScript dictionary; use map<K,V> or imap<V> in Enma",
-    },
-    "angelscript": {
-        "vec2": "Enma value type; use AngelScript Vector2/raw API shapes from docs",
-        "vec3": "Enma value type; use AngelScript Vector3/raw API shapes from docs",
-        "vec4": "Enma value type; use AngelScript docs for the registered vector type",
-        "color": "Enma value type; AngelScript render APIs usually take raw RGBA args",
-        "map": "Enma map; use dictionary in AngelScript",
     },
 }
 
@@ -331,10 +299,10 @@ def validate_code_against_index(
     source_path: str = "",
     extra_user_functions: set[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Validate Enma/AngelScript code for unknown or cross-language symbols."""
+    """Validate Enma code for unknown symbols."""
     if language not in SUPPORTED_LANGUAGES:
         return [_finding("unsupported_language", 0, language,
-                         f"unsupported language: {language}; expected enma or angelscript")]
+                         f"unsupported language: {language}; use enma")]
 
     findings: list[dict[str, Any]] = []
     if language == "enma":
@@ -408,15 +376,13 @@ def validate_code_against_index(
             continue
         if language == "enma" and name in {"main", "on_render", "on_update", "on_unload"}:
             continue
-        if language == "angelscript" and name in {"main", "on_tick", "on_unload", "on_frame"}:
-            continue
         if name in known_functions or name in known_methods:
             continue
         findings.append(_finding(
             "unknown_call",
             line,
             name,
-            f"'{name}' is not a known Perception Enma or AngelScript function/method",
+            f"'{name}' is not a known Perception Enma function/method",
             **_symbol_context(index, name, language),
         ))
 
@@ -439,7 +405,7 @@ def validate_code_against_index(
             "unknown_type",
             line,
             base,
-            f"'{base}' is not a known Perception Enma or AngelScript type (in declaration of '{name}')",
+            f"'{base}' is not a known Perception Enma type (in declaration of '{name}')",
             suggestions=lookup_symbol(index, base).get("suggestions", [])[:5],
         ))
 
@@ -486,7 +452,7 @@ def extract_code_blocks(markdown: str) -> list[dict[str, object]]:
 
 
 def validate_answer_markdown(markdown: str, index: dict[str, Any], source_path: str = "answer") -> dict[str, Any]:
-    """Validate all Enma/AngelScript code blocks in a generated answer."""
+    """Validate all Enma code blocks in a generated answer."""
     blocks = extract_code_blocks(markdown)
     findings: list[dict[str, Any]] = []
     for block in blocks:

@@ -9,19 +9,12 @@ class ScenarioCoverageTest(unittest.TestCase):
     def test_all_planned_scenarios_exist(self):
         expected = {
             "lifecycle-enma/main.em",
-            "lifecycle-angelscript/main.as",
             "render-enma/main.em",
-            "render-angelscript/main.as",
             "gui-enma/main.em",
-            "gui-angelscript/main.as",
             "proc-enma/main.em",
-            "proc-angelscript/main.as",
             "net-enma/main.em",
-            "net-angelscript/main.as",
             "filesystem-enma/main.em",
-            "filesystem-angelscript/main.as",
             "zydis-enma/main.em",
-            "zydis-angelscript/main.as",
             "unicorn-enma/main.em",
             "enma-language-addons/main.em",
             "enma-filesystem-json/main.em",
@@ -32,7 +25,7 @@ class ScenarioCoverageTest(unittest.TestCase):
         found = {
             str(path.relative_to(root))
             for path in root.rglob("*")
-            if path.suffix in {".em", ".as", ".md"} and path.name != "README.md"
+            if path.suffix in {".em", ".md"} and path.name != "README.md"
         }
         self.assertTrue(expected <= found, sorted(expected - found))
 

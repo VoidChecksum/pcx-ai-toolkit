@@ -12,7 +12,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PCX = REPO_ROOT / "tools" / "pcx.py"
 VERIFY_PROJECT = REPO_ROOT / "tools" / "verify-project.py"
-AS_LINTER = REPO_ROOT / "tools" / "as-linter.py"
 RE_IMPORTER = REPO_ROOT / "tools" / "re-importer.py"
 HALLUCINATION_EVAL = REPO_ROOT / "tools" / "hallucination-eval.py"
 
@@ -61,18 +60,27 @@ class ProjectWorkflowTest(unittest.TestCase):
             self.assertEqual(verify.returncode, 0, verify.stderr + verify.stdout)
             self.assertTrue(json.loads(verify.stdout)["ok"])
 
-    def test_as_linter_rejects_enma_lifecycle(self) -> None:
-        with tempfile.NamedTemporaryFile("w", suffix=".as", encoding="utf-8", delete=False) as f:
-            f.write("int64 main() { register_routine(cast<int64>(tick), 0); return 1; }\nvoid tick(int64 d) {}\n")
-            path = Path(f.name)
-        try:
-            result = subprocess.run([sys.executable, str(AS_LINTER), str(path), "--json"], capture_output=True, text=True)
-            self.assertEqual(result.returncode, 1, result.stdout)
-            data = json.loads(result.stdout)
-            rules = {finding["rule"] for file in data["files"].values() for finding in file["findings"]}
-            self.assertIn("AS-1", rules)
-        finally:
-            path.unlink(missing_ok=True)
+    def test_create_rejects_angelscript(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(PCX),
+                    "create",
+                    "--name",
+                    "AS Project",
+                    "--language",
+                    "angelscript",
+                    "--kind",
+                    "full",
+                    "--output",
+                    str(Path(td) / "as"),
+                ],
+                capture_output=True,
+                text=True,
+            )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unsupported", result.stderr.lower() + result.stdout.lower())
 
     def test_re_importer_converts_symbol_csv_from_stdin(self) -> None:
         result = subprocess.run(

@@ -1,7 +1,7 @@
 {
   "name": "pcx-ai-toolkit",
   "version": "1.16.0",
-  "description": "Source-grounded Enma and AngelScript toolkit for Perception.cx",
+  "description": "Source-grounded Enma toolkit for Perception.cx",
   "license": "MIT",
   "homepage": "https://github.com/VoidChecksum/pcx-ai-toolkit#readme",
   "repository": {
@@ -14,7 +14,6 @@
   "keywords": [
     "perception",
     "enma",
-    "angelscript",
     "pcx",
     "ai-toolkit",
     "game-scripting"
@@ -32,7 +31,6 @@
     "docs/COUNTS.json",
     "docs/llms.txt",
     "docs/llms-perception-enma.md",
-    "docs/llms-perception-angelscript.md",
     "README.md",
     "LICENSE",
     "VERSION"

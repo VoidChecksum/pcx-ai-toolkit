@@ -1,3 +1,5 @@
+Start here: `docs/perception/llm-routing.md`.
+
 # Cline Rules — Perception.cx Scripting
 
 Drop-in custom instructions for [Cline](https://github.com/cline/cline), the VS Code AI agent. Sibling to `rules/CLAUDE.md` (Claude Code drop-in) and `rules/CURSOR.md` (Cursor drop-in). Cline reads its custom instructions on every turn, so this file is intentionally tight — long rules eat the token budget without changing behavior.
@@ -16,13 +18,11 @@ Cline will apply these rules on every message in the project.
 
 ## Project Context
 
-- **Languages.** Enma (`.em`) and AngelScript (`.as`).
+- **Languages.** Enma (`.em`) only.
 - **Platform.** Perception.cx scripting runtime (`perception.cx`).
 - **API docs.** Live under `docs/`:
-  - `docs/perception/llm-routing.md` — load first; choose Enma vs AngelScript before using API names
   - `docs/enma/` — Enma language + standard library + SDK (50 files)
   - `docs/perception/` — Enma APIs (17 files)
-  - `docs/perception/angelscript/` — AngelScript APIs (23 files)
 - **Read before writing API calls.** Cline does not have these APIs in its pretraining; it must `@`-reference the relevant doc file before producing code.
 
 ## Coding Standards

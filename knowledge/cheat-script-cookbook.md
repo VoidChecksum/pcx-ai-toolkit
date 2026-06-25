@@ -7,9 +7,9 @@ It contains small, reusable recipes for the most common cheat-script tasks. Copy
 and adapt them inside your own projects; they follow the 12 guidelines and the
 cheat-script master rules.
 
-All examples are written in **Enma (.em)** because that is the default PCX
-language for this cookbook. Use the AngelScript context pack and templates when
-working in `.as`; do not translate examples into unsupported bindings.
+All examples are written in **Enma (`.em`)**. AngelScript (`.as`) is outside
+this toolkit's active support; port old `.as` snippets to Enma before using
+these recipes.
 
 ---
 

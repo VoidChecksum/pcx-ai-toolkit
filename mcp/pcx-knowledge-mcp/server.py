@@ -327,8 +327,7 @@ def build_context_recommendation(task: str, language: str = "") -> dict[str, obj
         skills.extend(["pcx-enma-discipline", "game-hacking-pcx"])
         docs.extend(["docs/llms-perception-enma.md", "docs/perception/lifecycle-and-routines.md"])
     if lang in {"angelscript", "angel-script", ".as", "as"} or ".as" in text:
-        skills.extend(["pcx-angelscript-discipline", "game-hacking-pcx"])
-        docs.extend(["docs/llms-perception-angelscript.md", "docs/perception/angelscript/life-cycle.md"])
+        docs.append("docs/llms-perception-enma.md")
 
     for triggers, payload in CONTEXT_RULES:
         if tokens & triggers:
@@ -350,8 +349,8 @@ def build_context_recommendation(task: str, language: str = "") -> dict[str, obj
         "docs": _dedupe(docs),
         "mcp_tools": _dedupe(tools),
         "commands": [
-            "pcx api <symbol> --lang enma|angelscript",
-            "pcx symbol-check <file.em|file.as>",
+            "pcx api <symbol>",
+            "pcx symbol-check <file.em>",
             "pcx check-answer <answer.md>",
         ],
     }
@@ -464,7 +463,7 @@ def recommend_context(task: str, language: str = "") -> str:
     """Recommend the smallest useful doc/skill/tool set for a PCX task.
 
     Use this before loading large bundles. It returns an ordered load plan,
-    skill names, docs, MCP tools, and CLI commands for Enma/AngelScript work.
+    skill names, docs, MCP tools, and CLI commands for Enma work.
     """
     return json.dumps(build_context_recommendation(task, language), indent=2)
 
@@ -489,15 +488,15 @@ def _load_api_index() -> dict | None:
 def api_lookup(symbol: str, language: str = "") -> str:
     """Look up an exact Perception API symbol with source-backed signatures.
 
-    language may be empty, enma, or angelscript. Use this before inventing a
-    function, method, type, argument shape, or lifecycle binding.
+    language may be empty or enma. Use this before inventing a function,
+    method, type, argument shape, or lifecycle binding.
     """
-    if language and language not in {"enma", "angelscript"}:
-        return json.dumps({"error": f"unsupported language: {language}"}, indent=2)
+    if language and language not in {"enma", "em", ".em"}:
+        return json.dumps({"error": f"unsupported language: {language}; use enma"}, indent=2)
     index = _load_api_index()
     if index is None:
         return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
-    return json.dumps(lookup_symbol(index, symbol, language or None), indent=2)
+    return json.dumps(lookup_symbol(index, symbol, "enma"), indent=2)
 
 
 @mcp.tool()
@@ -510,10 +509,10 @@ def validate_code(code: str, language: str, source_path: str = "") -> str:
     An empty findings list means no hallucinated or cross-language symbols were
     detected.
 
-    language must be one of: enma, angelscript.
+    language must be enma.
     """
-    if language not in {"enma", "angelscript"}:
-        return json.dumps({"error": f"unsupported language: {language}"}, indent=2)
+    if language not in {"enma", "em", ".em"}:
+        return json.dumps({"error": f"unsupported language: {language}; use enma"}, indent=2)
     index = _load_api_index()
     if index is None:
         findings = [{"line": 0, "symbol": "", "kind": "index_missing",
@@ -541,9 +540,9 @@ def validate_answer(answer: str, source_path: str = "answer.md") -> str:
 
 @mcp.tool()
 def list_project_templates(language: str = "") -> str:
-    """List supported PCX scaffold templates for Enma and AngelScript."""
+    """List supported PCX scaffold templates for Enma."""
     try:
-        return json.dumps(available_templates(language), indent=2)
+        return json.dumps(available_templates(language or "enma"), indent=2)
     except ValueError as exc:
         return json.dumps({"error": str(exc)}, indent=2)
 
@@ -564,7 +563,7 @@ def generate_script_plan(
     try:
         plan = build_project_plan(task or "pcx-project", language, kind, target_process, engine)
     except ValueError as exc:
-        return json.dumps({"error": str(exc), "templates": available_templates()}, indent=2)
+        return json.dumps({"error": str(exc), "templates": available_templates("enma")}, indent=2)
     plan["task"] = task
     plan["mcp_sequence"] = [
         "recommend_context(task, language)",
@@ -614,6 +613,8 @@ def scaffold_project(
             overwrite,
         )
         return json.dumps(result, indent=2)
+    except ValueError as exc:
+        return json.dumps({"error": str(exc)}, indent=2)
     except Exception as exc:  # noqa: BLE001
         return json.dumps({"error": f"{type(exc).__name__}: {exc}"}, indent=2)
 
@@ -670,9 +671,6 @@ def explain_finding(finding_json: str, language: str = "") -> str:
         "unknown_type": "Use the language-specific type documented for this binding; check llm-routing before porting types across languages.",
         "wrong_language_symbol": "This is a cross-binding mixup. Rewrite using the selected language lifecycle/API shape.",
         "wrong_language_type": "Replace the type with the selected language's documented equivalent.",
-        "AS-1": "Remove Enma-only syntax from AngelScript code and use docs/perception/angelscript/.",
-        "AS-2": "Use uint64 for addresses and pointer-sized arithmetic.",
-        "AS-3": "Add an E-NNN evidence citation or mark the offset/signature UNVERIFIED while scaffolding.",
         "placeholder": "Replace scaffold placeholder text with target-specific evidence-backed logic before shipping.",
         "unverified": "Convert UNVERIFIED claims into E-NNN evidence entries before shipping.",
     }.get(kind, "Read the referenced source/signature, apply the smallest code change, then re-run validation.")

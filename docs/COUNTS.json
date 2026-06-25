@@ -1,12 +1,12 @@
 {
-  "doc_lines": 33241,
-  "docs": 131,
+  "doc_lines": 19646,
+  "docs": 81,
   "engines": 5,
   "knowledge": 26,
   "mcp_tools": 59,
   "native_tools": 13,
   "signatures": 11,
-  "skills": 25,
-  "templates": 30,
-  "tools": 41
+  "skills": 24,
+  "templates": 18,
+  "tools": 40
 }

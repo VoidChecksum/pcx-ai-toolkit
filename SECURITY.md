@@ -33,7 +33,7 @@ Please include, at minimum:
 - Bugs in `tools/*.sh` and `tools/pe-parser/`.
 - Bugs in `mcp/pcx-knowledge-mcp/` (the knowledge-MCP server) and `mcp/setup-binary-analysis.{sh,ps1}`.
 - Bugs in `setup.sh` / `setup.ps1`.
-- Bugs in LSP config under `lsp/` (`enma-lsp/`, `angel-lsp-pcx/`).
+- Bugs in LSP config under `lsp/` (`enma-lsp/`).
 
 **Out of scope:**
 

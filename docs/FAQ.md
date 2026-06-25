@@ -91,12 +91,10 @@ See `knowledge/offset-methodology.md` and the `pcx-patch-day-playbook` skill for
 | **Lifecycle** | `int64 main()` + `register_routine` | `int main()` + `register_callback` |
 | **Process handle** | `proc_t` value with RAII cleanup | `proc_t@` handle with explicit `deref()` |
 | **Render style** | `vec2(...)` and `color(...)` values | Raw/value shapes from the AS API pages |
-| **File extension** | `.em` | `.as` |
-| **Skill** | `pcx-enma-discipline` | `pcx-angelscript-discipline` |
+| **File extension** | `.em` |
+| **Skill** | `pcx-enma-discipline` |
 
-For new scripts, use Enma unless you specifically need to maintain an existing
-AngelScript project. Always read `docs/perception/llm-routing.md` before
-porting between the two languages.
+For new scripts, use Enma. AngelScript is deprecated and unsupported.
 
 ---
 
@@ -107,7 +105,6 @@ porting between the two languages.
 1. **LSP servers aren't built**: Run `pcx setup` to compile them. Check with `pcx doctor`.
 2. **Wrong server path**: Verify your editor settings point to the correct server files:
    - Enma: `lsp/enma-lsp/server/dist/server.js`
-   - AngelScript: `lsp/angel-lsp-pcx/server/out/server.js`
 3. **Node.js not on PATH**: The servers require Node.js 18+. Run `node --version` to check.
 4. **Extension not installed**: Install the VSIX from [Releases](https://github.com/VoidChecksum/pcx-ai-toolkit/releases).
 

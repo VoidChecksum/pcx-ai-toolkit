@@ -45,15 +45,14 @@ Located at `docs/llms.txt` (also `docs/llms-full.txt` for the full bundle).
 
 ### 2. Concatenated Context Packs — the Bundle Surface
 
-Located at `docs/llms-full.txt`, `docs/llms-perception-{enma,angelscript}.md`, `docs/llms-skills.md`, `docs/llms-knowledge.md`.
+Located at `docs/llms-full.txt`, `docs/llms-perception-enma.md`, `docs/llms-skills.md`, `docs/llms-knowledge.md`.
 
 **What it is.** Per-language and per-category single-file concatenations of the relevant subset of the toolkit. Each file carries every member document inline with stable separators and the original source path preserved.
 
 | Bundle | Scope | Size |
 |---|---|---:|
-| `llms-full.txt` | Supported Enma + AngelScript docs / skills / knowledge / rules / templates / signatures | ~2.1 MB |
+| `llms-full.txt` | Enma docs / skills / knowledge / rules / templates / signatures | ~2 MB |
 | `llms-perception-enma.md` | Enma language + APIs + Enma-discipline skills + cheatsheet | ~950 KB |
-| `llms-perception-angelscript.md` | AngelScript APIs + AS discipline + cheatsheet | ~519 KB |
 | `llms-skills.md` | Supported skills concatenated | ~361 KB |
 | `llms-knowledge.md` | Supported knowledge references concatenated | ~363 KB |
 
@@ -198,8 +197,8 @@ The index also doesn't help with content the toolkit doesn't have — if you're 
 | # | Surface | When to use | Cost |
 |---|---|---|---|
 | 1 | `docs/llms.txt` | First-touch with a new tool; auto-fetch convention | ~56 KB context |
-| 2 | `docs/llms-perception-<lang>.md` | One-language session in a non-MCP tool | ~519-950 KB context |
-| 3 | `docs/llms-full.txt` | Enma + AngelScript session in a non-MCP tool | ~2.1 MB context |
+| 2 | `docs/llms-perception-enma.md` | Enma session in a non-MCP tool | ~950 KB context |
+| 3 | `docs/llms-full.txt` | Full Enma toolkit session in a non-MCP tool | ~2 MB context |
 | 4 | `docs/llms-skills.md` / `llms-knowledge.md` | Skills- or knowledge-focused session | ~361-363 KB context |
 | 5 | `mcp/pcx-knowledge-mcp/` server | MCP-aware tool, long session, lazy loading | One running process |
 

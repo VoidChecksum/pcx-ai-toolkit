@@ -34,17 +34,14 @@ class ApiLookupTest(unittest.TestCase):
         self.assertFalse(data["found"])
         self.assertIn("draw_text", data["suggestions"])
 
-    def test_angelscript_lookup_returns_source(self):
+    def test_angelscript_lookup_is_unsupported(self):
         result = subprocess.run(
             [sys.executable, str(API_LOOKUP), "register_callback", "--lang", "angelscript", "--json"],
             capture_output=True,
             text=True,
         )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        data = json.loads(result.stdout)
-        self.assertTrue(data["found"])
-        self.assertTrue(data["signatures"])
-
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unsupported", result.stderr.lower() + result.stdout.lower())
     def test_enma_language_addon_lookup_returns_source(self):
         result = subprocess.run(
             [sys.executable, str(API_LOOKUP), "json_object", "--lang", "enma", "--json"],

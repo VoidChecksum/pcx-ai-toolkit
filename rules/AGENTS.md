@@ -19,7 +19,6 @@ Analyzes game binaries to find data structures, pointers, and function signature
 
 ## script-writer
 
-Writes Enma (.em) and AngelScript (.as) scripts for the Perception.cx platform.
 
 ### Responsibilities
 - Read the relevant API doc from `docs/` before writing any code

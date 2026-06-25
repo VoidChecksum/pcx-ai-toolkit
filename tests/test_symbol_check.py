@@ -107,24 +107,22 @@ int64 main() {
         finally:
             path.unlink(missing_ok=True)
 
-    def test_angelscript_rejects_enma_lifecycle(self):
+    def test_angelscript_files_are_unsupported(self):
         code = """
 int main() {
-    register_routine(cast<int64>(on_render), 0);
+    register_callback(on_tick, 16, 0);
     return 1;
 }
 
-void on_render(int data) {
-    println("wrong language");
-}
+void on_tick(int id, int data_index) {}
 """
-        path = Path("/tmp/pcx_wrong_language_as_test.as")
+        path = Path("/tmp/pcx_unsupported_as_test.as")
         path.write_text(code, encoding="utf-8")
         try:
             rc, out, err = _run(str(path))
-            self.assertEqual(rc, 1, f"AS using Enma lifecycle should fail:\n{out}\n{err}")
-            self.assertIn("wrong_language_symbol", out)
-            self.assertIn("register_routine", out)
+            self.assertEqual(rc, 1, f".as should be unsupported:\n{out}\n{err}")
+            self.assertIn("unsupported", out.lower() + err.lower())
+            self.assertIn("Enma", out + err)
         finally:
             path.unlink(missing_ok=True)
 

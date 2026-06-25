@@ -12,7 +12,7 @@ Usage:
     pcx symbol-check <file>   # catch hallucinated API names / missing imports
     pcx api <symbol>          # source-backed API lookup / typo suggestions
     pcx check-answer <file.md> # validate code blocks in an LLM answer
-    pcx create [options]  # guided Enma/AngelScript project scaffold
+    pcx create [options]  # guided Enma project scaffold
     pcx build-api-index       # regenerate knowledge/pcx-api-index.json
     pcx verify <file>         # lint + symbol-check + LSP diagnostics (when built)
     pcx verify-project <dir>  # project-wide lint + symbol + hygiene verification
@@ -143,10 +143,6 @@ def cmd_doctor() -> int:
     checks.append(("enma-lsp built (server.js exists)", enma_lsp.exists(),
                    "Run: pcx setup  (or: cd lsp/enma-lsp && npm install && npm run compile)"))
 
-    angel_lsp = REPO_ROOT / "lsp" / "angel-lsp-pcx" / "server" / "out" / "server.js"
-    checks.append(("angel-lsp-pcx built (server.js exists)", angel_lsp.exists(),
-                   "Run: pcx setup  (or: cd lsp/angel-lsp-pcx && npm install && npm run compile)"))
-
     local_skills = REPO_ROOT / ".claude" / "skills"
     installed_skills = Path.home() / ".claude" / "skills"
     all_skills_synced = installed_skills.is_dir()
@@ -266,11 +262,11 @@ def _choose(prompt: str, choices: list[str], default: str) -> str:
 
 
 def cmd_create(args: list[str]) -> int:
-    """Create an Enma or AngelScript project scaffold."""
-    ap = argparse.ArgumentParser(description="Create a PCX Enma/AngelScript project scaffold")
+    """Create an Enma project scaffold."""
+    ap = argparse.ArgumentParser(description="Create a PCX Enma project scaffold")
     ap.add_argument("--wizard", action="store_true", help="prompt interactively for missing values")
     ap.add_argument("--name", default="", help="project name")
-    ap.add_argument("--language", "--lang", default="", help="enma or angelscript")
+    ap.add_argument("--language", "--lang", default="", help="enma (default)")
     ap.add_argument("--kind", default="", help="template kind: full, cheat, overlay, aimbot, minimap, hello")
     ap.add_argument("--target", default="game.exe", help="target process name to substitute into templates")
     ap.add_argument("--engine", default="generic", help="engine profile label, e.g. source2, unreal, re-engine")
@@ -299,7 +295,7 @@ def cmd_create(args: list[str]) -> int:
             if not name:
                 name = input("Project name [pcx-project]: ").strip() or "pcx-project"
             if not language:
-                language = _choose("Language", ["enma", "angelscript"], "enma")
+                language = _choose("Language", ["enma"], "enma")
             if not kind:
                 choices = [item["kind"] for item in available_templates(language)]
                 kind = _choose("Template kind", choices, choices[0])
@@ -337,10 +333,10 @@ def cmd_create(args: list[str]) -> int:
 def cmd_verify(args: list[str]) -> int:
     """Run lint + symbol-check on one script.
 
-    Usage: pcx verify <file.em|.as>
+    Usage: pcx verify <file.em>
     """
     if not args or any(a in ("-h", "--help") for a in args):
-        print("Usage: pcx verify <file.em|.as>")
+        print("Usage: pcx verify <file.em>")
         return 0 if any(a in ("-h", "--help") for a in args) else 1
 
     target = args[0]
@@ -349,11 +345,11 @@ def cmd_verify(args: list[str]) -> int:
         print(f"Error: file not found: {target}", file=sys.stderr)
         return 2
 
-    print(f"Verifying {target}...")
     if path.suffix.lower() == ".as":
-        rc = run_python_tool("as-linter", ["--strict", target])
-    else:
-        rc = run_python_tool("script-linter", ["--strict", target])
+        print("Error: unsupported language: .as/AngelScript is deprecated; use Enma (.em)", file=sys.stderr)
+        return 1
+    print(f"Verifying {target}...")
+    rc = run_python_tool("script-linter", ["--strict", target])
     if rc != 0:
         return rc
 

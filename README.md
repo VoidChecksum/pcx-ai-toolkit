@@ -4,18 +4,18 @@
 
 # pcx-ai-toolkit
 
-### The Source-Grounded AI Toolkit for Perception.cx Enma + AngelScript
+### The Source-Grounded AI Toolkit for Perception.cx Enma
 
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Scope](https://img.shields.io/badge/Scope-Enma%20%2B%20AngelScript-f97316.svg)](#language-scope)
+[![Scope](https://img.shields.io/badge/Scope-Enma-f97316.svg)](#language-scope)
 [![Docs](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.docs&label=Docs&suffix=%20pages&color=22c55e)](#knowledge-surface)
 [![Doc Lines](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.doc_lines&label=Doc%20Lines&color=22c55e)](#knowledge-surface)
 [![MCP Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.mcp_tools&label=MCP%20Tools&color=0ea5e9)](#mcp-integration)
 [![AI Skills](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.skills&label=AI%20Skills&color=eab308)](#ai-agent-stack)
 [![Native Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.native_tools&label=Native%20Tools&color=64748b)](#native-re-tools)
 
-**Make LLMs write Perception.cx code from verified Enma and AngelScript sources, not guessed APIs.**
+**Make LLMs write Perception.cx code from verified Enma sources, not guessed APIs.**
 
 `llms.txt` context packs | source-backed API oracle | MCP tools | validators | native Rust RE tools | templates | AI skills | VS Code and Visual Studio packages
 
@@ -28,8 +28,7 @@
 
 ```text
 Writing Enma?        Load docs/llms-perception-enma.md, then run pcx symbol-check.
-Writing AngelScript? Load docs/llms-perception-angelscript.md, then run pcx verify.
-Need API proof?      Run pcx api <symbol> --lang enma|angelscript.
+Need API proof?      Run pcx api <symbol>.
 Need MCP context?    Run pcx-rs mcp, pcx-rs mcp-schema --json, or pcx-knowledge-mcp.
 Need RE artifacts?   Use re-importer.py exporters; keep evidence before shipping.
 ```
@@ -44,7 +43,7 @@ Unsupported or hallucinated surfaces live in [`knowledge/unsupported-symbols.jso
 
 `pcx-ai-toolkit` is an AI-facing knowledge and validation layer for Perception.cx scripting.
 
-It teaches agents the supported **Enma** and **AngelScript** APIs, routes them to the right docs, rejects wrong-language symbols, and validates generated code before it reaches PCX.
+It teaches agents the supported **Enma** APIs, routes them to source docs, rejects unsupported symbols, and validates generated code before it reaches PCX.
 
 </td>
 <td width="50%">
@@ -53,7 +52,7 @@ It teaches agents the supported **Enma** and **AngelScript** APIs, routes them t
 
 This is not a generic cheat dump, offset pack, malware toolkit, or unsupported language bundle.
 
-Lua and other historical surfaces are intentionally excluded from the AI contract. If a symbol is not proven by docs or the API index, the agent must not invent it.
+AngelScript, Lua, and other historical surfaces are intentionally excluded from the AI contract. If a symbol is not proven by docs or the API index, the agent must not invent it.
 
 </td>
 </tr>
@@ -66,8 +65,8 @@ Load this sequence before writing any Perception code:
 ```text
 1. docs/AI_AGENT_OPERATING_MANUAL.md
 2. docs/perception/llm-routing.md
-3. Choose Enma (.em) or AngelScript (.as)
-4. Load the matching llms-perception-* context pack
+3. Use Enma (`.em`)
+4. Load `docs/llms-perception-enma.md`
 5. Verify every API or language add-on symbol with pcx api or MCP api_lookup
 6. Validate code with pcx symbol-check, pcx verify, or MCP validate_answer
 ```
@@ -75,9 +74,8 @@ Load this sequence before writing any Perception code:
 | Must Load | Purpose |
 |---|---|
 | [docs/AI_AGENT_OPERATING_MANUAL.md](docs/AI_AGENT_OPERATING_MANUAL.md) | Minimal safe workflow for LLM and MCP agents |
-| [docs/perception/llm-routing.md](docs/perception/llm-routing.md) | Binding split between Enma and AngelScript |
+| [docs/perception/llm-routing.md](docs/perception/llm-routing.md) | Enma-only source-grounding workflow |
 | [docs/llms-perception-enma.md](docs/llms-perception-enma.md) | Single-file Enma + PCX context pack |
-| [docs/llms-perception-angelscript.md](docs/llms-perception-angelscript.md) | Single-file AngelScript + PCX context pack |
 | [knowledge/pcx-api-index.json](knowledge/pcx-api-index.json) | Machine-readable oracle for PCX host APIs and language add-ons |
 | [knowledge/perception-forum-insights.md](knowledge/perception-forum-insights.md) | Secondary forum/changelog context, never an API contract |
 
@@ -85,7 +83,7 @@ Recommended model instruction:
 
 ```text
 Before writing Perception code, load docs/AI_AGENT_OPERATING_MANUAL.md and docs/perception/llm-routing.md.
-Use Enma docs for .em files and AngelScript docs for .as files.
+Use Enma docs for `.em` files; `.as` is unsupported.
 Verify every Perception host API and language/add-on symbol with pcx api or MCP api_lookup.
 Validate final code or Markdown answers before returning them.
 If the docs/API index do not prove a symbol exists, say so instead of guessing.
@@ -93,20 +91,9 @@ If the docs/API index do not prove a symbol exists, say so instead of guessing.
 
 ## Language Scope
 
-The toolkit is intentionally scoped to **Perception-supported Enma and AngelScript**.
+The toolkit is intentionally scoped to **Perception-supported Enma (`.em`) only**. AngelScript (`.as`) is deprecated and rejected by validators/scaffolding.
 
-| Contract | Enma `.em` | AngelScript `.as` |
-|---|---|---|
-| Entry point | `int64 main()` | `int main()` |
-| Repeating work | `register_routine(cast<int64>(fn), data)` | `register_callback(fn, interval, data)` |
-| Callback shape | `void fn(int64 data)` | `void fn(int id, int data_index)` |
-| Logging | `println(...)` | `log(...)` |
-| Process handle | `proc_t` value, RAII | `proc_t@` handle, explicit cleanup patterns |
-| Containers | `T[]`, `map<K,V>` | `array<T>`, `dictionary` |
-| Render positions | `vec2(...)` values | Raw parameters unless the AS page says otherwise |
-| Render colors | `color(r,g,b,a)` values | Integer RGBA parameters unless the AS page says otherwise |
-
-If code crosses this table without source proof, treat it as wrong.
+Core Enma contract: `int64 main()`, `register_routine(cast<int64>(fn), data)`, `void fn(int64 data)`, `println(...)`, RAII `proc_t`, `T[]`, `map<K,V>`, `vec2(...)`, and `color(r,g,b,a)`.
 
 ## Quick Start
 
@@ -165,13 +152,12 @@ Use these checks before trusting generated code:
 
 ```bash
 # Exact source-backed lookup.
-pcx api draw_text --lang enma
-pcx api register_callback --lang angelscript
-pcx api json_object --lang enma
+pcx api draw_text
+pcx api json_object
 
 # Script validation.
 pcx symbol-check my_script.em
-pcx verify my_script.as
+pcx verify my_script.em
 pcx verify-project ./my-project
 
 # Markdown answer validation.
@@ -217,7 +203,6 @@ validate_project(path)
 | LLM entry index | [docs/llms.txt](docs/llms.txt) | Auto-fetch tools and first-touch sessions |
 | Full context pack | [docs/llms-full.txt](docs/llms-full.txt) | One preload for both supported languages |
 | Enma context pack | [docs/llms-perception-enma.md](docs/llms-perception-enma.md) | Enma-only work |
-| AngelScript context pack | [docs/llms-perception-angelscript.md](docs/llms-perception-angelscript.md) | AngelScript-only work |
 | Skills bundle | [docs/llms-skills.md](docs/llms-skills.md) | Agent behavior and workflow rules |
 | Knowledge bundle | [docs/llms-knowledge.md](docs/llms-knowledge.md) | Patterns, forum-derived context, RE references |
 | API oracle | [knowledge/pcx-api-index.json](knowledge/pcx-api-index.json) | Exact signatures with source URLs |
@@ -251,9 +236,9 @@ python3 tools/check-skill-contract.py
 pcx setup
 pcx update
 pcx doctor
-pcx api draw_text --lang enma
+pcx api draw_text
 pcx symbol-check file.em
-pcx verify file.as
+pcx verify file.em
 pcx check-answer answer.md
 pcx create --wizard
 pcx create --name "My ESP" --language enma --kind full --target game.exe --output ./my-esp
@@ -264,7 +249,6 @@ pcx verify-project ./my-esp --allow-placeholders --allow-unverified
 |---|---|
 | [tools/api-lookup.py](tools/api-lookup.py) | Exact API oracle |
 | [tools/symbol-check.py](tools/symbol-check.py) | Script-level source-grounded validation |
-| [tools/as-linter.py](tools/as-linter.py) | AngelScript PCX discipline linting |
 | [tools/verify-project.py](tools/verify-project.py) | Project-wide lint, symbol, hygiene, and evidence verification |
 | [tools/check-llm-answer.py](tools/check-llm-answer.py) | Markdown answer code-block validation |
 | [tools/hallucination-eval.py](tools/hallucination-eval.py) | Golden regression benchmark for hallucination gates |
@@ -319,15 +303,14 @@ Keep new binary-analysis tools in the same Cargo package under [tools/pe-parser]
 
 ## Gap Analysis And Feature Improvements
 
-The docs surface is strong, but the toolkit still has a few high-value gaps when measured against the current Perception Enma and AngelScript surfaces:
+The docs surface is strong, but the toolkit still has a few high-value gaps when measured against the current Perception Enma surface:
 
 | Gap | Why It Matters | Improvement |
 |---|---|---|
 | Native parity is still incomplete | `symbol-check`, `verify-project`, `check-answer`, `create`, `counts`, `build-provenance`, offline `check-drift`, and core MCP handlers now run in Rust, but docs/index generation and some compatibility commands remain Python-backed | Port `build-api-index` and package/update commands only where native speed or release reliability pays for the code |
 | MCP server parity is partial | `pcx-rs mcp` supports line-delimited JSON-RPC plus `initialize`, `ping`, `tools/list`, `tools/call`, and toolkit validation tools, but not Streamable HTTP | Add HTTP transport only if real MCP clients need direct `pcx-rs` attachment instead of stdio |
-| Enma and AngelScript language services are separate TypeScript packages | The unified release workflow now ships both LSPs and the Rust CLI together, but the language packages still maintain separate generated API/predefined data | Share generated API/predefined data across both LSP packages once that duplication starts causing release drift |
 | API drift checks still rely on live Python doc scraping | The upstream docs change frequently, and live CI checks can fail from network instability | Keep native `pcx-rs build-provenance` and offline `pcx-rs check-drift` as the CI-safe path; add explicit `--live` Rust fetching and API-index parsing only if the Python scripts keep causing release failures |
-| Binary-analysis tools report findings but do not produce every PCX-ready remediation artifact | Analysts still manually turn some RE findings into Enma offsets, signatures, and evidence logs | Expand direct exporters for `offsets.em`, `offsets.as`, `evidence.jsonl`, signature health reports, and patch-day migration summaries |
+| Binary-analysis tools report findings but do not produce every PCX-ready remediation artifact | Analysts still manually turn some RE findings into Enma offsets, signatures, and evidence logs | Expand direct exporters for `offsets.em`, `evidence.jsonl`, signature health reports, and patch-day migration summaries |
 | Scenario coverage can go deeper | Current fixtures cover the major API families plus Enma JSON/map/file/OOB usage, and red/green validator tests cover cast, pointer escape, permission, and map-key mistakes | Add more tiny scenarios only when they catch a documented compiler/runtime edge that current tests miss |
 | Safety scope is metadata-backed but not policy-enforced | Templates and MCP responses preserve authorized-use context, but tooling does not block all dual-use misuse patterns | Keep metadata in generated artifacts and add narrow denylist checks only for common hallucinated abuse helpers |
 
@@ -347,7 +330,6 @@ Core skills:
 | Skill | Use |
 |---|---|
 | `pcx-enma-discipline` | Enma syntax, lifecycle, imports, and binding discipline |
-| `pcx-angelscript-discipline` | AngelScript lifecycle and PCX binding discipline |
 | `game-cheat-script-master` | End-to-end script architecture patterns |
 | `game-cheat-guidelines` | Behavioral guardrails and anti-hallucination rules |
 | `pcx-knowledge-index` | Which docs and knowledge files to load |
@@ -385,7 +367,6 @@ Prebuilt VS Code extension packages are stored in the LSP submodules:
 | Package | Path | Language |
 |---|---|---|
 | Enma Language | `lsp/enma-lsp/enma-language-1.1.22.vsix` | `.em`, `.em.predefined`, `.emb` |
-| AngelScript for Perception | `lsp/angel-lsp-pcx/angel-lsp-0.4.1.vsix` | `.as`, `.as.predefined` |
 
 Build locally:
 
@@ -401,17 +382,12 @@ npm install
 npm run compile
 npm run package
 
-cd ../angel-lsp-pcx
-npm install
-npm run compile
-npx vsce package
 ```
 
 Visual Studio packages live under [visualstudio/](visualstudio/). They require Windows, MSBuild, and the Visual Studio extension development workload.
 
 ```powershell
 msbuild visualstudio\EnmaVS\EnmaVS.csproj /p:Configuration=Release /restore
-msbuild visualstudio\AngelScriptVS\AngelScriptVS.csproj /p:Configuration=Release /restore
 ```
 
 ## Templates
@@ -420,9 +396,7 @@ msbuild visualstudio\AngelScriptVS\AngelScriptVS.csproj /p:Configuration=Release
 |---|---|---|
 | `hello-world` | Enma | Minimal lifecycle sanity check |
 | `cheat-skeleton-em` | Enma | Modular ESP, aim, menu, radar, triggerbot scaffold |
-| `cheat-skeleton-as` | AngelScript | Equivalent AS scaffold |
 | `full-project` | Enma | Multi-file Enma project layout |
-| `full-project-as` | AngelScript | Multi-file AS project layout |
 | `overlay-basic`, `minimap`, `aimbot-skeleton` | Enma | Focused examples |
 
 Create one:
@@ -430,7 +404,6 @@ Create one:
 ```bash
 pcx create --wizard
 pcx create --name "PCX Enma Script" --language enma --kind cheat --target game.exe --output ./pcx-enma-script
-pcx create --name "PCX AS Script" --language angelscript --kind cheat --target game.exe --output ./pcx-as-script
 pcx verify-project ./pcx-enma-script --allow-placeholders --allow-unverified
 ```
 
@@ -439,11 +412,10 @@ pcx verify-project ./pcx-enma-script --allow-placeholders --allow-unverified
 ```text
 pcx-ai-toolkit/
 ├── docs/                  Generated LLM bundles + local docs mirror
-├── docs/perception/       Perception Enma and AngelScript API docs
+├── docs/perception/       Perception Enma API docs
 ├── docs/enma/             Enma language and SDK references
-├── docs/angelscript-lang/ AngelScript core language manual
 ├── knowledge/             API index, patterns, forum insights, RE references
-├── templates/             Enma and AngelScript scaffolds
+├── templates/             Enma scaffolds
 ├── tools/                 CLI, validators, builders, RE helpers
 ├── tools/pe-parser/       Rust-native parser, signature, diff, and offset tools
 ├── evals/                 Hallucination regression corpus
@@ -451,7 +423,7 @@ pcx-ai-toolkit/
 ├── mcp/                   Knowledge MCP and Perception MCP setup
 ├── rules/                 Drop-in agent instruction files
 ├── .claude/skills/        Agent skills for PCX work
-├── lsp/                   Enma and AngelScript VS Code extension submodules
+├── lsp/                   Enma VS Code extension submodule
 └── visualstudio/          Visual Studio 2022 extension projects
 ```
 

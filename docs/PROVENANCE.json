@@ -1,13 +1,8 @@
 {
-  "count": 131,
-  "drift_checkable": 89,
+  "count": 81,
+  "drift_checkable": 67,
   "files": {
     "docs/AI_AGENT_OPERATING_MANUAL.md": {
-      "drift_check": false,
-      "source": "local",
-      "url": null
-    },
-    "docs/CROSS_LANGUAGE.md": {
       "drift_check": false,
       "source": "local",
       "url": null
@@ -16,131 +11,6 @@
       "drift_check": false,
       "source": "local",
       "url": null
-    },
-    "docs/angelscript-lang/addon-array.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_array.html"
-    },
-    "docs/angelscript-lang/addon-dictionary.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_dict.html"
-    },
-    "docs/angelscript-lang/addon-math.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_math.html"
-    },
-    "docs/angelscript-lang/addon-strings.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon_std_string.html"
-    },
-    "docs/angelscript-lang/addons-overview.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_addon.html"
-    },
-    "docs/angelscript-lang/arrays.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_arrays.html"
-    },
-    "docs/angelscript-lang/coroutines.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_adv_coroutine.html"
-    },
-    "docs/angelscript-lang/datatypes.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes.html"
-    },
-    "docs/angelscript-lang/delegate.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_funcptr.html"
-    },
-    "docs/angelscript-lang/dictionary.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_datatypes_dictionary.html"
-    },
-    "docs/angelscript-lang/enums.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_enums.html"
-    },
-    "docs/angelscript-lang/expressions.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_expressions.html"
-    },
-    "docs/angelscript-lang/funcdef.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_funcdef.html"
-    },
-    "docs/angelscript-lang/functions.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_func.html"
-    },
-    "docs/angelscript-lang/generics.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_generic.html"
-    },
-    "docs/angelscript-lang/handles.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_handle.html"
-    },
-    "docs/angelscript-lang/inheritance.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_inheritance.html"
-    },
-    "docs/angelscript-lang/license.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_license.html"
-    },
-    "docs/angelscript-lang/namespaces.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_namespace.html"
-    },
-    "docs/angelscript-lang/overview.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_overview.html"
-    },
-    "docs/angelscript-lang/script-class-props.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class_prop.html"
-    },
-    "docs/angelscript-lang/script-class.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_class.html"
-    },
-    "docs/angelscript-lang/statements.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_script_statements.html"
-    },
-    "docs/angelscript-lang/strings.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_strings.html"
-    },
-    "docs/angelscript-lang/variables.md": {
-      "drift_check": false,
-      "source": "angelcode",
-      "url": "https://www.angelcode.com/angelscript/sdk/docs/manual/doc_global_variable.html"
     },
     "docs/distribution-checklist.md": {
       "drift_check": false,
@@ -412,126 +282,6 @@
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/perception-analyzer.md"
     },
-    "docs/perception/angelscript/atomic-types.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/atomic-types.md"
-    },
-    "docs/perception/angelscript/bit-reinterpret-helpers.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/bit-reinterpret-helpers.md"
-    },
-    "docs/perception/angelscript/cs2-extended-api.md": {
-      "drift_check": false,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/cs2-extended-api.md"
-    },
-    "docs/perception/angelscript/custom-draw-api.md": {
-      "drift_check": false,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/custom-draw-api.md"
-    },
-    "docs/perception/angelscript/engine-specific-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/engine-specific-api.md"
-    },
-    "docs/perception/angelscript/engine.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/engine.md"
-    },
-    "docs/perception/angelscript/extended-math-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/extended-math-api.md"
-    },
-    "docs/perception/angelscript/file-system.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/file-system.md"
-    },
-    "docs/perception/angelscript/gui-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/gui-api.md"
-    },
-    "docs/perception/angelscript/input-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/input-api.md"
-    },
-    "docs/perception/angelscript/intrinsics.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/intrinsics.md"
-    },
-    "docs/perception/angelscript/json-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/json-api.md"
-    },
-    "docs/perception/angelscript/life-cycle.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/life-cycle.md"
-    },
-    "docs/perception/angelscript/mutex-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/mutex-api.md"
-    },
-    "docs/perception/angelscript/net-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/net-api.md"
-    },
-    "docs/perception/angelscript/overview.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/overview.md"
-    },
-    "docs/perception/angelscript/proc-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/proc-api.md"
-    },
-    "docs/perception/angelscript/render-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/render-api.md"
-    },
-    "docs/perception/angelscript/sound-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/sound-api.md"
-    },
-    "docs/perception/angelscript/system-api-cpu-and-disassembly.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/system-api-cpu-and-disassembly.md"
-    },
-    "docs/perception/angelscript/unicorn.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/unicorn.md"
-    },
-    "docs/perception/angelscript/utilities.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/utilities.md"
-    },
-    "docs/perception/angelscript/win-api.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/win-api.md"
-    },
-    "docs/perception/angelscript/zydis-encoder.md": {
-      "drift_check": true,
-      "source": "gitbook",
-      "url": "https://docs.perception.cx/perception/angel-script/zydis-encoder.md"
-    },
     "docs/perception/changelogs.md": {
       "drift_check": false,
       "source": "local",
@@ -661,7 +411,6 @@
   "generated": "2026-06-25",
   "unmapped": [
     "docs/AI_AGENT_OPERATING_MANUAL.md",
-    "docs/CROSS_LANGUAGE.md",
     "docs/FAQ.md",
     "docs/distribution-checklist.md",
     "docs/enma/UPSTREAM-SUGGESTIONS.md",

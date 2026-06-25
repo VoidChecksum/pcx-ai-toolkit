@@ -19,8 +19,8 @@ The "indexed database all LLMs can query" half of the toolkit's LLM-knowledge st
 | `recommend_context(task, language="")` | Return the smallest useful doc/skill/tool load plan for a task before loading large bundles. |
 | `api_lookup(symbol, language="")` | Exact source-backed lookup for a function, method, or type. Returns signatures, language availability, official source URLs, and typo suggestions. |
 | `validate_code(code, language, source_path="")` | Check a code snippet against the PCX API index. Catches unknown functions, wrong-language symbols, unknown types, and missing Enma imports. Returns `{findings, ok}` with source-backed repair context. |
-| `validate_answer(answer, source_path="answer.md")` | Validate fenced Enma/AngelScript code blocks inside a generated Markdown answer before copying it into a project. |
-| `list_project_templates(language="")` | List supported Enma/AngelScript scaffold kinds. |
+| `validate_answer(answer, source_path="answer.md")` | Validate fenced Enma code blocks inside a generated Markdown answer before copying it into a project. |
+| `list_project_templates(language="")` | List supported Enma scaffold kinds. |
 | `generate_script_plan(task, language, kind, target_process, engine)` | Return docs, skills, commands, and scaffold choice without writing files. |
 | `scaffold_project(...)` | Dry-run by default; can write a checked-in template scaffold when `dry_run=false` and `output_dir` is supplied. |
 | `validate_project(path, allow_placeholders=false, allow_unverified=false)` | Run project-wide lint, symbol-check, hygiene, and evidence gates. |

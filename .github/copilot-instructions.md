@@ -1,3 +1,5 @@
+Start here: `docs/perception/llm-routing.md`.
+
 # GitHub Copilot Rules — Perception.cx Scripting
 
 Drop-in custom instructions for GitHub Copilot. Sibling to `rules/CLAUDE.md` (Claude Code), `rules/CURSOR.md` (Cursor), `rules/CLINE.md` (Cline). Copilot reads `.github/copilot-instructions.md` for repo-wide rules and a per-workspace custom-instructions field for IDE-side rules — both apply on every completion request, so this file is intentionally tight.
@@ -15,13 +17,11 @@ Most projects want option 1; option 2 is for adding personal preferences on top 
 
 ## Project Context
 
-- **Languages.** Enma (`.em`) and AngelScript (`.as`).
+- **Languages.** Enma (`.em`) only.
 - **Platform.** Perception.cx scripting runtime.
 - **API docs.** Live under `docs/`:
-  - `docs/perception/llm-routing.md` — load first; choose Enma vs AngelScript before using API names
   - `docs/enma/` — Enma language + standard library + SDK
   - `docs/perception/` — Enma APIs
-  - `docs/perception/angelscript/` — AngelScript APIs
 - **Read before writing API calls.** Copilot does not have these APIs in pretraining; it will hallucinate confident-looking names. Always grep / link the relevant doc file when an API is needed.
 
 ## Language Lock — Enforce One Language at a Time
@@ -33,21 +33,17 @@ The PCX platform hosts **three scripting languages** with **different APIs, type
 | Language | File ext | Entry point | Registration | Render/update hook | Cleanup |
 |---|---|---|---|---|---|
 | **Enma** | `.em` | `int64 main()` | `register_routine(cast<int64>(fn), data)` | `void on_render(int64 data)` | RAII (no `on_unload`) |
-| **AngelScript** | `.as` | `int main()` | `register_callback(@fn, every_ms, data_index)` | `void on_tick(int id, int data_index)` | `void on_unload()` with `unregister_callback()` + `deref()` |
 
 ### Language-specific render API shapes
 
 - **Enma:** struct-passing style: `draw_rect_filled(vec2(10,10), vec2(100,50), color(255,100,50,200), 4.0, 15)`
-- **AngelScript:** raw positional style: `draw_rect_filled(10.0f, 10.0f, 100.0f, 50.0f, 255, 100, 50, 200, 4.0f, RR_ALL)`
 
 ### Language-specific type system gotchas
 
 - **Enma:** `proc_t` is a value (RAII); arrays are `T[]`; maps are `map<K,V>`; floats default to `float64`; use `cast<T>(x)`.
-- **AngelScript:** `proc_t@` is a handle (ref-counted, needs `deref()`); arrays are `array<T>`; maps are `dictionary`; use `float` (32-bit) and `double` (64-bit); use `&out` parameters.
 
 ### Language-lock enforcement rule
 
-> **Before writing any API call, cite the doc file and line where you found it. If you cannot cite it, do not write it.** Cross-reference with `docs/CROSS_LANGUAGE.md` when porting between languages. If a user says "write this in AngelScript," do not output `register_routine`, `println`, `T[]`, or `cast<int64>` — those are Enma APIs.
 
 ---
 
@@ -107,7 +103,6 @@ project/
 - **Multi-file refactors.** Use Cursor / Cline / Aider for cross-file changes; Copilot's window is too narrow.
 - **API names from less-common APIs.** It will hallucinate `proc.read_mat3x4_fl32` because the more common APIs follow that shape. Verify every API name against `docs/`.
 - **Enforcing the 12 guidelines unprompted.** It does not scan its own completions for `int64`-on-an-address or missing `f` suffixes. You must.
-- **Choosing between Enma / AngelScript.** See `docs/perception/llm-routing.md` for the decision; Copilot will produce whichever language the file extension suggests, which is sometimes the wrong choice.
 - **MCP-aware work.** Copilot does not speak MCP. Binary-level RE (find_pattern, disassemble, struct_dump) happens in another tool; Copilot handles only the script-side editing.
 
 ## Workflow Notes

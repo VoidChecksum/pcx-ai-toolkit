@@ -11,21 +11,13 @@ echo "==> Packaging Enma VS Code extension"
   npm run package
 )
 
-echo "==> Packaging AngelScript VS Code extension"
-(
-  cd "$ROOT/lsp/angel-lsp-pcx"
-  npm install
-  npm run compile
-  npx vsce package
-)
 
 echo "==> VS Code packages"
-ls -lh "$ROOT"/lsp/enma-lsp/*.vsix "$ROOT"/lsp/angel-lsp-pcx/*.vsix
+ls -lh "$ROOT"/lsp/enma-lsp/*.vsix
 
 if command -v msbuild >/dev/null 2>&1; then
   echo "==> Packaging Visual Studio extensions with msbuild"
   msbuild "$ROOT/visualstudio/EnmaVS/EnmaVS.csproj" /p:Configuration=Release /restore
-  msbuild "$ROOT/visualstudio/AngelScriptVS/AngelScriptVS.csproj" /p:Configuration=Release /restore
 else
   echo "==> Skipping Visual Studio .vsix packages: msbuild/VSSDK is not available on this host."
   echo "    Build them on Windows with the Visual Studio extension development workload."

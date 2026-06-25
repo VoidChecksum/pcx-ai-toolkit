@@ -13,7 +13,6 @@ Verify your LSP servers are built:
 pcx doctor
 # or manually:
 ls lsp/enma-lsp/server/dist/server.js
-ls lsp/angel-lsp-pcx/server/out/server.js
 ```
 
 ---
@@ -58,10 +57,8 @@ return {
           default_config = {
             cmd = {
               "node",
-              pcx_toolkit .. "/lsp/angel-lsp-pcx/server/out/server.js",
               "--stdio",
             },
-            filetypes = { "angelscript" },
             root_dir = lspconfig.util.root_pattern(".git", "main.as", "*.as"),
             settings = {},
           },
@@ -190,7 +187,6 @@ args = ["/path/to/pcx-ai-toolkit/lsp/enma-lsp/server/dist/server.js", "--stdio"]
 
 [language-server.angelscript-lsp]
 command = "node"
-args = ["/path/to/pcx-ai-toolkit/lsp/angel-lsp-pcx/server/out/server.js", "--stdio"]
 ```
 
 Replace `/path/to/pcx-ai-toolkit` with your actual path (e.g. `/home/user/pcx-ai-toolkit` or `C:/Users/user/pcx-ai-toolkit`).

@@ -57,7 +57,7 @@ and prevent the most expensive mistakes.
 
 1. **Quick API surface:** `knowledge/pcx-api-cheatsheet.md` (15 KB)
 2. **The 12 guidelines:** `.claude/skills/game-cheat-guidelines/SKILL.md`
-3. **Language reference:** `docs/enma/llms-language.md` (Enma) or `docs/angelscript-lang/INDEX.md` (AS)
+3. **Language reference:** `docs/enma/llms-language.md`
 4. **Core APIs for almost every cheat:**
    - `docs/perception/proc-api.md` — process attach, memory reads, pattern scan
    - `docs/perception/render-api.md` — 2D overlay drawing
@@ -80,9 +80,7 @@ Use the official templates. Do **not** invent a layout.
 | Template | Use when |
 |----------|----------|
 | `templates/cheat-skeleton-em/` | Full Enma cheat project (ESP, aim, triggerbot, radar, menu) |
-| `templates/cheat-skeleton-as/` | Full AngelScript cheat project |
 | `templates/full-project/` | Minimal one-feature Enma scaffold |
-| `templates/full-project-as/` | Minimal one-feature AngelScript scaffold |
 | `templates/aimbot-skeleton.em` | Standalone aimbot math/reference |
 | `templates/overlay-basic.em` | Tiny overlay-only script |
 

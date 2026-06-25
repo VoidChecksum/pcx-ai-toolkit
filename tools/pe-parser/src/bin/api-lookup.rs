@@ -3,7 +3,7 @@ use pe_parser::api_index::{load_api_index, lookup_symbol, print_lookup_human};
 use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
-#[command(about = "Look up a Perception Enma/AngelScript API symbol")]
+#[command(about = "Look up a Perception Enma API symbol")]
 struct Args {
     symbol: String,
     #[arg(long)]
@@ -34,9 +34,8 @@ fn normalize_lang(lang: Option<&String>) -> Result<Option<&str>, String> {
     match lang.map(|s| s.as_str()) {
         None => Ok(None),
         Some("enma" | "em" | ".em") => Ok(Some("enma")),
-        Some("angelscript" | "angel-script" | "as" | ".as") => Ok(Some("angelscript")),
         Some(other) => Err(format!(
-            "unsupported --lang {other:?}; use enma or angelscript"
+            "unsupported --lang {other:?}; use enma"
         )),
     }
 }
@@ -64,7 +63,7 @@ fn main() {
             std::process::exit(2);
         }
     };
-    let result = lookup_symbol(&index, &args.symbol, lang);
+    let result = lookup_symbol(&index, &args.symbol, Some("enma"));
     if args.json {
         println!("{}", serde_json::to_string_pretty(&result).unwrap());
     } else {

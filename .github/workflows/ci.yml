@@ -161,8 +161,7 @@ jobs:
 
       - name: Dogfood — source-backed API oracle
         run: |
-          python3 tools/api-lookup.py draw_text --lang enma --json
-          python3 tools/api-lookup.py register_callback --lang angelscript --json
+          python3 tools/api-lookup.py draw_text --json
 
       - name: Dogfood — LLM answer code-block checker
         run: |
@@ -184,9 +183,7 @@ jobs:
           set -e
           tmp="$(mktemp -d)"
           python3 tools/pcx.py create --name "CI Enma" --language enma --kind full --target ci.exe --output "$tmp/ci-enma"
-          python3 tools/pcx.py create --name "CI AS" --language angelscript --kind full --target ci.exe --output "$tmp/ci-as"
           python3 tools/verify-project.py "$tmp/ci-enma" --allow-placeholders --allow-unverified
-          python3 tools/verify-project.py "$tmp/ci-as" --allow-placeholders --allow-unverified
           rm -rf "$tmp"
 
       - name: Dogfood — RE importer smoke
@@ -302,7 +299,3 @@ jobs:
       - name: Build enma-lsp
         working-directory: lsp/enma-lsp
         run: npm install && npm run compile && test -f server/dist/server.js
-
-      - name: Build angel-lsp-pcx
-        working-directory: lsp/angel-lsp-pcx
-        run: npm install && npm run compile && test -f server/out/server.js

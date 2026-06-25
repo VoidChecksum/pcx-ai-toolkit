@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Project-wide verifier for Perception Enma/AngelScript projects.
+"""Project-wide verifier for Perception Enma projects.
 
 Runs the same checks agents should run before handing code to PCX:
   * Enma linter for .em files
-  * AngelScript linter for .as files
   * source-backed symbol-check across the whole project
   * optional placeholder / UNVERIFIED hygiene gate
   * evidence-log-validator when an evidence/ directory exists
@@ -24,8 +23,8 @@ TOOL_DIR = Path(__file__).resolve().parent
 
 def collect_scripts(root: Path) -> list[Path]:
     if root.is_file():
-        return [root] if root.suffix.lower() in {".em", ".as"} else []
-    return sorted(p for p in root.rglob("*") if p.suffix.lower() in {".em", ".as"})
+        return [root] if root.suffix.lower() == ".em" else []
+    return sorted(p for p in root.rglob("*") if p.suffix.lower() == ".em")
 
 
 def run_tool(args: list[str]) -> dict[str, Any]:
@@ -67,16 +66,10 @@ def verify_project(root: Path, allow_placeholders: bool, allow_unverified: bool)
     target = root.resolve()
     scripts = collect_scripts(target)
     if not scripts:
-        return {"ok": False, "error": f"no .em or .as files found at {target}", "steps": []}
+        return {"ok": False, "error": f"no .em files found at {target}", "steps": []}
 
     steps: list[dict[str, Any]] = []
-    has_em = any(p.suffix.lower() == ".em" for p in scripts)
-    has_as = any(p.suffix.lower() == ".as" for p in scripts)
-
-    if has_em:
-        steps.append(run_tool([sys.executable, str(TOOL_DIR / "script-linter.py"), "--strict", str(target)]))
-    if has_as:
-        steps.append(run_tool([sys.executable, str(TOOL_DIR / "as-linter.py"), "--strict", str(target)]))
+    steps.append(run_tool([sys.executable, str(TOOL_DIR / "script-linter.py"), "--strict", str(target)]))
 
     steps.append(run_tool([sys.executable, str(TOOL_DIR / "symbol-check.py"), str(target)]))
 

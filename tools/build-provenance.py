@@ -4,21 +4,10 @@
 The supported docs/ surface is a scrape of three upstream sources:
 
   * enma-1.gitbook.io/enma/**           (the Enma language)
-  * docs.perception.cx/perception/**    (the Perception.cx host APIs)
-  * www.angelcode.com/angelscript/**     (the core AngelScript language manual)
+  * docs.perception.cx/perception/**    (the Perception.cx Enma host APIs)
 
 GitBook pages carry their own canonical URL in a header blockquote:
     > ... this page is available as [Markdown](<upstream-url>).
-The AngelScript scrape carries its upstream source in an HTML comment header:
-    <!-- Source: <upstream-url> ... -->
-
-This script extracts those URLs and writes docs/PROVENANCE.json, consumed by
-tools/check-doc-drift.py (weekly CI drift detection against the live upstream).
-Only GitBook-sourced files are drift-checkable 1:1 (the local files are markdown
-mirrors, modulo internal-link flattening). The AngelScript core-manual files
-are hand-converted from Doxygen HTML and are NOT byte-comparable to upstream;
-they are recorded for provenance but excluded from automated drift checking
-(marked "drift_check": false).
 
 Usage:
     python tools/build-provenance.py             # write docs/PROVENANCE.json

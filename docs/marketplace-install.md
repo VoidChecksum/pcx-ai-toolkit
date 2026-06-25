@@ -7,7 +7,6 @@ Two VS Code extensions are available for pcx-ai-toolkit:
 | Extension | Language | Purpose |
 |-----------|----------|---------| 
 | `enma-lsp` | Enma (`.em`) | Syntax highlighting, completions, hover docs, diagnostics |
-| `angel-lsp-pcx` | AngelScript (`.as`) | Syntax highlighting, completions, diagnostics |
 
 ### Install from VSIX (Current Method)
 
@@ -25,7 +24,6 @@ Two VS Code extensions are available for pcx-ai-toolkit:
 Once published, installation will be as simple as:
 ```
 ext install VoidChecksum.enma-lsp
-ext install VoidChecksum.angel-lsp-pcx
 ```
 
 Or search for `Perception.cx` in the VS Code Extensions panel.
@@ -44,7 +42,6 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 
 This builds the servers at:
 - Enma: `lsp/enma-lsp/server/dist/server.js`
-- AngelScript: `lsp/angel-lsp-pcx/server/out/server.js`
 
 Then configure your editor to use these paths (see your editor's setup guide in `mcp/`).
 
@@ -57,11 +54,10 @@ Native Visual Studio 2022 extensions (`.vsix`) are also provided for Windows dev
 | Extension | Language |
 |-----------|----------|
 | `PcxEnmaVS` | Enma (`.em`) |
-| `PcxAngelScriptVS` | AngelScript (`.as`) |
 
 ### Install
 
-1. Download `PcxEnmaVS-*.vsix` or `PcxAngelScriptVS-*.vsix` from [GitHub Releases](https://github.com/VoidChecksum/pcx-ai-toolkit/releases).
+1. Download `PcxEnmaVS-*.vsix` from [GitHub Releases](https://github.com/VoidChecksum/pcx-ai-toolkit/releases).
 2. **Close Visual Studio** before installing.
 3. Double-click the downloaded `.vsix` file to launch the VSIX Installer.
 4. Follow the prompts and restart Visual Studio.

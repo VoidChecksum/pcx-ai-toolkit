@@ -43,12 +43,10 @@ For Enma and AngelScript language intelligence in your editor:
 
 ```bash
 cd lsp/enma-lsp && npm install && npm run compile
-cd lsp/angel-lsp-pcx && npm install && npm run compile
 ```
 
 Configure your editor to use:
 - Enma LSP: `node lsp/enma-lsp/server/dist/server.js --stdio`
-- AngelScript LSP: `node lsp/angel-lsp-pcx/server/out/server.js --stdio`
 
 ## 5. Reference Docs
 

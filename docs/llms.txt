@@ -12,7 +12,6 @@ See `docs/INDEX.md` for the complete file index. The most useful single-file con
 ## Single-File Context Packs
 
 - [Enma Context Pack](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-perception-enma.md): Single-file context pack for AI tools writing Enma scripts. Bundles the language docs, platform APIs, behavioral skills, and quick-reference knowledge most relevant when working in Enma.
-- [AngelScript Context Pack](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-perception-angelscript.md): Single-file context pack for AI tools writing AngelScript scripts on Perception.cx. Bundles the AngelScript API surface, the discipline skill, and cross-references to the underlying 12 guidelines.
 - [Full Skills Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-skills.md): every AI skill in one file.
 - [Full Knowledge Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-knowledge.md): every knowledge reference in one file.
 - [Full Toolkit Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-full.txt): the entire toolkit concatenated.
@@ -22,7 +21,6 @@ See `docs/INDEX.md` for the complete file index. The most useful single-file con
 Top-level operating manuals, FAQ, and routing references for AI tools using this repo.
 
 - [AI Agent Operating Manual](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/AI_AGENT_OPERATING_MANUAL.md): This is the shortest safe workflow for any LLM or MCP-aware agent working with
-- [Enma vs AngelScript Binding Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/CROSS_LANGUAGE.md): Side-by-side mapping of common Perception.cx scripting patterns across the two
 - [Frequently Asked Questions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/FAQ.md): A quick reference for common issues and questions when using pcx-ai-toolkit.
 - [Distribution Checklist](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/distribution-checklist.md): Safe release/publishing path for pcx-ai-toolkit.
 - [Extension Installation Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/marketplace-install.md): Two VS Code extensions are available for pcx-ai-toolkit:
@@ -108,66 +106,6 @@ The Perception.cx host API surface as exposed to Enma.
 - [Win API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/win-api.md): All win natives are auto-registered into every loaded script.
 - [Zydis API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/zydis-api.md): All Zydis natives are auto-registered into every loaded script.
 
-## AngelScript APIs
-
-The Perception.cx host API surface as exposed to AngelScript.
-
-- [Atomic Types](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/atomic-types.md): This page documents the atomic integer types exposed to AngelScript. Use these for thread-safe counters, flags, and shared state across callbacks/threads without needing a mutex for simple operations.
-- [Bit Reinterpret Helpers](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/bit-reinterpret-helpers.md): The Bit Reinterpret Helpers allow scripts to inspect the raw bit-pattern of numeric values by converting them into a uint32.
-- [CS2 Extended API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/cs2-extended-api.md): This API is available in both the Uni API and the CS2 product.
-- [Custom Draw API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/custom-draw-api.md): The Custom Draw API gives scripts direct access to the D3D11 GPU pipeline — custom HLSL vertex, pixel, and compute shaders, vertex/index/constant/structured buffers, textures, render targets, depth bu
-- [Engine Specific API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/engine-specific-api.md): The following helpers are designed for Unreal Engine–based games (UE4 & UE5), including both float-precision and double-precision view structures.
-- [Engine](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/engine.md): A callback is a script function that executes repeatedly on a background thread created by the engine.\
-- [Extended Math API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/extended-math-api.md): The Extended Math API supplies:
-- [File System](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/file-system.md): Filesystem API that allows scripts to read, write, and manage files only inside the main scripting directory.
-- [GUI API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/gui-api.md): This page documents the AngelScript GUI API used to build and interact with the Perception.cx UI.
-- [Input API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/input-api.md): The Input API provides full access to mouse, keyboard, and scroll states from AngelScript.\
-- [Intrinsics](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/intrinsics.md): The Intrinsics API provides direct CPU intrinsic bindings for faithful reproduction of pointer decryption and obfuscation logic (bit rotations, bit scans, and a subset of SSE integer operations).
-- [Json API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/json-api.md): The AngelScript JSON API provides robust parsing and encoding of JSON directly into native AngelScript structures.\
-- [Life Cycle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/life-cycle.md): Every AngelScript module loaded by the PCX engine must define an entry function:
-- [Mutex API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/mutex-api.md): The Mutex API provides lightweight thread synchronization inside AngelScript.\
-- [Net API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/net-api.md): The Net API provides AngelScript access to:
-- [Overview](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/overview.md): This environment provides a lightweight scripting layer for UI, rendering, memory analysis and interaction in Perception.cx. It uses AngelScript with core add-ons and PCX-specific APIs enabled by defa
-- [Proc API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/proc-api.md): The Proc API lets AngelScript access and edit memory of external processes using a lightweight handle type proct.
-- [Render API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/render-api.md): const uint8 RRTOPLEFT
-- [Sound API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/sound-api.md): The Sound API lets AngelScript scripts load and play audio files with real-time volume and stereo panning control.
-- [System API (CPU & Disassembly)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/system-api-cpu-and-disassembly.md): Low-level CPU information, high-precision timing, and full multi-instruction x64 disassembly using Zydis.
-- [Unicorn](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/unicorn.md): The Unicorn API exposes a lightweight CPU + memory emulation layer to AngelScript.\
-- [Utilities](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/utilities.md): Low-level helpers for encoding/decoding binary data and text.
-- [Win API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/win-api.md): This API allows AngelScript scripts to interact with Windows:
-- [Zydis Encoder](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/angelscript/zydis-encoder.md): The Zydis Encoder API lets you assemble instructions into raw machine code at runtime. It’s designed for:
-
-## AngelScript Language (Core)
-
-The core AngelScript language manual scraped from angelcode.com (zlib/libpng license): datatypes, strings, arrays, expressions, statements, functions, classes, handles, generics, delegates, enums, namespaces, coroutines, add-ons.
-
-- [AngelScript core language reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/INDEX.md): This directory holds a curated scrape of the core AngelScript language reference from the
-- [array template object](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/addon-array.md): The array type is a template object that allow the scripts to declare arrays of any type. Since it is a generic class it is not the most performatic due to the need to determine characteristics at run
-- [dictionary object](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/addon-dictionary.md): The dictionary object maps string values to values or objects of other types.
-- [math functions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/addon-math.md): This add-on registers the math functions from the standard C runtime library with the script engine. Use RegisterScriptMath(asIScriptEngine) to perform the registration.
-- [string object](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/addon-strings.md): This add-on registers the std::string type as-is with AngelScript. This gives perfect compatibility with C++ functions that use std::string in parameters or as return type.
-- [Add-ons](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/addons-overview.md): This page gives a brief description of the add-ons that you'll find in the /sdk/addon/ folder.
-- [Custom array type](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/arrays.md): Like the string type, AngelScript doesn't have a built-in dynamic array type. Instead the application developers that wishes to allow dynamic arrays in the scripts should register this in the way that
-- [Co-routines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/coroutines.md): Co-routines is a way to allow multiple execution paths in parallel, but without the hazards of pre-emptive scheduling in multithreading where one thread can be suspended at any moment so another can r
-- [Data types](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/datatypes.md): Note that the host application may add types specific to that application, refer to the application's manual for more information.
-- [Function handles and delegates](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/delegate.md): A function handle is a data type that can be dynamically set to point to a global function that has a matching function signature as that defined by the variable declaration. Function handles are comm
-- [dictionary](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/dictionary.md): The dictionary stores key-value pairs, where the key is a string, and the value can be of any type. Key-value pairs can be added or removed dynamically, making the dictionary a good general purpose co
-- [Enums](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/enums.md): Enums are a convenient way of registering a family of integer constants that may be used throughout the script as named literals instead of numeric constants. Using enums often help improve the readab
-- [Expressions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/expressions.md): lvalue = rvalue;
-- [Funcdefs](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/funcdef.md): Funcdefs are used to define a function signature that will be used to store pointers to functions with matching signatures. With this a function pointer can be created, which is able to store dynamic 
-- [Functions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/functions.md): Functions are declared globally, and consists of a signature where the types of the arguments and the return value is defined, and a body where the implementation is declared.
-- [The generic calling convention](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/generics.md): The generic calling convention is available for those situations where the application's native calling convention doesn't work, for example on platforms where support for native calling conventions h
-- [Object handles](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/handles.md): An object handle is a type that can hold a reference to an object. With object handles it is possible to declare more than one variables that refer to the same physical object.
-- [Inheritance and polymorphism](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/inheritance.md): AngelScript supports single inheritance, where a derived class inherits the properties and methods of its base class. Multiple inheritance is not supported, but polymorphism is supported by implementi
-- [License](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/license.md): Copyright © 2003-2025 Andreas Jönsson
-- [Namespaces](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/namespaces.md): Namespaces can be used to organize large projects in logical units that may be easier to remember. When using namespaces it is also not necessary to worry about using names for entities that may exist
-- [Overview](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/overview.md): AngelScript is structured around an engine where the application should register the functions, properties, and even types, that the scripts will be able to use. The scripts are then compiled into mod
-- [Property accessors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/script-class-props.md): Many times when working with properties it is necessary to make sure specific logic is followed when accessing them. An example would be to always send a notification when a property is modified, or c
-- [Script classes](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/script-class.md): Script classes are declared globally and provides an easy way of grouping properties and methods into logical units. The syntax for classes is similar to C++ and Java.
-- [Statements](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/statements.md): int var = 0, var2 = 10;
-- [Custom string type](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/strings.md): Almost all applications have some need to manipulate text strings in one way or another. However most applications have very different needs, and also different ways of representing their string types
-- [Variables](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/angelscript-lang/variables.md): Global variables may be declared in the scripts, which will then be shared between all contexts accessing the script module.
-
 ## AI Skills
 
 Behavioral / discipline skills loaded automatically by AI tools (Claude Code / OMC).
@@ -175,13 +113,12 @@ Behavioral / discipline skills loaded automatically by AI tools (Claude Code / O
 - [AI Pair Programming — Driving Claude / Cursor / Cline / Aider Well on PCX Projects](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/ai-pair-programming/SKILL.md): The other skills cover what to write; this one covers how to drive the AI to write it well. The user-recurring frustration with AI on PCX projects is uniform: "the AI keeps inventing API names" / "it 
 - [Anti-Cheat Reverse Engineering — Kernel-Level Game Protection Analysis](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/anti-cheat-re/SKILL.md): Methodology for reverse engineering kernel-level anti-cheat systems: EAC (Easy Anti-Cheat), BattlEye, Vanguard, GameGuard, XIGNCODE3, and similar kernel drivers that protect game processes. Covers the
 - [Deobfuscation — Reversing Protected Binaries](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/deobfuscation/SKILL.md): Methodology for reversing binaries protected by commercial obfuscators (Themida/WinLicense, VMProtect, Code Virtualizer), compiler-level obfuscation (LLVM-obfuscator, Hikari, OLLVM), and custom protec
-- [Perception.cx Game-Cheat Script Development Guidelines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-guidelines/SKILL.md): Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma and AngelScript. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, trigg
+- [Perception.cx Game-Cheat Script Development Guidelines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-guidelines/SKILL.md): Behavioral rules and practical patterns for writing game-cheat scripts with Perception.cx in Enma. Derived from the Karpathy principles and rewritten for the domain: ESP, aimbot, triggerbot, radar, pa
 - [Game Cheat Script Master — Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-cheat-script-master/SKILL.md): This skill turns any LLM into a specialized Perception.cx cheat-script developer.
 - [Game Hacking & Scripting — Perception.cx / Enma / AngelScript](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/game-hacking-pcx/SKILL.md): Game hacking, game cheats, cheat scripts, ESP, aimbot, triggerbot, radar, memory reading/writing,
 - [Kernel Driver Analysis — Technical Patterns for AC Driver Reversing](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/kernel-analysis/SKILL.md): Technical patterns for reversing Windows kernel drivers: WDM/KMDF structure identification, IOCTL dispatch table extraction, kernel callback enumeration, integrity check routines, obfuscation layers, 
 - [Perception MCP Tool Routing — The Decision Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/mcp-tool-routing/SKILL.md): 59 tools across memory I/O, modules/threads/PE, memory regions, pattern/scanner/xrefs/signature, code analysis, symbol/function lookup, handles, system/environment, and the Enma scripting bridge. This
 - [Multi-Binary Targeting — One Script, N Game Versions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/multi-binary-targeting/SKILL.md): The pattern for supporting multiple binaries (game versions, architectures, storefront builds, beta channels) from one Enma codebase. A well-organized script can target v1.42.3 and v1.42.4, 32-bit and
-- [AngelScript Discipline for Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-angelscript-discipline/SKILL.md): Behavioral and syntactic rules for writing .as scripts on Perception.cx. The companion skill to game-cheat-guidelines (which is Enma-flavored): same domain, different language, different gotchas. Ange
 - [SKILL](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-bloat-audit/SKILL.md)
 - [SKILL](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-bloat-review/SKILL.md)
 - [PCX Coding Discipline — How to Write Scripts, Not What They Look Like](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-coding-discipline/SKILL.md): Workflow discipline for developing Enma (.em) and AngelScript (.as) scripts on Perception.cx. Derived from the four Karpathy principles — think before coding, simplicity first, surgical changes, goal-
@@ -234,7 +171,7 @@ Quick references for engines, anti-cheat architecture, patterns, methodology.
 Project-rules drop-ins for Claude Code / Cursor / Cline / Copilot / Aider / Zed / Continue.
 
 - [Agent Definitions for PCX Scripting Projects](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/AGENTS.md): Analyzes game binaries to find data structures, pointers, and function signatures.
-- [Perception.cx Scripting Project](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CLAUDE.md): Languages: Enma (.em), AngelScript (.as)
+- [Perception.cx Scripting Project](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CLAUDE.md): Languages: Enma (.em) only
 - [Cline Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CLINE.md): Drop-in custom instructions for Cline, the VS Code AI agent. Sibling to rules/CLAUDE.md (Claude Code drop-in) and rules/CURSOR.md (Cursor drop-in). Cline reads its custom instructions on every turn, s
 - [GitHub Copilot Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/COPILOT.md): Drop-in custom instructions for GitHub Copilot. Sibling to rules/CLAUDE.md (Claude Code), rules/CURSOR.md (Cursor), rules/CLINE.md (Cline). Copilot reads .github/copilot-instructions.md for repo-wide 
 - [Cursor Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CURSOR.md): Drop-in project rules for Cursor (the IDE), parallel to CLAUDE.md but tailored for Cursor's context system.
@@ -264,23 +201,6 @@ Starter scripts; copy and customize for your project.
 - [minimap](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/minimap.em)
 - [overlay-basic](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/overlay-basic.em)
 
-## AngelScript Templates
-
-Starter AngelScript scaffolds.
-
-- [aim](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/aim.as)
-- [esp](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/esp.as)
-- [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/globals.as)
-- [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/main.as)
-- [menu](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/menu.as)
-- [offsets](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/offsets.as)
-- [radar](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/radar.as)
-- [triggerbot](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/triggerbot.as)
-- [utils](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/cheat-skeleton-as/utils.as)
-- [feature](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project-as/feature.as)
-- [globals](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project-as/globals.as)
-- [main](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/templates/full-project-as/main.as)
-
 ## Signatures & RE Guides
 
 Engine-specific reversal guides (Source, UE, Unity IL2CPP, Source 2, anti-cheat, obfuscation).
@@ -305,7 +225,6 @@ Python-facing CLI tools for validation, generation, and RE; hot binary-analysis 
 - [Section names strongly associated with VMProtect](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/analyze-vmprotect.py): VMPSECTIONS = (b'.vmp0', b'.vmp1', b'.vmp2', b'.vmp3', b'.vmp4')
 - [── Detection tables ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/anti-debug-scanner.py): DIRECTCHECKIMPORTS = {
 - [api-lookup](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/api-lookup.py)
-- [as-linter](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/as-linter.py)
 - [.text classifier thresholds (block-level identical %, raw-size delta %).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/binary-diff-summary.py): RECOMPILEMINSAME = 70.0
 - [── Upstream endpoints ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-api-index.py): ENMAROOTURL = "https://docs.perception.cx/perception/enma/readme.md"
 - [Exclude only the generated bundles sitting directly under docs/.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-counts.py): if p.parent == (REPOROOT / "docs") and p.name.startswith("llms-"):

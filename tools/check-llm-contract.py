@@ -30,7 +30,6 @@ MUST_REFERENCE_ROUTING = [
 
 BUNDLES = [
     "docs/llms-perception-enma.md",
-    "docs/llms-perception-angelscript.md",
 ]
 
 
@@ -66,7 +65,7 @@ def main() -> int:
 
     llms = read("docs/llms.txt") if (REPO_ROOT / "docs/llms.txt").exists() else ""
     if "llms-perception-lua.md" in llms or "## Lua APIs" in llms or "## Lua Language" in llms:
-        errors.append("docs/llms.txt: public LLM index must be Enma + AngelScript only")
+        errors.append("docs/llms.txt: public LLM index must be Enma only")
 
     if errors:
         print("LLM contract check failed:")

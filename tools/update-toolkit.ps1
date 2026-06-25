@@ -120,7 +120,7 @@ if (-not $SkipLsp) {
     Write-Host ""
     Write-Host "Rebuilding LSP servers..."
 
-    foreach ($lsp in @("enma-lsp", "angel-lsp-pcx")) {
+    foreach ($lsp in @("enma-lsp")) {
         $lspDir = Join-Path $ToolkitDir "lsp\$lsp"
         if (Test-Path $lspDir) {
             Write-Host "  $lsp..."

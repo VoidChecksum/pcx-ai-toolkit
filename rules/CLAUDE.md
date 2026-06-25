@@ -1,15 +1,14 @@
 # Perception.cx Scripting Project
 
-Languages: Enma (.em), AngelScript (.as)
+Languages: Enma (.em) only
 
 ## Documentation
 
 Full API docs at `docs/` in this toolkit. **Read the relevant doc before writing any API call.**
 
-- Start here for every task: `docs/perception/llm-routing.md` — choose Enma vs AngelScript before using any API name.
+- Start here for every task: `docs/perception/llm-routing.md` — use Enma before any API name.
 - Enma language: `docs/enma/llms-language.md` (complete single-page reference)
 - PCX Enma APIs: `docs/perception/*.md` (proc, render, gui, input, cpu, zydis, unicorn, net, win, fs, sound, lifecycle, mcp)
-- PCX AngelScript APIs: `docs/perception/angelscript/*.md`
 - Quick references: `knowledge/enma-cheatsheet.md`, `knowledge/pcx-api-cheatsheet.md`
 - Common patterns: `knowledge/common-patterns.md`
 
@@ -64,12 +63,10 @@ project/
 4. **Goal-driven execution** — done = visible success criteria met on the live target, not "it compiles."
 ## Anti-Hallucination Rule
 
-Do not invent PCX, Enma, or AngelScript API names. Every function,
 method, type, and import must be traceable to one of these two upstream
 sources:
 
 1. `https://docs.perception.cx/perception/enma/overview` — Enma API surface
-2. `https://docs.perception.cx/perception/angel-script/overview` — AngelScript API surface
 
 Use the `.md` variant of any sub-page (e.g. `.../enma/proc-api.md`) for
 structured markdown. Prefer reading the live upstream doc over the local
@@ -86,4 +83,3 @@ See `knowledge/pcx-doc-roots.md` for the full sourcing policy.
 ## LSP Servers
 
 - Enma: `lsp/enma-lsp/server/dist/server.js` (node)
-- AngelScript: `lsp/angel-lsp-pcx/server/out/server.js` (node)

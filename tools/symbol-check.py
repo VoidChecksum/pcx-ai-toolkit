@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Symbol-level hallucination checker for Enma and AngelScript scripts.
+"""Symbol-level hallucination checker for Enma scripts.
 
 Loads knowledge/pcx-api-index.json (built by tools/build-api-index.py) and
 reports unknown function/method calls and unknown declared types. This catches
@@ -45,23 +45,21 @@ def detect_language(path: Path) -> str:
     if ext == ".em":
         return "enma"
     if ext == ".as":
-        return "angelscript"
+        raise ValueError("unsupported language: .as/AngelScript is deprecated; use Enma (.em)")
     text = path.read_text(encoding="utf-8", errors="ignore").strip()
     if text.startswith("import \"") or "register_routine" in text[:500]:
         return "enma"
-    if "register_callback" in text[:500] or "@" in text[:200]:
-        return "angelscript"
     return "enma"
 
 
 def collect_files(target: Path) -> list[Path]:
     if target.is_file():
         return [target]
-    return sorted(p for p in target.rglob("*") if p.suffix.lower() in {".em", ".as"})
+    return sorted(p for p in target.rglob("*") if p.suffix.lower() == ".em")
 
 
 def _project_functions(paths: list[Path]) -> dict[str, set[str]]:
-    funcs: dict[str, set[str]] = {"enma": set(), "angelscript": set()}
+    funcs: dict[str, set[str]] = {"enma": set()}
     for path in paths:
         language = detect_language(path)
         text = path.read_text(encoding="utf-8", errors="ignore")
@@ -112,7 +110,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("target", help="file or directory to check")
     ap.add_argument("--json", action="store_true", help="emit machine-readable JSON")
-    ap.add_argument("--lang", choices=["enma", "angelscript"], help="force language detection")
+    ap.add_argument("--lang", choices=["enma"], help="force Enma language detection")
     args = ap.parse_args()
 
     try:
@@ -130,8 +128,11 @@ def main() -> int:
     project_funcs = _project_functions(paths) if target.is_dir() and args.lang is None else {}
     all_findings: list[dict[str, Any]] = []
     for path in paths:
-        language = args.lang or detect_language(path)
-        all_findings.extend(check_file(path, index, language, project_funcs.get(language)))
+        try:
+            language = args.lang or detect_language(path)
+            all_findings.extend(check_file(path, index, language, project_funcs.get(language)))
+        except ValueError as exc:
+            all_findings.append({"file": str(path), "line": 0, "kind": "unsupported_language", "symbol": path.suffix, "message": str(exc)})
 
     print_findings(all_findings, args.json)
     return 1 if all_findings else 0

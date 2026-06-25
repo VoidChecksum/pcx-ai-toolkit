@@ -13,7 +13,7 @@ Counts:
   mcp_tools   length of the `tools` array in mcp/perception-mcp-config.json
   skills      count of .claude/skills/*/SKILL.md
   knowledge   count of knowledge/*.md
-  templates   count of supported starter scripts under templates/ (*.em, *.as + scaffold docs)
+  templates   count of supported starter scripts under templates/ (*.em + scaffold docs)
   tools       count of standalone tools/*.py + tools/*.sh (excludes lib/, pe-parser/)
   native_tools count of compiled Rust CLI entry points under tools/pe-parser/src/
   signatures  count of signature files under signatures/**/*.md
@@ -82,7 +82,7 @@ def build() -> dict:
         if p.name != "pcx-cross-language-bridge.md"
     ]
     templates = sorted((REPO_ROOT / "templates").rglob("*"))
-    templates = [p for p in templates if p.is_file() and p.suffix in {".em", ".as", ".md"} and p.name != "README.md"]
+    templates = [p for p in templates if p.is_file() and p.suffix in {".em", ".md"} and p.name != "README.md"]
     tools = [p for p in (REPO_ROOT / "tools").iterdir() if p.is_file() and (p.suffix in {".py", ".sh"} or p.name == "pcx")]
     native_tool_dir = REPO_ROOT / "tools" / "pe-parser" / "src"
     native_tools = sorted((native_tool_dir / "bin").glob("*.rs"))

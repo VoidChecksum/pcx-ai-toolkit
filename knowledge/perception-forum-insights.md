@@ -51,7 +51,6 @@ context, identify likely stale docs, and decide which official source to verify.
   mesh loading, dynamic textures, and backbuffer capture.
 - 2026-03-14 added Sound API coverage for script use and corrected several
   memory-scan/VAD documentation mismatches. If a VAD or scan signature appears
-  suspicious, check `docs/perception/angelscript/` and `knowledge/pcx-api-index.json`.
 - 2026-02-12 added AngelScript GUI position/size helpers and clarified render
   callback ordering. UI overlap or ordering answers should check the current
   Render and GUI docs before assuming older behavior.
@@ -97,9 +96,6 @@ context, identify likely stale docs, and decide which official source to verify.
 
 - For Enma tasks: load `docs/perception/llm-routing.md`,
   `docs/llms-perception-enma.md`, `docs/perception/enma`, and the Enma skill.
-- For AngelScript Custom Draw, Sound, VAD, GUI, input, and window APIs: load
-  `docs/llms-perception-angelscript.md` plus the exact API page, then run
-  `pcx api <symbol> --lang angelscript`.
 - For forum/changelog/overlay/client questions: load this file after the
   official docs. Never let this file override exact symbol signatures.
 - For all code-bearing answers: finish with `pcx check-answer` or MCP

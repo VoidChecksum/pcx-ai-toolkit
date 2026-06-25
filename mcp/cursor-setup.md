@@ -40,6 +40,5 @@ Add to `.vscode/settings.json` (Cursor uses VS Code settings):
 ```json
 {
   "enma.server.path": "./lsp/enma-lsp/server/dist/server.js",
-  "angelscript.server.path": "./lsp/angel-lsp-pcx/server/out/server.js"
 }
 ```

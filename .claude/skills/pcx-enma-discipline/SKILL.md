@@ -517,4 +517,4 @@ int64 leaked = tex + 0x1000;              // don't do arithmetic on it
 
 **The 12 game-cheat-guidelines rules still apply** — this skill is the *Enma-flavored* version of those discipline rules. Address types are `uint64`, null-check every read, separate update from render, sigs over hardcodes, one feature per file, minimize writes, validate against the live binary. Read `skill://game-cheat-guidelines` for the full discipline.
 
-**Cross-references:** `skill://game-cheat-guidelines` (the 12 rules), `skill://game-hacking-pcx` (doc router), `skill://pcx-angelscript-discipline` (AS-specific gotchas, useful when porting), `docs/perception/readme.md` (registered modules and addons), `docs/perception/proc-api.md`, `docs/perception/render-api.md`, `docs/perception/lifecycle-and-routines.md`, `docs/perception/gui-api.md`.
+**Cross-references:** `skill://game-cheat-guidelines` (the 12 rules), `skill://game-hacking-pcx` (doc router), `docs/perception/readme.md` (registered modules and addons), `docs/perception/proc-api.md`, `docs/perception/render-api.md`, `docs/perception/lifecycle-and-routines.md`, `docs/perception/gui-api.md`.

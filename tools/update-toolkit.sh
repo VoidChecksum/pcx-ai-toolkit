@@ -133,7 +133,7 @@ if [ "$SKIP_LSP" -eq 0 ]; then
     echo ""
     echo "Rebuilding LSP servers..."
 
-    for lsp in enma-lsp angel-lsp-pcx; do
+    for lsp in enma-lsp; do
         lsp_dir="$TOOLKIT_DIR/lsp/$lsp"
         if [ -d "$lsp_dir" ]; then
             echo "  $lsp..."

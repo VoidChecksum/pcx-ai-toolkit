@@ -125,45 +125,6 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 | **Lifecycle** | `docs/perception/lifecycle-and-routines.md` | 134 | main(), routines, unload, exceptions |
 | **MCP API** | `docs/perception/mcp-api.md` | 268 | AI agent JSON-RPC surface |
 
-### When writing core AngelScript (.as) code — read the language manual:
-
-| Doc | Path | Lines | Content |
-|-----|------|-------|---------|
-| **Language Index** | `docs/angelscript-lang/INDEX.md` | - | Overview of the core language, data types, statements, etc. |
-| Datatypes | `docs/angelscript-lang/datatypes.md` | 17 | Landing page for primitives, objects, and handles |
-| Handles | `docs/angelscript-lang/handles.md` | - | Core AngelScript `@` object handles and memory management |
-| Script Classes | `docs/angelscript-lang/script-class.md` | - | User-defined classes, members, and methods |
-| Expressions | `docs/angelscript-lang/expressions.md` | - | Math, logic, assignments, and operator precedence |
-| Statements | `docs/angelscript-lang/statements.md` | - | If, switch, loops, try/catch |
-
-### When writing PCX AngelScript (.as) code — read these:
-
-| API | Path | Lines |
-|-----|------|-------|
-| Overview | `docs/perception/angelscript/overview.md` | 68 |
-| Life Cycle | `docs/perception/angelscript/life-cycle.md` | 128 |
-| Engine | `docs/perception/angelscript/engine.md` | 178 |
-| Atomic Types | `docs/perception/angelscript/atomic-types.md` | 185 |
-| Proc API | `docs/perception/angelscript/proc-api.md` | 1156 |
-| Render API | `docs/perception/angelscript/render-api.md` | 1829 |
-| GUI API | `docs/perception/angelscript/gui-api.md` | 718 |
-| Input API | `docs/perception/angelscript/input-api.md` | 226 |
-| System/CPU/Disasm | `docs/perception/angelscript/system-api-cpu-and-disassembly.md` | 304 |
-| Net API | `docs/perception/angelscript/net-api.md` | 379 |
-| File System | `docs/perception/angelscript/file-system.md` | 298 |
-| Extended Math | `docs/perception/angelscript/extended-math-api.md` | 580 |
-| Win API | `docs/perception/angelscript/win-api.md` | 594 |
-| JSON API | `docs/perception/angelscript/json-api.md` | 479 |
-| Unicorn | `docs/perception/angelscript/unicorn.md` | 702 |
-| Zydis Encoder | `docs/perception/angelscript/zydis-encoder.md` | 703 |
-| Intrinsics | `docs/perception/angelscript/intrinsics.md` | 661 |
-| Mutex API | `docs/perception/angelscript/mutex-api.md` | 248 |
-| Utilities | `docs/perception/angelscript/utilities.md` | 607 |
-| Sound API | `docs/perception/angelscript/sound-api.md` | 250 |
-| Bit Reinterpret | `docs/perception/angelscript/bit-reinterpret-helpers.md` | 167 |
-| Engine Specific | `docs/perception/angelscript/engine-specific-api.md` | 195 |
-| CS2 Extended | `docs/perception/angelscript/cs2-extended-api.md` | 165 |
-
 ### PCX IDE & Extensions:
 
 | Doc | Path | Lines |
@@ -176,17 +137,16 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
 2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/overview` and read the relevant `.md` sub-page
-3. **Before writing AngelScript code**: start from `https://docs.perception.cx/perception/angel-script/overview` and read the relevant `.md` sub-page
+3. **If asked for AngelScript or `.as`**: stop — this toolkit is Enma-only
 4. **If unsure about a type, function, or parameter**: read the upstream doc, don't guess
 5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
-6. **For a starting project scaffold**: use `templates/cheat-skeleton-em/` or `templates/cheat-skeleton-as/`
+6. **For a starting project scaffold**: use `templates/cheat-skeleton-em/`
 
 ## Anti-Hallucination Rule
 
-You must NEVER invent a PCX, Enma, or AngelScript API name. Every function,
+You must NEVER invent a PCX or Enma API name. Every function,
 method, type, and import you use must come from one of:
   - `https://docs.perception.cx/perception/enma/overview` and its sub-pages,
-  - `https://docs.perception.cx/perception/angel-script/overview` and its sub-pages,
   - `knowledge/pcx-api-index.json` (via `pcx symbol-check` or the
     `mcp:pcx-knowledge` `validate_code` tool),
   - a user-defined function declared in the same script.
@@ -201,7 +161,6 @@ See `knowledge/pcx-doc-roots.md` for the full sourcing policy.
 ## Cheat-Script Scaffolds
 
 - **Enma skeleton**: `templates/cheat-skeleton-em/` — globals, offsets, utils, ESP, aim, triggerbot, radar, menu, main
-- **AngelScript skeleton**: `templates/cheat-skeleton-as/` — same layout in AngelScript
 - **Cookbook recipes**: `knowledge/cheat-script-cookbook.md` — pattern scan, pointer chain, W2S, ESP, aim smoothing, FOV, triggerbot, radar, config, unload cleanup
 
 ## Critical Enma Rules (from the docs)
@@ -224,7 +183,6 @@ See `knowledge/pcx-doc-roots.md` for the full sourcing policy.
 ## LSP Servers (built, ready to use)
 
 - **Enma LSP**: `lsp/enma-lsp/server/dist/server.js`
-- **AngelScript+PCX LSP**: `lsp/angel-lsp-pcx/server/out/server.js`
 
 ## RE Tools & Knowledge
 

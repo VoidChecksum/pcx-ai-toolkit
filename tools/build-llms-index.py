@@ -16,7 +16,7 @@ Generates four kinds of artifacts under docs/:
                              ingest one big file but don't speak the llms.txt
                              convention.
 
-  3. llms-perception-*.md  — Per-language context packs (Enma / AngelScript)
+  3. llms-perception-*.md  — Per-language context packs (Enma)
                              for tools like Cursor / Aider / Continue
                              that want to @-reference a single bundle scoped
                              to one scripting language.
@@ -56,13 +56,10 @@ CATEGORIES = [
     ('docs/*.md',                    'Agent Operating Docs',    'Top-level operating manuals, FAQ, and routing references for AI tools using this repo.'),
     ('docs/enma/**/*.md',              'Enma Language Docs',     'The native Perception.cx scripting language: syntax, addons, SDK, lifecycle.'),
     ('docs/perception/*.md',           'Enma Platform APIs',     'The Perception.cx host API surface as exposed to Enma.'),
-    ('docs/perception/angelscript/**/*.md', 'AngelScript APIs',  'The Perception.cx host API surface as exposed to AngelScript.'),
-    ('docs/angelscript-lang/**/*.md', 'AngelScript Language (Core)', 'The core AngelScript language manual scraped from angelcode.com (zlib/libpng license): datatypes, strings, arrays, expressions, statements, functions, classes, handles, generics, delegates, enums, namespaces, coroutines, add-ons.'),
     ('.claude/skills/*/SKILL.md',      'AI Skills',              'Behavioral / discipline skills loaded automatically by AI tools (Claude Code / OMC).'),
     ('knowledge/*.md',                 'Knowledge References',   'Quick references for engines, anti-cheat architecture, patterns, methodology.'),
     ('rules/*.md',                     'IDE Drop-Ins',           'Project-rules drop-ins for Claude Code / Cursor / Cline / Copilot / Aider / Zed / Continue.'),
     ('templates/**/*.em',              'Enma Templates',         'Starter scripts; copy and customize for your project.'),
-    ('templates/**/*.as',              'AngelScript Templates',  'Starter AngelScript scaffolds.'),
     ('signatures/*/*.md',              'Signatures & RE Guides', 'Engine-specific reversal guides (Source, UE, Unity IL2CPP, Source 2, anti-cheat, obfuscation).'),
     ('tools/*.py',                     'Standalone Tools',       'Python-facing CLI tools for validation, generation, and RE; hot binary-analysis paths proxy to Rust when built.'),
     ('tools/*.sh',                     'Build Scripts',          'Bash scripts for pre-ship hygiene checks and one-shot installers.'),
@@ -101,19 +98,6 @@ LANG_BUNDLES = {
             'knowledge/common-patterns.md',
             'knowledge/aimbot-math.md',
             'knowledge/offset-methodology.md',
-        ],
-    },
-    'angelscript': {
-        'title': 'AngelScript Context Pack',
-        'desc':  'Single-file context pack for AI tools writing AngelScript scripts on Perception.cx. Bundles the AngelScript API surface, the discipline skill, and cross-references to the underlying 12 guidelines.',
-        'globs': [
-            'docs/perception/llm-routing.md',
-            'docs/perception/angelscript/**/*.md',
-            'docs/angelscript-lang/**/*.md',
-            '.claude/skills/pcx-angelscript-discipline/SKILL.md',
-            '.claude/skills/game-cheat-guidelines/SKILL.md',
-            '.claude/skills/game-hacking-pcx/SKILL.md',
-            'knowledge/pcx-api-cheatsheet.md',
         ],
     },
 }
@@ -272,7 +256,7 @@ def build_llms_full() -> str:
     desc = ('Full text concatenation of every doc, skill, knowledge reference, IDE drop-in, '
             'signature guide, and template in the pcx-ai-toolkit. ~MB-sized; load into AI tools '
             'that accept a single bundle. For per-language context, use the smaller '
-            'llms-perception-{enma,angelscript}.md packs instead.')
+            'llms-perception-enma.md pack instead.')
     return build_concat_bundle('pcx-ai-toolkit — Full Bundle', desc, files)
 
 
@@ -312,7 +296,6 @@ GENERATORS = {
     'llms.txt':                       build_llms_txt,
     'llms-full.txt':                  build_llms_full,
     'llms-perception-enma.md':        lambda: build_lang_bundle('enma'),
-    'llms-perception-angelscript.md': lambda: build_lang_bundle('angelscript'),
     'llms-skills.md':                 build_skills_bundle,
     'llms-knowledge.md':              build_knowledge_bundle,
 }

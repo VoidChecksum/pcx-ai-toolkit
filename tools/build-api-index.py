@@ -4,9 +4,7 @@
 Authoritative roots:
   1. https://docs.perception.cx/perception/enma/overview  (Enma API surface)
      Markdown equivalent: https://docs.perception.cx/perception/enma/readme.md
-  2. https://docs.perception.cx/perception/angel-script/overview  (AngelScript API surface)
-     Markdown equivalent: https://docs.perception.cx/perception/angel-script/overview.md
-  3. Local mirrors of official Enma and AngelScript language/add-on references.
+  2. Local mirrors of official Enma language/add-on references.
 
 Only official/live PCX pages and checked-in official language mirrors contribute
 symbols. The docs.perception.cx `llms.txt` index is used solely to enumerate
@@ -42,13 +40,10 @@ from pcx_parser import (  # noqa: E402
 
 # ── Upstream endpoints ─────────────────────────────────────────────────────────
 ENMA_ROOT_URL = "https://docs.perception.cx/perception/enma/readme.md"
-AS_ROOT_URL = "https://docs.perception.cx/perception/angel-script/overview.md"
 LLMS_INDEX_URL = "https://docs.perception.cx/perception/llms.txt"
 ENMA_LANGUAGE_ROOT_URL = "https://enma-1.gitbook.io/enma/llms-language.md"
-AS_LANGUAGE_ROOT_URL = "https://www.angelcode.com/angelscript/sdk/docs/manual/"
 
 ENMA_PREFIX = "/perception/enma/"
-AS_PREFIX = "/perception/angel-script/"
 
 # Language primitives that are not API symbols but must not be flagged as unknown.
 ENMA_BUILTIN_TYPES = {
@@ -59,20 +54,9 @@ ENMA_BUILTIN_TYPES = {
     "json_value",
 }
 
-AS_BUILTIN_TYPES = {
-    "bool", "int", "uint", "int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64",
-    "float", "double", "string", "void", "any", "array", "dictionary", "grid",
-    "proc_t", "mutex_t", "ws_t", "subtab_t", "panel_t", "checkbox_t",
-    "slider_double_t", "slider_int_t", "input_t", "multi_select_t",
-    "single_select_t", "keybind_t", "button_t", "color_picker_t",
-    "vector2", "vector3", "vector4", "matrix4x4", "quaternion",
-    "funcdef",
-}
 
 LOCAL_LANGUAGE_DOCS = [
     (REPO_ROOT / "docs" / "enma" / "llms-language.md", "enma"),
-    (REPO_ROOT / "docs" / "angelscript-lang" / "addon-math.md", "angelscript"),
-    (REPO_ROOT / "docs" / "angelscript-lang" / "dictionary.md", "angelscript"),
 ]
 
 EXTRA_SOURCE_SIGNATURES = [
@@ -129,8 +113,6 @@ def _page_url(path: str) -> str:
 def _language_from_path(path: str) -> str:
     if path.startswith(ENMA_PREFIX):
         return "enma"
-    if path.startswith(AS_PREFIX):
-        return "angelscript"
     return "enma"
 
 
@@ -169,16 +151,6 @@ def _find_inline_signature_blocks(text: str, language: str) -> list[str]:
             continue
         snippets.append(sig.rstrip(";") + ";")
 
-    if language == "angelscript":
-        arrow_re = re.compile(
-            r'\b([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*(?:→|->)\s*'
-            r'([A-Za-z_][A-Za-z0-9_]*)'
-        )
-        for m in arrow_re.finditer(text.replace("\\_", "_")):
-            name, raw_args, ret = m.groups()
-            args = [a.strip().split()[0] for a in raw_args.split(",") if a.strip()]
-            typed_args = ", ".join(f"double {arg}" for arg in args)
-            snippets.append(f"{ret} {name}({typed_args});")
 
     return snippets
 
@@ -189,7 +161,7 @@ def _discover_sub_pages() -> list[str]:
     The root pages themselves are included.  llms.txt is used only for
     enumeration; every page content is fetched directly from its own URL.
     """
-    paths: set[str] = {ENMA_PREFIX + "readme.md", AS_PREFIX + "overview.md"}
+    paths: set[str] = {ENMA_PREFIX + "readme.md"}
 
     # The Enma root explicitly links to its sub-pages.
     enma_root = _fetch(ENMA_ROOT_URL)
@@ -198,15 +170,6 @@ def _discover_sub_pages() -> list[str]:
         if href.startswith(ENMA_PREFIX) and href.endswith(".md"):
             paths.add(href)
 
-    # The AngelScript overview does not link to sub-pages in markdown, so we use
-    # the site's structured index to discover them. Links in llms.txt may be
-    # absolute URLs; compare against the parsed path, not the raw href.
-    index = _fetch(LLMS_INDEX_URL)
-    for m in re.finditer(r'\[([^\]]*)\]\(([^)]+)\)', index):
-        href = urllib.parse.urldefrag(m.group(2).strip())[0]
-        path = urllib.parse.urlparse(href).path
-        if path.startswith((ENMA_PREFIX, AS_PREFIX)) and path.endswith(".md"):
-            paths.add(path)
 
     return sorted(paths)
 
@@ -241,7 +204,6 @@ def build_index() -> dict[str, object]:
     modules: dict[str, set[str]] = {}
 
     types.update(ENMA_BUILTIN_TYPES)
-    types.update(AS_BUILTIN_TYPES)
 
     page_paths = _discover_sub_pages()
     pages = _fetch_pages(page_paths)
@@ -269,7 +231,7 @@ def build_index() -> dict[str, object]:
                 modules.setdefault(mod, set())
 
         for lang_hint, body in _find_markdown_code_blocks(text):
-            block_language = lang_hint if lang_hint in {"enma", "angelscript"} else language
+            block_language = lang_hint if lang_hint == "enma" else language
             sigs = extract_api_signatures(body, block_language, source_url)
             for sig in sigs:
                 add_sig(sig)
@@ -286,7 +248,7 @@ def build_index() -> dict[str, object]:
                 modules.setdefault(mod, set())
 
         for lang_hint, body in _find_markdown_code_blocks(text):
-            block_language = lang_hint if lang_hint in {"enma", "angelscript"} else language
+            block_language = lang_hint if lang_hint == "enma" else language
             sigs = extract_api_signatures(body, block_language, source_url)
             for sig in sigs:
                 add_sig(sig)
@@ -327,7 +289,7 @@ def build_index() -> dict[str, object]:
     return {
         "version": 1,
         "generated_by": "tools/build-api-index.py",
-        "source_roots": [ENMA_ROOT_URL, AS_ROOT_URL, ENMA_LANGUAGE_ROOT_URL, AS_LANGUAGE_ROOT_URL],
+        "source_roots": [ENMA_ROOT_URL, ENMA_LANGUAGE_ROOT_URL],
         "functions": sig_list_to_json(functions),
         "methods": sig_list_to_json(methods),
         "types": sorted(types),

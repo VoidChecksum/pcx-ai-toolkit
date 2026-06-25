@@ -53,7 +53,7 @@ fn native_build_provenance_json_reports_counts() {
     );
     let json: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
     assert_eq!(json["source"], "rust");
-    assert!(json["count"].as_u64().unwrap() > 100);
+    assert!(json["count"].as_u64().unwrap() > 80);
     assert!(json["drift_checkable"].as_u64().unwrap() > 50);
     assert!(json["unmapped"].as_array().unwrap().len() > 0);
 }

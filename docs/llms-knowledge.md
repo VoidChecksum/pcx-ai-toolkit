@@ -850,9 +850,9 @@ It contains small, reusable recipes for the most common cheat-script tasks. Copy
 and adapt them inside your own projects; they follow the 12 guidelines and the
 cheat-script master rules.
 
-All examples are written in **Enma (.em)** because that is the default PCX
-language for this cookbook. Use the AngelScript context pack and templates when
-working in `.as`; do not translate examples into unsupported bindings.
+All examples are written in **Enma (`.em`)**. AngelScript (`.as`) is outside
+this toolkit's active support; port old `.as` snippets to Enma before using
+these recipes.
 
 ---
 
@@ -6453,7 +6453,6 @@ release carrying every API a script needs. Pure IDE/Analyzer/decompiler internal
 - `knowledge/pcx-api-cheatsheet.md` — the full current API surface this matrix versions.
 - `docs/perception/render-api.md`, `proc-api.md`, `gui-api.md`, `input-api.md`, `sound-api.md`, `net-api.md`, `win-api.md`, `filesystem-api.md`, `unicorn-api.md`, `zydis-api.md`, `cpu-api.md`, `custom-draw-api.md`, `extensions-api.md` — per-API signatures.
 - `docs/enma/llms-language.md`, `lang-pre-processor.md`, `lang-annotations.md`, `lang-advanced.md` — Enma language reference for the Language Version Quirks section.
-- `skill://pcx-angelscript-discipline` — AngelScript usage discipline.
 - `.claude/skills/game-cheat-guidelines/SKILL.md` — the 12 rules every script in this repo follows.
 
 ---
@@ -6513,7 +6512,6 @@ context, identify likely stale docs, and decide which official source to verify.
   mesh loading, dynamic textures, and backbuffer capture.
 - 2026-03-14 added Sound API coverage for script use and corrected several
   memory-scan/VAD documentation mismatches. If a VAD or scan signature appears
-  suspicious, check `docs/perception/angelscript/` and `knowledge/pcx-api-index.json`.
 - 2026-02-12 added AngelScript GUI position/size helpers and clarified render
   callback ordering. UI overlap or ordering answers should check the current
   Render and GUI docs before assuming older behavior.
@@ -6559,9 +6557,6 @@ context, identify likely stale docs, and decide which official source to verify.
 
 - For Enma tasks: load `docs/perception/llm-routing.md`,
   `docs/llms-perception-enma.md`, `docs/perception/enma`, and the Enma skill.
-- For AngelScript Custom Draw, Sound, VAD, GUI, input, and window APIs: load
-  `docs/llms-perception-angelscript.md` plus the exact API page, then run
-  `pcx api <symbol> --lang angelscript`.
 - For forum/changelog/overlay/client questions: load this file after the
   official docs. Never let this file override exact symbol signatures.
 - For all code-bearing answers: finish with `pcx check-answer` or MCP

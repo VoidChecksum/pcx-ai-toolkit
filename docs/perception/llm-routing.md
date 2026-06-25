@@ -1,14 +1,12 @@
 # Perception-First LLM Routing
 
 Use this page before writing any Perception.cx script in this toolkit. The repo
-is scoped to Enma and AngelScript only. The same Perception.cx product exposes
-similar capability through both languages, but the bindings are not
-interchangeable. A correct answer starts by selecting Enma or AngelScript, then
-reading the matching API page.
+is scoped to **Enma (`.em`) only**. AngelScript (`.as`) is deprecated and is not
+part of the AI contract.
 
 ## Load Order
 
-For `.em` Enma work:
+For Enma work:
 
 1. Read `docs/perception/readme.md` for the registered Enma surface and official
    conventions.
@@ -19,34 +17,25 @@ For `.em` Enma work:
 4. Read `knowledge/enma-cheatsheet.md` and
    `.claude/skills/pcx-enma-discipline/SKILL.md` for language gotchas.
 
-For `.as` AngelScript work:
+For `.as` or AngelScript requests, stop and say this toolkit only supports Enma.
 
-1. Read `docs/perception/angelscript/overview.md` for registered AS add-ons and
-   PCX add-ons.
-2. Read `docs/perception/angelscript/life-cycle.md` before writing `main()`,
-   `register_callback`, or unload logic.
-3. Read the relevant AngelScript API page under
-   `docs/perception/angelscript/*.md` before using any host function.
-4. Read `.claude/skills/pcx-angelscript-discipline/SKILL.md` for AS handle,
-   float, array, dictionary, and callback rules.
+## Non-Negotiable Enma Contract
 
-## Non-Negotiable Binding Split
+| Concern | Enma `.em` |
+|---|---|
+| Entry point | `int64 main()` |
+| Repeating work | `register_routine(cast<int64>(fn), data)` |
+| Callback shape | `void fn(int64 data)` |
+| Logging | `println(...)` |
+| Process ref | `proc_t` value, RAII |
+| Arrays | `T[]`, `.push()`, `.pop()` |
+| Maps | `map<K,V>` for string keys, `imap<V>` for integer keys |
+| Casts | `cast<T>(x)` |
+| Render positions | `vec2(...)` values |
+| Render colors | `color(r,g,b,a)` value |
 
-| Concern | Enma `.em` | AngelScript `.as` |
-|---|---|---|
-| Entry point | `int64 main()` | `int main()` |
-| Repeating work | `register_routine(cast<int64>(fn), data)` | `register_callback(fn, interval, data)` |
-| Callback shape | `void fn(int64 data)` | `void fn(int id, int data_index)` |
-| Logging | `println(...)` | `log(...)` |
-| Process ref | `proc_t` value, RAII | `proc_t@` handle, explicit `deref()` |
-| Arrays | `T[]`, `.push()`, `.pop()` | `array<T>`, `.insertLast()`, `.removeLast()` |
-| Maps | `map<K,V>` | `dictionary` |
-| Casts | `cast<T>(x)` | constructor/cast syntax from AS docs |
-| Render positions | `vec2(...)` values | raw float parameters unless page says otherwise |
-| Render colors | `color(r,g,b,a)` value | integer RGBA parameters unless page says otherwise |
-
-If code crosses a column boundary, treat it as wrong until the target language's
-API page proves otherwise.
+If a generated answer uses AngelScript lifecycle, handle, array, dictionary, or
+raw render-shape idioms, treat it as wrong.
 
 ## Perception Enma Facts From Upstream
 
@@ -66,39 +55,22 @@ The official Perception Enma overview states:
   back unchanged into draw, bind, or destroy calls. Do not inspect them.
 - The Perception Enma SDK is not public yet.
 
-## Perception AngelScript Facts From Upstream
-
-The official Perception AngelScript overview states:
-
-- PCX AngelScript is a lightweight scripting layer for UI, rendering, memory
-  analysis, and interaction in Perception.cx.
-- Core add-ons include `string`, `array`, `dictionary`, `math`, `any`, `grid`,
-  and script helper functions.
-- PCX add-ons include Unicorn, atomic types, render, input, host utilities,
-  proc, mutex, GUI, system, net, filesystem, extended math, engine-specific
-  helpers, JSON, utilities, Zydis encoder, intrinsics, sound, bit reinterpret
-  helpers, and the CS2 extended API.
-
 ## Answering Rules For Any LLM
 
 Before producing code:
 
-1. Name the target language from the file extension or user request.
-2. If the target language is not Enma or AngelScript, stop and say this toolkit
-   is scoped to Enma + AngelScript.
-3. Load that language's context pack or the load-order pages above.
+1. Use Enma unless the user asks for something outside toolkit scope.
+2. If the target language is not Enma, stop and say this toolkit is Enma-only.
+3. Load `docs/llms-perception-enma.md` or the load-order pages above.
 4. Verify every PCX function name and parameter shape against the matching API
-   page, `pcx api <symbol> --lang enma|angelscript`, or MCP
-   `api_lookup(symbol, language)`. Use the same lookup for Enma/AngelScript
-   language and add-on helpers before assuming a stdlib call exists.
+   page, `pcx api <symbol>`, or MCP `api_lookup(symbol, "enma")`.
 5. Prefer symbolic offsets and placeholders over version-specific magic values
    unless the user supplied verified offsets.
 6. Keep update/scanning work out of render callbacks.
-7. If a function name only exists in another language's column, do not use it.
-8. Before presenting final code, run `pcx symbol-check <file>` or MCP
-   `validate_code(code, language)` when available.
-9. Before copying a generated Markdown answer into a project, run
-   `pcx check-answer <answer.md>` to validate fenced Enma/AngelScript code.
+7. Before presenting final code, run `pcx symbol-check <file.em>` or MCP
+   `validate_code(code, "enma")` when available.
+8. Before copying a generated Markdown answer into a project, run
+   `pcx check-answer <answer.md>` to validate fenced Enma code.
 
 When uncertain, answer with the exact docs that must be checked instead of
 inventing a plausible API.

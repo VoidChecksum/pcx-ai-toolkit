@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Look up a Perception Enma/AngelScript API symbol from the generated index.
+"""Look up a Perception Enma API symbol from the generated index.
 
 This is the fast, deterministic oracle to use before trusting an LLM-proposed
 function, method, type, or signature.
@@ -68,7 +68,7 @@ def main() -> int:
 
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("symbol", help="function, method, or type name")
-    ap.add_argument("--lang", choices=["enma", "angelscript"], help="restrict lookup to one language")
+    ap.add_argument("--lang", default="", help="restrict lookup to Enma (default)")
     ap.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     args = ap.parse_args()
 
@@ -76,8 +76,12 @@ def main() -> int:
         print(f"ERROR: {INDEX_FILE} missing; run `python3 tools/build-api-index.py`", file=sys.stderr)
         return 2
 
+    language = (args.lang or "enma").lower()
+    if language not in {"enma", "em", ".em"}:
+        print(f"ERROR: unsupported --lang {args.lang!r}; use enma", file=sys.stderr)
+        return 2
     index = load_api_index(INDEX_FILE)
-    result = lookup_symbol(index, args.symbol, args.lang)
+    result = lookup_symbol(index, args.symbol, "enma")
     if args.json:
         print(json.dumps(result, indent=2))
     else:

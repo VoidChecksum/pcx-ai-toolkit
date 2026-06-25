@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pcx-knowledge-mcp"
 version = "1.0.0"
-description = "MCP server exposing the Enma and AngelScript pcx-ai-toolkit corpus for AI tools."
+description = "MCP server exposing the Enma pcx-ai-toolkit corpus for AI tools."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"

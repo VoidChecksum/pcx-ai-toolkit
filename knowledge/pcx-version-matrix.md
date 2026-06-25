@@ -371,5 +371,4 @@ release carrying every API a script needs. Pure IDE/Analyzer/decompiler internal
 - `knowledge/pcx-api-cheatsheet.md` — the full current API surface this matrix versions.
 - `docs/perception/render-api.md`, `proc-api.md`, `gui-api.md`, `input-api.md`, `sound-api.md`, `net-api.md`, `win-api.md`, `filesystem-api.md`, `unicorn-api.md`, `zydis-api.md`, `cpu-api.md`, `custom-draw-api.md`, `extensions-api.md` — per-API signatures.
 - `docs/enma/llms-language.md`, `lang-pre-processor.md`, `lang-annotations.md`, `lang-advanced.md` — Enma language reference for the Language Version Quirks section.
-- `skill://pcx-angelscript-discipline` — AngelScript usage discipline.
 - `.claude/skills/game-cheat-guidelines/SKILL.md` — the 12 rules every script in this repo follows.

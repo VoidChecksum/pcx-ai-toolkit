@@ -123,13 +123,10 @@ python3 "$TOOLKIT_DIR/tools/build-api-index.py" --check > /dev/null
 echo " 16. symbol-check on hello-world template..."
 python3 "$TOOLKIT_DIR/tools/symbol-check.py" "$TOOLKIT_DIR/templates/hello-world.em" > /dev/null
 
-echo " 17. as-linter..."
-python3 "$TOOLKIT_DIR/tools/as-linter.py" --strict "$TOOLKIT_DIR/templates/full-project-as" > /dev/null
-
-echo " 18. verify-project on templates..."
+echo " 17. verify-project on templates..."
 python3 "$TOOLKIT_DIR/tools/verify-project.py" "$TOOLKIT_DIR/templates" --allow-placeholders --allow-unverified > /dev/null
 
-echo " 19. pcx create scaffold..."
+echo " 18. pcx create scaffold..."
 rm -rf "$PROJECT_TMP"
 python3 "$TOOLKIT_DIR/tools/pcx.py" create --name Smoke --language enma --kind full --target smoke.exe --output "$PROJECT_TMP" > /dev/null
 python3 "$TOOLKIT_DIR/tools/verify-project.py" "$PROJECT_TMP" --allow-placeholders --allow-unverified > /dev/null

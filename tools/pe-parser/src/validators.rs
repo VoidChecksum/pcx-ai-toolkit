@@ -41,7 +41,7 @@ fn language_for(p: &Path) -> Option<&'static str> {
         .as_str()
     {
         "em" => Some("enma"),
-        "as" => Some("angelscript"),
+        "as" => Some("unsupported"),
         _ => None,
     }
 }
@@ -223,14 +223,10 @@ fn forbidden(lang: &str, n: &str) -> Option<&'static str> {
             Some("AngelScript lifecycle; use register_routine(cast<int64>(fn), data)")
         }
         ("enma", "log") => Some("AngelScript logging; use println(...) in Enma"),
-        ("angelscript", "register_routine") => {
-            Some("Enma lifecycle; use register_callback(fn, interval, data_index)")
-        }
-        ("angelscript", "println") => Some("Enma logging; use log(...) in AngelScript"),
         (_, "draw_esp") => {
             Some("Invented helper; use source-backed render APIs such as draw_text/draw_rect")
         }
-        (_, "lua_pcall") => Some("Lua is outside pcx-ai-toolkit scope; use Enma or AngelScript"),
+        (_, "lua_pcall") => Some("Lua is outside pcx-ai-toolkit scope; use Enma"),
         _ => None,
     }
 }
@@ -242,6 +238,16 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
     let mut findings = Vec::new();
     for p in scripts {
         let lang = language_for(&p).unwrap();
+        if lang == "unsupported" {
+            findings.push(ValidationFinding {
+                file: p.display().to_string(),
+                line: 0,
+                kind: "unsupported_language",
+                symbol: ".as".to_string(),
+                message: "unsupported language: .as/AngelScript is deprecated; use Enma (.em)".to_string(),
+            });
+            continue;
+        }
         let raw = fs::read_to_string(&p).map_err(|e| format!("{}: {e}", p.display()))?;
         let text = clean(&raw);
         let user = funcs(&text);

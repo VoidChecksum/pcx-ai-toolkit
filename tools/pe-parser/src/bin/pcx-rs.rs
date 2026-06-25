@@ -70,12 +70,12 @@ fn print_help(repo_root: &Path) {
     println!();
     println!("Native Rust commands:");
     println!("  version");
-    println!("  api <symbol> [--lang enma|angelscript] [--json]");
+    println!("  api <symbol> [--lang enma] [--json]");
     println!("  mcp-schema [--json]");
     println!("  symbol-check <path> [--json]");
     println!("  verify-project <path> [--json] [--allow-placeholders] [--allow-unverified]");
-    println!("  mcp overview|api_lookup <symbol> [--lang enma|angelscript]");
-    println!("  create --name <name> [--language enma|angelscript] [--kind hello] --output <dir>");
+    println!("  mcp overview|api_lookup <symbol> [--lang enma]");
+    println!("  create --name <name> [--language enma] [--kind hello] --output <dir>");
     println!("  check-answer <answer.md> [--json]");
     println!("  check-drift [--json] [--limit N]");
     println!("  build-provenance [--json] [--check]");
@@ -94,9 +94,8 @@ fn normalize_lang(lang: Option<&str>) -> Result<Option<&str>, String> {
     match lang {
         None => Ok(None),
         Some("enma" | "em" | ".em") => Ok(Some("enma")),
-        Some("angelscript" | "angel-script" | "as" | ".as") => Ok(Some("angelscript")),
         Some(other) => Err(format!(
-            "unsupported --lang {other:?}; use enma or angelscript"
+            "unsupported --lang {other:?}; use enma"
         )),
     }
 }
@@ -118,7 +117,7 @@ fn cmd_api(repo_root: &Path, args: &[String]) -> i32 {
                 lang = Some(args[i].as_str());
             }
             "-h" | "--help" => {
-                println!("Usage: pcx api <symbol> [--lang enma|angelscript] [--json]");
+                println!("Usage: pcx api <symbol> [--lang enma] [--json]");
                 return 0;
             }
             value if value.starts_with("--lang=") => {
@@ -472,11 +471,7 @@ fn param_str<'a>(params: &'a serde_json::Value, name: &str) -> Option<&'a str> {
 }
 
 fn temp_script_path(language: &str, label: &str) -> PathBuf {
-    let ext = if language == "angelscript" {
-        "as"
-    } else {
-        "em"
-    };
+    let ext = "em";
     std::env::temp_dir().join(format!("pcx_rs_{label}_{}.{}", std::process::id(), ext))
 }
 
@@ -532,7 +527,6 @@ fn validate_answer_value(repo_root: &Path, markdown: &str) -> Result<serde_json:
             } else {
                 let lang = match tag.trim().to_ascii_lowercase().as_str() {
                     "enma" | "em" => Some("enma"),
-                    "angelscript" | "angel-script" | "as" => Some("angelscript"),
                     _ => None,
                 };
                 if let Some(lang) = lang {
@@ -573,8 +567,7 @@ fn scaffold_project_value(
     params: &serde_json::Value,
 ) -> Result<serde_json::Value, String> {
     let name = param_str(params, "name").unwrap_or("PCX Project");
-    let language =
-        normalize_lang(param_str(params, "language").or(Some("enma")))?.unwrap_or("enma");
+    let language = normalize_lang(param_str(params, "language").or(Some("enma")))?.unwrap_or("enma");
     let kind = param_str(params, "kind").unwrap_or("hello");
     let output = param_str(params, "output")
         .or_else(|| param_str(params, "path"))
@@ -597,11 +590,7 @@ fn scaffold_project_value(
         ("enma", "hello" | "minimal") => repo_root.join("templates/hello-world.em"),
         _ => repo_root.join("templates/hello-world.em"),
     };
-    let ext = if language == "angelscript" {
-        "as"
-    } else {
-        "em"
-    };
+    let ext = "em";
     let entrypoint = format!("{slug}.{ext}");
     let target = out.join(&entrypoint);
     let text = fs::read_to_string(&src).map_err(|e| format!("{}: {e}", src.display()))?;
@@ -876,7 +865,7 @@ fn cmd_create(repo_root: &Path, args: &[String]) -> i32 {
             let field = key.trim_start_matches('-');
             params[field] = serde_json::Value::String(args[i].clone());
         } else if key == "-h" || key == "--help" {
-            println!("Usage: pcx create --name <name> [--language enma|angelscript] [--kind hello] --output <dir>");
+            println!("Usage: pcx create --name <name> [--language enma] [--kind hello] --output <dir>");
             return 0;
         } else if key.starts_with('-') {
             eprintln!("ERROR: unknown option {key}");

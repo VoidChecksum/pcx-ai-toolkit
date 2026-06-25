@@ -71,18 +71,14 @@ class ValidateCodeTest(unittest.TestCase):
         result = json.loads(validate_code(code, "enma"))
         self.assertTrue(result["ok"], result["findings"])
 
-    def test_catches_wrong_language_symbol(self):
-        code = 'int main(){ register_routine(cast<int64>(r),0); return 1; } void r(int id, int data_index){}'
+    def test_rejects_angelscript_mode(self):
+        code = 'int main(){ register_callback(on_tick, 16, 0); return 1; } void on_tick(int id, int data_index){}'
         result = json.loads(validate_code(code, "angelscript"))
-        self.assertFalse(result["ok"])
-        finding = next(f for f in result["findings"] if f["symbol"] == "register_routine")
-        self.assertEqual(finding["kind"], "wrong_language_symbol")
-        self.assertIn("signatures", finding)
-        self.assertTrue(any("source" in sig for sig in finding["signatures"]))
+        self.assertEqual(result["error"], "unsupported language: angelscript; use enma")
 
     def test_rejects_unsupported_lua_mode(self):
         result = json.loads(validate_code("function main() return 1 end", "lua"))
-        self.assertEqual(result["error"], "unsupported language: lua")
+        self.assertEqual(result["error"], "unsupported language: lua; use enma")
 
     def test_api_lookup_returns_source_backed_signature(self):
         result = json.loads(api_lookup("draw_text", "enma"))
@@ -130,11 +126,9 @@ void r(int64 d) { draw_texxt("hi"); }
         self.assertEqual(plan["language"], "enma")
         self.assertIn("pcx verify-project . --allow-placeholders --allow-unverified", plan["commands"])
 
-    def test_scaffold_project_dry_run_does_not_require_output_dir(self):
+    def test_scaffold_project_rejects_angelscript(self):
         result = json.loads(scaffold_project("Dry Run", "angelscript", "full"))
-        self.assertTrue(result["dry_run"])
-        self.assertEqual(result["language"], "angelscript")
-        self.assertIn("write_command", result)
+        self.assertEqual(result["error"], "unsupported language: angelscript; use enma")
 
     def test_suggest_imports_from_missing_enma_addon(self):
         result = json.loads(suggest_imports("int64 main(){ float64 x = atan2(1.0, 2.0); return 1; }", "enma"))

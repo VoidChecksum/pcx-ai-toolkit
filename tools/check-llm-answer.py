@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Validate Enma/AngelScript code blocks inside an LLM answer.
+"""Validate Enma code blocks inside an LLM answer.
 
 Use this on a Markdown transcript, draft response, or generated README before
 copying code into Perception. It extracts fenced code blocks tagged as enma,
-angelScript, em, or as and runs the source-grounded PCX validator.
+enma or em and runs the source-grounded PCX validator.
 
 Usage:
     python3 tools/check-llm-answer.py answer.md
@@ -41,7 +41,7 @@ def print_human(result: dict[str, Any]) -> None:
         print(f"ERROR: {result['error']}", file=sys.stderr)
         return
     if result["ok"]:
-        print(f"clean: checked {result['blocks_checked']} Enma/AngelScript code block(s)")
+        print(f"clean: checked {result['blocks_checked']} Enma code block(s)")
         return
     print(f"LLM answer has {len(result['findings'])} finding(s)")
     for finding in result["findings"]:

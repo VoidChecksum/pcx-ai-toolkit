@@ -182,7 +182,6 @@ def main() -> int:
 
     # 2. Build LSP servers
     build_lsp("enma-lsp", REPO_ROOT / "lsp" / "enma-lsp", "server/dist/server.js")
-    build_lsp("angel-lsp-pcx", REPO_ROOT / "lsp" / "angel-lsp-pcx", "server/out/server.js")
 
     # 3. Build Rust native tools
     build_rust_tools()
