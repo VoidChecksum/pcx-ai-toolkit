@@ -22,6 +22,7 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("twine check dist/*", text)
         self.assertIn("pypa/gh-action-pypi-publish@release/v1", text)
         self.assertIn("packages-dir: dist", text)
+        self.assertIn("skip-existing: true", text)
         self.assertNotIn("TWINE_PASSWORD", text)
         self.assertNotIn("password:", text)
 
