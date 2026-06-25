@@ -115,6 +115,8 @@ ergonomics, template parity, and tooling enhancement.
   native std::unordered_map<K, V> and std::unordered_set<T> supporting
   arbitrary scalar and struct keys.
 
+Documentation gap: the Maps and Templates docs should state this limit explicitly, including supported key types, unsupported nested-template field patterns, examples such as `map<int64, V>` that fail, and PCX-safe cache patterns using currently supported maps.
+
 ## 2. Byte-Wise Pointer Arithmetic (byte* / void*)
 
 * Issue: Pointer arithmetic in Enma is strictly typed (p + n scales by the
@@ -128,6 +130,8 @@ ergonomics, template parity, and tooling enhancement.
   that permits direct offset additions without scaling, or expose a compiler
   intrinsic for direct offset dereferencing (e.g., read_mem<T>(base, offset)).
 
+Documentation gap: the Pointers docs should include a reverse-engineering section that explains typed scaling, shows safe byte-offset traversal through host memory APIs or casts, and calls out integer-to-pointer assignments that will not compile.
+
 ## 3. Overloaded Function Templates
 
 * Issue: Overloaded function templates (selected by call arity) are not supported.
@@ -139,6 +143,8 @@ ergonomics, template parity, and tooling enhancement.
 * Recommendation: Implement template argument matching for overloaded function
   templates to bring closer parity with C++ template metaprogramming.
 
+Documentation gap: the Templates docs should include a "Known unsupported template patterns" section covering arity-selected overloads, recursive variadic-template base cases, examples that fail, and the simplest replacement patterns.
+
 ## 4. Character Packing & std::string Support
 
 * Issue: The implementation of std::string in the standard library is currently
@@ -149,6 +155,8 @@ ergonomics, template parity, and tooling enhancement.
 * Recommendation: Finalize char-packing to support std::string and allow
   script-level structs to mirror native C++ character arrays layout-wise.
 
+Documentation gap: the String, Types, or struct-layout docs should state the current string and `char` representation, whether script structs can layout-match native `char[N]`, and the safe way to read or write narrow C strings from process memory.
+
 ## 5. LSP Type Inference for Template Instantiation
 
 * Issue: Type diagnostics are resolved during the compiler's monomorphization
@@ -158,6 +166,8 @@ ergonomics, template parity, and tooling enhancement.
   within template definitions.
 * Recommendation: Enhance enma-lsp to parse template instantiations on-the-fly
   and provide inline diagnostics/autocomplete within specialized template scopes.
+
+Documentation gap: the LSP and IDE docs should distinguish live editor diagnostics from compile-time-only monomorphization diagnostics, and explain how to force template instantiation checks before relying on generic helper code.
 
 ---
 
@@ -17754,7 +17764,9 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 # Enma - Overview
 
-Enma is perception's proprietary full-module AOT and JIT-compiled scripting language. This site covers the APIs perception registers on top of Enma. For the language itself see [enma docs](https://enma-1.gitbook.io/enma).
+Enma is perception's proprietary full-module AOT and JIT-compiled scripting language. This site covers the APIs perception registers on top of Enma, not the language reference itself. For syntax, types, templates, pointers, modules, and SDK embedding, see the upstream [Enma docs](https://enma-1.gitbook.io/enma).
+
+Use this page as the Perception API map. Use the related platform docs below for tooling and extension boundaries.
 
 ## What's registered
 
@@ -17783,6 +17795,7 @@ Enma is perception's proprietary full-module AOT and JIT-compiled scripting lang
 
 * [Lifecycle and Routines](lifecycle-and-routines.md)
 * [Render](render-api.md)
+  * [Custom Draw](custom-draw-api.md) — D3D11 pipeline access: HLSL shaders, buffers, textures, render targets, depth buffers, primitive topology, and encrypted `int64` GPU handles.
 * [Proc](proc-api.md)
 * [CPU](cpu-api.md)
 * [Filesystem](filesystem-api.md)
@@ -17793,6 +17806,14 @@ Enma is perception's proprietary full-module AOT and JIT-compiled scripting lang
 * [Unicorn](unicorn-api.md)
 * [Net](net-api.md)
 * [GUI](gui-api.md)
+
+#### Related platform docs
+
+* [Extensions](extensions-api.md) — extension-only APIs and explicit exclusions from the Enma script host.
+* [Analyzer](analyzer.md) — integrated disassembly, decompilation, source reconstruction, hex view, scanning, and structure editing.
+* [Perception IDE](ide.md) — built-in editor and AI assistant setup.
+* [Changelogs](changelogs.md) — platform changelog archive; Enma language feature introduction dates are not fully versioned.
+* [llms.txt](https://docs.perception.cx/perception/llms.txt) — complete machine-readable page index.
 
 #### AI agent surface
 
@@ -17821,15 +17842,52 @@ int64 main() {
 
 See [Lifecycle and Routines](lifecycle-and-routines.md) for the entry point, return-value semantics, and how routines tick.
 
+## Before writing Perception Enma scripts
+
+Read these upstream Enma pages first if you are new to PCX Enma scripting:
+
+* [Basics](https://enma-1.gitbook.io/enma/language/basics), types, and casts.
+* [Functions](https://enma-1.gitbook.io/enma/language/functions).
+* [Modules and imports](https://enma-1.gitbook.io/enma/language/modules).
+* [Structs and classes](https://enma-1.gitbook.io/enma/language/structs-and-classes).
+* [Pointers](https://enma-1.gitbook.io/enma/language/pointers). Pointer arithmetic is typed: `p + n` scales by `sizeof(T)`, so use the Proc/CPU APIs for raw byte-offset memory workflows.
+* [Templates](https://enma-1.gitbook.io/enma/language/templates). Some C++-style patterns are unsupported; see this toolkit's [upstream suggestions](../enma/UPSTREAM-SUGGESTIONS.md) for known limits around nested template fields, overloaded function templates, packed strings, and LSP template diagnostics.
+* Addons commonly used by PCX scripts: [Core](https://enma-1.gitbook.io/enma/addons/core), [String](https://enma-1.gitbook.io/enma/addons/strings), [Arrays](https://enma-1.gitbook.io/enma/addons/arrays), [Maps](https://enma-1.gitbook.io/enma/addons/maps), [Math](https://enma-1.gitbook.io/enma/addons/math), [Vec](https://enma-1.gitbook.io/enma/addons/vec), [JSON](https://enma-1.gitbook.io/enma/addons/json), [Bits](https://enma-1.gitbook.io/enma/addons/bits), and [Time](https://enma-1.gitbook.io/enma/addons/time).
+
+Perception-side entry points live in [Lifecycle and Routines](lifecycle-and-routines.md).
+
 ## Conventions
 
 * **Colors and positions**: always wrap. `color(255, 255, 255, 255)`, `vec2(10.0, 20.0)`. Freshly constructed each frame is fine; Enma drops the temporaries at scope exit.
 * **Float32 literals**: `0.2f`, not `cast<float32>(0.2)`. Required for vertex buffers.
 * **Handles**: all `create_*` / `load_*` natives return an encrypted `int64`. Pass it back into draw / bind / destroy. Don't inspect.
 
+## Extension vs Enma script surface
+
+| Area | Enma scripts | Extensions |
+|------|--------------|------------|
+| Process memory | yes | no |
+| Script GUI | yes | no |
+| Render | yes | partial / extension-specific |
+| Input | yes | yes |
+| Unicorn | yes | no |
+| Callbacks and routines | yes | no |
+| Filesystem | yes | yes |
+| HTTP, clipboard, editor APIs | no | yes |
+
+See [Extensions](extensions-api.md) for the authoritative extension API boundary.
+
+## Tooling workflow
+
+1. Use [Analyzer](analyzer.md) to inspect the target process.
+2. Use [Perception IDE](ide.md) to write Enma.
+3. Use [Lifecycle and Routines](lifecycle-and-routines.md) to run script entry points.
+4. Use Proc, CPU, Zydis, Render, GUI, and Custom Draw APIs as needed.
+5. Use [MCP](mcp-api.md) for AI-agent automation.
+
 ## SDK
 
-Perception's Enma SDK is not public yet.
+Perception's Enma SDK is not public yet. Until it is published, treat upstream Enma SDK pages as language-runtime background only: they do not document Perception host registration, build/link steps, SDK headers/libraries, local test harness setup, package distribution, or whether `.emb` binaries can be compiled outside Perception and loaded by the platform.
 
 
 ---

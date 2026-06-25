@@ -6402,6 +6402,11 @@ introduction version is `unknown`.
 No Enma changelog predates the May 2026 Open Beta Phase 2 post, so anything finer than
 "present in Open Beta Phase 2" is a guess and is left `unknown` here.
 
+Documentation gap: publish an Enma language/API changelog or per-page `Introduced in`
+metadata before using this matrix for compatibility decisions across Perception builds.
+Until then, this toolkit records exact Enma introduction versions as `unknown` rather
+than guessing from unversioned reference pages.
+
 ### AngelScript
 
 PCX's AngelScript dialect is the historical default (pre-Enma). Feature deltas that

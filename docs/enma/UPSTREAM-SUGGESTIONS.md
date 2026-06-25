@@ -22,6 +22,8 @@ ergonomics, template parity, and tooling enhancement.
   native std::unordered_map<K, V> and std::unordered_set<T> supporting
   arbitrary scalar and struct keys.
 
+Documentation gap: the Maps and Templates docs should state this limit explicitly, including supported key types, unsupported nested-template field patterns, examples such as `map<int64, V>` that fail, and PCX-safe cache patterns using currently supported maps.
+
 ## 2. Byte-Wise Pointer Arithmetic (byte* / void*)
 
 * Issue: Pointer arithmetic in Enma is strictly typed (p + n scales by the
@@ -35,6 +37,8 @@ ergonomics, template parity, and tooling enhancement.
   that permits direct offset additions without scaling, or expose a compiler
   intrinsic for direct offset dereferencing (e.g., read_mem<T>(base, offset)).
 
+Documentation gap: the Pointers docs should include a reverse-engineering section that explains typed scaling, shows safe byte-offset traversal through host memory APIs or casts, and calls out integer-to-pointer assignments that will not compile.
+
 ## 3. Overloaded Function Templates
 
 * Issue: Overloaded function templates (selected by call arity) are not supported.
@@ -46,6 +50,8 @@ ergonomics, template parity, and tooling enhancement.
 * Recommendation: Implement template argument matching for overloaded function
   templates to bring closer parity with C++ template metaprogramming.
 
+Documentation gap: the Templates docs should include a "Known unsupported template patterns" section covering arity-selected overloads, recursive variadic-template base cases, examples that fail, and the simplest replacement patterns.
+
 ## 4. Character Packing & std::string Support
 
 * Issue: The implementation of std::string in the standard library is currently
@@ -56,6 +62,8 @@ ergonomics, template parity, and tooling enhancement.
 * Recommendation: Finalize char-packing to support std::string and allow
   script-level structs to mirror native C++ character arrays layout-wise.
 
+Documentation gap: the String, Types, or struct-layout docs should state the current string and `char` representation, whether script structs can layout-match native `char[N]`, and the safe way to read or write narrow C strings from process memory.
+
 ## 5. LSP Type Inference for Template Instantiation
 
 * Issue: Type diagnostics are resolved during the compiler's monomorphization
@@ -65,3 +73,5 @@ ergonomics, template parity, and tooling enhancement.
   within template definitions.
 * Recommendation: Enhance enma-lsp to parse template instantiations on-the-fly
   and provide inline diagnostics/autocomplete within specialized template scopes.
+
+Documentation gap: the LSP and IDE docs should distinguish live editor diagnostics from compile-time-only monomorphization diagnostics, and explain how to force template instantiation checks before relying on generic helper code.
