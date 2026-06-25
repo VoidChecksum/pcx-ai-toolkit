@@ -79,6 +79,7 @@ uint64 resolve_rip(uint64 hit, int32 disp_off, int32 insn_len) {
 }
 
 // One-shot attach + sig scan (rule 4: scans happen once, not every frame).
+// Requires process_memory_read permission for ref_process/process reads.
 bool ensure_resolved() {
     if (g_resolved) return true;
     g_proc = ref_process("game.exe");           // <- set your process name

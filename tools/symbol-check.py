@@ -125,7 +125,7 @@ def main() -> int:
         return 2
 
     paths = collect_files(target)
-    project_funcs = _project_functions(paths) if target.is_dir() and args.lang is None else {}
+    project_funcs = _project_functions(paths) if args.lang is None else {}
     all_findings: list[dict[str, Any]] = []
     for path in paths:
         try:
