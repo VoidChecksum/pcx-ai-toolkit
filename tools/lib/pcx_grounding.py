@@ -307,10 +307,126 @@ def _line_for_offset(text: str, offset: int) -> int:
 def _without_line_comments(text: str) -> str:
     return "\n".join(line.split("//", 1)[0] for line in text.splitlines())
 
+def _split_args(args: str) -> list[str]:
+    out: list[str] = []
+    depth = 0
+    start = 0
+    for i, ch in enumerate(args):
+        if ch in "(<[":
+            depth += 1
+        elif ch in ")>]":
+            depth = max(0, depth - 1)
+        elif ch == "," and depth == 0:
+            out.append(args[start:i].strip())
+            start = i + 1
+    tail = args[start:].strip()
+    if tail:
+        out.append(tail)
+    return out
+
+
+def _extract_call_args(code: str) -> list[tuple[str, str, int]]:
+    clean = _without_line_comments(code)
+    out: list[tuple[str, str, int]] = []
+    for match in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", clean):
+        name = match.group(1)
+        start = match.end()
+        depth = 1
+        i = start
+        while i < len(clean) and depth:
+            if clean[i] == "(":
+                depth += 1
+            elif clean[i] == ")":
+                depth -= 1
+            i += 1
+        if depth == 0:
+            out.append((name, clean[start:i - 1], _line_for_offset(clean, match.start())))
+    return out
+
+
+def _validate_enma_lifecycle(code: str) -> list[dict[str, Any]]:
+    clean = _without_line_comments(code)
+    findings: list[dict[str, Any]] = []
+    if re.search(r"\bvoid\s+main\s*\(", clean):
+        findings.append(_finding("invalid_entrypoint", _line_for_offset(clean, clean.find("void main")), "main", "Enma entry point must be `int64 main()` and return 1."))
+    if re.search(r"\breturn\s+true\s*;", clean):
+        findings.append(_finding("invalid_entrypoint_return", _line_for_offset(clean, clean.find("return true")), "return true", "Enma main should return integer sentinel `1`, not boolean `true`."))
+    for match in re.finditer(r"\bregister_callback\s*\(", clean):
+        findings.append(_finding("wrong_routine_api", _line_for_offset(clean, match.start()), "register_callback", "Use `register_routine(cast<int64>(fn), data)`; Enma has no automatic callback API.", repair="register_routine(cast<int64>(fn), data);"))
+    functions = {m.group(2): (m.group(1), _split_args(m.group(3)), _line_for_offset(clean, m.start())) for m in re.finditer(r"\b([A-Za-z_][\w:<>,\\s*&]*)\s+([A-Za-z_]\w*)\s*\(([^)]*)\)\s*\{", clean)}
+    for name, args, line in _extract_call_args(clean):
+        if name != "register_routine":
+            continue
+        parts = _split_args(args)
+        if parts and not parts[0].startswith("cast<int64>"):
+            findings.append(_finding("routine_missing_cast", line, "register_routine", "First register_routine argument must be `cast<int64>(fn)`.", repair="register_routine(cast<int64>(fn), data);"))
+        fn_match = re.search(r"cast\s*<\s*int64\s*>\s*\(\s*(\w+)\s*\)", parts[0] if parts else "")
+        if fn_match and fn_match.group(1) in functions:
+            _ret, fn_args, fn_line = functions[fn_match.group(1)]
+            if len(fn_args) != 1 or "int64" not in fn_args[0]:
+                findings.append(_finding("invalid_routine_signature", fn_line, fn_match.group(1), "Routine callback must be `void fn(int64 data)`.", repair=f"void {fn_match.group(1)}(int64 data) {{ ... }}"))
+    return findings
+
+
+def _validate_call_shapes(code: str, index: dict[str, Any], language: str) -> list[dict[str, Any]]:
+    findings: list[dict[str, Any]] = []
+    for name, args, line in _extract_call_args(code):
+        sigs = signatures_for(index, name, language)
+        if not sigs:
+            continue
+        actual = _split_args(args)
+        arities = {int(sig.get("arity", len(sig.get("arg_types", [])))) for sig in sigs}
+        if len(actual) not in arities:
+            findings.append(_finding("argument_count_mismatch", line, name, f"{name} expects {sorted(arities)} argument(s), got {len(actual)}.", signatures=[{"text": signature_text(sig), "source": sig.get("source", "")} for sig in sigs[:3]]))
+            continue
+        sig = next((s for s in sigs if int(s.get("arity", len(s.get("arg_types", [])))) == len(actual)), sigs[0])
+        expected = [str(t) for t in sig.get("arg_types", [])]
+        for i, (arg, typ) in enumerate(zip(actual, expected), start=1):
+            base = _base_type(typ)
+            if base in {"vec2", "vec3", "vec4", "color"} and not re.search(rf"\b{re.escape(base)}\s*\(", arg):
+                findings.append(_finding("argument_shape_mismatch", line, name, f"Argument {i} of {name} should be {base}; wrap raw values with `{base}(...)`.", repair=f"Use `{base}(...)` for argument {i}."))
+    return findings
+
 
 def _validate_enma_semantics(code: str) -> list[dict[str, Any]]:
     clean = _without_line_comments(code)
     findings: list[dict[str, Any]] = []
+    for match in re.finditer(r"\barray\s*<[^>]+>\s*@", clean):
+        findings.append(_finding(
+            "semantic_trap",
+            _line_for_offset(clean, match.start()),
+            "@",
+            "Enma arrays use `T[]`; AngelScript handle syntax `array<T>@` is not valid here.",
+            repair="Use `T[] name;`.",
+        ))
+    for match in re.finditer(r"\bread_memory\s*<", clean):
+        findings.append(_finding(
+            "unknown_call",
+            _line_for_offset(clean, match.start()),
+            "read_memory",
+            "C++ template helper `read_memory<T>` is not a Perception Enma API; use documented proc methods.",
+        ))
+    for match in re.finditer(r"\bawait\s+\w+\s*\(", clean):
+        findings.append(_finding(
+            "semantic_trap",
+            _line_for_offset(clean, match.start()),
+            "await",
+            "Enma validation does not support JavaScript async/await; check documented net return values.",
+        ))
+    for match in re.finditer(r"\bauto\s+\w+\s*=", clean):
+        findings.append(_finding(
+            "unknown_type",
+            _line_for_offset(clean, match.start()),
+            "auto",
+            "C++ `auto` is not valid Enma; write the documented concrete type.",
+        ))
+    for match in re.finditer(r"\bvector\s*<", clean):
+        findings.append(_finding(
+            "unknown_type",
+            _line_for_offset(clean, match.start()),
+            "vector",
+            "Use Enma `T[]` arrays, not C++ `vector<T>`.",
+        ))
     for match in re.finditer(r"\bmap\s*<\s*([^,>]+)", clean):
         key = match.group(1).strip()
         if key != "string":
@@ -395,6 +511,8 @@ def validate_code_against_index(
     findings: list[dict[str, Any]] = []
     if language == "enma":
         findings.extend(_validate_enma_semantics(code))
+        findings.extend(_validate_enma_lifecycle(code))
+        findings.extend(_validate_call_shapes(code, index, language))
     user_funcs = {name for name, _ in extract_function_defs(code, language)}
     if extra_user_functions:
         user_funcs.update(extra_user_functions)

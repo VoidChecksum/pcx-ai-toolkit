@@ -32,6 +32,20 @@ class SymbolMetadataTest(unittest.TestCase):
             "removed",
             "replacement",
         })
+        self.assertGreaterEqual(symbol_required, {
+            "failure_modes",
+            "return_sentinel",
+            "requires_context",
+            "side_effects",
+            "threading",
+            "source_anchor",
+            "line_start",
+            "line_end",
+            "kind",
+            "signature",
+            "return_type",
+            "params",
+        })
 
     def test_symbol_rows_are_complete_and_source_backed(self):
         self.assertEqual(self.data["schema"], 1)
@@ -57,6 +71,14 @@ class SymbolMetadataTest(unittest.TestCase):
                 self.assertIsInstance(row["permissions"], list)
                 self.assertIsInstance(row["deprecated"], bool)
                 self.assertIsInstance(row["removed"], bool)
+                self.assertIsInstance(row["failure_modes"], list)
+                self.assertIsInstance(row["side_effects"], list)
+                self.assertIn(row["threading"], {"main", "routine", "render", "any", "unknown"})
+                self.assertIn(row["kind"], {"function", "method", "type", "constant", "enum", "callback", "page"})
+                self.assertIsInstance(row["params"], list)
+                if row["signature"] is not None:
+                    self.assertIsInstance(row["signature"], str)
+                    self.assertTrue(row["signature"].strip())
                 self.assertTrue((REPO_ROOT / row["source"]).exists())
                 if row["changelog_source"] is not None:
                     self.assertTrue((REPO_ROOT / row["changelog_source"]).exists())

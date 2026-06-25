@@ -17,13 +17,16 @@
     ],
     "perception_api_pages_indexed": 15,
     "symbols_indexed": 216,
-    "symbols_with_permission_metadata": 16
+    "symbols_with_failure_modes": 136,
+    "symbols_with_permission_metadata": 26,
+    "symbols_with_signatures": 212
   },
   "deprecated": {
     "symbols": 0
   },
   "hallucinations": {
-    "eval_cases": 10,
+    "eval_cases": 53,
+    "eval_cases_with_expected_findings": 51,
     "known_symbols": 18
   },
   "permissions": {

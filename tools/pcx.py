@@ -448,6 +448,27 @@ def cmd_ai_smoke() -> int:
                 print(f"  {finding.get('kind')} {finding.get('symbol')}: {finding.get('message')}")
     return 1 if failed else 0
 
+def cmd_docs_check() -> int:
+    """Run source regeneration, drift, eval, and focused tests before shipping."""
+    commands = [
+        [sys.executable, str(TOOL_DIR / "build-api-index.py"), "--check"],
+        [sys.executable, str(TOOL_DIR / "build-llms-index.py"), "--check"],
+        [sys.executable, str(TOOL_DIR / "build-coverage-dashboard.py"), "--check"],
+        [sys.executable, str(TOOL_DIR / "check-internal-links.py")],
+        [sys.executable, str(TOOL_DIR / "check-doc-drift.py")],
+        [sys.executable, str(TOOL_DIR / "hallucination-eval.py")],
+        [sys.executable, "-m", "pytest", "tests/test_symbol_metadata.py"],
+        [sys.executable, "-m", "pytest", "tests/test_mcp_validate_code.py"],
+        [sys.executable, "-m", "pytest", "tests/test_coverage_dashboard.py"],
+    ]
+    for command in commands:
+        print("+ " + " ".join(command))
+        result = subprocess.run(command, cwd=REPO_ROOT)
+        if result.returncode:
+            return result.returncode
+    return 0
+
+
 def main() -> int:
     desc = f"pcx-ai-toolkit manager CLI v{get_version()}"
     ap = argparse.ArgumentParser(description=desc, usage="pcx <command> [args]")
@@ -455,8 +476,8 @@ def main() -> int:
                     version=f"pcx-ai-toolkit v{get_version()}")
     ap.add_argument("command", nargs="?", help=(
         "Command to run: setup, update, lint, symbol-check, api, check-answer, "
-        "create, build-api-index, verify, verify-project, check-drift, check-mcp, "
-        "check-matrix, counts, prompt, agent-install, ai-smoke, version, doctor, new, help"
+        "create, build-api-index, verify, verify-project, docs-check, check-drift, "
+        "check-mcp, check-matrix, counts, prompt, agent-install, ai-smoke, version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
     args = ap.parse_args()
@@ -532,6 +553,9 @@ def main() -> int:
 
     if cmd == "ai-smoke":
         return cmd_ai_smoke()
+
+    if cmd in ("docs-check", "doc-check"):
+        return cmd_docs_check()
 
     if cmd == "new":
         return cmd_new(sub_args)

@@ -11,11 +11,36 @@
       "changelog_source": "docs/perception/changelogs.md",
       "language": "enma",
       "api_family": "proc",
-      "permissions": [],
+      "permissions": [
+        "process_memory_write"
+      ],
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "permission_denied",
+        "target_unavailable",
+        "invalid_address"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#alloc_vm",
+      "line_start": null,
+      "line_end": null,
+      "kind": "method",
+      "signature": "uint64 proc.alloc_vm(uint64)",
+      "return_type": "uint64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint64"
+        }
+      ]
     },
     {
       "symbol": "ampm",
@@ -29,7 +54,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#ampm",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string ampm(int64)",
+      "return_type": "string",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "bind_structured_buffer",
@@ -43,7 +85,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#bind_structured_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 bind_structured_buffer(int64, int32, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int32"
+        },
+        {
+          "name": "arg3",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "capture_backbuffer",
@@ -57,7 +127,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#capture_backbuffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 capture_backbuffer(int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "cb",
@@ -71,7 +161,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#cb",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 cb(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "clip_pop",
@@ -85,7 +192,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#clip_pop",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 clip_pop()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "clip_push",
@@ -99,7 +221,31 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#clip_push",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 clip_push(vec2, vec2)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "vec2"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        }
+      ]
     },
     {
       "symbol": "copy_from_clipboard",
@@ -113,7 +259,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#copy_from_clipboard",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string copy_from_clipboard()",
+      "return_type": "string",
+      "params": []
     },
     {
       "symbol": "copy_to_clipboard",
@@ -127,7 +285,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#copy_to_clipboard",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool copy_to_clipboard(string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "cpu_active",
@@ -141,7 +316,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#cpu_active",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "cpu_t cpu_active()",
+      "return_type": "cpu_t",
+      "params": []
     },
     {
       "symbol": "cpu_brand",
@@ -155,7 +342,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#cpu_brand",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string cpu_brand()",
+      "return_type": "string",
+      "params": []
     },
     {
       "symbol": "cpu_create",
@@ -169,7 +368,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#cpu_create",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "cpu_t cpu_create()",
+      "return_type": "cpu_t",
+      "params": []
     },
     {
       "symbol": "cpu_create_process",
@@ -183,7 +394,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#cpu_create_process",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "cpu_t cpu_create_process(proc_t, bool)",
+      "return_type": "cpu_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "proc_t"
+        },
+        {
+          "name": "arg2",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "cpu_vendor",
@@ -197,7 +429,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#cpu_vendor",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string cpu_vendor()",
+      "return_type": "string",
+      "params": []
     },
     {
       "symbol": "create_bitmap",
@@ -211,7 +455,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_bitmap",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_bitmap(array)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "create_blend_state",
@@ -225,7 +489,47 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_blend_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_blend_state(int32, int32, int32, int32, int32, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int32"
+        },
+        {
+          "name": "arg2",
+          "type": "int32"
+        },
+        {
+          "name": "arg3",
+          "type": "int32"
+        },
+        {
+          "name": "arg4",
+          "type": "int32"
+        },
+        {
+          "name": "arg5",
+          "type": "int32"
+        },
+        {
+          "name": "arg6",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "create_compute_shader",
@@ -239,7 +543,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_compute_shader",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_compute_shader(string)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "create_constant_buffer",
@@ -253,7 +577,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_constant_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_constant_buffer(uint32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint32"
+        }
+      ]
     },
     {
       "symbol": "create_default_frame",
@@ -267,7 +611,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_default_frame",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "frame_t create_default_frame(string, vec2, vec2, layer_t)",
+      "return_type": "frame_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "vec2"
+        },
+        {
+          "name": "arg4",
+          "type": "layer_t"
+        }
+      ]
     },
     {
       "symbol": "create_depth_buffer",
@@ -281,7 +657,31 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_depth_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_depth_buffer(uint32, uint32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint32"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        }
+      ]
     },
     {
       "symbol": "create_depth_stencil_state",
@@ -295,7 +695,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_depth_stencil_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_depth_stencil_state(bool, bool, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "bool"
+        },
+        {
+          "name": "arg2",
+          "type": "bool"
+        },
+        {
+          "name": "arg3",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "create_draggable_frame",
@@ -309,7 +737,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_draggable_frame",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "frame_t create_draggable_frame(string, vec2, vec2, layer_t)",
+      "return_type": "frame_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "vec2"
+        },
+        {
+          "name": "arg4",
+          "type": "layer_t"
+        }
+      ]
     },
     {
       "symbol": "create_file_picker",
@@ -323,7 +783,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_file_picker",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "file_picker_t create_file_picker(string, string, string, bool)",
+      "return_type": "file_picker_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        },
+        {
+          "name": "arg3",
+          "type": "string"
+        },
+        {
+          "name": "arg4",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "create_font",
@@ -337,7 +829,43 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_font",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_font(string, float64, bool, bool, array)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "float64"
+        },
+        {
+          "name": "arg3",
+          "type": "bool"
+        },
+        {
+          "name": "arg4",
+          "type": "bool"
+        },
+        {
+          "name": "arg5",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "create_font_mem",
@@ -351,7 +879,47 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_font_mem",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_font_mem(string, float64, array, bool, bool, array)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "float64"
+        },
+        {
+          "name": "arg3",
+          "type": "array"
+        },
+        {
+          "name": "arg4",
+          "type": "bool"
+        },
+        {
+          "name": "arg5",
+          "type": "bool"
+        },
+        {
+          "name": "arg6",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "create_frame",
@@ -365,7 +933,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_frame",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "frame_t create_frame(string, vec2, vec2, layer_t)",
+      "return_type": "frame_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "vec2"
+        },
+        {
+          "name": "arg4",
+          "type": "layer_t"
+        }
+      ]
     },
     {
       "symbol": "create_index_buffer",
@@ -379,7 +979,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_index_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_index_buffer(uint32, bool, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint32"
+        },
+        {
+          "name": "arg2",
+          "type": "bool"
+        },
+        {
+          "name": "arg3",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "create_layer",
@@ -393,7 +1021,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_layer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "layer_t create_layer(string, bool, bool)",
+      "return_type": "layer_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "bool"
+        },
+        {
+          "name": "arg3",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "create_menu",
@@ -407,7 +1063,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_menu",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "menu_t create_menu()",
+      "return_type": "menu_t",
+      "params": []
     },
     {
       "symbol": "create_mesh_raw",
@@ -421,7 +1092,47 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_mesh_raw",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_mesh_raw(array, uint32, uint32, array, uint32, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "array"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        },
+        {
+          "name": "arg3",
+          "type": "uint32"
+        },
+        {
+          "name": "arg4",
+          "type": "array"
+        },
+        {
+          "name": "arg5",
+          "type": "uint32"
+        },
+        {
+          "name": "arg6",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "create_popup",
@@ -435,7 +1146,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_popup",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "frame_t create_popup(string, vec2, vec2, layer_t)",
+      "return_type": "frame_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "vec2"
+        },
+        {
+          "name": "arg4",
+          "type": "layer_t"
+        }
+      ]
     },
     {
       "symbol": "create_rasterizer_state",
@@ -449,7 +1192,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_rasterizer_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_rasterizer_state(int32, int32, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int32"
+        },
+        {
+          "name": "arg2",
+          "type": "int32"
+        },
+        {
+          "name": "arg3",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "create_render_target",
@@ -463,7 +1234,31 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_render_target",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_render_target(uint32, uint32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint32"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        }
+      ]
     },
     {
       "symbol": "create_sampler",
@@ -477,7 +1272,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_sampler",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_sampler(int32, int32, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int32"
+        },
+        {
+          "name": "arg2",
+          "type": "int32"
+        },
+        {
+          "name": "arg3",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "create_shader",
@@ -491,7 +1314,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_shader",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_shader(string, string, string)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        },
+        {
+          "name": "arg3",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "create_sidebar_section",
@@ -505,7 +1356,31 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_sidebar_section",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "sidebar_section_t create_sidebar_section(string, string)",
+      "return_type": "sidebar_section_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "create_sidebar_separator",
@@ -519,7 +1394,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_sidebar_separator",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void create_sidebar_separator()",
+      "return_type": "void",
+      "params": []
     },
     {
       "symbol": "create_structured_buffer",
@@ -533,7 +1423,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_structured_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_structured_buffer(uint32, uint32, bool, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint32"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        },
+        {
+          "name": "arg3",
+          "type": "bool"
+        },
+        {
+          "name": "arg4",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "create_texture",
@@ -547,7 +1469,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_texture",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_texture(uint32, uint32, array)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint32"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        },
+        {
+          "name": "arg3",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "create_vertex_buffer",
@@ -561,7 +1511,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_vertex_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 create_vertex_buffer(uint32, uint32, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint32"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        },
+        {
+          "name": "arg3",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "create_widget",
@@ -575,7 +1553,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#create_widget",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "widget_t create_widget(frame_t, string, int64, bool)",
+      "return_type": "widget_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "frame_t"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        },
+        {
+          "name": "arg3",
+          "type": "int64"
+        },
+        {
+          "name": "arg4",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "custom_bind_constant_buffer",
@@ -589,7 +1599,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_bind_constant_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_bind_constant_buffer(int64, array, int32, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "array"
+        },
+        {
+          "name": "arg3",
+          "type": "int32"
+        },
+        {
+          "name": "arg4",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "custom_bind_rt_as_texture",
@@ -603,7 +1645,31 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_bind_rt_as_texture",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_bind_rt_as_texture(int64, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "custom_bind_texture",
@@ -617,7 +1683,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_bind_texture",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_bind_texture(int64, int64, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        },
+        {
+          "name": "arg3",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "custom_clear_depth_buffer",
@@ -631,7 +1725,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_clear_depth_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_clear_depth_buffer(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "custom_clear_render_target",
@@ -645,7 +1759,43 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_clear_render_target",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_clear_render_target(int64, float64, float64, float64, float64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "float64"
+        },
+        {
+          "name": "arg3",
+          "type": "float64"
+        },
+        {
+          "name": "arg4",
+          "type": "float64"
+        },
+        {
+          "name": "arg5",
+          "type": "float64"
+        }
+      ]
     },
     {
       "symbol": "custom_draw",
@@ -659,7 +1809,71 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_draw",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_draw(int64, int64, array, uint32, int32, int64, int64, int64, int32, int64, array, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        },
+        {
+          "name": "arg3",
+          "type": "array"
+        },
+        {
+          "name": "arg4",
+          "type": "uint32"
+        },
+        {
+          "name": "arg5",
+          "type": "int32"
+        },
+        {
+          "name": "arg6",
+          "type": "int64"
+        },
+        {
+          "name": "arg7",
+          "type": "int64"
+        },
+        {
+          "name": "arg8",
+          "type": "int64"
+        },
+        {
+          "name": "arg9",
+          "type": "int32"
+        },
+        {
+          "name": "arg10",
+          "type": "int64"
+        },
+        {
+          "name": "arg11",
+          "type": "array"
+        },
+        {
+          "name": "arg12",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "custom_draw_indexed",
@@ -673,7 +1887,83 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_draw_indexed",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_draw_indexed(int64, int64, array, uint32, int64, array, uint32, int32, int64, int64, int64, int32, int64, array, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        },
+        {
+          "name": "arg3",
+          "type": "array"
+        },
+        {
+          "name": "arg4",
+          "type": "uint32"
+        },
+        {
+          "name": "arg5",
+          "type": "int64"
+        },
+        {
+          "name": "arg6",
+          "type": "array"
+        },
+        {
+          "name": "arg7",
+          "type": "uint32"
+        },
+        {
+          "name": "arg8",
+          "type": "int32"
+        },
+        {
+          "name": "arg9",
+          "type": "int64"
+        },
+        {
+          "name": "arg10",
+          "type": "int64"
+        },
+        {
+          "name": "arg11",
+          "type": "int64"
+        },
+        {
+          "name": "arg12",
+          "type": "int32"
+        },
+        {
+          "name": "arg13",
+          "type": "int64"
+        },
+        {
+          "name": "arg14",
+          "type": "array"
+        },
+        {
+          "name": "arg15",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "custom_reset_render_target",
@@ -687,7 +1977,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_reset_render_target",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_reset_render_target()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "custom_reset_viewport",
@@ -701,7 +2006,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_reset_viewport",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_reset_viewport()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "custom_restore_state",
@@ -715,7 +2035,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_restore_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_restore_state()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "custom_set_depth_stencil_state",
@@ -729,7 +2064,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_set_depth_stencil_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_set_depth_stencil_state(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "custom_set_rasterizer_state",
@@ -743,7 +2098,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_set_rasterizer_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_set_rasterizer_state(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "custom_set_render_target",
@@ -757,7 +2132,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_set_render_target",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_set_render_target(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "custom_set_render_target_ext",
@@ -771,7 +2166,31 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_set_render_target_ext",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_set_render_target_ext(int64, int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "custom_set_viewport",
@@ -785,7 +2204,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_set_viewport",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_set_viewport(float64, float64, float64, float64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "float64"
+        },
+        {
+          "name": "arg2",
+          "type": "float64"
+        },
+        {
+          "name": "arg3",
+          "type": "float64"
+        },
+        {
+          "name": "arg4",
+          "type": "float64"
+        }
+      ]
     },
     {
       "symbol": "custom_update_texture",
@@ -799,7 +2250,47 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#custom_update_texture",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 custom_update_texture(int64, uint32, uint32, uint32, uint32, array)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        },
+        {
+          "name": "arg3",
+          "type": "uint32"
+        },
+        {
+          "name": "arg4",
+          "type": "uint32"
+        },
+        {
+          "name": "arg5",
+          "type": "uint32"
+        },
+        {
+          "name": "arg6",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "day_name",
@@ -813,7 +2304,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#day_name",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string day_name(int64)",
+      "return_type": "string",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_blend_state",
@@ -827,7 +2335,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_blend_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_blend_state(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_compute_shader",
@@ -841,7 +2369,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_compute_shader",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_compute_shader(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_constant_buffer",
@@ -855,7 +2403,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_constant_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_constant_buffer(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_depth_buffer",
@@ -869,7 +2437,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_depth_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_depth_buffer(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_depth_stencil_state",
@@ -883,7 +2471,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_depth_stencil_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_depth_stencil_state(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_index_buffer",
@@ -897,7 +2505,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_index_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_index_buffer(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_mesh",
@@ -911,7 +2539,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_mesh",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_mesh(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_rasterizer_state",
@@ -925,7 +2573,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_rasterizer_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_rasterizer_state(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_render_target",
@@ -939,7 +2607,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_render_target",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_render_target(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_sampler",
@@ -953,7 +2641,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_sampler",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_sampler(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_shader",
@@ -967,7 +2675,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_shader",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_shader(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_structured_buffer",
@@ -981,7 +2709,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_structured_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_structured_buffer(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_texture",
@@ -995,7 +2743,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_texture",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_texture(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "destroy_vertex_buffer",
@@ -1009,7 +2777,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#destroy_vertex_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 destroy_vertex_buffer(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "dispatch_compute",
@@ -1023,7 +2811,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#dispatch_compute",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 dispatch_compute(int64, uint32, uint32, uint32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        },
+        {
+          "name": "arg3",
+          "type": "uint32"
+        },
+        {
+          "name": "arg4",
+          "type": "uint32"
+        }
+      ]
     },
     {
       "symbol": "draw_arc",
@@ -1037,7 +2857,51 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_arc",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_arc(vec2, vec2, float64, float64, color, float64, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "vec2"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "float64"
+        },
+        {
+          "name": "arg4",
+          "type": "float64"
+        },
+        {
+          "name": "arg5",
+          "type": "color"
+        },
+        {
+          "name": "arg6",
+          "type": "float64"
+        },
+        {
+          "name": "arg7",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "draw_bitmap",
@@ -1051,7 +2915,43 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_bitmap",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_bitmap(int64, vec2, vec2, color, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "vec2"
+        },
+        {
+          "name": "arg4",
+          "type": "color"
+        },
+        {
+          "name": "arg5",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "draw_circle",
@@ -1065,7 +2965,43 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_circle",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_circle(vec2, float64, color, float64, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "vec2"
+        },
+        {
+          "name": "arg2",
+          "type": "float64"
+        },
+        {
+          "name": "arg3",
+          "type": "color"
+        },
+        {
+          "name": "arg4",
+          "type": "float64"
+        },
+        {
+          "name": "arg5",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "draw_four_corner_gradient",
@@ -1079,7 +3015,51 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_four_corner_gradient",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_four_corner_gradient(vec2, vec2, color, color, color, color, float64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "vec2"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "color"
+        },
+        {
+          "name": "arg4",
+          "type": "color"
+        },
+        {
+          "name": "arg5",
+          "type": "color"
+        },
+        {
+          "name": "arg6",
+          "type": "color"
+        },
+        {
+          "name": "arg7",
+          "type": "float64"
+        }
+      ]
     },
     {
       "symbol": "draw_line",
@@ -1093,7 +3073,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_line",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_line(vec2, vec2, color, float64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "vec2"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "color"
+        },
+        {
+          "name": "arg4",
+          "type": "float64"
+        }
+      ]
     },
     {
       "symbol": "draw_mesh",
@@ -1107,7 +3119,63 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_mesh",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_mesh(int64, int64, int32, int64, int64, int64, int32, int64, array, int32)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        },
+        {
+          "name": "arg3",
+          "type": "int32"
+        },
+        {
+          "name": "arg4",
+          "type": "int64"
+        },
+        {
+          "name": "arg5",
+          "type": "int64"
+        },
+        {
+          "name": "arg6",
+          "type": "int64"
+        },
+        {
+          "name": "arg7",
+          "type": "int32"
+        },
+        {
+          "name": "arg8",
+          "type": "int64"
+        },
+        {
+          "name": "arg9",
+          "type": "array"
+        },
+        {
+          "name": "arg10",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "draw_polygon",
@@ -1121,7 +3189,43 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_polygon",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_polygon(array, uint32, color, float64, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "array"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        },
+        {
+          "name": "arg3",
+          "type": "color"
+        },
+        {
+          "name": "arg4",
+          "type": "float64"
+        },
+        {
+          "name": "arg5",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "draw_rect",
@@ -1135,7 +3239,47 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_rect",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_rect(vec2, vec2, color, float64, float64, uint8)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "vec2"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "color"
+        },
+        {
+          "name": "arg4",
+          "type": "float64"
+        },
+        {
+          "name": "arg5",
+          "type": "float64"
+        },
+        {
+          "name": "arg6",
+          "type": "uint8"
+        }
+      ]
     },
     {
       "symbol": "draw_rect_filled",
@@ -1149,7 +3293,43 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_rect_filled",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_rect_filled(vec2, vec2, color, float64, uint8)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "vec2"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "color"
+        },
+        {
+          "name": "arg4",
+          "type": "float64"
+        },
+        {
+          "name": "arg5",
+          "type": "uint8"
+        }
+      ]
     },
     {
       "symbol": "draw_text",
@@ -1163,7 +3343,51 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_text",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_text(string, vec2, color, int64, int32, color, float64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "color"
+        },
+        {
+          "name": "arg4",
+          "type": "int64"
+        },
+        {
+          "name": "arg5",
+          "type": "int32"
+        },
+        {
+          "name": "arg6",
+          "type": "color"
+        },
+        {
+          "name": "arg7",
+          "type": "float64"
+        }
+      ]
     },
     {
       "symbol": "draw_triangle",
@@ -1177,7 +3401,47 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#draw_triangle",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 draw_triangle(vec2, vec2, vec2, color, float64, bool)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "vec2"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        },
+        {
+          "name": "arg3",
+          "type": "vec2"
+        },
+        {
+          "name": "arg4",
+          "type": "color"
+        },
+        {
+          "name": "arg5",
+          "type": "float64"
+        },
+        {
+          "name": "arg6",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "Filesystem API",
@@ -1193,7 +3457,25 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#Filesystem API",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": null,
+      "return_type": null,
+      "params": []
     },
     {
       "symbol": "find_window",
@@ -1207,7 +3489,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#find_window",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 find_window(string)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "float32",
@@ -1217,11 +3516,36 @@
       "changelog_source": null,
       "language": "enma",
       "api_family": "proc",
-      "permissions": [],
+      "permissions": [
+        "process_memory_read"
+      ],
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "permission_denied",
+        "target_unavailable",
+        "invalid_address"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#float32",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "reads source bytes as float32(promoted)",
+      "return_type": "reads source bytes as",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "promoted"
+        }
+      ]
     },
     {
       "symbol": "free_vm",
@@ -1231,11 +3555,36 @@
       "changelog_source": "docs/perception/changelogs.md",
       "language": "enma",
       "api_family": "proc",
-      "permissions": [],
+      "permissions": [
+        "process_memory_write"
+      ],
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "permission_denied",
+        "target_unavailable",
+        "invalid_address"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#free_vm",
+      "line_start": null,
+      "line_end": null,
+      "kind": "method",
+      "signature": "bool proc.free_vm(uint64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint64"
+        }
+      ]
     },
     {
       "symbol": "fs_append_file",
@@ -1251,7 +3600,34 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_append_file",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_append_file(string, string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_append_file_binary",
@@ -1267,7 +3643,34 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_append_file_binary",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_append_file_binary(string, array)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "fs_create_directory",
@@ -1283,7 +3686,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_create_directory",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_create_directory(string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_create_file",
@@ -1299,7 +3725,34 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_create_file",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_create_file(string, string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_delete_directory",
@@ -1315,7 +3768,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_delete_directory",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_delete_directory(string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_delete_file",
@@ -1331,7 +3807,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_delete_file",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_delete_file(string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_dir_exists",
@@ -1347,7 +3846,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_dir_exists",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_dir_exists(string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_file_exists",
@@ -1363,7 +3885,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_file_exists",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_file_exists(string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_file_size",
@@ -1379,7 +3924,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_file_size",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 fs_file_size(string)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_list_all",
@@ -1395,7 +3963,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_list_all",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array fs_list_all(string)",
+      "return_type": "array",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_list_dirs",
@@ -1411,7 +4002,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_list_dirs",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array fs_list_dirs(string)",
+      "return_type": "array",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_list_files",
@@ -1427,7 +4041,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_list_files",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array fs_list_files(string)",
+      "return_type": "array",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_read_file",
@@ -1443,7 +4080,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_read_file",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string fs_read_file(string)",
+      "return_type": "string",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_read_file_binary",
@@ -1459,7 +4119,30 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_read_file_binary",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array fs_read_file_binary(string)",
+      "return_type": "array",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_write_file",
@@ -1475,7 +4158,34 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_write_file",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_write_file(string, string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "fs_write_file_binary",
@@ -1491,7 +4201,34 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "missing_file",
+        "permission_denied",
+        "io_error"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#fs_write_file_binary",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool fs_write_file_binary(string, array)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "get_all_hwnds",
@@ -1505,7 +4242,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_all_hwnds",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array get_all_hwnds()",
+      "return_type": "array",
+      "params": []
     },
     {
       "symbol": "get_char_advance",
@@ -1519,7 +4268,31 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_char_advance",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int32 get_char_advance(int64, uint32)",
+      "return_type": "int32",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "uint32"
+        }
+      ]
     },
     {
       "symbol": "get_default_layer",
@@ -1533,7 +4306,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_default_layer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "layer_t get_default_layer()",
+      "return_type": "layer_t",
+      "params": []
     },
     {
       "symbol": "get_focused_frame",
@@ -1547,7 +4335,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_focused_frame",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "frame_t get_focused_frame()",
+      "return_type": "frame_t",
+      "params": []
     },
     {
       "symbol": "get_font18",
@@ -1561,7 +4364,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_font18",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_font18()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "get_font20",
@@ -1575,7 +4393,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_font20",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_font20()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "get_font24",
@@ -1589,7 +4422,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_font24",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_font24()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "get_font28",
@@ -1603,7 +4451,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_font28",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_font28()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "get_fps",
@@ -1617,7 +4480,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_fps",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_fps()",
+      "return_type": "float64",
+      "params": []
     },
     {
       "symbol": "get_key_name",
@@ -1631,7 +4509,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_key_name",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string get_key_name(int64)",
+      "return_type": "string",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_key_state",
@@ -1645,7 +4540,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_key_state",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "key_state_t get_key_state(int64)",
+      "return_type": "key_state_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_keys_down",
@@ -1659,7 +4571,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_keys_down",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array get_keys_down()",
+      "return_type": "array",
+      "params": []
     },
     {
       "symbol": "get_mesh_bounds_max_x",
@@ -1673,7 +4597,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_mesh_bounds_max_x",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_mesh_bounds_max_x(int64)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_mesh_bounds_max_y",
@@ -1687,7 +4631,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_mesh_bounds_max_y",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_mesh_bounds_max_y(int64)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_mesh_bounds_max_z",
@@ -1701,7 +4665,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_mesh_bounds_max_z",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_mesh_bounds_max_z(int64)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_mesh_bounds_min_x",
@@ -1715,7 +4699,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_mesh_bounds_min_x",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_mesh_bounds_min_x(int64)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_mesh_bounds_min_y",
@@ -1729,7 +4733,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_mesh_bounds_min_y",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_mesh_bounds_min_y(int64)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_mesh_bounds_min_z",
@@ -1743,7 +4767,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_mesh_bounds_min_z",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_mesh_bounds_min_z(int64)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_mesh_index_count",
@@ -1757,7 +4801,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_mesh_index_count",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_mesh_index_count(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_mesh_stride",
@@ -1771,7 +4835,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_mesh_stride",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_mesh_stride(int64)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_mesh_vert_count",
@@ -1785,7 +4869,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_mesh_vert_count",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_mesh_vert_count(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_mouse_delta",
@@ -1799,7 +4903,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_mouse_delta",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "vec2 get_mouse_delta()",
+      "return_type": "vec2",
+      "params": []
     },
     {
       "symbol": "get_mouse_delta_desktop",
@@ -1813,7 +4929,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_mouse_delta_desktop",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "vec2 get_mouse_delta_desktop()",
+      "return_type": "vec2",
+      "params": []
     },
     {
       "symbol": "get_mouse_pos",
@@ -1827,7 +4955,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_mouse_pos",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "vec2 get_mouse_pos()",
+      "return_type": "vec2",
+      "params": []
     },
     {
       "symbol": "get_mouse_pos_desktop",
@@ -1841,7 +4981,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_mouse_pos_desktop",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "vec2 get_mouse_pos_desktop()",
+      "return_type": "vec2",
+      "params": []
     },
     {
       "symbol": "get_recent_key_input",
@@ -1855,7 +5007,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_recent_key_input",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string get_recent_key_input()",
+      "return_type": "string",
+      "params": []
     },
     {
       "symbol": "get_scroll_delta",
@@ -1869,7 +5033,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_scroll_delta",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_scroll_delta()",
+      "return_type": "float64",
+      "params": []
     },
     {
       "symbol": "get_text_height",
@@ -1883,7 +5059,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_text_height",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_text_height(int64, string, int32, int32)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        },
+        {
+          "name": "arg3",
+          "type": "int32"
+        },
+        {
+          "name": "arg4",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "get_text_width",
@@ -1897,7 +5105,39 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_text_width",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_text_width(int64, string, int32, int32)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        },
+        {
+          "name": "arg3",
+          "type": "int32"
+        },
+        {
+          "name": "arg4",
+          "type": "int32"
+        }
+      ]
     },
     {
       "symbol": "get_texture_height",
@@ -1911,7 +5151,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_texture_height",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_texture_height(int64)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_texture_width",
@@ -1925,7 +5185,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_texture_width",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_texture_width(int64)",
+      "return_type": "float64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_theme_color",
@@ -1939,7 +5219,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_theme_color",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "color get_theme_color(int64)",
+      "return_type": "color",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_tickcount64",
@@ -1953,7 +5253,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#get_tickcount64",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_tickcount64()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "get_view_height",
@@ -1967,7 +5279,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_view_height",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_view_height()",
+      "return_type": "float64",
+      "params": []
     },
     {
       "symbol": "get_view_scale",
@@ -1981,7 +5308,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_view_scale",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_view_scale()",
+      "return_type": "float64",
+      "params": []
     },
     {
       "symbol": "get_view_width",
@@ -1995,7 +5337,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#get_view_width",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "float64 get_view_width()",
+      "return_type": "float64",
+      "params": []
     },
     {
       "symbol": "get_window_class",
@@ -2009,7 +5366,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_window_class",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string get_window_class(int64)",
+      "return_type": "string",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_window_height",
@@ -2023,7 +5397,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_window_height",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_window_height(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_window_pos",
@@ -2037,7 +5428,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_window_pos",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "vec2 get_window_pos(int64)",
+      "return_type": "vec2",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_window_process_id",
@@ -2051,7 +5459,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_window_process_id",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_window_process_id(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_window_size",
@@ -2065,7 +5490,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_window_size",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "vec2 get_window_size(int64)",
+      "return_type": "vec2",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_window_thread_id",
@@ -2079,7 +5521,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_window_thread_id",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_window_thread_id(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_window_title",
@@ -2093,7 +5552,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_window_title",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string get_window_title(int64)",
+      "return_type": "string",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "get_window_width",
@@ -2107,7 +5583,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#get_window_width",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 get_window_width(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "gui_active",
@@ -2121,7 +5614,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#gui_active",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool gui_active()",
+      "return_type": "bool",
+      "params": []
     },
     {
       "symbol": "heartbeat",
@@ -2135,7 +5643,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#heartbeat",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void heartbeat()",
+      "return_type": "void",
+      "params": []
     },
     {
       "symbol": "hour12",
@@ -2149,7 +5669,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#hour12",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 hour12(int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "http_get",
@@ -2159,11 +5696,40 @@
       "changelog_source": null,
       "language": "enma",
       "api_family": "net",
-      "permissions": [],
+      "permissions": [
+        "network_access"
+      ],
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "network_error",
+        "status_zero",
+        "timeout"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#http_get",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "http_response_t http_get(string, int64)",
+      "return_type": "http_response_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "http_post",
@@ -2173,11 +5739,48 @@
       "changelog_source": null,
       "language": "enma",
       "api_family": "net",
-      "permissions": [],
+      "permissions": [
+        "network_access"
+      ],
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "network_error",
+        "status_zero",
+        "timeout"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#http_post",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "http_response_t http_post(string, string, string, int64)",
+      "return_type": "http_response_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        },
+        {
+          "name": "arg3",
+          "type": "string"
+        },
+        {
+          "name": "arg4",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "is_dark_theme",
@@ -2191,7 +5794,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#is_dark_theme",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool is_dark_theme()",
+      "return_type": "bool",
+      "params": []
     },
     {
       "symbol": "is_foreground_window",
@@ -2205,7 +5823,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#is_foreground_window",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool is_foreground_window(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "is_hovered",
@@ -2219,7 +5854,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#is_hovered",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool is_hovered(vec2, vec2)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "vec2"
+        },
+        {
+          "name": "arg2",
+          "type": "vec2"
+        }
+      ]
     },
     {
       "symbol": "is_window_active",
@@ -2233,7 +5889,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#is_window_active",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool is_window_active(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "key_down",
@@ -2247,7 +5920,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#key_down",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool key_down(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "key_fired",
@@ -2261,7 +5951,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#key_fired",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool key_fired(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "key_prev_down",
@@ -2275,7 +5982,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#key_prev_down",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool key_prev_down(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "key_raw_down",
@@ -2289,7 +6013,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#key_raw_down",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool key_raw_down(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "key_singlepress",
@@ -2303,7 +6044,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#key_singlepress",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool key_singlepress(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "key_toggle",
@@ -2317,7 +6075,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#key_toggle",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool key_toggle(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "layer_count",
@@ -2331,7 +6106,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#layer_count",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 layer_count()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "load_mesh",
@@ -2345,7 +6135,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#load_mesh",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 load_mesh(string)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "load_mesh_mem",
@@ -2359,7 +6169,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#load_mesh_mem",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 load_mesh_mem(array)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "load_sound",
@@ -2373,7 +6203,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#load_sound",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "sound_t load_sound(string)",
+      "return_type": "sound_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "load_texture",
@@ -2387,7 +6234,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#load_texture",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 load_texture(string)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "load_texture_mem",
@@ -2401,7 +6268,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#load_texture_mem",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 load_texture_mem(array)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "mat4.readas_*",
@@ -2415,7 +6302,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#mat4readas_*",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": null,
+      "return_type": null,
+      "params": []
     },
     {
       "symbol": "mat4.writeas_*",
@@ -2429,7 +6328,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#mat4writeas_*",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": null,
+      "return_type": null,
+      "params": []
     },
     {
       "symbol": "month_name",
@@ -2443,7 +6354,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#month_name",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string month_name(int64)",
+      "return_type": "string",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "mouse_left_click",
@@ -2457,7 +6385,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#mouse_left_click",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void mouse_left_click()",
+      "return_type": "void",
+      "params": []
     },
     {
       "symbol": "mouse_middle_click",
@@ -2471,7 +6411,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#mouse_middle_click",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void mouse_middle_click()",
+      "return_type": "void",
+      "params": []
     },
     {
       "symbol": "mouse_move",
@@ -2485,7 +6437,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#mouse_move",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void mouse_move(int64, int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "mouse_move_relative",
@@ -2499,7 +6472,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#mouse_move_relative",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void mouse_move_relative(int64, int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "mouse_movement_received",
@@ -2513,7 +6507,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#mouse_movement_received",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool mouse_movement_received()",
+      "return_type": "bool",
+      "params": []
     },
     {
       "symbol": "mouse_right_click",
@@ -2527,7 +6533,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#mouse_right_click",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void mouse_right_click()",
+      "return_type": "void",
+      "params": []
     },
     {
       "symbol": "mouse_scroll",
@@ -2541,7 +6559,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#mouse_scroll",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void mouse_scroll(int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "Net API",
@@ -2551,11 +6586,31 @@
       "changelog_source": null,
       "language": "enma",
       "api_family": "net",
-      "permissions": [],
+      "permissions": [
+        "network_access"
+      ],
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "network_error",
+        "status_zero",
+        "timeout"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#Net API",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": null,
+      "return_type": null,
+      "params": []
     },
     {
       "symbol": "now_millisecond",
@@ -2569,7 +6624,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#now_millisecond",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 now_millisecond()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "perf_frequency",
@@ -2583,7 +6650,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#perf_frequency",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 perf_frequency()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "perf_time",
@@ -2597,7 +6676,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#perf_time",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 perf_time()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "post_message",
@@ -2611,7 +6702,36 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#post_message",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool post_message(int64, int64, int64, int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        },
+        {
+          "name": "arg3",
+          "type": "int64"
+        },
+        {
+          "name": "arg4",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "rdtsc",
@@ -2625,7 +6745,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#rdtsc",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 rdtsc()",
+      "return_type": "int64",
+      "params": []
     },
     {
       "symbol": "ref_process",
@@ -2635,11 +6767,36 @@
       "changelog_source": null,
       "language": "enma",
       "api_family": "proc",
-      "permissions": [],
+      "permissions": [
+        "process_memory_read"
+      ],
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "permission_denied",
+        "target_unavailable",
+        "invalid_address"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#ref_process",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "proc_t ref_process(uint32)",
+      "return_type": "proc_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "uint32"
+        }
+      ]
     },
     {
       "symbol": "register_routine",
@@ -2653,7 +6810,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "routine",
+      "source_anchor": "#register_routine",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 register_routine(int64, int64)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "send_char",
@@ -2667,7 +6845,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#send_char",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool send_char(int64, string)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "send_key",
@@ -2681,7 +6880,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#send_key",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool send_key(int64, int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "send_mouse_input",
@@ -2695,7 +6915,36 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#send_mouse_input",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void send_mouse_input(int64, int64, int64, int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        },
+        {
+          "name": "arg3",
+          "type": "int64"
+        },
+        {
+          "name": "arg4",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "set_dark_theme",
@@ -2709,7 +6958,27 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#set_dark_theme",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void set_dark_theme(bool)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "bool"
+        }
+      ]
     },
     {
       "symbol": "set_foreground_window",
@@ -2723,7 +6992,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#set_foreground_window",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool set_foreground_window(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "set_theme_color",
@@ -2737,7 +7023,31 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#set_theme_color",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void set_theme_color(int64, color)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "color"
+        }
+      ]
     },
     {
       "symbol": "set_thread_priority",
@@ -2751,7 +7061,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "any",
+      "source_anchor": "#set_thread_priority",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool set_thread_priority(thread_priority)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "thread_priority"
+        }
+      ]
     },
     {
       "symbol": "show_toast",
@@ -2765,7 +7092,35 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#show_toast",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void show_toast(toast_kind, string, string)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "toast_kind"
+        },
+        {
+          "name": "arg2",
+          "type": "string"
+        },
+        {
+          "name": "arg3",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "stop_all_sounds",
@@ -2779,7 +7134,19 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#stop_all_sounds",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void stop_all_sounds()",
+      "return_type": "void",
+      "params": []
     },
     {
       "symbol": "take_int",
@@ -2793,7 +7160,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#take_int",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void take_int(int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "take_ptr",
@@ -2807,7 +7191,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#take_ptr",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void take_ptr(int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "test_3arg",
@@ -2821,7 +7222,32 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#test_3arg",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void test_3arg(int64, int64, int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        },
+        {
+          "name": "arg3",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "udp_create",
@@ -2831,11 +7257,31 @@
       "changelog_source": null,
       "language": "enma",
       "api_family": "net",
-      "permissions": [],
+      "permissions": [
+        "network_access"
+      ],
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "network_error",
+        "status_zero",
+        "timeout"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#udp_create",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "udp_t udp_create()",
+      "return_type": "udp_t",
+      "params": []
     },
     {
       "symbol": "ui_is_focused",
@@ -2849,7 +7295,22 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#ui_is_focused",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool ui_is_focused()",
+      "return_type": "bool",
+      "params": []
     },
     {
       "symbol": "unregister_routine",
@@ -2863,7 +7324,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "false",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "routine",
+      "source_anchor": "#unregister_routine",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "bool unregister_routine(int64)",
+      "return_type": "bool",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "update_structured_buffer",
@@ -2877,7 +7355,31 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "invalid_context",
+        "invalid_handle"
+      ],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "render",
+      "source_anchor": "#update_structured_buffer",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 update_structured_buffer(int64, array)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "array"
+        }
+      ]
     },
     {
       "symbol": "win_key_down",
@@ -2891,7 +7393,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#win_key_down",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void win_key_down(int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "win_key_press",
@@ -2905,7 +7424,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#win_key_press",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void win_key_press(int64, int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "win_key_up",
@@ -2919,7 +7459,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#win_key_up",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "void win_key_up(int64)",
+      "return_type": "void",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "ws_connect",
@@ -2929,11 +7486,40 @@
       "changelog_source": null,
       "language": "enma",
       "api_family": "net",
-      "permissions": [],
+      "permissions": [
+        "network_access"
+      ],
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [
+        "network_error",
+        "status_zero",
+        "timeout"
+      ],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [
+        "external_resource_access"
+      ],
+      "threading": "any",
+      "source_anchor": "#ws_connect",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "ws_t ws_connect(string, int64)",
+      "return_type": "ws_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "zydis_decoded_to_request",
@@ -2947,7 +7533,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#zydis_decoded_to_request",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "zydis_req_t zydis_decoded_to_request(array, int64)",
+      "return_type": "zydis_req_t",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "array"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "zydis_disasm",
@@ -2961,7 +7568,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#zydis_disasm",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array zydis_disasm(array, int64)",
+      "return_type": "array",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "array"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "zydis_encode",
@@ -2975,7 +7603,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#zydis_encode",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array zydis_encode(zydis_req_t)",
+      "return_type": "array",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "zydis_req_t"
+        }
+      ]
     },
     {
       "symbol": "zydis_encode_absolute",
@@ -2989,7 +7634,28 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#zydis_encode_absolute",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array zydis_encode_absolute(zydis_req_t, int64)",
+      "return_type": "array",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "zydis_req_t"
+        },
+        {
+          "name": "arg2",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "zydis_mnemonic_from_string",
@@ -3003,7 +7669,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#zydis_mnemonic_from_string",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 zydis_mnemonic_from_string(string)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "zydis_mnemonic_to_string",
@@ -3017,7 +7700,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#zydis_mnemonic_to_string",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string zydis_mnemonic_to_string(int64)",
+      "return_type": "string",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "zydis_nop_fill",
@@ -3031,7 +7731,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": null,
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#zydis_nop_fill",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "array zydis_nop_fill(int64)",
+      "return_type": "array",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     },
     {
       "symbol": "zydis_register_from_string",
@@ -3045,7 +7762,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "0",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#zydis_register_from_string",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "int64 zydis_register_from_string(string)",
+      "return_type": "int64",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "string"
+        }
+      ]
     },
     {
       "symbol": "zydis_register_to_string",
@@ -3059,7 +7793,24 @@
       "deprecated": false,
       "removed": false,
       "replacement": null,
-      "notes": ""
+      "notes": "",
+      "failure_modes": [],
+      "return_sentinel": "empty string",
+      "requires_context": null,
+      "side_effects": [],
+      "threading": "unknown",
+      "source_anchor": "#zydis_register_to_string",
+      "line_start": null,
+      "line_end": null,
+      "kind": "function",
+      "signature": "string zydis_register_to_string(int64)",
+      "return_type": "string",
+      "params": [
+        {
+          "name": "arg1",
+          "type": "int64"
+        }
+      ]
     }
   ]
 }

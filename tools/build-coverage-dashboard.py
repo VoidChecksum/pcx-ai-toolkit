@@ -37,13 +37,14 @@ def symbol_count(index: dict[str, Any]) -> int:
     return len(index.get("functions", {})) + len(index.get("methods", {})) + len(index.get("types", []))
 
 
-def permission_symbol_count(index: dict[str, Any]) -> int:
-    count = 0
-    for group in ("functions", "methods"):
-        for symbol, signatures in index.get(group, {}).items():
-            if symbol.startswith("fs_") or any("filesystem-api.md" in str(sig.get("source", "")) for sig in signatures):
-                count += 1
-    return count
+def rows(symbol_versions: dict[str, Any]) -> list[dict[str, Any]]:
+    value = symbol_versions.get("symbols", [])
+    return value if isinstance(value, list) else []
+
+
+def count_with(symbol_versions: dict[str, Any], key: str) -> int:
+    return sum(1 for row in rows(symbol_versions) if row.get(key) not in (None, [], ""))
+
 
 
 def build() -> dict[str, Any]:
@@ -61,14 +62,17 @@ def build() -> dict[str, Any]:
             "families_indexed": len(families),
             "family_names": families,
             "perception_api_pages_indexed": int(index.get("doc_count", 0)),
-            "symbols_indexed": len(symbol_versions.get("symbols", {})) or symbol_count(index),
-            "symbols_with_permission_metadata": permission_symbol_count(index),
+            "symbols_indexed": len(rows(symbol_versions)) or symbol_count(index),
+            "symbols_with_permission_metadata": count_with(symbol_versions, "permissions"),
+            "symbols_with_signatures": count_with(symbol_versions, "signature"),
+            "symbols_with_failure_modes": count_with(symbol_versions, "failure_modes"),
         },
         "permissions": {"rules": len(permissions.get("rules", []))},
         "deprecated": {"symbols": len(deprecated.get("symbols", {}))},
         "hallucinations": {
             "known_symbols": len(unsupported.get("symbols", {})),
             "eval_cases": len(evals.get("cases", [])),
+            "eval_cases_with_expected_findings": sum(1 for case in evals.get("cases", []) if case.get("expected_findings")),
         },
         "provenance": {
             "sources": int(provenance.get("count", 0)),
@@ -95,6 +99,19 @@ def render_md(data: dict[str, Any]) -> str:
 - Hallucination eval cases: {data['hallucinations']['eval_cases']}
 - Generated bundle sources: {data['provenance']['sources']}
 - Drift-checkable sources: {data['provenance']['drift_checkable']}
+
+## Targets
+
+| Metric | Current | Target | Status |
+|---|---:|---:|---|
+| Symbols indexed | {data['api']['symbols_indexed']} | 216 | {'pass' if data['api']['symbols_indexed'] >= 216 else 'fail'} |
+| Symbols with permission metadata | {data['api']['symbols_with_permission_metadata']} | 216 | {'pass' if data['api']['symbols_with_permission_metadata'] >= 216 else 'fail'} |
+| Symbols with signatures | {data['api']['symbols_with_signatures']} | 216 | {'pass' if data['api']['symbols_with_signatures'] >= 216 else 'fail'} |
+| Symbols with failure metadata | {data['api']['symbols_with_failure_modes']} | 216 | {'pass' if data['api']['symbols_with_failure_modes'] >= 216 else 'fail'} |
+| Known hallucinations covered | {data['hallucinations']['known_symbols']} | 100 | {'pass' if data['hallucinations']['known_symbols'] >= 100 else 'fail'} |
+| Eval cases | {data['hallucinations']['eval_cases']} | 150 | {'pass' if data['hallucinations']['eval_cases'] >= 150 else 'fail'} |
+| Eval cases with expected findings | {data['hallucinations']['eval_cases_with_expected_findings']} | 100 | {'pass' if data['hallucinations']['eval_cases_with_expected_findings'] >= 100 else 'fail'} |
+| API pages indexed | {data['api']['perception_api_pages_indexed']} | 20 | {'pass' if data['api']['perception_api_pages_indexed'] >= 20 else 'fail'} |
 
 ## Indexed API Families
 

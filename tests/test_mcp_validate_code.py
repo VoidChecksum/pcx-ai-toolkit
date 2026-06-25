@@ -71,6 +71,21 @@ class ValidateCodeTest(unittest.TestCase):
         result = json.loads(validate_code(code, "enma"))
         self.assertTrue(result["ok"], result["findings"])
 
+    def test_rejects_wrong_draw_text_shape(self):
+        code = 'import "vec";\nimport "color";\nint64 main(){ draw_text("hi", 20, 20); return 1; }'
+        result = json.loads(validate_code(code, "enma"))
+        self.assertFalse(result["ok"])
+        kinds = {f["kind"] for f in result["findings"]}
+        self.assertIn("argument_count_mismatch", kinds)
+
+    def test_rejects_wrong_routine_shape(self):
+        code = 'void draw(){ }\nint64 main(){ register_routine(draw, 0); return true; }'
+        result = json.loads(validate_code(code, "enma"))
+        self.assertFalse(result["ok"])
+        kinds = {f["kind"] for f in result["findings"]}
+        self.assertIn("routine_missing_cast", kinds)
+        self.assertIn("invalid_entrypoint_return", kinds)
+
     def test_rejects_angelscript_mode(self):
         code = 'int main(){ register_callback(on_tick, 16, 0); return 1; } void on_tick(int id, int data_index){}'
         result = json.loads(validate_code(code, "angelscript"))

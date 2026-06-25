@@ -33,13 +33,26 @@ def run_case(case: dict[str, Any], index: dict[str, Any]) -> dict[str, Any]:
         findings = validate_code_against_index(str(case.get("input", "")), language, index, str(case.get("name", "case")))
         ok = not findings
         result = {"ok": ok, "findings": findings}
-    passed = ok == should_pass
+    expected_findings = case.get("expected_findings") or []
+    missing_expected: list[dict[str, Any]] = []
+    for expected in expected_findings:
+        code = expected.get("code")
+        symbol = expected.get("symbol")
+        matched = any(
+            (not code or finding.get("kind") == code or finding.get("code") == code)
+            and (not symbol or finding.get("symbol") == symbol)
+            for finding in findings
+        )
+        if not matched:
+            missing_expected.append(expected)
+    passed = ok == should_pass and not missing_expected
     return {
         "name": case.get("name", "unnamed"),
         "mode": mode,
         "expected_ok": should_pass,
         "actual_ok": ok,
         "passed": passed,
+        "missing_expected_findings": missing_expected,
         "findings": findings,
         "result": result,
     }

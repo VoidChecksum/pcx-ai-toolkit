@@ -7,13 +7,26 @@
 - Perception API pages indexed: 15
 - API families indexed: 12
 - Symbols indexed: 216
-- Symbols with permission metadata: 16
+- Symbols with permission metadata: 26
 - Permission rules: 5
 - Deprecated or removed symbols tracked: 0
 - Known hallucinations covered: 18
-- Hallucination eval cases: 10
+- Hallucination eval cases: 53
 - Generated bundle sources: 88
 - Drift-checkable sources: 67
+
+## Targets
+
+| Metric | Current | Target | Status |
+|---|---:|---:|---|
+| Symbols indexed | 216 | 216 | pass |
+| Symbols with permission metadata | 26 | 216 | fail |
+| Symbols with signatures | 212 | 216 | fail |
+| Symbols with failure metadata | 136 | 216 | fail |
+| Known hallucinations covered | 18 | 100 | fail |
+| Eval cases | 53 | 150 | fail |
+| Eval cases with expected findings | 51 | 100 | fail |
+| API pages indexed | 15 | 20 | fail |
 
 ## Indexed API Families
 
