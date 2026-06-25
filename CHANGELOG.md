@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.19.0 - 2026-06-25
+
+- fix: stabilize generated-file dirty check
+- fix: check generated provenance after api index
+- fix: avoid pytest dependency in release check
+- fix: make release check ci-safe
+- feat: harden docs and workflow gates
+
 ## v1.18.0 - 2026-06-25
 
 - chore: normalize provenance output
