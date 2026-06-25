@@ -5,21 +5,43 @@ from __future__ import annotations
 import argparse, json, re
 from pathlib import Path
 
-def score(text: str) -> dict:
-    checks = {
-        "api_symbol_validity": "pcx api" in text or "pcx check-answer" in text,
-        "lifecycle_correctness": all(x in text for x in ["reference_by_name", "dereference"]),
-        "permissions_mentioned": "permission" in text.lower(),
-        "mcp_workflow_correctness": "pcx mcp-plan" in text or "process/" in text,
-        "no_fake_offsets": not re.search(r"0x[0-9a-fA-F]{4,}", text) or "evidence" in text.lower() or "verified" in text.lower(),
-        "validation_commands_included": "pcx verify" in text or "pcx check-answer" in text or "pcx evidence" in text,
-        "evidence_references_included": bool(re.search(r"\b[CE]-\d{3,}\b", text)),
-    }
-    passed=sum(checks.values())
-    return {"score": passed, "max_score": len(checks), "percent": round(100*passed/len(checks), 1), "checks": checks}
+FENCE_RE = re.compile(r'```enma\n(.*?)```', re.S)
+
+def section(text: str, name: str) -> str:
+    m = re.search(rf'(?ims)^##\s+{re.escape(name)}\b(.*?)(?=^##\s+|\Z)', text)
+    return m.group(1) if m else text
+
+def score_task(task: dict, answer: str) -> list[str]:
+    failures=[]; low=answer.lower()
+    for sym in task.get('must_use', []):
+        if sym.lower() not in low: failures.append(f'missing required symbol {sym}')
+    for sym in task.get('must_not_use', []):
+        if sym.lower() in low: failures.append(f'used forbidden symbol {sym}')
+    if task.get('expected_refusal') and not any(w in low for w in ['cannot', 'refuse', 'not documented', 'hallucinat']):
+        failures.append('expected refusal or correction for fake API prompt')
+    if 'permission' not in low and task['name'] in {'http-get','read-process-memory'}:
+        failures.append('permissions not mentioned')
+    if not any(cmd in low for cmd in ['pcx verify','pcx check-answer','pcx mcp-plan','pcx evidence']):
+        failures.append('validation commands missing')
+    if re.search(r'0x[0-9a-f]{4,}', low) and not any(w in low for w in ['placeholder','verified','evidence']):
+        failures.append('offset-like literal lacks placeholder/verification context')
+    return failures
+
+def score(text: str, suite: dict) -> dict:
+    failures=[]; passed=0
+    for task in suite.get('tasks', []):
+        ans=section(text, task['name'])
+        errs=score_task(task, ans)
+        if errs: failures.append({'task': task['name'], 'reason': '; '.join(errs)})
+        else: passed += 1
+    total=len(suite.get('tasks', [])) or 1
+    score=round(100*passed/total)
+    return {'score': score, 'passed': passed, 'failed': len(failures), 'failures': failures}
 
 def main() -> int:
-    ap=argparse.ArgumentParser(prog='pcx model-eval'); ap.add_argument('--model-output', type=Path, required=True); ap.add_argument('--suite', type=Path, required=True)
-    args=ap.parse_args(); text=args.model_output.read_text(encoding='utf-8'); result=score(text); result['suite']=str(args.suite)
-    print(json.dumps(result, indent=2)); return 0 if result['percent'] >= 70 else 1
+    ap=argparse.ArgumentParser(prog='pcx model-eval')
+    ap.add_argument('--model-output', '--answers', dest='answers', type=Path, required=True)
+    ap.add_argument('--suite', type=Path, required=True)
+    args=ap.parse_args(); text=args.answers.read_text(encoding='utf-8'); suite=json.loads(args.suite.read_text(encoding='utf-8'))
+    result=score(text, suite); print(json.dumps(result, indent=2)); return 0 if result['score'] >= 70 else 1
 if __name__=='__main__': raise SystemExit(main())

@@ -20,7 +20,7 @@
 - Deprecated or removed symbols tracked: 0
 - Known hallucinations covered: 113
 - Hallucination eval cases: 150
-- Generated bundle sources: 103
+- Generated bundle sources: 122
 - Drift-checkable sources: 67
 
 ## Targets

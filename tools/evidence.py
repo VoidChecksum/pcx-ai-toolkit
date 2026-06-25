@@ -78,15 +78,23 @@ def cmd_stale(args):
         except ValueError: stale.append(e.get("id"))
     print(json.dumps({"stale": stale}, indent=2)); return 1 if stale else 0
 
+def render_mermaid(data):
+    lines=["graph TD"]
+    for c in data.get("claims", []):
+        cid=c["id"].replace("-", "_")
+        lines.append(f"  {cid}[\"{c['id']}: {c['claim']}\"]")
+        for eid in c.get("evidence", []): lines.append(f"  {cid} --> {eid.replace('-', '_')}")
+    for e in data.get("evidence", []): lines.append(f"  {e['id'].replace('-', '_')}[\"{e['id']}: {e['type']}\"]")
+    return "\n".join(lines)
+
 def cmd_graph(args):
     data=load(args.file)
-    if args.format != "mermaid": raise SystemExit("only --format mermaid is supported")
-    print("graph TD")
-    for c in data.get("claims", []):
-        print(f"  {c['id'].replace('-', '_')}[\"{c['id']}: {c['claim']}\"]")
-        for eid in c.get("evidence", []): print(f"  {c['id'].replace('-', '_')} --> {eid.replace('-', '_')}")
-    for e in data.get("evidence", []): print(f"  {e['id'].replace('-', '_')}[\"{e['id']}: {e['type']}\"]")
-    return 0
+    mermaid=render_mermaid(data)
+    if args.format == "mermaid":
+        print(mermaid); return 0
+    if args.format == "html":
+        print("<html><body><pre class=\"mermaid\">" + mermaid.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;") + "</pre></body></html>"); return 0
+    raise SystemExit("--format must be mermaid or html")
 
 def main():
     ap=argparse.ArgumentParser(prog="pcx evidence"); ap.add_argument("--file", type=Path, default=Path("evidence.json")); sub=ap.add_subparsers(dest="cmd", required=True)

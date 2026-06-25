@@ -23,6 +23,7 @@ Top-level operating manuals, FAQ, and routing references for AI tools using this
 - [AI Agent Operating Manual](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/AI_AGENT_OPERATING_MANUAL.md): This is the shortest safe workflow for any LLM or MCP-aware agent working with
 - [PCX Anti-Hallucination Coverage](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/COVERAGE.md)
 - [Frequently Asked Questions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/FAQ.md): A quick reference for common issues and questions when using pcx-ai-toolkit.
+- [PCX Documentation Navigation](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/NAVIGATION.md)
 - [Workflow Cookbook](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/WORKFLOW_COOKBOOK.md): Intent-first index for PCX, Perception MCP, RE workflows, task docs, and skills.
 - [Distribution Checklist](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/distribution-checklist.md): Safe release/publishing path for pcx-ai-toolkit.
 - [Extension Installation Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/marketplace-install.md): Two VS Code extensions are available for pcx-ai-toolkit:
@@ -255,6 +256,7 @@ Python-facing CLI tools for validation, generation, and RE; hot binary-analysis 
 - [check-llm-answer](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-llm-answer.py)
 - [check-llm-contract](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-llm-contract.py)
 - [Cut the "Agent Instructions" footer — it mentions urls, not tools.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-mcp-config.py): txt = re.split(r"\n#\sAgent Instructions\b", txt)[0]
+- [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-mcp-workflows.py): """Static validation for deterministic Perception MCP workflow plans."""
 - [check-skill-contract](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-skill-contract.py)
 - [Scripting-API surface keywords that make a changelog release "API-relevant".](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-version-matrix.py): APIKEYWORDS = re.compile(
 - [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dump-strings-xor.py): import os
@@ -275,6 +277,7 @@ Python-facing CLI tools for validation, generation, and RE; hot binary-analysis 
 - [perception-mcp-session](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/perception-mcp-session.py)
 - [re-importer](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/re-importer.py)
 - [regenerate-docs](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/regenerate-docs.py)
+- [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/release-check.py): """One-command release readiness gate."""
 - [── Hash algorithms ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/resolve-api-hashes.py): def ror13add(name: bytes) -> int:
 - [── Rule registry ─────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/script-linter.py): # rule number -> (severity, one-liner). Severity is fixed per rule, not per hit.
 - [1. Update submodules](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/setup-core.py): print("[..] Checking git submodules...")

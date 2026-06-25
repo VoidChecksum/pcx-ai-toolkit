@@ -15,6 +15,9 @@ CORE_TOOLS = [
     "tools/list", "process/list", "process/reference_by_name", "process/get_module_by_name", "process/is_valid_address",
     "process/read_typed_value", "process/find_string_refs", "process/find_function_bounds", "process/disassemble",
     "process/dereference", "script/get_context", "script/validate",
+    "process/get_modules", "process/get_module_sections", "process/find_all_patterns", "process/generate_signature",
+    "process/read_pointer_chain", "process/analyze_vtable", "process/read_rtti", "process/lookup_symbol",
+    "process/scan_value", "process/scan_next", "process/diff_memory", "process/write_virtual_memory", "process/allocate_memory",
 ]
 ERR = {
     "permission": {"code": -32001, "message": "permission denied", "data": {"permission": "read_memory"}},
@@ -56,6 +59,31 @@ class State:
             return self.mem["functions"].get(str(args.get("address")), {"start": "0x401000", "end": "0x401080"})
         if name == "process/disassemble":
             return {"address": args.get("address", args.get("start", "0x401000")), "instructions": ["push rbp", "mov rbp, rsp", "ret"]}
+
+        if name == "process/get_modules":
+            return {"modules": self.proc["modules"]}
+        if name == "process/get_module_sections":
+            return {"sections": [{"name": ".text", "start": "0x401000", "size": "0x2000"}, {"name": ".rdata", "start": "0x403000", "size": "0x1000"}]}
+        if name == "process/find_all_patterns":
+            return {"hits": ["0x401200"]}
+        if name == "process/generate_signature":
+            return {"signature": "48 8B ?? ?? C3", "unique": True}
+        if name == "process/read_pointer_chain":
+            return {"address": "0x402000", "chain": [args.get("base_address", "0x401000"), "0x402000"]}
+        if name == "process/analyze_vtable":
+            return {"vtable": args.get("address", "0x403100"), "methods": [{"slot": 0, "address": "0x401200"}]}
+        if name == "process/read_rtti":
+            return {"name": "MockClass", "vtable": args.get("address", "0x403100")}
+        if name == "process/lookup_symbol":
+            return {"symbol": args.get("symbol", "MockClass"), "address": "0x401200"}
+        if name == "process/scan_value":
+            return {"results": [{"address": "0x402000", "value": args.get("value", 1337)}]}
+        if name == "process/scan_next":
+            return {"results": [{"address": "0x402000", "value": args.get("value", 1337)}]}
+        if name == "process/diff_memory":
+            return {"changes": [{"address": "0x402000", "before": "00", "after": "01"}]}
+        if name in {"process/write_virtual_memory", "process/allocate_memory"}:
+            raise RpcError(ERR["permission"])
         if name == "script/get_context":
             return {"language": "Enma", "addons": ["core"], "permissions": ["read_memory"]}
         if name == "script/validate":

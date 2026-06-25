@@ -52,7 +52,7 @@
       "task": "module inventory",
       "workflow": "module_inventory",
       "must_include": [
-        "process/get_module_list"
+        "process/get_modules"
       ]
     },
     {
@@ -115,7 +115,7 @@
       "workflow": "import_export_analysis",
       "must_include": [
         "process/list_module_exports",
-        "process/list_module_imports"
+        "process/get_module_imports"
       ]
     },
     {
@@ -296,7 +296,7 @@
       "task": "module inventory please",
       "workflow": "module_inventory",
       "must_include": [
-        "process/get_module_list"
+        "process/get_modules"
       ]
     },
     {

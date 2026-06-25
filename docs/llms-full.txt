@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 179**
+**Source files included: 180**
 
 ---
 
@@ -122,7 +122,7 @@ doc or lookup must be checked next.
 - Deprecated or removed symbols tracked: 0
 - Known hallucinations covered: 113
 - Hallucination eval cases: 150
-- Generated bundle sources: 103
+- Generated bundle sources: 122
 - Drift-checkable sources: 67
 
 ## Targets
@@ -331,7 +331,7 @@ Report persistent false positives as GitHub issues with label `lsp`.
 3. **Port mismatch**: The default Perception MCP port is `42069`. Ensure nothing else is using it.
 4. **Restart required**: Most AI clients require a restart after MCP config changes.
 
-See `mcp/troubleshooting.md` for detailed diagnostics.
+See `docs/perception/mcp-error-recovery.md` for detailed diagnostics.
 
 ### Why does `pcx check-mcp` fail?
 
@@ -368,6 +368,89 @@ Open a [GitHub Issue](https://github.com/VoidChecksum/pcx-ai-toolkit/issues) wit
 
 ---
 
+## Source: `docs/NAVIGATION.md`
+
+# PCX Documentation Navigation
+
+## Start here
+
+- `README.md`
+- `docs/INDEX.md`
+- `docs/WORKFLOW_COOKBOOK.md`
+- `docs/AI_AGENT_OPERATING_MANUAL.md`
+
+## Enma scripting
+
+- `docs/perception/lifecycle-and-routines.md`
+- `docs/perception/gui-api.md`
+- `docs/perception/render-api.md`
+- `docs/perception/custom-draw-api.md`
+- `docs/tasks/`
+
+## Perception APIs
+
+- `docs/perception/proc-api.md`
+- `docs/perception/filesystem-api.md`
+- `docs/perception/net-api.md`
+- `docs/perception/unicorn-api.md`
+- `docs/perception/zydis-api.md`
+
+## MCP live workflows
+
+- `docs/perception/two-mcp-workflow.md`
+- `docs/perception/mcp-api.md`
+- `docs/perception/mcp-workflows.md`
+- `docs/perception/mcp-error-recovery.md`
+- `docs/perception/mcp-safety-policy.md`
+
+## RE workflows
+
+- `knowledge/re-workflows/find-local-player.md`
+- `knowledge/re-workflows/find-entity-list.md`
+- `knowledge/re-workflows/find-vtable-method.md`
+- `knowledge/mcp-workflows/source2.md`
+- `knowledge/mcp-workflows/unreal.md`
+- `knowledge/mcp-workflows/unity-il2cpp.md`
+
+## Evidence / patch day
+
+- `.claude/skills/evidence-graph/SKILL.md`
+- `.claude/skills/pcx-patch-day-playbook/SKILL.md`
+- `schemas/pcx-evidence-graph.schema.json`
+
+## Model guides
+
+- `docs/model-guides/weak-local-models.md`
+- `evals/model-compatibility.json`
+- `docs/examples/golden-answers/`
+- `docs/examples/bad-answers/`
+
+## Labs
+
+- `labs/re-toy-targets/`
+
+## Skills
+
+- `.claude/skills/perception-mcp-session/SKILL.md`
+- `.claude/skills/perception-mcp-safety/SKILL.md`
+- `.claude/skills/perception-mcp-re-workflows/SKILL.md`
+- `.claude/skills/mcp-tool-routing/SKILL.md`
+
+## Validators
+
+- `tools/check-llm-answer.py`
+- `tools/check-mcp-config.py`
+- `tools/check-mcp-workflows.py`
+- `tools/release-check.py`
+
+## Troubleshooting
+
+- `docs/FAQ.md`
+- `docs/perception/mcp-error-recovery.md`
+- `docs/perception/support-matrix.md`
+
+---
+
 ## Source: `docs/WORKFLOW_COOKBOOK.md`
 
 # Workflow Cookbook
@@ -382,13 +465,13 @@ Intent-first index for PCX, Perception MCP, RE workflows, task docs, and skills.
 
 ## I want to find a string xref
 
-- Read `knowledge/mcp-workflows/string-xref.md` and `docs/perception/mcp-workflows.md`.
+- Read `docs/perception/mcp-transcripts/string-xref.md` and `docs/perception/mcp-workflows.md`.
 - Plan: `pcx mcp-plan "find xrefs to PlayerHealth" --target game.exe`.
 - Record evidence: `pcx mcp-record --url http://127.0.0.1:42069/mcp --target game.exe --out session.jsonl`.
 
 ## I want to create an overlay
 
-- Use `docs/tasks/render-overlay.md`, `docs/tasks/custom-draw.md`, and `docs/perception/overlay-api.md`.
+- Use `docs/tasks/render-overlay.md`, `docs/tasks/custom-draw.md`, and `docs/perception/render-api.md`.
 - Validate snippets with `pcx check-answer docs/tasks/render-overlay.md`.
 
 ## I want to validate Enma
@@ -399,7 +482,7 @@ Intent-first index for PCX, Perception MCP, RE workflows, task docs, and skills.
 
 ## I want to recover after a patch
 
-- Use `knowledge/re-workflows/patch-day.md` and `knowledge/offset-methodology.md`.
+- Use `.claude/skills/pcx-patch-day-playbook/SKILL.md` and `knowledge/offset-methodology.md`.
 - Plan: `pcx mcp-plan "patch rollback restore patch" --permissions write_memory`.
 
 ## I want to use Source 2

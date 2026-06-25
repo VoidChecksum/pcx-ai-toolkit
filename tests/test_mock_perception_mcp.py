@@ -41,8 +41,14 @@ class MockPerceptionMcpTest(unittest.TestCase):
         tools = self.rpc("tools/list", {})["result"]["tools"]
         names = {t["name"] for t in tools}
         self.assertIn("process/read_typed_value", names)
+        self.assertIn("process/generate_signature", names)
+        self.assertIn("process/read_rtti", names)
         ok = self.rpc("tools/call", {"name":"process/reference_by_name", "arguments":{"name":"game.exe"}})
         self.assertEqual(ok["result"]["handle"], "0x1000")
+        sig = self.rpc("tools/call", {"name":"process/generate_signature", "arguments":{"handle":"0x1000", "address":"0x401200"}})
+        self.assertTrue(sig["result"]["unique"])
+        denied = self.rpc("tools/call", {"name":"process/write_virtual_memory", "arguments":{"handle":"0x1000", "address":"0x401200", "bytes":"90"}})
+        self.assertEqual(denied["error"]["code"], -32001)
         stale = self.rpc("tools/call", {"name":"process/read_typed_value", "arguments":{"handle":"0xdead", "address":"0x401000", "type":"u32"}})
         self.assertEqual(stale["error"]["code"], -32002)
 

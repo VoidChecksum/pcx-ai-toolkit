@@ -129,7 +129,7 @@ Report persistent false positives as GitHub issues with label `lsp`.
 3. **Port mismatch**: The default Perception MCP port is `42069`. Ensure nothing else is using it.
 4. **Restart required**: Most AI clients require a restart after MCP config changes.
 
-See `mcp/troubleshooting.md` for detailed diagnostics.
+See `docs/perception/mcp-error-recovery.md` for detailed diagnostics.
 
 ### Why does `pcx check-mcp` fail?
 

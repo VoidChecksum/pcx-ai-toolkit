@@ -592,6 +592,9 @@ def main() -> int:
     if cmd == "model-eval":
         return run_python_tool("model-eval", sub_args)
 
+    if cmd == "release-check":
+        return run_python_tool("release-check", sub_args)
+
     if cmd == "mcp-doctor":
         return run_python_tool("perception-mcp-doctor", sub_args)
 
@@ -600,6 +603,9 @@ def main() -> int:
 
     if cmd == "check-mcp":
         return run_python_tool("check-mcp-config", sub_args)
+
+    if cmd == "check-mcp-workflows":
+        return run_python_tool("check-mcp-workflows", sub_args)
 
     if cmd == "check-matrix":
         return run_python_tool("check-version-matrix", sub_args)

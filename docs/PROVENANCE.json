@@ -1,5 +1,5 @@
 {
-  "count": 103,
+  "count": 122,
   "drift_checkable": 67,
   "files": {
     "docs/AI_AGENT_OPERATING_MANUAL.md": {
@@ -13,6 +13,11 @@
       "url": null
     },
     "docs/FAQ.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/NAVIGATION.md": {
       "drift_check": false,
       "source": "local",
       "url": null
@@ -282,6 +287,96 @@
       "source": "gitbook",
       "url": "https://enma-1.gitbook.io/enma/sdk-guide/type-registration.md"
     },
+    "docs/examples/bad-answers/draw-esp-hallucination.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/bad-answers/find-pattern-string-search.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/bad-answers/mcp-handle-reuse.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/bad-answers/missing-file-permission.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/bad-answers/pattern-hit-proof.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/bad-answers/raw-xy-no-vec2.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/bad-answers/register-callback-enma.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/bad-answers/write-memory-no-rollback.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/draw-text.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/evidence-graph.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/fake-api-refusal.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/gui-sidebar.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/http-get.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/parse-json.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/pattern-to-function-mcp.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/read-process-memory.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/string-xref-mcp.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
+    "docs/examples/golden-answers/unicorn.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/marketplace-install.md": {
       "drift_check": false,
       "source": "local",
@@ -518,14 +613,33 @@
       "url": null
     }
   },
-  "generated": "2026-06-25",
+  "generated": "2026-06-26",
   "unmapped": [
     "docs/AI_AGENT_OPERATING_MANUAL.md",
     "docs/COVERAGE.md",
     "docs/FAQ.md",
+    "docs/NAVIGATION.md",
     "docs/WORKFLOW_COOKBOOK.md",
     "docs/distribution-checklist.md",
     "docs/enma/UPSTREAM-SUGGESTIONS.md",
+    "docs/examples/bad-answers/draw-esp-hallucination.md",
+    "docs/examples/bad-answers/find-pattern-string-search.md",
+    "docs/examples/bad-answers/mcp-handle-reuse.md",
+    "docs/examples/bad-answers/missing-file-permission.md",
+    "docs/examples/bad-answers/pattern-hit-proof.md",
+    "docs/examples/bad-answers/raw-xy-no-vec2.md",
+    "docs/examples/bad-answers/register-callback-enma.md",
+    "docs/examples/bad-answers/write-memory-no-rollback.md",
+    "docs/examples/golden-answers/draw-text.md",
+    "docs/examples/golden-answers/evidence-graph.md",
+    "docs/examples/golden-answers/fake-api-refusal.md",
+    "docs/examples/golden-answers/gui-sidebar.md",
+    "docs/examples/golden-answers/http-get.md",
+    "docs/examples/golden-answers/parse-json.md",
+    "docs/examples/golden-answers/pattern-to-function-mcp.md",
+    "docs/examples/golden-answers/read-process-memory.md",
+    "docs/examples/golden-answers/string-xref-mcp.md",
+    "docs/examples/golden-answers/unicorn.md",
     "docs/marketplace-install.md",
     "docs/model-guides/weak-local-models.md",
     "docs/perception/changelogs.md",
