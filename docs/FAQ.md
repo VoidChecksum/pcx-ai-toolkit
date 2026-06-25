@@ -133,7 +133,7 @@ See `mcp/troubleshooting.md` for detailed diagnostics.
 
 ### Why does `pcx check-mcp` fail?
 
-`pcx check-mcp` verifies that `mcp/perception-mcp-config.json` matches the documented API in `mcp/mcp-api.md`. If they're out of sync, update the config or the docs to match.
+`pcx check-mcp` verifies that `mcp/perception-mcp-config.json` matches the documented API in `docs/perception/mcp-api.md`. If they're out of sync, update the config or the docs to match.
 
 ---
 

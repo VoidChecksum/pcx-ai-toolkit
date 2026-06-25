@@ -155,6 +155,7 @@ npm Trusted Publisher for `pcx-ai-toolkit`:
 - Repository: `pcx-ai-toolkit`
 - Workflow filename: `release.yml`
 - Allowed action: `npm publish`
+- Fallback: add GitHub secret `NPM_TOKEN`; the release workflow passes it as `NODE_AUTH_TOKEN`.
 
 ## Anti-Hallucination Pipeline
 

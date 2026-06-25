@@ -79,14 +79,14 @@ Wire the Perception MCP server into Cline via `cline_mcp_settings.json` (Cline's
   "mcpServers": {
     "perception": {
       "transport": "http",
-      "url": "http://127.0.0.1:42069",
+      "url": "http://127.0.0.1:42069/mcp",
       "description": "Perception.cx MCP — live process / memory / disasm tools"
     }
   }
 }
 ```
 
-Authoritative tool list: `mcp/perception-mcp-config.json`. Routing guide for which of the 37 tools to use when: `.claude/skills/mcp-tool-routing/SKILL.md`. The Perception IDE must be running with MCP enabled (`Settings → MCP → Enabled`).
+Authoritative tool list: `mcp/perception-mcp-config.json`. Routing guide for which of the 59 tools to use when: `.claude/skills/mcp-tool-routing/SKILL.md`. The Perception IDE must be running with MCP enabled (`Settings → Perception MCP → Enable MCP server`).
 
 ## Karpathy Workflow
 

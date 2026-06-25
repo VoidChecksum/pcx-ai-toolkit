@@ -109,7 +109,7 @@ indexes it once and you can `@docs` into it by name. Otherwise pull the specific
 Continue loads MCP servers as tool sources in **agent mode**. The Perception MCP server
 ships with the toolkit (`mcp/perception-mcp-config.json`) — it is JSON-RPC over local
 HTTP, launched automatically by the Perception IDE when MCP is enabled in settings, and
-listens on `http://127.0.0.1:42069`. Register it in `config.yaml` with the
+listens on `http://127.0.0.1:42069/mcp`. Register it in `config.yaml` with the
 `streamable-http` transport:
 
 ```yaml
@@ -117,7 +117,7 @@ listens on `http://127.0.0.1:42069`. Register it in `config.yaml` with the
 mcpServers:
   - name: perception
     type: streamable-http
-    url: http://127.0.0.1:42069
+    url: http://127.0.0.1:42069/mcp
 ```
 
 Start the Perception IDE with MCP enabled first so the endpoint is live, then reload

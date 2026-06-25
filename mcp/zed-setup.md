@@ -115,9 +115,9 @@ covers the breadth of the API. Add the per-area API docs (`render`, `proc`, `gui
 
 ## MCP Integration
 
-The Perception MCP server (`mcp/perception-mcp-config.json`) is a JSON-RPC server over
-local HTTP at `127.0.0.1:42069`, **launched by the Perception IDE** when MCP is enabled in
-its settings. Start the IDE with MCP on, then attach Zed to that endpoint.
+The Perception MCP server (`mcp/perception-mcp-config.json`) is streamable HTTP at
+`127.0.0.1:42069/mcp`, **launched by the Perception IDE** when MCP is enabled in its
+settings. Start the IDE with MCP on, then attach Zed to that endpoint.
 
 Zed's `context_servers` launches a local command and talks to it over stdio, so bridge to
 the IDE's HTTP endpoint with `mcp-remote`. Add this to `~/.config/zed/settings.json`:
@@ -129,7 +129,7 @@ the IDE's HTTP endpoint with `mcp-remote`. Add this to `~/.config/zed/settings.j
       "source": "custom",
       "command": {
         "path": "npx",
-        "args": ["-y", "mcp-remote", "http://127.0.0.1:42069"]
+        "args": ["-y", "mcp-remote", "http://127.0.0.1:42069/mcp"]
       },
       "env": {}
     }
@@ -156,7 +156,7 @@ scripting bridge (`script/get_context`, `script/validate`, `script/execute`). Th
 agent resolve and verify an offset against the live binary instead of guessing — guideline 12.
 
 If your Zed version exposes a native URL/SSE field for remote context servers, point it
-straight at `http://127.0.0.1:42069` and drop the bridge.
+straight at `http://127.0.0.1:42069/mcp` and drop the bridge.
 
 ## Typical Workflow
 

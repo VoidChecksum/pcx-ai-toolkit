@@ -25,7 +25,7 @@ class DistributionTest(unittest.TestCase):
         self.assertNotIn("TWINE_PASSWORD", text)
         self.assertNotIn("password:", text)
 
-    def test_release_publishes_npm_with_trusted_publishing(self):
+    def test_release_publishes_npm_with_trusted_publishing_or_token_secret(self):
         workflow = REPO_ROOT / ".github" / "workflows" / "release.yml"
         text = workflow.read_text(encoding="utf-8")
         self.assertIn("Build npm package", text)
@@ -33,8 +33,8 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("npm-version", text)
         self.assertIn("npm pack --dry-run", text)
         self.assertIn("npm publish", text)
-        self.assertNotIn("NODE_AUTH_TOKEN", text)
-        self.assertNotIn("NPM_TOKEN", text)
+        self.assertIn("NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}", text)
+        self.assertNotIn("_authToken", text)
 
     def test_readme_documents_registry_trusted_publishers(self):
         readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")

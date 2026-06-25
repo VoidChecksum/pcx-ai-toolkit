@@ -1,11 +1,9 @@
 {
   "mcpServers": {
     "perception": {
-      "command": "node",
-      "args": [],
-      "url": "http://127.0.0.1:42069",
+      "url": "http://127.0.0.1:42069/mcp",
       "transport": "http",
-      "description": "Perception.cx MCP server — JSON-RPC over local HTTP. Launched automatically by the Perception IDE when MCP is enabled in settings (Settings → Perception MCP). Loopback-only. Tool names below are the live JSON-RPC method names, kept in sync with docs/perception/mcp-api.md by tools/check-mcp-config.py (CI).",
+      "description": "Perception.cx MCP server — streamable HTTP at /mcp. Launched automatically by the Perception IDE when MCP is enabled in settings (Settings → Perception MCP). Loopback-only. Tool names below are the live JSON-RPC method names, kept in sync with docs/perception/mcp-api.md by tools/check-mcp-config.py (CI).",
       "tools": [
         "process/list",
         "process/info_by_pid",

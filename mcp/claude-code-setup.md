@@ -30,12 +30,13 @@ Claude Code reads this rules file automatically when launched in your project di
 
 If you run the Perception IDE with MCP enabled, Claude Code can connect to its tool server:
 
-1. Copy the MCP config:
+1. Add the streamable HTTP server (replace the port if Perception picked another):
    ```bash
-   cp mcp/perception-mcp-config.json ~/.claude/mcp.json
+   claude mcp add --transport http perception http://127.0.0.1:42069/mcp
    ```
-2. Launch Perception IDE with MCP enabled (Settings -> enable MCP server)
-3. The tools (memory read, disassemble, pattern scan, etc.) become available in Claude Code
+   Or copy the checked config: `cp mcp/perception-mcp-config.json ~/.claude/mcp.json`.
+2. Launch Perception IDE with MCP enabled (Settings -> enable MCP server).
+3. The tools (memory read, disassemble, pattern scan, etc.) become available in Claude Code.
 
 ## 4. Build LSP Servers (Optional)
 

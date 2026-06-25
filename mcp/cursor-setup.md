@@ -26,7 +26,7 @@ Cursor supports MCP servers. Add to `.cursor/mcp.json`:
 {
   "mcpServers": {
     "perception": {
-      "url": "http://127.0.0.1:42069",
+      "url": "http://127.0.0.1:42069/mcp",
       "transport": "http"
     }
   }

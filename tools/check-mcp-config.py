@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Keep mcp/perception-mcp-config.json 100% in sync with docs/perception/mcp-api.md.
 
-The Perception MCP server's tool list is the source of truth for "what can an
-MCP client call." mcp-api.md is the scraped, drift-checked mirror of that surface
-(tools/check-doc-drift.py keeps it synced to docs.perception.cx). This script
-ensures the toolkit's client config (`mcp/perception-mcp-config.json`) lists
+The Perception MCP server's tool list and streamable HTTP endpoint are the source
+of truth for "what can an MCP client call." mcp-api.md is the scraped,
+drift-checked mirror of that surface (tools/check-doc-drift.py keeps it synced
+to docs.perception.cx). This script ensures the toolkit's client config
+(`mcp/perception-mcp-config.json`) uses the documented `/mcp` endpoint and lists
 exactly those tool method names — no stale names, no missing tools, no extras.
 
-Compatibility contract: every name in the config `tools` array MUST appear in
-mcp-api.md, and every `process/*` / `system/*` / `script/*` method documented in
-mcp-api.md MUST be listed in the config. Drift either way fails CI.
+Compatibility contract: the config URL MUST end in `/mcp`, MUST use HTTP
+transport, MUST NOT include a dummy stdio command, every name in the config
+`tools` array MUST appear in mcp-api.md, and every `process/*` / `system/*` /
+`script/*` method documented in mcp-api.md MUST be listed in the config.
 
 Usage:
     python tools/check-mcp-config.py          # human report, exit 1 on mismatch
@@ -23,6 +25,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONFIG = REPO_ROOT / "mcp" / "perception-mcp-config.json"
@@ -48,6 +51,30 @@ def config_tools() -> set[str]:
     return out
 
 
+def config_server() -> dict:
+    d = json.loads(CONFIG.read_text(encoding="utf-8"))
+    server = d.get("mcpServers", {}).get("perception")
+    return server if isinstance(server, dict) else {}
+
+
+def config_endpoint_errors(server: dict) -> list[str]:
+    errors: list[str] = []
+    url = server.get("url")
+    if not isinstance(url, str):
+        errors.append("missing string url")
+    else:
+        parsed = urlparse(url)
+        if parsed.scheme not in {"http", "https"}:
+            errors.append(f"url must be http(s), got {parsed.scheme or '<none>'}")
+        if parsed.path.rstrip("/") != "/mcp":
+            errors.append("url path must be /mcp")
+    if server.get("transport") != "http":
+        errors.append("transport must be http")
+    if "command" in server or "args" in server:
+        errors.append("http MCP config must not include command/args")
+    return errors
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true", help="exit 1 on mismatch (CI)")
@@ -60,11 +87,16 @@ def main() -> int:
 
     doc = doc_tools()
     cfg = config_tools()
+    server = config_server()
+    endpoint_errors = config_endpoint_errors(server)
     in_cfg_not_doc = sorted(cfg - doc)
     in_doc_not_cfg = sorted(doc - cfg)
 
-    ok = not in_cfg_not_doc and not in_doc_not_cfg
+    ok = not endpoint_errors and not in_cfg_not_doc and not in_doc_not_cfg
     report = {
+        "url": server.get("url"),
+        "transport": server.get("transport"),
+        "endpoint_errors": endpoint_errors,
         "doc_tools": len(doc),
         "config_tools": len(cfg),
         "in_config_not_in_doc": in_cfg_not_doc,
@@ -80,6 +112,10 @@ def main() -> int:
         return 0
 
     print("MCP config OUT OF SYNC with docs/perception/mcp-api.md:")
+    if endpoint_errors:
+        print(f"  endpoint/config errors ({len(endpoint_errors)}):")
+        for e in endpoint_errors:
+            print(f"    ! {e}")
     if in_cfg_not_doc:
         print(f"  in config but NOT in mcp-api.md ({len(in_cfg_not_doc)}):")
         for t in in_cfg_not_doc:
@@ -88,8 +124,8 @@ def main() -> int:
         print(f"  in mcp-api.md but NOT in config ({len(in_doc_not_cfg)}):")
         for t in in_doc_not_cfg:
             print(f"    - {t}")
-    print("Fix: update mcp/perception-mcp-config.json `tools` to match mcp-api.md,")
-    print("then regenerate docs/COUNTS.json (python tools/build-counts.py).")
+    print("Fix: update mcp/perception-mcp-config.json URL/tools to match docs/perception/mcp-api.md,")
+    print("then regenerate docs/COUNTS.json and LLM bundles if docs changed.")
     return 1 if args.check or not args.json else 0
 
 
