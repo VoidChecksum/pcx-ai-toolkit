@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.18.0 - 2026-06-25
+
+- chore: normalize provenance output
+- chore: refresh generated hardening metadata
+- fix: quiet workflow pyright diagnostics
+- fix: satisfy mcp hardening ci
+- feat: harden perception mcp workflows
+
 ## v1.17.0 - 2026-06-25
 
 - fix(examples): document process permissions
