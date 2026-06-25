@@ -13,16 +13,16 @@ def run(name, cmd):
 def main() -> int:
     py=sys.executable
     checks=[
-      ('markdown links', [py,'-m','pytest','tests/test_all_markdown_links.py','-q']),
+      ('markdown links', [py,'-m','unittest','tests.test_all_markdown_links']),
       ('docs drift', [py,'tools/check-doc-drift.py']),
       ('generated freshness', [py,'tools/pcx.py','docs-check']),
       ('mcp config', [py,'tools/check-mcp-config.py','--check']),
       ('mcp workflows', [py,'tools/check-mcp-workflows.py','--json']),
-      ('task docs', [py,'-m','pytest','tests/test_task_docs.py','-q']),
-      ('mock mcp', [py,'-m','pytest','tests/test_mock_perception_mcp.py','-q']),
-      ('workflow eval', [py,'-m','pytest','tests/test_perception_mcp_workflow_evals.py','-q']),
-      ('evidence graph', [py,'-m','pytest','tests/test_evidence_graph.py','tests/test_evidence_graph_integrity.py','-q']),
-      ('model compatibility', [py,'-m','pytest','tests/test_model_eval.py','-q']),
+      ('task docs', [py,'-m','unittest','tests.test_task_docs']),
+      ('mock mcp', [py,'-m','unittest','tests.test_mock_perception_mcp']),
+      ('workflow eval', [py,'-m','unittest','tests.test_perception_mcp_workflow_evals']),
+      ('evidence graph', [py,'-m','unittest','tests.test_evidence_graph','tests.test_evidence_graph_integrity']),
+      ('model compatibility', [py,'-m','unittest','tests.test_model_eval']),
     ]
     results=[run(n,c) for n,c in checks]
     ok=all(r['ok'] for r in results)
