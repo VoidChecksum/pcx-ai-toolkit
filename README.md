@@ -4,373 +4,259 @@
 
 # pcx-ai-toolkit
 
-### The Source-Grounded AI Toolkit for Perception.cx Enma
+### Source-grounded AI infrastructure for Perception.cx Enma
 
 [![CI](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidChecksum/pcx-ai-toolkit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Scope](https://img.shields.io/badge/Scope-Enma-f97316.svg)](#language-scope)
-[![Docs](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.docs&label=Docs&suffix=%20pages&color=22c55e)](#knowledge-surface)
-[![Doc Lines](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.doc_lines&label=Doc%20Lines&color=22c55e)](#knowledge-surface)
-[![MCP Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.mcp_tools&label=MCP%20Tools&color=0ea5e9)](#mcp-integration)
-[![AI Skills](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.skills&label=AI%20Skills&color=eab308)](#ai-agent-stack)
-[![Native Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.native_tools&label=Native%20Tools&color=64748b)](#native-re-tools)
+[![Scope](https://img.shields.io/badge/Scope-Enma-f97316.svg)](#language-contract)
+[![Docs](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.docs&label=Docs&suffix=%20files&color=22c55e)](#ai-workflow)
+[![MCP Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.mcp_tools&label=MCP%20Tools&color=0ea5e9)](#mcp)
+[![Native Tools](https://img.shields.io/badge/dynamic/json?url=https://raw.githubusercontent.com/VoidChecksum/pcx-ai-toolkit/main/docs/COUNTS.json&query=$.native_tools&label=Native%20Tools&color=64748b)](#native-re-toolchain)
 
-**Make LLMs write Perception.cx code from verified Enma sources, not guessed APIs.**
+**Make LLMs write Perception.cx scripts from verified Enma sources, not guessed APIs.**
 
-`llms.txt` context packs | source-backed API oracle | MCP tools | validators | native Rust RE tools | templates | AI skills | VS Code and Visual Studio packages
+`llms.txt` bundles · source-backed API oracle · MCP server · code validators · hallucination evals · templates · native RE helpers
 
-[AI Start Here](#ai-start-here) | [Anti-Hallucination](#anti-hallucination-pipeline) | [Knowledge](#knowledge-surface) | [MCP](#mcp-integration) | [Editors](#editor-and-vsix-packages) | [Safety](#safety-and-scope)
+[Install](#install) · [AI workflow](#ai-workflow) · [Validation](#validation-pipeline) · [MCP](#mcp) · [Coverage](#coverage) · [Safety](#safety)
 
 </div>
 
 ---
-## First Decision
 
-```text
-Writing Enma?        Load docs/llms-perception-enma.md, then run pcx symbol-check.
-Need API proof?      Run pcx api <symbol>.
-Need MCP context?    Run pcx-rs mcp, pcx-rs mcp-schema --json, or pcx-knowledge-mcp.
-Need RE artifacts?   Use re-importer.py exporters; keep evidence before shipping.
+## The point
+
+LLMs are good at syntax shape and terrible at knowing which Perception APIs actually exist. `pcx-ai-toolkit` gives them a grounded contract:
+
+```mermaid
+flowchart LR
+    P[Prompt] --> C[Context plan]
+    C --> D[Source docs + llms bundles]
+    D --> A[API lookup]
+    A --> G[Generate Enma]
+    G --> V[Validate code / answer / project]
+    V -->|findings| R[Repair with citations]
+    R --> V
+    V -->|ok| S[Ship script]
 ```
-
-Unsupported or hallucinated surfaces live in [`knowledge/unsupported-symbols.json`](knowledge/unsupported-symbols.json) and are rejected by validators when seen.
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" valign="top">
 
-## What This Is
+### Built for
 
-`pcx-ai-toolkit` is an AI-facing knowledge and validation layer for Perception.cx scripting.
-
-It teaches agents the supported **Enma** APIs, routes them to source docs, rejects unsupported symbols, and validates generated code before it reaches PCX.
+- Perception.cx Enma scripting
+- AI agents that need small, precise context
+- MCP clients that need lookup and validation tools
+- Reverse-engineering workflows that need evidence discipline
+- Users who want copy-paste setup and predictable checks
 
 </td>
-<td width="50%">
+<td width="50%" valign="top">
 
-## What This Is Not
+### Not built for
 
-This is not a generic cheat dump, offset pack, malware toolkit, or unsupported language bundle.
-
-AngelScript, Lua, and other historical surfaces are intentionally excluded from the AI contract. If a symbol is not proven by docs or the API index, the agent must not invent it.
+- Invented helper APIs like `draw_esp()`
+- AngelScript, Lua, or historical bindings as an AI target
+- Offset dumps without source evidence
+- Malware, credential theft, or unauthorized targets
+- Guessing when docs are silent
 
 </td>
 </tr>
 </table>
 
-## AI Start Here
+## Install
 
-Load this sequence before writing any Perception code:
-
-```text
-1. docs/AI_AGENT_OPERATING_MANUAL.md
-2. docs/perception/llm-routing.md
-3. Use Enma (`.em`)
-4. Load `docs/llms-perception-enma.md`
-5. Verify every API or language add-on symbol with pcx api or MCP api_lookup
-6. Validate code with pcx symbol-check, pcx verify, or MCP validate_answer
-```
-
-| Must Load | Purpose |
-|---|---|
-| [docs/AI_AGENT_OPERATING_MANUAL.md](docs/AI_AGENT_OPERATING_MANUAL.md) | Minimal safe workflow for LLM and MCP agents |
-| [docs/perception/llm-routing.md](docs/perception/llm-routing.md) | Enma-only source-grounding workflow |
-| [docs/llms-perception-enma.md](docs/llms-perception-enma.md) | Single-file Enma + PCX context pack |
-| [knowledge/pcx-api-index.json](knowledge/pcx-api-index.json) | Machine-readable oracle for PCX host APIs and language add-ons |
-| [knowledge/perception-forum-insights.md](knowledge/perception-forum-insights.md) | Secondary forum/changelog context, never an API contract |
-
-Recommended model instruction:
-
-```text
-Before writing Perception code, load docs/AI_AGENT_OPERATING_MANUAL.md and docs/perception/llm-routing.md.
-Use Enma docs for `.em` files; `.as` is unsupported.
-Verify every Perception host API and language/add-on symbol with pcx api or MCP api_lookup.
-Validate final code or Markdown answers before returning them.
-If the docs/API index do not prove a symbol exists, say so instead of guessing.
-```
-
-## Language Scope
-
-The toolkit is intentionally scoped to **Perception-supported Enma (`.em`) only**. AngelScript (`.as`) is deprecated and rejected by validators/scaffolding.
-
-Core Enma contract: `int64 main()`, `register_routine(cast<int64>(fn), data)`, `void fn(int64 data)`, `println(...)`, RAII `proc_t`, `T[]`, `map<K,V>`, `vec2(...)`, and `color(r,g,b,a)`.
-
-## Quick Start
-
-PyPI:
-
-```bash
-python -m pip install pcx-ai-toolkit
-pcx doctor
-pcx update  # later: runs python -m pip install --upgrade pcx-ai-toolkit
-```
-
-npm / Bun:
+### npm / Bun
 
 ```bash
 npm install -g pcx-ai-toolkit
 # or
 bun add -g pcx-ai-toolkit
+
 pcx doctor
-pcx update  # later: runs npm install -g pcx-ai-toolkit@latest
+pcx ai-smoke
 ```
 
-Source checkout:
+### Python
+
+```bash
+python -m pip install pcx-ai-toolkit
+pcx doctor
+pcx ai-smoke
+```
+
+### Source checkout
 
 ```bash
 git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
 cd pcx-ai-toolkit
 ./setup.sh
+pcx doctor
 ```
 
-Windows PowerShell:
+### Windows PowerShell
 
 ```powershell
 git clone --recursive https://github.com/VoidChecksum/pcx-ai-toolkit.git
 cd pcx-ai-toolkit
 powershell -ExecutionPolicy Bypass -File setup.ps1
+pcx doctor
 ```
 
-After publishing, users update with the same command everywhere:
+Requirements: Git, Python 3.10+, Node.js 18+. Rust/Cargo enables native RE binaries. Submodules are required for LSP and VSIX packaging.
+
+Update later with one command:
 
 ```bash
 pcx update
 ```
 
-Source checkouts keep using the git-backed updater; registry installs use their package manager.
+## First command by job
 
-Requirements: Git, Python 3.10+, Node.js 18+. Git submodules are required for LSP and `.vsix` packaging.
+| Job | Command / file | Result |
+|---|---|---|
+| Need model instructions | `pcx prompt --model claude` | Copy-paste anti-hallucination prompt |
+| Need setup targets | `pcx agent-install --dry-run` | Shows client install plan |
+| Need API proof | `pcx api draw_text` | Exact signatures and source URLs |
+| Need script validation | `pcx verify file.em` | Lint + symbol checks |
+| Need project validation | `pcx verify-project ./project` | Project hygiene + evidence gates |
+| Need answer validation | `pcx check-answer answer.md` | Checks fenced code blocks |
+| Need all docs gates | `pcx docs-check` | Regeneration, drift, eval, focused tests |
+| Need MCP workflow | `mcp/pcx-knowledge-mcp/` | Search, fetch, lookup, validate, scaffold |
 
-## Registry Publishing Setup
+## Language contract
 
-For automatic package publishing from GitHub Actions, configure trusted publishers once in each registry.
-
-PyPI Trusted Publisher for `pcx-ai-toolkit`:
-- Owner: `VoidChecksum`
-- Repository: `pcx-ai-toolkit`
-- Workflow filename: `release.yml`
-
-npm Trusted Publisher for `pcx-ai-toolkit`:
-- Owner/user: `VoidChecksum`
-- Repository: `pcx-ai-toolkit`
-- Workflow filename: `release.yml`
-- Allowed action: `npm publish`
-- Fallback: add GitHub secret `NPM_TOKEN`; the release workflow passes it as `NODE_AUTH_TOKEN`.
-
-## Easiest Agent Setup
-
-```bash
-pcx prompt --model claude
-pcx agent-install --dry-run
-pcx ai-smoke
-```
-
-Coverage truth is generated in [`docs/COVERAGE.md`](docs/COVERAGE.md) and [`docs/COVERAGE.json`](docs/COVERAGE.json); do not trust stale hand-counted numbers.
-
-## Anti-Hallucination Pipeline
-
-Use these checks before trusting generated code:
-
-```bash
-# Exact source-backed lookup.
-pcx api draw_text
-pcx api json_object
-
-# Script validation.
-pcx symbol-check my_script.em
-pcx verify my_script.em
-pcx verify-project ./my-project
-
-# Markdown answer validation.
-pcx check-answer answer.md
-
-# Regression benchmark for hallucinated answers/snippets.
-python3 tools/hallucination-eval.py
-```
-
-MCP-aware clients should use this sequence:
+This toolkit intentionally targets **Perception-supported Enma (`.em`)**.
 
 ```text
-overview()
-recommend_context(task, language)
-generate_script_plan(task, language)
-scaffold_project(..., dry_run=true)
-get_skill(name)
-get_file(path)
-api_lookup(symbol, language)
-validate_code(code, language)
-validate_answer(markdown)
-validate_project(path)
+Entrypoint:       int64 main()
+Routine install: register_routine(cast<int64>(fn), data)
+Routine shape:   void fn(int64 data)
+Arrays:          T[]
+Maps:            map<K,V> for string keys; imap<V> for integer keys
+Render shapes:   vec2(...), color(r,g,b,a), documented draw_* calls only
+Validation rule: if docs/API index do not prove it, do not use it
 ```
 
-| Failure Mode | Countermeasure |
-|---|---|
-| Invented API names like `draw_esp()` | `pcx api`, MCP `api_lookup`, and `knowledge/pcx-api-index.json` |
-| Enma lifecycle inside `.as` | `docs/perception/llm-routing.md`, symbol validation, wrong-language detection |
-| Missing Enma imports | `validate_code` missing-import findings for `vec`, `color`, `math`, `json`, and more |
-| Enma semantic traps | Rust `symbol-check` flags integer-keyed `map<K,V>`, escaping `return &local`, and missing `PERM_FILE` for file APIs |
-| Stale docs | provenance, drift checks, `tools/regenerate-docs.py`, regenerated `llms-*` bundles |
-| Forum facts treated as APIs | `knowledge/perception-forum-insights.md` is marked secondary |
-| Regressed validators | `tools/hallucination-eval.py` golden corpus |
+AngelScript (`.as`), Lua, C++ helper syntax, JavaScript `await`, `ImGui::*`, and game-specific helpers are rejected or flagged by validators.
 
-## Knowledge Surface
+## AI workflow
 
-| Docs | Doc Lines | API Docs Indexed | API Functions | API Methods | Skills | Templates | MCP Tools | Native Tools |
-|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 124 | 32,186 | 39 | 836 | 333 | 25 | 30 | 59 | 13 |
+### Minimal context load
 
-| Surface | Path | Best For |
+```text
+1. Read docs/AI_AGENT_OPERATING_MANUAL.md
+2. Read docs/perception/llm-routing.md
+3. Load docs/llms-perception-enma.md
+4. Verify every API name with pcx api or MCP api_lookup
+5. Validate final code with pcx verify, validate_code, or validate_answer
+```
+
+### Copy-paste model instruction
+
+```text
+You are writing Perception.cx Enma only.
+Before code, load docs/AI_AGENT_OPERATING_MANUAL.md and docs/perception/llm-routing.md.
+Use docs/llms-perception-enma.md as the primary context pack.
+Do not use AngelScript, Lua, ImGui, C++ templates, or invented game helpers.
+Verify every Perception host API and Enma add-on symbol with pcx api or MCP api_lookup.
+Run validation before final answer. If the API index does not prove a symbol exists, say it is unverified instead of guessing.
+```
+
+### Choose a context surface
+
+| Surface | Path | Best when |
 |---|---|---|
-| LLM entry index | [docs/llms.txt](docs/llms.txt) | Auto-fetch tools and first-touch sessions |
-| Full context pack | [docs/llms-full.txt](docs/llms-full.txt) | One preload for both supported languages |
-| Enma context pack | [docs/llms-perception-enma.md](docs/llms-perception-enma.md) | Enma-only work |
-| Skills bundle | [docs/llms-skills.md](docs/llms-skills.md) | Agent behavior and workflow rules |
-| Knowledge bundle | [docs/llms-knowledge.md](docs/llms-knowledge.md) | Patterns, forum-derived context, RE references |
-| API oracle | [knowledge/pcx-api-index.json](knowledge/pcx-api-index.json) | Exact signatures with source URLs |
-| Dynamic MCP | [mcp/pcx-knowledge-mcp](mcp/pcx-knowledge-mcp) | Long sessions, lazy loading, validation |
+| Entry index | [docs/llms.txt](docs/llms.txt) | Tool auto-fetches `llms.txt` |
+| Enma pack | [docs/llms-perception-enma.md](docs/llms-perception-enma.md) | One-language Perception scripting session |
+| Full pack | [docs/llms-full.txt](docs/llms-full.txt) | Tool accepts one large file |
+| Skills pack | [docs/llms-skills.md](docs/llms-skills.md) | Agent needs operating rules |
+| Knowledge pack | [docs/llms-knowledge.md](docs/llms-knowledge.md) | Agent needs patterns and RE context |
+| API oracle | [knowledge/pcx-api-index.json](knowledge/pcx-api-index.json) | Exact symbol/signature lookup |
+| Dynamic MCP | [mcp/pcx-knowledge-mcp](mcp/pcx-knowledge-mcp) | Long sessions and lazy retrieval |
 
-High-value files:
+## Validation pipeline
 
-| File | Use |
-|---|---|
-| [knowledge/pcx-api-cheatsheet.md](knowledge/pcx-api-cheatsheet.md) | PCX APIs at a glance |
-| [knowledge/common-patterns.md](knowledge/common-patterns.md) | Working Enma patterns |
-| [knowledge/custom-draw-patterns.md](knowledge/custom-draw-patterns.md) | GPU/custom draw examples |
-| [knowledge/pcx-version-matrix.md](knowledge/pcx-version-matrix.md) | Version and changelog availability matrix |
-| [knowledge/perception-forum-insights.md](knowledge/perception-forum-insights.md) | Forum-derived Enma rollout, overlay, IDE, analyzer, changelog context |
-
-Regenerate and verify generated knowledge:
-
-```bash
-python3 tools/build-counts.py
-python3 tools/build-api-index.py
-python3 tools/build-llms-index.py
-python3 tools/build-provenance.py
-python3 tools/regenerate-docs.py --check
-python3 tools/check-llm-contract.py
-python3 tools/check-skill-contract.py
+```mermaid
+flowchart TD
+    Q[Question or generated answer] --> L{Contains code?}
+    L -->|No| C[Use docs + citations]
+    L -->|Yes| E[Extract Enma blocks]
+    E --> S[Symbol lookup]
+    S --> M[Import + lifecycle checks]
+    M --> P[Permission and sentinel checks]
+    P --> H[Hallucination regression patterns]
+    H --> O{ok?}
+    O -->|No| F[Return finding code + minimal repair]
+    O -->|Yes| K[Safe to hand off]
 ```
 
-## PCX CLI
-
-```bash
-pcx setup
-pcx update
-pcx doctor
-pcx api draw_text
-pcx symbol-check file.em
-pcx verify file.em
-pcx check-answer answer.md
-pcx create --wizard
-pcx create --name "My ESP" --language enma --kind full --target game.exe --output ./my-esp
-pcx verify-project ./my-esp --allow-placeholders --allow-unverified
-```
-
-| Tool | Purpose |
+| Failure mode | Gate |
 |---|---|
-| [tools/api-lookup.py](tools/api-lookup.py) | Exact API oracle |
-| [tools/symbol-check.py](tools/symbol-check.py) | Script-level source-grounded validation |
-| [tools/verify-project.py](tools/verify-project.py) | Project-wide lint, symbol, hygiene, and evidence verification |
-| [tools/check-llm-answer.py](tools/check-llm-answer.py) | Markdown answer code-block validation |
-| [tools/hallucination-eval.py](tools/hallucination-eval.py) | Golden regression benchmark for hallucination gates |
-| [tools/build-api-index.py](tools/build-api-index.py) | Rebuild source-backed API index |
-| [tools/check-doc-drift.py](tools/check-doc-drift.py) | Compare local docs against upstream |
-| [tools/regenerate-docs.py](tools/regenerate-docs.py) | Fetch drift-checkable upstream Markdown into `docs/` |
-| [tools/re-importer.py](tools/re-importer.py) | Convert IDA/Ghidra/Binja/ReClass exports into PCX offset/evidence seeds |
-| [tools/anti-debug-scanner.py](tools/anti-debug-scanner.py) | Native-backed anti-debug import, byte-pattern, and string scanner |
-| [tools/identify-protector.py](tools/identify-protector.py) | Native-backed protector, packer, overlay, and anti-debug indicator scan |
-| [tools/pe-section-analyzer.py](tools/pe-section-analyzer.py) | Native-backed section entropy, flag, overlay, and anomaly report |
-| [tools/analyze-vmprotect.py](tools/analyze-vmprotect.py) | Native-backed VMProtect section, VM-entry, and workflow analyzer |
-| [tools/dump-strings-xor.py](tools/dump-strings-xor.py) | Native-backed single-byte XOR string extraction |
-| [tools/module-export-mapper.py](tools/module-export-mapper.py) | Native-backed export listing and named consumer cross-reference |
-| [tools/sig-uniqueness-checker.py](tools/sig-uniqueness-checker.py) | Validate byte signatures; proxies to native Rust when built |
-| [tools/binary-diff-summary.py](tools/binary-diff-summary.py) | Patch-day section diff and recompile/refactor/major-change classifier; proxies to native Rust when built |
-| [tools/offset-diff.py](tools/offset-diff.py) | Diff named direct/RIP signatures across binary versions; proxies to native Rust when built |
-| [tools/check-skill-contract.py](tools/check-skill-contract.py) | Reject stale or unsupported AI-skill contracts |
-| [tools/check-mcp-config.py](tools/check-mcp-config.py) | Keep runtime MCP config aligned with docs |
+| Invented API names | `pcx api`, `knowledge/pcx-api-index.json`, MCP `api_lookup` |
+| Wrong lifecycle | `validate_code`, `symbol-check`, routine-shape checks |
+| Missing imports | Enma module hints for `vec`, `color`, `math`, `json`, and others |
+| Wrong argument shape | argument-count and rough constructor-shape validation |
+| Permission-sensitive APIs | permission metadata and `knowledge/permission-rules.json` |
+| Bad Markdown answer | `pcx check-answer answer.md` or MCP `validate_answer` |
+| Regressed validator | `tools/hallucination-eval.py` expected-finding corpus |
+| Generated docs drift | `pcx docs-check` |
 
-## Native RE Tools
+## Coverage
 
-The high-volume binary-analysis path is Rust-first with Python compatibility wrappers. Running `setup.sh`, `setup.ps1`, or CI builds these binaries into `tools/bin/`; if Cargo is unavailable, the same Python commands fall back automatically.
+Coverage truth is generated from committed artifacts. Do not hand-count these numbers.
 
-```bash
-cargo build --release --manifest-path tools/pe-parser/Cargo.toml
-mkdir -p tools/bin
-for tool in pe-parser anti-debug-scanner identify-protector pe-section-analyzer \
-  pcx-rs api-lookup pattern-format-converter analyze-vmprotect \
-  dump-strings-xor module-export-mapper \
-  sig-uniqueness-checker binary-diff-summary offset-diff; do
-  cp "tools/pe-parser/target/release/$tool" "tools/bin/$tool"
-done
-```
+| Metric | Current |
+|---|---:|
+| Documentation files | 88 |
+| Documentation lines | 21,687 |
+| Knowledge files | 26 |
+| MCP tools | 59 |
+| Native tools | 13 |
+| Templates | 18 |
+| API families indexed | 12 |
+| Symbols indexed | 216 |
+| Symbols with signatures | 212 |
+| Hallucination eval cases | 53 |
+| Drift-checkable sources | 67 |
 
-| Native binary | Wrapper | Use |
-|---|---|---|
-| `pcx-rs` | [tools/pcx](tools/pcx) | Rust-first manager command layer and native command router |
-| `api-lookup` | [tools/api-lookup.py](tools/api-lookup.py) | Source-backed Enma and AngelScript API lookup |
-| `pattern-format-converter` | [tools/pattern-format-converter.py](tools/pattern-format-converter.py) | Pattern conversion across IDA, Ghidra, x64dbg, CE, Enma, and mask formats |
-| `pe-parser` | [tools/lib/pe_parse.py](tools/lib/pe_parse.py) | PE/ELF/Mach-O metadata extraction for all RE tools |
-| `anti-debug-scanner` | [tools/anti-debug-scanner.py](tools/anti-debug-scanner.py) | Anti-debug imports, byte patterns, timing, context, and debugger-string scan |
-| `identify-protector` | [tools/identify-protector.py](tools/identify-protector.py) | Protector and packer heuristics from sections, imports, stubs, and overlays |
-| `pe-section-analyzer` | [tools/pe-section-analyzer.py](tools/pe-section-analyzer.py) | Entropy, flags, overlay, and section anomaly analysis |
-| `analyze-vmprotect` | [tools/analyze-vmprotect.py](tools/analyze-vmprotect.py) | VMProtect-specific section, entry-stub, and tooling recommendations |
-| `dump-strings-xor` | [tools/dump-strings-xor.py](tools/dump-strings-xor.py) | XOR-hidden string extraction across selected sections |
-| `module-export-mapper` | [tools/module-export-mapper.py](tools/module-export-mapper.py) | Export table mapping and named import consumer cross-reference |
-| `sig-uniqueness-checker` | [tools/sig-uniqueness-checker.py](tools/sig-uniqueness-checker.py) | Unique/stale/ambiguous signature verdicts with near-miss support |
-| `binary-diff-summary` | [tools/binary-diff-summary.py](tools/binary-diff-summary.py) | Fast patch-day section survival summary |
-| `offset-diff` | [tools/offset-diff.py](tools/offset-diff.py) | Direct and RIP-relative offset movement report |
+See [docs/COVERAGE.md](docs/COVERAGE.md) and [docs/COVERAGE.json](docs/COVERAGE.json) for generated target status.
 
-Keep new binary-analysis tools in the same Cargo package under [tools/pe-parser](tools/pe-parser), then expose a small Python wrapper so existing agent commands do not change.
+## MCP
 
-## Gap Analysis And Feature Improvements
-
-The docs surface is strong, but the toolkit still has a few high-value gaps when measured against the current Perception Enma surface:
-
-| Gap | Why It Matters | Improvement |
-|---|---|---|
-| Native parity is still incomplete | `symbol-check`, `verify-project`, `check-answer`, `create`, `counts`, `build-provenance`, offline `check-drift`, and core MCP handlers now run in Rust, but docs/index generation and some compatibility commands remain Python-backed | Port `build-api-index` and package/update commands only where native speed or release reliability pays for the code |
-| MCP server parity is partial | `pcx-rs mcp` supports line-delimited JSON-RPC plus `initialize`, `ping`, `tools/list`, `tools/call`, and toolkit validation tools, but not Streamable HTTP | Add HTTP transport only if real MCP clients need direct `pcx-rs` attachment instead of stdio |
-| API drift checks still rely on live Python doc scraping | The upstream docs change frequently, and live CI checks can fail from network instability | Keep native `pcx-rs build-provenance` and offline `pcx-rs check-drift` as the CI-safe path; add explicit `--live` Rust fetching and API-index parsing only if the Python scripts keep causing release failures |
-| Binary-analysis tools report findings but do not produce every PCX-ready remediation artifact | Analysts still manually turn some RE findings into Enma offsets, signatures, and evidence logs | Expand direct exporters for `offsets.em`, `evidence.jsonl`, signature health reports, and patch-day migration summaries |
-| Scenario coverage can go deeper | Current fixtures cover the major API families plus Enma JSON/map/file/OOB usage, and red/green validator tests cover cast, pointer escape, permission, and map-key mistakes | Add more tiny scenarios only when they catch a documented compiler/runtime edge that current tests miss |
-| Safety scope is metadata-backed but not policy-enforced | Templates and MCP responses preserve authorized-use context, but tooling does not block all dual-use misuse patterns | Keep metadata in generated artifacts and add narrow denylist checks only for common hallucinated abuse helpers |
-
-## AI Agent Stack
-
-| Layer | Files |
-|---|---|
-| Global rules | [.clinerules](.clinerules), [.cursorrules](.cursorrules), [.windsurfrules](.windsurfrules), [.github/copilot-instructions.md](.github/copilot-instructions.md) |
-| Drop-in rules | [rules/](rules/) |
-| Claude skills | [.claude/skills/](.claude/skills/) |
-| Agent manual | [docs/AI_AGENT_OPERATING_MANUAL.md](docs/AI_AGENT_OPERATING_MANUAL.md) |
-| Routing contract | [docs/perception/llm-routing.md](docs/perception/llm-routing.md) |
-| Knowledge MCP | [mcp/pcx-knowledge-mcp/](mcp/pcx-knowledge-mcp/) |
-
-Core skills:
-
-| Skill | Use |
-|---|---|
-| `pcx-enma-discipline` | Enma syntax, lifecycle, imports, and binding discipline |
-| `game-cheat-script-master` | End-to-end script architecture patterns |
-| `game-cheat-guidelines` | Behavioral guardrails and anti-hallucination rules |
-| `pcx-knowledge-index` | Which docs and knowledge files to load |
-| `mcp-tool-routing` | When and how to call MCP tools |
-
-## MCP Integration
-
-| MCP Surface | Purpose |
-|---|---|
-| [mcp/pcx-knowledge-mcp](mcp/pcx-knowledge-mcp) | Searchable corpus, API lookup, project scaffolding, code/project validation, answer validation |
-| [mcp/perception-mcp-config.json](mcp/perception-mcp-config.json) | Runtime Perception MCP config with 59 live-process tools |
-
-Install the knowledge server:
+`pcx-knowledge-mcp` exposes the repo as a tool surface for AI clients.
 
 ```bash
 pip install -e mcp/pcx-knowledge-mcp/
 pcx-knowledge-mcp --help
 ```
 
-Client setup:
+Recommended MCP call order:
+
+```text
+overview()
+recommend_context(task, "enma")
+generate_script_plan(task, "enma")
+scaffold_project(..., dry_run=true)
+get_skill(name)
+get_file(path)
+api_lookup(symbol, "enma")
+validate_code(code, "enma")
+validate_answer(markdown)
+validate_project(path)
+```
+
+| Tool family | Purpose |
+|---|---|
+| Search/fetch | Find and load docs, knowledge, templates, and skills |
+| Planning | Recommend minimal context and deterministic script plans |
+| Grounding | Exact API lookup with source URLs |
+| Validation | Check snippets, answers, and full projects |
+| Scaffolding | Preview or create Enma project templates |
+
+Client guides:
 
 | Client | Guide |
 |---|---|
@@ -381,46 +267,31 @@ Client setup:
 | Zed | [mcp/zed-setup.md](mcp/zed-setup.md) |
 | Aider | [mcp/aider-setup.md](mcp/aider-setup.md) |
 
-## Editor and VSIX Packages
+## CLI map
 
-Prebuilt VS Code extension packages are stored in the LSP submodules:
+| Command | Purpose |
+|---|---|
+| `pcx doctor` | Check local install health |
+| `pcx prompt --model claude` | Print model-specific operating prompt |
+| `pcx agent-install --dry-run` | Preview agent/client config writes |
+| `pcx api <symbol>` | Source-backed symbol lookup |
+| `pcx symbol-check file.em` | Script-level symbol validation |
+| `pcx verify file.em` | Lint and symbol-check one script |
+| `pcx verify-project ./project` | Validate project layout, placeholders, symbols, evidence |
+| `pcx check-answer answer.md` | Validate fenced code blocks in Markdown |
+| `pcx create --wizard` | Interactive Enma project scaffold |
+| `pcx ai-smoke` | Fast validator smoke test |
+| `pcx docs-check` | One pre-ship docs/eval/test gate |
 
-| Package | Path | Language |
-|---|---|---|
-| Enma Language | `lsp/enma-lsp/enma-language-1.1.22.vsix` | `.em`, `.em.predefined`, `.emb` |
-
-Build locally:
+Pre-ship gate:
 
 ```bash
-./tools/package-vsix.sh
+pcx docs-check
 ```
 
-Manual packaging:
-
-```bash
-cd lsp/enma-lsp
-npm install
-npm run compile
-npm run package
-
-```
-
-Visual Studio packages live under [visualstudio/](visualstudio/). They require Windows, MSBuild, and the Visual Studio extension development workload.
-
-```powershell
-msbuild visualstudio\EnmaVS\EnmaVS.csproj /p:Configuration=Release /restore
-```
+Runs API index check, LLM bundle check, coverage dashboard check, internal links, doc drift, hallucination eval, and focused pytest suites.
 
 ## Templates
-
-| Template | Language | Use |
-|---|---|---|
-| `hello-world` | Enma | Minimal lifecycle sanity check |
-| `cheat-skeleton-em` | Enma | Modular ESP, aim, menu, radar, triggerbot scaffold |
-| `full-project` | Enma | Multi-file Enma project layout |
-| `overlay-basic`, `minimap`, `aimbot-skeleton` | Enma | Focused examples |
-
-Create one:
 
 ```bash
 pcx create --wizard
@@ -428,31 +299,108 @@ pcx create --name "PCX Enma Script" --language enma --kind cheat --target game.e
 pcx verify-project ./pcx-enma-script --allow-placeholders --allow-unverified
 ```
 
-## Repository Map
+| Template | Use |
+|---|---|
+| `hello-world` | Minimal lifecycle sanity check |
+| `cheat-skeleton-em` | Modular ESP, aim, menu, radar, triggerbot scaffold |
+| `full-project` | Multi-file Enma project layout |
+| `overlay-basic` | Focused render overlay example |
+| `minimap` | Map/radar example |
+| `aimbot-skeleton` | Aiming architecture skeleton |
+
+## Native RE toolchain
+
+The high-volume binary-analysis path is Rust-first with Python compatibility wrappers. Setup and CI build native binaries into `tools/bin/`; Python wrappers keep existing agent commands stable.
+
+```bash
+cargo build --release --manifest-path tools/pe-parser/Cargo.toml
+```
+
+| Native tool | Wrapper | Use |
+|---|---|---|
+| `pcx-rs` | `tools/pcx` | Native command router and MCP helpers |
+| `api-lookup` | `tools/api-lookup.py` | Source-backed API lookup |
+| `pattern-format-converter` | `tools/pattern-format-converter.py` | Convert IDA/Ghidra/x64dbg/CE/Enma patterns |
+| `anti-debug-scanner` | `tools/anti-debug-scanner.py` | Anti-debug imports, byte patterns, timing, strings |
+| `identify-protector` | `tools/identify-protector.py` | Protector and packer heuristics |
+| `pe-section-analyzer` | `tools/pe-section-analyzer.py` | Entropy, flags, overlays, section anomalies |
+| `analyze-vmprotect` | `tools/analyze-vmprotect.py` | VMProtect section and entry-stub workflow |
+| `dump-strings-xor` | `tools/dump-strings-xor.py` | Single-byte XOR string extraction |
+| `module-export-mapper` | `tools/module-export-mapper.py` | Export listing and named consumer mapping |
+| `sig-uniqueness-checker` | `tools/sig-uniqueness-checker.py` | Signature uniqueness and near-miss checks |
+| `binary-diff-summary` | `tools/binary-diff-summary.py` | Patch-day section survival summary |
+| `offset-diff` | `tools/offset-diff.py` | Direct and RIP-relative offset movement report |
+
+## Editor packages
+
+| Package | Path | Language |
+|---|---|---|
+| Enma VS Code extension | `lsp/enma-lsp/enma-language-1.1.22.vsix` | `.em`, `.em.predefined`, `.emb` |
+| Visual Studio extension | [visualstudio/](visualstudio/) | Windows + MSBuild |
+
+Build locally:
+
+```bash
+./tools/package-vsix.sh
+```
+
+Manual VS Code packaging:
+
+```bash
+cd lsp/enma-lsp
+npm install
+npm run compile
+npm run package
+```
+
+Visual Studio package:
+
+```powershell
+msbuild visualstudio\EnmaVS\EnmaVS.csproj /p:Configuration=Release /restore
+```
+
+## Repository map
 
 ```text
 pcx-ai-toolkit/
 ├── docs/                  Generated LLM bundles + local docs mirror
 ├── docs/perception/       Perception Enma API docs
 ├── docs/enma/             Enma language and SDK references
-├── knowledge/             API index, patterns, forum insights, RE references
+├── knowledge/             API index, metadata, patterns, forum insights
+├── evals/                 Hallucination regression and model scorecards
 ├── templates/             Enma scaffolds
 ├── tools/                 CLI, validators, builders, RE helpers
-├── tools/pe-parser/       Rust-native parser, signature, diff, and offset tools
-├── evals/                 Hallucination regression corpus
-├── signatures/            Engine and protector reversal signature packs
+├── tools/pe-parser/       Rust-native parser, signature, diff, offset tools
 ├── mcp/                   Knowledge MCP and Perception MCP setup
 ├── rules/                 Drop-in agent instruction files
 ├── .claude/skills/        Agent skills for PCX work
+├── signatures/            Engine and protector reversal signature packs
 ├── lsp/                   Enma VS Code extension submodule
-└── visualstudio/          Visual Studio 2022 extension projects
+└── visualstudio/          Visual Studio extension projects
 ```
 
-## Safety and Scope
+## Maintainer commands
+
+```bash
+python3 tools/build-counts.py
+python3 tools/build-api-index.py --check
+python3 tools/build-llms-index.py --check
+python3 tools/build-coverage-dashboard.py --check
+python3 tools/check-internal-links.py
+python3 tools/check-doc-drift.py
+python3 tools/hallucination-eval.py
+pcx docs-check
+```
+
+Generated files include `docs/llms*.txt`, `docs/COVERAGE.*`, `docs/COUNTS.json`, and `knowledge/pcx-api-index.json`.
+
+## Safety
 
 This toolkit is for authorized Perception.cx scripting, reverse engineering, security research, single-player modding, and defensive analysis. Only analyze software you own or are explicitly authorized to test.
 
-The repo does not provide malware, stolen offsets, credential material, or binary payloads. See [SECURITY.md](SECURITY.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [CONTRIBUTING.md](CONTRIBUTING.md).
+The repository does not provide malware, stolen offsets, credential material, or binary payloads. Keep offset claims evidence-backed and mark placeholders until verified.
+
+See [SECURITY.md](SECURITY.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
