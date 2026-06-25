@@ -11,6 +11,18 @@ lsp/cpp-language-server/
 *.i64
 *.idb
 
+
+# Agent/session artifacts
+.omc/
+.omo/
+docs/superpowers/plans/
+
+# Local Python test environments and packaging metadata
+.venv/
+.venv-test/
+.pytest_cache/
+*.egg-info/
+uv.lock
 # Visual Studio extension build outputs + staged server payloads
 packages/
 bin/
