@@ -1,0 +1,4 @@
+{
+  "source": "mcp/perception-mcp-config.json",
+  "note": "Contract tests load the authoritative tool list from the config at runtime."
+}

@@ -1,0 +1,1714 @@
+{
+  "schema": "pcx-perception-mcp-tool-schemas-v1",
+  "source": "mcp/perception-mcp-config.json",
+  "tools": [
+    {
+      "name": "process/list",
+      "category": "lifecycle",
+      "requires_handle": false,
+      "params": {},
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/list",
+          "arguments": {}
+        }
+      }
+    },
+    {
+      "name": "process/info_by_pid",
+      "category": "lifecycle",
+      "requires_handle": false,
+      "params": {
+        "pid": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/info_by_pid",
+          "arguments": {
+            "pid": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/info_by_name",
+      "category": "lifecycle",
+      "requires_handle": false,
+      "params": {
+        "name": "string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/info_by_name",
+          "arguments": {
+            "name": "target.exe"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/reference_by_pid",
+      "category": "lifecycle",
+      "requires_handle": false,
+      "params": {
+        "pid": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/reference_by_pid",
+          "arguments": {
+            "pid": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/reference_by_name",
+      "category": "lifecycle",
+      "requires_handle": false,
+      "params": {
+        "name": "string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/reference_by_name",
+          "arguments": {
+            "name": "target.exe"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/dereference",
+      "category": "lifecycle",
+      "requires_handle": false,
+      "params": {
+        "handle": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/dereference",
+          "arguments": {}
+        }
+      }
+    },
+    {
+      "name": "process/cleanup_references",
+      "category": "lifecycle",
+      "requires_handle": false,
+      "params": {},
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/cleanup_references",
+          "arguments": {}
+        }
+      }
+    },
+    {
+      "name": "process/list_references",
+      "category": "lifecycle",
+      "requires_handle": false,
+      "params": {},
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/list_references",
+          "arguments": {}
+        }
+      }
+    },
+    {
+      "name": "process/read_virtual_memory",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "size": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/read_virtual_memory",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "size": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/write_virtual_memory",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "data": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [
+        "write_memory"
+      ],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/write_virtual_memory",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "data": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/is_valid_address",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/is_valid_address",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/read_typed_value",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "type": "u8|u16|u32|u64|i8|i16|i32|i64|f32|f64|ptr|bool"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/read_typed_value",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "type": "u32"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/write_typed_value",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "type": "u8|u16|u32|u64|i8|i16|i32|i64|f32|f64|ptr|bool",
+        "value": "string|number|bool"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [
+        "write_memory"
+      ],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/write_typed_value",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "type": "u32",
+            "value": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/read_string",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "max_len?": "number",
+        "encoding?": "auto|ascii|utf16"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/read_string",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "max_len": 32,
+            "encoding": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/write_string",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "text": "string",
+        "encoding?": "ascii|utf16",
+        "null_terminate?": "boolean"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [
+        "write_memory"
+      ],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/write_string",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "text": "PlayerHealth",
+            "encoding": "...",
+            "null_terminate": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/copy_memory",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "src_address": "hex string",
+        "dst_address": "hex string",
+        "size": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [
+        "write_memory"
+      ],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/copy_memory",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "src_address": "0x7ff700001234",
+            "dst_address": "0x7ff700001234",
+            "size": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/fill_memory",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "size": "number",
+        "byte": "0..255"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [
+        "write_memory"
+      ],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/fill_memory",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "size": 32,
+            "byte": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/read_pointer_chain",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "base_address": "hex string",
+        "offsets": "number[]"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/read_pointer_chain",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "base_address": "0x7ff700001234",
+            "offsets": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/disassemble",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "max_bytes?": "number",
+        "max_instructions?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/disassemble",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "max_bytes": 32,
+            "max_instructions": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_modules",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_modules",
+          "arguments": {
+            "handle": "0xHANDLE"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_threads",
+      "category": "process",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_threads",
+          "arguments": {
+            "handle": "0xHANDLE"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_module_by_name",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "name": "string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_module_by_name",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "name": "target.exe"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_export_address",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string",
+        "export_name": "string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_export_address",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234",
+            "export_name": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_import_address",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string",
+        "import_name": "string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_import_address",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234",
+            "import_name": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_module_imports",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_module_imports",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/list_module_exports",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/list_module_exports",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_module_sections",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_module_sections",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_pe_header",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_pe_header",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_module_strings",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string",
+        "min_length?": "number",
+        "encoding?": "ascii|utf16|both"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_module_strings",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234",
+            "min_length": "...",
+            "encoding": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_exception_table",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string",
+        "max_entries?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_exception_table",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234",
+            "max_entries": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_data_directory",
+      "category": "module_pe",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string",
+        "directory": "string|number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_data_directory",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234",
+            "directory": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/query_memory_region",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/query_memory_region",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/enumerate_memory_regions",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "heap_only?": "boolean"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/enumerate_memory_regions",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "heap_only": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/allocate_memory",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "size": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [
+        "virtual_memory_operations"
+      ],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/allocate_memory",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "size": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/free_memory",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [
+        "virtual_memory_operations"
+      ],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/free_memory",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/find_pattern",
+      "category": "scan_xref_signature",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "start": "hex string",
+        "size": "number",
+        "signature": "IDA pattern string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/find_pattern",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "start": "0x7ff700001234",
+            "size": 32,
+            "signature": "48 8B ?? ??"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/find_all_patterns",
+      "category": "scan_xref_signature",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "start": "hex string",
+        "size": "number",
+        "signature": "IDA pattern string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/find_all_patterns",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "start": "0x7ff700001234",
+            "size": 32,
+            "signature": "48 8B ?? ??"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/scan_value",
+      "category": "scan_xref_signature",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "type": "numeric type",
+        "value": "string|number",
+        "aligned?": "boolean",
+        "heap_only?": "boolean"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/scan_value",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "type": "u32",
+            "value": "...",
+            "aligned": "...",
+            "heap_only": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/scan_next",
+      "category": "scan_xref_signature",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "compare": "exact|range|unchanged|changed|increased|decreased",
+        "value?": "string|number",
+        "min?": "number",
+        "max?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/scan_next",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "compare": "...",
+            "value": "...",
+            "min": "...",
+            "max": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/scan_string",
+      "category": "scan_xref_signature",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "text": "string",
+        "encoding?": "ascii|utf16",
+        "heap_only?": "boolean"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/scan_string",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "text": "PlayerHealth",
+            "encoding": "...",
+            "heap_only": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/scan_pointer_to",
+      "category": "scan_xref_signature",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "target_address": "hex string",
+        "heap_only?": "boolean"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/scan_pointer_to",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "target_address": "0x7ff700001234",
+            "heap_only": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/find_xrefs",
+      "category": "scan_xref_signature",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string",
+        "target_address": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/find_xrefs",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234",
+            "target_address": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/find_string_refs",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string",
+        "text": "string",
+        "encoding?": "ascii|utf16",
+        "heap_only?": "boolean",
+        "string_module?": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/find_string_refs",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234",
+            "text": "PlayerHealth",
+            "encoding": "...",
+            "heap_only": "...",
+            "string_module": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/generate_signature",
+      "category": "scan_xref_signature",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "max_length?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/generate_signature",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "max_length": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/diff_memory",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "addr_a": "hex string",
+        "addr_b": "hex string",
+        "size": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/diff_memory",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "addr_a": "0x7ff700001234",
+            "addr_b": "0x7ff700001234",
+            "size": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/find_function_bounds",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string",
+        "scan_back?": "number",
+        "scan_forward?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/find_function_bounds",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234",
+            "scan_back": "...",
+            "scan_forward": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "process/find_function_by_signature",
+      "category": "scan_xref_signature",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "module_base": "hex string",
+        "signature": "IDA pattern string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/find_function_by_signature",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "module_base": "0x7ff700001234",
+            "signature": "48 8B ?? ??"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/analyze_vtable",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "vtable_address": "hex string",
+        "max_entries?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/analyze_vtable",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "vtable_address": "0x7ff700001234",
+            "max_entries": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/read_rtti",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "vtable_address": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/read_rtti",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "vtable_address": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/lookup_symbol",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "address": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/lookup_symbol",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "address": "0x7ff700001234"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/find_function_by_name",
+      "category": "memory_code_analysis",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "pattern": "string",
+        "case_sensitive?": "boolean",
+        "max_results?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "high",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/find_function_by_name",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "pattern": "...",
+            "case_sensitive": "...",
+            "max_results": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/enum_handles",
+      "category": "process",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "max_entries?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/enum_handles",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "max_entries": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "system/info",
+      "category": "system",
+      "requires_handle": false,
+      "params": {},
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "cheap",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "system/info",
+          "arguments": {}
+        }
+      }
+    },
+    {
+      "name": "system/list_drivers",
+      "category": "system",
+      "requires_handle": false,
+      "params": {
+        "max_entries?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [
+        "kernel_rw_access"
+      ],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "system/list_drivers",
+          "arguments": {
+            "max_entries": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "process/get_command_line",
+      "category": "process",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/get_command_line",
+          "arguments": {
+            "handle": "0xHANDLE"
+          }
+        }
+      }
+    },
+    {
+      "name": "process/list_environment",
+      "category": "lifecycle",
+      "requires_handle": true,
+      "params": {
+        "handle": "hex string",
+        "max_bytes?": "number"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32001",
+        "-32002",
+        "-32003",
+        "-32004"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "process/list_environment",
+          "arguments": {
+            "handle": "0xHANDLE",
+            "max_bytes": 32
+          }
+        }
+      }
+    },
+    {
+      "name": "script/get_context",
+      "category": "script_bridge",
+      "requires_handle": false,
+      "params": {},
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32602",
+        "-32603"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "script/get_context",
+          "arguments": {}
+        }
+      }
+    },
+    {
+      "name": "script/validate",
+      "category": "script_bridge",
+      "requires_handle": false,
+      "params": {
+        "source": "string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32602",
+        "-32603"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "script/validate",
+          "arguments": {
+            "source": "..."
+          }
+        }
+      }
+    },
+    {
+      "name": "script/execute",
+      "category": "script_bridge",
+      "requires_handle": false,
+      "params": {
+        "source": "string"
+      },
+      "returns": "JSON result or JSON-RPC error",
+      "permissions": [],
+      "errors": [
+        "-32602",
+        "-32603"
+      ],
+      "cost": "medium",
+      "example": {
+        "method": "tools/call",
+        "params": {
+          "name": "script/execute",
+          "arguments": {
+            "source": "..."
+          }
+        }
+      }
+    }
+  ]
+}

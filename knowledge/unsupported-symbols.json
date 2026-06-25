@@ -30,7 +30,6 @@
     "begin_window": "Immediate-mode GUI helper hallucination; use documented GUI APIs.",
     "bool_main": "Invalid lifecycle shape; Enma entrypoint is int64 main().",
     "close_handle": "Win32 helper is not Enma API; rely on documented RAII handles.",
-    "create_menu": "Invented GUI helper; use documented Perception GUI section/widget APIs.",
     "create_window": "Generic GUI helper hallucination; use documented GUI/window APIs from api_lookup.",
     "dictionary": "AngelScript dictionary type is not Enma; use documented map/imap addons.",
     "draw_bone": "Invented bone helper; use documented draw_line after verified world-to-screen projection.",

@@ -38,6 +38,7 @@ sys.path.insert(0, str(TOOL_DIR / "lib"))
 from pcx_paths import data_root, tool_dir  # noqa: E402
 from pcx_scaffold import available_templates, build_project_plan, scaffold_project, slugify  # noqa: E402
 from pcx_grounding import load_api_index, validate_code_against_index  # noqa: E402
+from pcx_mcp_workflows import plan_json as plan_perception_mcp_json  # noqa: E402
 
 REPO_ROOT = data_root()
 VERSION_FILE = REPO_ROOT / "VERSION"
@@ -476,6 +477,17 @@ def cmd_plan(args: list[str]) -> int:
     return 0
 
 
+def cmd_mcp_plan(args: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="pcx mcp-plan")
+    ap.add_argument("task", nargs="*", help="Perception MCP task description")
+    ap.add_argument("--target", default="", help="target process name, e.g. game.exe")
+    ap.add_argument("--permissions", default="", help="space/comma-separated granted permissions")
+    ns = ap.parse_args(args)
+    task = " ".join(ns.task).strip() or "attach and read typed value"
+    print(plan_perception_mcp_json(task, ns.target, ns.permissions))
+    return 0
+
+
 def cmd_docs_check() -> int:
     """Run source regeneration, drift, eval, and focused tests before shipping."""
     commands = [
@@ -504,7 +516,7 @@ def main() -> int:
                     version=f"pcx-ai-toolkit v{get_version()}")
     ap.add_argument("command", nargs="?", help=(
         "Command to run: setup, update, lint, symbol-check, api, check-answer, "
-        "create, build-api-index, verify, verify-project, plan, docs-check, check-drift, "
+        "create, build-api-index, verify, verify-project, plan, mcp-plan, docs-check, check-drift, "
         "check-mcp, check-matrix, counts, prompt, agent-install, ai-smoke, version, doctor, new, help"
     ))
     ap.add_argument("args", nargs=argparse.REMAINDER, help="Subcommand arguments")
@@ -557,6 +569,9 @@ def main() -> int:
 
     if cmd in ("verify-project", "project-check"):
         return run_python_tool("verify-project", sub_args)
+
+    if cmd in ("mcp-plan", "plan-mcp"):
+        return cmd_mcp_plan(sub_args)
 
     if cmd == "check-drift":
         return run_python_tool("check-doc-drift", sub_args)

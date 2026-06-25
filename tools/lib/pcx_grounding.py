@@ -604,7 +604,7 @@ def validate_code_against_index(
     known_methods = known_method_names(index)
 
     for name, line in extract_calls(code, language):
-        if name in unsupported_symbols:
+        if name in unsupported_symbols and name not in known_functions and name not in known_methods:
             findings.append(_finding(
                 "unsupported_symbol",
                 line,

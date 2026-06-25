@@ -1,0 +1,6 @@
+{
+  "-32001": "permission denied",
+  "-32002": "stale / cross-connection handle",
+  "-32003": "target not found",
+  "-32004": "operation failed"
+}

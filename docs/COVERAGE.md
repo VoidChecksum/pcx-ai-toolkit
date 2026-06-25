@@ -18,7 +18,7 @@
 - Symbols with failure metadata: 216
 - Permission rules: 5
 - Deprecated or removed symbols tracked: 0
-- Known hallucinations covered: 114
+- Known hallucinations covered: 113
 - Hallucination eval cases: 150
 - Generated bundle sources: 88
 - Drift-checkable sources: 67
@@ -32,9 +32,9 @@
 | Callable symbols with signatures | 213 | 213 | pass |
 | Non-callable symbols with shape metadata | 3 | 3 | pass |
 | Symbols with failure metadata | 216 | 216 | pass |
-| Known hallucinations covered | 114 | 100 | pass |
+| Known hallucinations covered | 113 | 100 | pass |
 | Eval cases | 150 | 150 | pass |
-| Eval cases with expected findings | 143 | 100 | pass |
+| Eval cases with expected findings | 142 | 100 | pass |
 | Total Perception pages indexed | 20 | 20 | pass |
 
 ## Perception Page Classes
@@ -51,7 +51,7 @@
 |---|---:|---:|---:|---:|---:|
 | cpu | 12 | 12 | 12 | 12 | 0 |
 | filesystem | 17 | 17 | 17 | 17 | 1 |
-| gui | 20 | 20 | 20 | 20 | 26 |
+| gui | 20 | 20 | 20 | 20 | 27 |
 | input | 17 | 17 | 17 | 17 | 0 |
 | lifecycle | 6 | 6 | 6 | 6 | 5 |
 | math3d | 2 | 2 | 2 | 2 | 0 |

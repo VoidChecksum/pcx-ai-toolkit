@@ -1193,18 +1193,12 @@
       ]
     },
     {
-      "name": "enma-rejects-denylist-create_menu",
+      "name": "positive-gui-create-menu",
       "mode": "code",
       "language": "enma",
-      "should_pass": false,
+      "should_pass": true,
       "input": "int64 main(){ create_menu(); return 1; }\n",
-      "expected_findings": [
-        {
-          "code": "unsupported_symbol",
-          "symbol": "create_menu",
-          "severity": "error"
-        }
-      ]
+      "expected_findings": []
     },
     {
       "name": "enma-rejects-denylist-create_window",

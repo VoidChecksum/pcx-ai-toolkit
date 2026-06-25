@@ -98,12 +98,18 @@ The Perception.cx host API surface as exposed to Enma.
 - [Lifecycle and Routines](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/lifecycle-and-routines.md): Every script needs a main() function. It runs once when the script is loaded.
 - [Perception-First LLM Routing](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/llm-routing.md): Use this page before writing any Perception.cx script in this toolkit. The repo
 - [MCP API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/mcp-api.md): Perception's MCP server exposes the proc-API surface as JSON-RPC tools that any Model Context Protocol client (Claude Code, Cline, Continue, ...) can call.
+- [Perception MCP Error Recovery](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/mcp-error-recovery.md): Likely cause: writememory, virtualmemoryoperations, or kernelrwaccess is disabled in Perception.
+- [Perception MCP Safety Policy](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/mcp-safety-policy.md): These rules apply to any agent using Perception runtime MCP.
+- [MCP Script Bridge](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/mcp-script-bridge.md): Perception MCP exposes Enma compiler/runtime bridge tools that are stronger than static validation alone.
+- [Perception MCP Tool Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/mcp-tool-reference.md): Generated companion to mcp-api.md. JSON schema: mcp-tool-schemas.json; examples: ../../mcp/perception-mcp-examples.json.
+- [Perception MCP Workflows](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/mcp-workflows.md): Use these chains instead of ad-hoc tool calls. Tool params are documented in mcp-api.md; tool names are kept in sync in ../../mcp/perception-mcp-config.json.
 - [Net API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/net-api.md): All net natives are auto-registered into every loaded script.
 - [Proc API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/proc-api.md): All proc natives are auto-registered into every loaded script.
 - [Enma - Overview](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/readme.md): Enma is perception's proprietary full-module AOT and JIT-compiled scripting language. This site covers the APIs perception registers on top of Enma, not the language reference itself. For syntax, type
 - [Render API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/render-api.md): All render natives are auto-registered into every loaded script.
 - [SDK status and local development](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/sdk-status.md): Last verified: 2026-06-25.
 - [Sound API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/sound-api.md): All sound natives are auto-registered into every loaded script.
+- [Two-MCP Workflow](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/two-mcp-workflow.md): PCX has two MCP surfaces. Use both; do not make either one do the other's job.
 - [Unicorn API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/unicorn-api.md): All unicorn natives are auto-registered into every loaded script.
 - [Versioning and migration notes](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/versioning-and-migration.md): Last verified: 2026-06-25.
 - [Win API](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/perception/win-api.md): All win natives are auto-registered into every loaded script.

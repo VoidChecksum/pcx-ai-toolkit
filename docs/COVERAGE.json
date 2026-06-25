@@ -65,7 +65,7 @@
       "symbols": 17
     },
     {
-      "eval_cases": 26,
+      "eval_cases": 27,
       "failures": 20,
       "family": "gui",
       "permissions": 20,
@@ -155,8 +155,8 @@
   ],
   "hallucinations": {
     "eval_cases": 150,
-    "eval_cases_with_expected_findings": 143,
-    "known_symbols": 114
+    "eval_cases_with_expected_findings": 142,
+    "known_symbols": 113
   },
   "missing": {
     "callable_signatures": [],

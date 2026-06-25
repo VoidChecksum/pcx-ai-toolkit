@@ -1,0 +1,617 @@
+{
+  "schema": "pcx-perception-mcp-examples-v1",
+  "examples": {
+    "process/list": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/list",
+        "arguments": {}
+      }
+    },
+    "process/info_by_pid": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/info_by_pid",
+        "arguments": {
+          "pid": "..."
+        }
+      }
+    },
+    "process/info_by_name": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/info_by_name",
+        "arguments": {
+          "name": "target.exe"
+        }
+      }
+    },
+    "process/reference_by_pid": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/reference_by_pid",
+        "arguments": {
+          "pid": "..."
+        }
+      }
+    },
+    "process/reference_by_name": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/reference_by_name",
+        "arguments": {
+          "name": "target.exe"
+        }
+      }
+    },
+    "process/dereference": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/dereference",
+        "arguments": {}
+      }
+    },
+    "process/cleanup_references": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/cleanup_references",
+        "arguments": {}
+      }
+    },
+    "process/list_references": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/list_references",
+        "arguments": {}
+      }
+    },
+    "process/read_virtual_memory": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/read_virtual_memory",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "size": 32
+        }
+      }
+    },
+    "process/write_virtual_memory": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/write_virtual_memory",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "data": "..."
+        }
+      }
+    },
+    "process/is_valid_address": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/is_valid_address",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234"
+        }
+      }
+    },
+    "process/read_typed_value": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/read_typed_value",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "type": "u32"
+        }
+      }
+    },
+    "process/write_typed_value": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/write_typed_value",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "type": "u32",
+          "value": "..."
+        }
+      }
+    },
+    "process/read_string": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/read_string",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "max_len": 32,
+          "encoding": "..."
+        }
+      }
+    },
+    "process/write_string": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/write_string",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "text": "PlayerHealth",
+          "encoding": "...",
+          "null_terminate": "..."
+        }
+      }
+    },
+    "process/copy_memory": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/copy_memory",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "src_address": "0x7ff700001234",
+          "dst_address": "0x7ff700001234",
+          "size": 32
+        }
+      }
+    },
+    "process/fill_memory": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/fill_memory",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "size": 32,
+          "byte": "..."
+        }
+      }
+    },
+    "process/read_pointer_chain": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/read_pointer_chain",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "base_address": "0x7ff700001234",
+          "offsets": "..."
+        }
+      }
+    },
+    "process/disassemble": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/disassemble",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "max_bytes": 32,
+          "max_instructions": 32
+        }
+      }
+    },
+    "process/get_modules": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_modules",
+        "arguments": {
+          "handle": "0xHANDLE"
+        }
+      }
+    },
+    "process/get_threads": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_threads",
+        "arguments": {
+          "handle": "0xHANDLE"
+        }
+      }
+    },
+    "process/get_module_by_name": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_module_by_name",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "name": "target.exe"
+        }
+      }
+    },
+    "process/get_export_address": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_export_address",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234",
+          "export_name": "..."
+        }
+      }
+    },
+    "process/get_import_address": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_import_address",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234",
+          "import_name": "..."
+        }
+      }
+    },
+    "process/get_module_imports": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_module_imports",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234"
+        }
+      }
+    },
+    "process/list_module_exports": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/list_module_exports",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234"
+        }
+      }
+    },
+    "process/get_module_sections": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_module_sections",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234"
+        }
+      }
+    },
+    "process/get_pe_header": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_pe_header",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234"
+        }
+      }
+    },
+    "process/get_module_strings": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_module_strings",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234",
+          "min_length": "...",
+          "encoding": "..."
+        }
+      }
+    },
+    "process/get_exception_table": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_exception_table",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234",
+          "max_entries": 32
+        }
+      }
+    },
+    "process/get_data_directory": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_data_directory",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234",
+          "directory": "..."
+        }
+      }
+    },
+    "process/query_memory_region": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/query_memory_region",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234"
+        }
+      }
+    },
+    "process/enumerate_memory_regions": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/enumerate_memory_regions",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "heap_only": "..."
+        }
+      }
+    },
+    "process/allocate_memory": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/allocate_memory",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "size": 32
+        }
+      }
+    },
+    "process/free_memory": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/free_memory",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234"
+        }
+      }
+    },
+    "process/find_pattern": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/find_pattern",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "start": "0x7ff700001234",
+          "size": 32,
+          "signature": "48 8B ?? ??"
+        }
+      }
+    },
+    "process/find_all_patterns": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/find_all_patterns",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "start": "0x7ff700001234",
+          "size": 32,
+          "signature": "48 8B ?? ??"
+        }
+      }
+    },
+    "process/scan_value": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/scan_value",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "type": "u32",
+          "value": "...",
+          "aligned": "...",
+          "heap_only": "..."
+        }
+      }
+    },
+    "process/scan_next": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/scan_next",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "compare": "...",
+          "value": "...",
+          "min": "...",
+          "max": 32
+        }
+      }
+    },
+    "process/scan_string": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/scan_string",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "text": "PlayerHealth",
+          "encoding": "...",
+          "heap_only": "..."
+        }
+      }
+    },
+    "process/scan_pointer_to": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/scan_pointer_to",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "target_address": "0x7ff700001234",
+          "heap_only": "..."
+        }
+      }
+    },
+    "process/find_xrefs": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/find_xrefs",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234",
+          "target_address": "0x7ff700001234"
+        }
+      }
+    },
+    "process/find_string_refs": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/find_string_refs",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234",
+          "text": "PlayerHealth",
+          "encoding": "...",
+          "heap_only": "...",
+          "string_module": "..."
+        }
+      }
+    },
+    "process/generate_signature": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/generate_signature",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "max_length": 32
+        }
+      }
+    },
+    "process/diff_memory": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/diff_memory",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "addr_a": "0x7ff700001234",
+          "addr_b": "0x7ff700001234",
+          "size": 32
+        }
+      }
+    },
+    "process/find_function_bounds": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/find_function_bounds",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234",
+          "scan_back": "...",
+          "scan_forward": "..."
+        }
+      }
+    },
+    "process/find_function_by_signature": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/find_function_by_signature",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "module_base": "0x7ff700001234",
+          "signature": "48 8B ?? ??"
+        }
+      }
+    },
+    "process/analyze_vtable": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/analyze_vtable",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "vtable_address": "0x7ff700001234",
+          "max_entries": 32
+        }
+      }
+    },
+    "process/read_rtti": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/read_rtti",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "vtable_address": "0x7ff700001234"
+        }
+      }
+    },
+    "process/lookup_symbol": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/lookup_symbol",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "address": "0x7ff700001234"
+        }
+      }
+    },
+    "process/find_function_by_name": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/find_function_by_name",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "pattern": "...",
+          "case_sensitive": "...",
+          "max_results": 32
+        }
+      }
+    },
+    "process/enum_handles": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/enum_handles",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "max_entries": 32
+        }
+      }
+    },
+    "system/info": {
+      "method": "tools/call",
+      "params": {
+        "name": "system/info",
+        "arguments": {}
+      }
+    },
+    "system/list_drivers": {
+      "method": "tools/call",
+      "params": {
+        "name": "system/list_drivers",
+        "arguments": {
+          "max_entries": 32
+        }
+      }
+    },
+    "process/get_command_line": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/get_command_line",
+        "arguments": {
+          "handle": "0xHANDLE"
+        }
+      }
+    },
+    "process/list_environment": {
+      "method": "tools/call",
+      "params": {
+        "name": "process/list_environment",
+        "arguments": {
+          "handle": "0xHANDLE",
+          "max_bytes": 32
+        }
+      }
+    },
+    "script/get_context": {
+      "method": "tools/call",
+      "params": {
+        "name": "script/get_context",
+        "arguments": {}
+      }
+    },
+    "script/validate": {
+      "method": "tools/call",
+      "params": {
+        "name": "script/validate",
+        "arguments": {
+          "source": "..."
+        }
+      }
+    },
+    "script/execute": {
+      "method": "tools/call",
+      "params": {
+        "name": "script/execute",
+        "arguments": {
+          "source": "..."
+        }
+      }
+    }
+  }
+}

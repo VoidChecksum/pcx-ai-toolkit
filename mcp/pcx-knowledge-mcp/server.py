@@ -75,6 +75,7 @@ from pcx_scaffold import (  # noqa: E402
     build_project_plan,
     scaffold_project as write_scaffold_project,
 )
+from pcx_mcp_workflows import plan_json as plan_perception_mcp_json  # noqa: E402
 
 
 # ── Corpus scanning ──────────────────────────────────────────────────────────
@@ -582,6 +583,12 @@ def why_invalid(code: str, language: str = "enma", runtime_mode: str = "project"
         return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
     findings = validate_code_against_index(code, language, index, "why_invalid", runtime_mode=runtime_mode)
     return json.dumps({"ok": not findings, "findings": findings}, indent=2)
+
+@mcp.tool()
+def plan_perception_mcp_workflow(task: str, target_process: str = "", permissions: str = "") -> str:
+    """Return a deterministic Perception runtime MCP call plan for an RE task."""
+    return plan_perception_mcp_json(task, target_process, permissions)
+
 
 # ── Project creation and workflow helpers ────────────────────────────────────
 

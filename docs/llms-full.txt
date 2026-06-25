@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 164**
+**Source files included: 170**
 
 ---
 
@@ -120,7 +120,7 @@ doc or lookup must be checked next.
 - Symbols with failure metadata: 216
 - Permission rules: 5
 - Deprecated or removed symbols tracked: 0
-- Known hallucinations covered: 114
+- Known hallucinations covered: 113
 - Hallucination eval cases: 150
 - Generated bundle sources: 88
 - Drift-checkable sources: 67
@@ -134,9 +134,9 @@ doc or lookup must be checked next.
 | Callable symbols with signatures | 213 | 213 | pass |
 | Non-callable symbols with shape metadata | 3 | 3 | pass |
 | Symbols with failure metadata | 216 | 216 | pass |
-| Known hallucinations covered | 114 | 100 | pass |
+| Known hallucinations covered | 113 | 100 | pass |
 | Eval cases | 150 | 150 | pass |
-| Eval cases with expected findings | 143 | 100 | pass |
+| Eval cases with expected findings | 142 | 100 | pass |
 | Total Perception pages indexed | 20 | 20 | pass |
 
 ## Perception Page Classes
@@ -153,7 +153,7 @@ doc or lookup must be checked next.
 |---|---:|---:|---:|---:|---:|
 | cpu | 12 | 12 | 12 | 12 | 0 |
 | filesystem | 17 | 17 | 17 | 17 | 1 |
-| gui | 20 | 20 | 20 | 20 | 26 |
+| gui | 20 | 20 | 20 | 20 | 27 |
 | input | 17 | 17 | 17 | 17 | 0 |
 | lifecycle | 6 | 6 | 6 | 6 | 5 |
 | math3d | 2 | 2 | 2 | 2 | 0 |
@@ -17876,6 +17876,320 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 ---
 
+## Source: `docs/perception/mcp-error-recovery.md`
+
+# Perception MCP Error Recovery
+
+| Code | Meaning | First recovery | Stop condition |
+|---:|---|---|---|
+| `-32001` | permission denied | surface missing permission and ask for explicit authorization | user does not grant permission |
+| `-32002` | stale / cross-connection handle | reacquire handle once with `process/reference_by_name` or `_by_pid` | second failure after reacquire |
+| `-32003` | target not found | call `process/list`, confirm name/PID, retry with exact image name | target absent |
+| `-32004` | operation failed | shrink scope, validate params, check address/module bounds | repeated failure with validated params |
+
+## -32001 permission denied
+
+Likely cause: `write_memory`, `virtual_memory_operations`, or `kernel_rw_access` is disabled in Perception.
+
+Recovery:
+1. Do not retry blindly.
+2. Report the exact missing permission.
+3. If write/kernel/alloc is involved, ask for explicit authorization.
+4. Prefer read-only verification when possible.
+
+## -32002 stale / cross-connection handle
+
+Likely cause: handle came from another MCP connection, the client disconnected, or the target exited.
+
+Recovery:
+1. `process/list_references`.
+2. `process/reference_by_name` or `process/reference_by_pid` again.
+3. Retry the failed call once with the new handle.
+4. If it still fails, stop and report target state.
+
+## -32003 target not found
+
+Recovery:
+1. `process/list`.
+2. Match exact process image name or PID.
+3. Retry `process/reference_by_name` / `_by_pid`.
+4. If absent, stop; do not guess process names.
+
+## -32004 operation failed
+
+Recovery:
+1. Check every address/handle is a hex string.
+2. Check address validity with `process/is_valid_address`.
+3. Bound scans to module sections.
+4. Reduce `size`, `max_bytes`, or search scope.
+5. Stop after one scoped retry.
+
+---
+
+## Source: `docs/perception/mcp-safety-policy.md`
+
+# Perception MCP Safety Policy
+
+These rules apply to any agent using Perception runtime MCP.
+
+## Write tools
+
+Write tools are `process/write_virtual_memory`, `process/write_typed_value`, `process/write_string`, `process/copy_memory`, and `process/fill_memory`.
+
+Rules:
+- Never call write tools unless the user explicitly asks for a write/patch.
+- Always read and log old bytes before writing.
+- Always provide rollback bytes.
+- Always validate the address and module ownership before writing.
+- Never patch based only on a pattern hit; confirm function identity first.
+
+## Allocation tools
+
+`process/allocate_memory` and `process/free_memory` require `virtual_memory_operations`.
+
+Rules:
+- Never allocate executable memory without explicit authorization.
+- Free allocations when done.
+- Prefer read-only analysis and Enma script validation first.
+
+## Kernel-gated tools
+
+`kernel_rw_access` gates kernel addresses, driver listing, eprocess/ethread fields, and kernel-range reads/disassembly/scans.
+
+Rules:
+- Never use kernel-gated tools unless the user confirms scope and permission.
+- Treat permission denial as a stop condition, not a retry loop.
+
+## Scan bounds
+
+- Use `heap_only: true` unless full user-space scan is explicitly needed.
+- Bound `find_pattern` to a module section, usually `.text`.
+- Do not run repeated scan loops without a cap and a reason.
+
+---
+
+## Source: `docs/perception/mcp-script-bridge.md`
+
+# MCP Script Bridge
+
+Perception MCP exposes Enma compiler/runtime bridge tools that are stronger than static validation alone.
+
+## `script/get_context`
+
+Call once per MCP session before generating Enma. It returns the full Enma language and Perception API context. Cache it in the agent session; do not call it before every snippet.
+
+## `script/validate`
+
+Compile-only validation. It registers all Perception addons, including GUI, thread, render, proc, cpu, zydis, sound, win, unicorn, net, input, and filesystem.
+
+Use it after pcx knowledge MCP `validate_code`: pcx catches known hallucination patterns cheaply; Perception catches real compiler/type errors.
+
+## `script/execute`
+
+Compiles and runs `main()` once. GUI and thread addons are intentionally not registered because one-shot execution would leak long-lived resources. Use the in-app script editor for overlays, GUI, routines, and threads.
+
+## Recommended LLM pipeline
+
+1. pcx `api_lookup` or MCP `api_lookup` for uncertain symbols.
+2. pcx `validate_code` / `validate_answer`.
+3. Perception `script/get_context` once.
+4. Perception `script/validate`.
+5. Only use `script/execute` for a bounded, non-GUI, non-thread one-shot script.
+
+## Error handling
+
+Validation errors are source-level defects. Fix the smallest snippet, rerun pcx validation, then rerun `script/validate`. Do not suppress errors by deleting imports or changing language mode.
+
+---
+
+## Source: `docs/perception/mcp-tool-reference.md`
+
+# Perception MCP Tool Reference
+
+Generated companion to `mcp-api.md`. JSON schema: `mcp-tool-schemas.json`; examples: `../../mcp/perception-mcp-examples.json`.
+
+Tools covered: 59.
+
+## Categories
+- `lifecycle`: 9 tools
+- `memory_code_analysis`: 22 tools
+- `module_pe`: 11 tools
+- `process`: 3 tools
+- `scan_xref_signature`: 9 tools
+- `script_bridge`: 3 tools
+- `system`: 2 tools
+
+## No-handle tools
+- `process/list`
+- `process/info_by_pid`
+- `process/info_by_name`
+- `process/reference_by_pid`
+- `process/reference_by_name`
+- `process/dereference`
+- `process/cleanup_references`
+- `process/list_references`
+- `system/info`
+- `system/list_drivers`
+- `script/get_context`
+- `script/validate`
+- `script/execute`
+
+## Permission-gated tools
+- `process/write_virtual_memory`: write_memory
+- `process/write_typed_value`: write_memory
+- `process/write_string`: write_memory
+- `process/copy_memory`: write_memory
+- `process/fill_memory`: write_memory
+- `process/allocate_memory`: virtual_memory_operations
+- `process/free_memory`: virtual_memory_operations
+- `system/list_drivers`: kernel_rw_access
+
+## Expensive tools
+Avoid these in loops; bound the search region.
+- `process/enumerate_memory_regions`
+- `process/find_pattern`
+- `process/find_all_patterns`
+- `process/scan_value`
+- `process/scan_next`
+- `process/scan_string`
+- `process/scan_pointer_to`
+- `process/find_xrefs`
+- `process/find_string_refs`
+- `process/diff_memory`
+- `process/find_function_bounds`
+- `process/find_function_by_signature`
+- `process/find_function_by_name`
+
+## All tools
+- `process/list` (lifecycle, handle=False, cost=medium)
+- `process/info_by_pid` (lifecycle, handle=False, cost=cheap)
+- `process/info_by_name` (lifecycle, handle=False, cost=cheap)
+- `process/reference_by_pid` (lifecycle, handle=False, cost=cheap)
+- `process/reference_by_name` (lifecycle, handle=False, cost=cheap)
+- `process/dereference` (lifecycle, handle=False, cost=cheap)
+- `process/cleanup_references` (lifecycle, handle=False, cost=cheap)
+- `process/list_references` (lifecycle, handle=False, cost=cheap)
+- `process/read_virtual_memory` (memory_code_analysis, handle=True, cost=medium)
+- `process/write_virtual_memory` (memory_code_analysis, handle=True, cost=medium)
+- `process/is_valid_address` (memory_code_analysis, handle=True, cost=cheap)
+- `process/read_typed_value` (memory_code_analysis, handle=True, cost=cheap)
+- `process/write_typed_value` (memory_code_analysis, handle=True, cost=cheap)
+- `process/read_string` (memory_code_analysis, handle=True, cost=medium)
+- `process/write_string` (memory_code_analysis, handle=True, cost=medium)
+- `process/copy_memory` (memory_code_analysis, handle=True, cost=medium)
+- `process/fill_memory` (memory_code_analysis, handle=True, cost=medium)
+- `process/read_pointer_chain` (memory_code_analysis, handle=True, cost=medium)
+- `process/disassemble` (memory_code_analysis, handle=True, cost=medium)
+- `process/get_modules` (module_pe, handle=True, cost=medium)
+- `process/get_threads` (process, handle=True, cost=medium)
+- `process/get_module_by_name` (module_pe, handle=True, cost=medium)
+- `process/get_export_address` (module_pe, handle=True, cost=medium)
+- `process/get_import_address` (module_pe, handle=True, cost=medium)
+- `process/get_module_imports` (module_pe, handle=True, cost=medium)
+- `process/list_module_exports` (module_pe, handle=True, cost=medium)
+- `process/get_module_sections` (module_pe, handle=True, cost=medium)
+- `process/get_pe_header` (module_pe, handle=True, cost=medium)
+- `process/get_module_strings` (module_pe, handle=True, cost=medium)
+- `process/get_exception_table` (module_pe, handle=True, cost=medium)
+- `process/get_data_directory` (module_pe, handle=True, cost=medium)
+- `process/query_memory_region` (memory_code_analysis, handle=True, cost=medium)
+- `process/enumerate_memory_regions` (memory_code_analysis, handle=True, cost=high)
+- `process/allocate_memory` (memory_code_analysis, handle=True, cost=medium)
+- `process/free_memory` (memory_code_analysis, handle=True, cost=medium)
+- `process/find_pattern` (scan_xref_signature, handle=True, cost=high)
+- `process/find_all_patterns` (scan_xref_signature, handle=True, cost=high)
+- `process/scan_value` (scan_xref_signature, handle=True, cost=high)
+- `process/scan_next` (scan_xref_signature, handle=True, cost=high)
+- `process/scan_string` (scan_xref_signature, handle=True, cost=high)
+- `process/scan_pointer_to` (scan_xref_signature, handle=True, cost=high)
+- `process/find_xrefs` (scan_xref_signature, handle=True, cost=high)
+- `process/find_string_refs` (memory_code_analysis, handle=True, cost=high)
+- `process/generate_signature` (scan_xref_signature, handle=True, cost=medium)
+- `process/diff_memory` (memory_code_analysis, handle=True, cost=high)
+- `process/find_function_bounds` (memory_code_analysis, handle=True, cost=high)
+- `process/find_function_by_signature` (scan_xref_signature, handle=True, cost=high)
+- `process/analyze_vtable` (memory_code_analysis, handle=True, cost=medium)
+- `process/read_rtti` (memory_code_analysis, handle=True, cost=medium)
+- `process/lookup_symbol` (memory_code_analysis, handle=True, cost=medium)
+- `process/find_function_by_name` (memory_code_analysis, handle=True, cost=high)
+- `process/enum_handles` (process, handle=True, cost=medium)
+- `system/info` (system, handle=False, cost=cheap)
+- `system/list_drivers` (system, handle=False, cost=medium)
+- `process/get_command_line` (process, handle=True, cost=medium)
+- `process/list_environment` (lifecycle, handle=True, cost=medium)
+- `script/get_context` (script_bridge, handle=False, cost=medium)
+- `script/validate` (script_bridge, handle=False, cost=medium)
+- `script/execute` (script_bridge, handle=False, cost=medium)
+
+---
+
+## Source: `docs/perception/mcp-workflows.md`
+
+# Perception MCP Workflows
+
+Use these chains instead of ad-hoc tool calls. Tool params are documented in `mcp-api.md`; tool names are kept in sync in `../../mcp/perception-mcp-config.json`.
+
+## Attach and read typed value
+
+1. `process/reference_by_name` → `$handle`.
+2. `process/get_module_by_name` → `$module`.
+3. `process/is_valid_address` for the hex address.
+4. `process/read_typed_value` with `type: "u32"` / `i32` / `ptr` / etc.
+5. `process/dereference`.
+
+Use this for one scalar. Use `process/read_virtual_memory` only for byte ranges/struct blobs.
+
+## Module map
+
+1. `process/reference_by_name`.
+2. `process/get_modules`.
+3. `process/get_module_sections` for the module you will scan.
+4. `process/get_pe_header` if image metadata matters.
+5. `process/dereference`.
+
+## String xref to owning function
+
+1. `process/reference_by_name`.
+2. `process/get_module_by_name`.
+3. `process/find_string_refs` with `encoding: "ascii"` or `"utf16"`, `heap_only: true`, and `string_module` when the string should live in that module.
+4. `process/find_function_bounds` on each xref address.
+5. `process/disassemble` at the function start.
+6. `process/lookup_symbol` for call targets.
+7. `process/dereference`.
+
+Do not use `process/find_pattern` for string search.
+
+## Pattern to function
+
+1. `process/reference_by_name`.
+2. `process/get_module_by_name`.
+3. `process/get_module_sections` and choose `.text`.
+4. `process/find_all_patterns` bounded to `.text`.
+5. Require one hit unless the evidence log explains why multiple hits are safe.
+6. `process/find_function_bounds`.
+7. `process/disassemble`.
+8. `process/generate_signature` only after the function identity is confirmed.
+9. `process/dereference`.
+
+## Pointer-chain validation
+
+1. `process/reference_by_name`.
+2. `process/get_module_by_name`.
+3. `process/read_pointer_chain` with a verified base and offsets.
+4. `process/is_valid_address` on the leaf.
+5. `process/read_typed_value` or `process/read_virtual_memory` for the actual field.
+6. `process/dereference`.
+
+## Script validate before run
+
+1. pcx knowledge MCP `api_lookup` for uncertain symbols.
+2. pcx knowledge MCP `validate_code`.
+3. Perception MCP `script/get_context` once per session.
+4. Perception MCP `script/validate` for real compiler validation.
+5. Use `script/execute` only for one-shot scripts that do not need GUI/thread addons.
+
+---
+
 ## Source: `docs/perception/net-api.md`
 
 > For the complete documentation index, see [llms.txt](https://docs.perception.cx/perception/llms.txt). Markdown versions of documentation pages are available by appending `.md` to page URLs; this page is available as [Markdown](https://docs.perception.cx/perception/enma/net-api.md).
@@ -19017,6 +19331,48 @@ The question should be specific, self-contained, and written in natural language
 The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
 
 Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.
+
+---
+
+## Source: `docs/perception/two-mcp-workflow.md`
+
+# Two-MCP Workflow
+
+PCX has two MCP surfaces. Use both; do not make either one do the other's job.
+
+| Surface | Purpose | Best for | Not for |
+|---|---|---|---|
+| pcx knowledge MCP | Static docs, API lookup, validation, templates | planning, symbol checks, generated-answer validation | live memory/process state |
+| Perception runtime MCP | Live process, memory, modules, disassembly, script compiler bridge | RE evidence, string xrefs, signatures, real compile validation | inventing docs or API names |
+
+## Default loop
+
+1. `recommend_context(task, "enma")` from pcx knowledge MCP.
+2. `get_file` / `search_docs` for the relevant docs.
+3. `api_lookup(symbol, "enma")` before using uncertain API names.
+4. `validate_code` or `validate_answer` on generated source.
+5. Perception MCP `script/get_context` once per runtime session if generating Enma for the live app.
+6. Perception MCP `process/reference_by_name` or `process/reference_by_pid` for live target evidence.
+7. Perception MCP process tools for reads/scans/disassembly.
+8. Perception MCP `script/validate` for real compiler validation.
+9. Perception MCP `process/dereference` or `process/cleanup_references` before ending.
+
+## MCP vs Enma decision table
+
+| Task | Prefer Enma script | Prefer Perception MCP |
+|---|---:|---:|
+| Long-lived overlay | yes | no |
+| GUI/menu | yes | no |
+| Read value every frame | yes | no |
+| One-time memory inspection | no | yes |
+| Search process for string | maybe | yes |
+| Generate signature from live binary | no | yes |
+| Validate generated code | pcx + `script/validate` | yes |
+| Agent-driven RE investigation | no | yes |
+
+## Cleanup rule
+
+Every target-scoped Perception MCP flow ends with `process/dereference(handle)` for one target or `process/cleanup_references()` for session reset. Handles are per-connection hex strings; never reuse one across clients.
 
 ---
 
