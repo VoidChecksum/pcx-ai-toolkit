@@ -23,6 +23,8 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("pypa/gh-action-pypi-publish@release/v1", text)
         self.assertIn("packages-dir: dist", text)
         self.assertIn("skip-existing: true", text)
+        self.assertIn("Check PyPI version availability", text)
+        self.assertIn("steps.pypi-version.outputs.exists != 'true'", text)
         self.assertNotIn("TWINE_PASSWORD", text)
         self.assertNotIn("password:", text)
 
@@ -35,6 +37,8 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("npm pack --dry-run", text)
         self.assertIn("npm publish", text)
         self.assertIn("NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}", text)
+        self.assertIn("Check npm version availability", text)
+        self.assertIn("steps.npm-version.outputs.exists != 'true'", text)
         self.assertNotIn("_authToken", text)
 
     def test_release_npm_job_does_not_cache_without_root_lockfile(self):
