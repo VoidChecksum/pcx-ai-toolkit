@@ -63,7 +63,7 @@ void esp_render(int64 data) {
         float64 x = head2d.x - w * 0.5;
         color c = (e.team == g_local_team && e.team != 0) ? ally : enemy;
 
-        draw_rect(vec2(x, head2d.y), vec2(w, h), c, 1.0, false);
+        draw_rect(vec2(x, head2d.y), vec2(w, h), c, 1.0, 0.0, 0);
         draw_line(screen_bottom, feet2d, color(255, 255, 255, 120), 1.0);
 
         string hp = format("{}", e.health);

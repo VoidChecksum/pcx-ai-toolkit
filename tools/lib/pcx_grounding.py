@@ -343,14 +343,42 @@ def _extract_call_args(code: str) -> list[tuple[str, str, int]]:
             out.append((name, clean[start:i - 1], _line_for_offset(clean, match.start())))
     return out
 
+def _looks_raw_scalar(arg: str) -> bool:
+    text = arg.strip()
+    if re.fullmatch(r"[-+]?(?:0x[0-9A-Fa-f]+|\d+(?:\.\d+)?)", text):
+        return True
+    if re.fullmatch(r"[-+]?(?:0x[0-9A-Fa-f]+|\d+(?:\.\d+)?)\s*,", text):
+        return True
+    return False
+
+
+def _main_body(clean: str) -> str:
+    match = re.search(r"\b(?:int64|int32|int)\s+main\s*\([^)]*\)\s*\{", clean)
+    if not match:
+        return ""
+    start = match.end()
+    depth = 1
+    i = start
+    while i < len(clean) and depth:
+        if clean[i] == "{":
+            depth += 1
+        elif clean[i] == "}":
+            depth -= 1
+        i += 1
+    return clean[start:i - 1] if depth == 0 else clean[start:]
+
+
+
 
 def _validate_enma_lifecycle(code: str) -> list[dict[str, Any]]:
     clean = _without_line_comments(code)
     findings: list[dict[str, Any]] = []
     if re.search(r"\bvoid\s+main\s*\(", clean):
         findings.append(_finding("invalid_entrypoint", _line_for_offset(clean, clean.find("void main")), "main", "Enma entry point must be `int64 main()` and return 1."))
-    if re.search(r"\breturn\s+true\s*;", clean):
-        findings.append(_finding("invalid_entrypoint_return", _line_for_offset(clean, clean.find("return true")), "return true", "Enma main should return integer sentinel `1`, not boolean `true`."))
+    main_body = _main_body(clean)
+    true_offset = clean.find("return true")
+    if main_body and re.search(r"\breturn\s+true\s*;", main_body):
+        findings.append(_finding("invalid_entrypoint_return", _line_for_offset(clean, true_offset), "return true", "Enma main should return integer sentinel `1`, not boolean `true`."))
     for match in re.finditer(r"\bregister_callback\s*\(", clean):
         findings.append(_finding("wrong_routine_api", _line_for_offset(clean, match.start()), "register_callback", "Use `register_routine(cast<int64>(fn), data)`; Enma has no automatic callback API.", repair="register_routine(cast<int64>(fn), data);"))
     functions = {m.group(2): (m.group(1), _split_args(m.group(3)), _line_for_offset(clean, m.start())) for m in re.finditer(r"\b([A-Za-z_][\w:<>,\\s*&]*)\s+([A-Za-z_]\w*)\s*\(([^)]*)\)\s*\{", clean)}
@@ -383,7 +411,7 @@ def _validate_call_shapes(code: str, index: dict[str, Any], language: str) -> li
         expected = [str(t) for t in sig.get("arg_types", [])]
         for i, (arg, typ) in enumerate(zip(actual, expected), start=1):
             base = _base_type(typ)
-            if base in {"vec2", "vec3", "vec4", "color"} and not re.search(rf"\b{re.escape(base)}\s*\(", arg):
+            if base in {"vec2", "vec3", "vec4", "color"} and _looks_raw_scalar(arg):
                 findings.append(_finding("argument_shape_mismatch", line, name, f"Argument {i} of {name} should be {base}; wrap raw values with `{base}(...)`.", repair=f"Use `{base}(...)` for argument {i}."))
     return findings
 
