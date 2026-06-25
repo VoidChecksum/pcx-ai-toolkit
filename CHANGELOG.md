@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.20.2 - 2026-06-25
+
+- fix: publish npm on release dispatch
+
 ## v1.20.1 - 2026-06-25
 
 - fix: keep npm package metadata coverage
