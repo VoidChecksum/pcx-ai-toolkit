@@ -4,6 +4,8 @@
 
 Script-exposed atomic integers and memory barriers backed by `std::atomic<>`. Use these when multiple threads touch the same value. Plain `aint32` / `aint64` keywords exist as Enma types but the codegen doesn't currently emit LOCK-prefixed ops for assignments on them, so reach for the atomic types instead.
 
+> **Do not use `aint32` / `aint64` for synchronization.** They are language-level integer types, but assignment is not currently emitted as a hardware atomic operation. For cross-thread synchronization, use `atomic_int32` / `atomic_int64` and their methods.
+
 ## Types
 
 * `atomic_int32(init) -> atomic_int32`

@@ -114,6 +114,31 @@ for (string name : configs)
 }
 ```
 
+## Pitfalls and correct failure handling
+
+Filesystem natives collapse failures into falsy values and never throw. Check existence before reading when empty data is valid.
+
+```cpp
+string path = "configs/active.json";
+if (!fs_file_exists(path)) {
+    println("[fs] missing file");
+} else {
+    string data = fs_read_file(path);
+    // data may legitimately be empty here.
+}
+```
+
+For sizes, `0` means either a zero-byte file or failure:
+
+```cpp
+if (fs_file_exists(path)) {
+    int64 size = fs_file_size(path);
+    println("size=" + cast<string>(size));
+}
+```
+
+Directory listing is non-recursive and returns basenames only. Empty array means either no entries, missing directory, permission denial, or I/O failure, so check `fs_dir_exists(path)` first when it matters.
+
 ## Failure modes
 
 Every native handles every failure the same way: returns a falsy value (`false` / `0` / empty). The script never sees an exception from the FS layer.

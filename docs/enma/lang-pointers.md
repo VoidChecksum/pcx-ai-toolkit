@@ -79,7 +79,13 @@ println(a->x);       // null deref - traps
 
 `move(x)` returns the value at `x` AND writes 0 (null) to `x`'s slot in one step. Distinct from `*pt` which makes an independent copy and leaves the source intact. Useful for explicit ownership transfer without a copy.
 
-Currently restricted to a simple variable name — `move(arr[i])` and `move(s.field)` error out at compile time.
+Currently restricted to a simple variable name — `move(arr[i])` and `move(s.field)` error out at compile time. Move through a temporary and clear the original slot yourself:
+
+```c
+Foo* tmp = arr[i];
+Foo* owned = move(tmp);
+arr[i] = null;
+```
 
 ## Pointer Fields & Globals
 

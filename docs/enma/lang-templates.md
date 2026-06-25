@@ -72,6 +72,27 @@ int32 v = unwrap<int32>(b);  // 42
 
 Type args themselves can be template instantiations — `Pair<Pair<int64>>`, `Box<Box<Box<int64>>>`, etc. The closing `>>` parses without spacing in both type position and ctor-call position.
 
+## No script-level constraints
+
+Script templates accept unconstrained `typename` parameters. SDK-side generic parameters can be constrained by host registration helpers such as `.requires_iface(...)`, but that constraint syntax is not available in script templates.
+
+```cpp
+template<typename T>
+struct Box {
+    T value;
+}
+```
+
+Not supported today:
+
+```cpp
+// Invalid: script-level constraints do not exist.
+template<typename T: Hashable>
+struct SetLike { }
+```
+
+Use concrete helper functions or document the methods a template expects. Type errors surface when the compiler monomorphizes the template for a concrete `T`.
+
 ## Templated Base Classes
 
 A class can inherit from a template instantiation:

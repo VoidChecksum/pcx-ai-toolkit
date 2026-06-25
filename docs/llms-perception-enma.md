@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 83**
+**Source files included: 85**
 
 ---
 
@@ -302,6 +302,8 @@ Use this mechanism when the answer is not explicitly present in the current page
 # Atomic
 
 Script-exposed atomic integers and memory barriers backed by `std::atomic<>`. Use these when multiple threads touch the same value. Plain `aint32` / `aint64` keywords exist as Enma types but the codegen doesn't currently emit LOCK-prefixed ops for assignments on them, so reach for the atomic types instead.
+
+> **Do not use `aint32` / `aint64` for synchronization.** They are language-level integer types, but assignment is not currently emitted as a hardware atomic operation. For cross-thread synchronization, use `atomic_int32` / `atomic_int64` and their methods.
 
 ## Types
 
@@ -4087,7 +4089,13 @@ println(a->x);       // null deref - traps
 
 `move(x)` returns the value at `x` AND writes 0 (null) to `x`'s slot in one step. Distinct from `*pt` which makes an independent copy and leaves the source intact. Useful for explicit ownership transfer without a copy.
 
-Currently restricted to a simple variable name — `move(arr[i])` and `move(s.field)` error out at compile time.
+Currently restricted to a simple variable name — `move(arr[i])` and `move(s.field)` error out at compile time. Move through a temporary and clear the original slot yourself:
+
+```c
+Foo* tmp = arr[i];
+Foo* owned = move(tmp);
+arr[i] = null;
+```
 
 ## Pointer Fields & Globals
 
@@ -5626,6 +5634,27 @@ int32 v = unwrap<int32>(b);  // 42
 ```
 
 Type args themselves can be template instantiations — `Pair<Pair<int64>>`, `Box<Box<Box<int64>>>`, etc. The closing `>>` parses without spacing in both type position and ctor-call position.
+
+## No script-level constraints
+
+Script templates accept unconstrained `typename` parameters. SDK-side generic parameters can be constrained by host registration helpers such as `.requires_iface(...)`, but that constraint syntax is not available in script templates.
+
+```cpp
+template<typename T>
+struct Box {
+    T value;
+}
+```
+
+Not supported today:
+
+```cpp
+// Invalid: script-level constraints do not exist.
+template<typename T: Hashable>
+struct SetLike { }
+```
+
+Use concrete helper functions or document the methods a template expects. Type errors surface when the compiler monomorphizes the template for a concrete `T`.
 
 ## Templated Base Classes
 
@@ -13858,6 +13887,8 @@ I am also actively working on the **Reconstruct Source** feature shown in the sc
 
 If this feature interests you and you would like to help improve it, please feel free to share suggestions and bug reports.
 
+Operational boundary: treat reconstructed source as analysis output, not as trusted recompilable source. It is best for reading pseudocode, recovering structures, naming modules, and finding unresolved areas. Obfuscated control flow, unusual calling conventions, hand-written assembly, stripped RTTI, packed code, self-modifying code, and failed function boundaries can produce incomplete output or `__asm {}` fallbacks. Report issues with the target architecture, module-loading mode, function address/RVA, and the smallest screenshot or snippet that shows the bad reconstruction.
+
 — **Timefall / Admin**
 
 <div data-with-frame="true"><figure><img src="/files/FZZ90AC37miYmZdG7Xkb" alt=""><figcaption></figcaption></figure></div>
@@ -15611,6 +15642,31 @@ for (string name : configs)
     // ...
 }
 ```
+
+## Pitfalls and correct failure handling
+
+Filesystem natives collapse failures into falsy values and never throw. Check existence before reading when empty data is valid.
+
+```cpp
+string path = "configs/active.json";
+if (!fs_file_exists(path)) {
+    println("[fs] missing file");
+} else {
+    string data = fs_read_file(path);
+    // data may legitimately be empty here.
+}
+```
+
+For sizes, `0` means either a zero-byte file or failure:
+
+```cpp
+if (fs_file_exists(path)) {
+    int64 size = fs_file_size(path);
+    println("size=" + cast<string>(size));
+}
+```
+
+Directory listing is non-recursive and returns basenames only. Empty array means either no entries, missing directory, permission denial, or I/O failure, so check `fs_dir_exists(path)` first when it matters.
 
 ## Failure modes
 
@@ -17807,12 +17863,15 @@ Use this page as the Perception API map. Use the related platform docs below for
 * [Net](net-api.md)
 * [GUI](gui-api.md)
 
-#### Related platform docs
+#### Related Perception platform docs
 
-* [Extensions](extensions-api.md) — extension-only APIs and explicit exclusions from the Enma script host.
-* [Analyzer](analyzer.md) — integrated disassembly, decompilation, source reconstruction, hex view, scanning, and structure editing.
-* [Perception IDE](ide.md) — built-in editor and AI assistant setup.
-* [Changelogs](changelogs.md) — platform changelog archive; Enma language feature introduction dates are not fully versioned.
+* [Custom Draw](custom-draw-api.md) — first-class D3D11 GPU pipeline API registered through Render.
+* [Perception IDE](ide.md) — built-in editor, AI assistant, tool calls, and project workflow.
+* [Extensions API](extensions-api.md) — extension-only API surface and limitations.
+* [Perception Analyzer](analyzer.md) — disassembler, decompiler, memory analysis, and structure tooling.
+* [Changelogs](changelogs.md) — release history and API/version provenance.
+* [SDK status](sdk-status.md) — what local compilation and `.emb` workflows are currently supported.
+* [Versioning and migration](versioning-and-migration.md) — symbol provenance, unknown introduction dates, and legacy AngelScript-to-Enma migration notes.
 * [llms.txt](https://docs.perception.cx/perception/llms.txt) — complete machine-readable page index.
 
 #### AI agent surface
@@ -17840,7 +17899,32 @@ int64 main() {
 }
 ```
 
-See [Lifecycle and Routines](lifecycle-and-routines.md) for the entry point, return-value semantics, and how routines tick.
+See [Lifecycle and Routines](lifecycle-and-routines.md) for the entry point, return-value semantics, and how routines tick. For advanced GPU work, use [Custom Draw](custom-draw-api.md).
+
+Minimum checklist:
+
+* Define `int64 main()`.
+* Initialize globals before registering persistent work.
+* Register a routine when the script needs to keep ticking.
+* Return `1` to stay loaded; return `0` to unload immediately.
+* Use unload cleanup hooks when you own external or long-lived resources.
+* Do not inspect encrypted `int64` handles.
+* Wrap colors/vectors (`color(...)`, `vec2(...)`).
+* Use `0.2f` for `float32` literals.
+
+## Before writing Perception Enma scripts
+
+Read these upstream Enma pages first if you are new to PCX Enma scripting:
+
+* [Basics](https://enma-1.gitbook.io/enma/language/basics), types, and casts.
+* [Functions](https://enma-1.gitbook.io/enma/language/functions).
+* [Modules and imports](https://enma-1.gitbook.io/enma/language/modules).
+* [Structs and classes](https://enma-1.gitbook.io/enma/language/structs-and-classes).
+* [Pointers](https://enma-1.gitbook.io/enma/language/pointers). Pointer arithmetic is typed: `p + n` scales by `sizeof(T)`, so use the Proc/CPU APIs for raw byte-offset memory workflows.
+* [Templates](https://enma-1.gitbook.io/enma/language/templates). Some C++-style patterns are unsupported; see this toolkit's [upstream suggestions](../enma/UPSTREAM-SUGGESTIONS.md) for known limits around nested template fields, overloaded function templates, packed strings, and LSP template diagnostics.
+* Addons commonly used by PCX scripts: [Core](https://enma-1.gitbook.io/enma/addons/core), [String](https://enma-1.gitbook.io/enma/addons/strings), [Arrays](https://enma-1.gitbook.io/enma/addons/arrays), [Maps](https://enma-1.gitbook.io/enma/addons/maps), [Math](https://enma-1.gitbook.io/enma/addons/math), [Vec](https://enma-1.gitbook.io/enma/addons/vec), [JSON](https://enma-1.gitbook.io/enma/addons/json), [Bits](https://enma-1.gitbook.io/enma/addons/bits), and [Time](https://enma-1.gitbook.io/enma/addons/time).
+
+Perception-side entry points live in [Lifecycle and Routines](lifecycle-and-routines.md).
 
 ## Before writing Perception Enma scripts
 
@@ -17864,16 +17948,19 @@ Perception-side entry points live in [Lifecycle and Routines](lifecycle-and-rout
 
 ## Extension vs Enma script surface
 
-| Area | Enma scripts | Extensions |
-|------|--------------|------------|
-| Process memory | yes | no |
-| Script GUI | yes | no |
-| Render | yes | partial / extension-specific |
-| Input | yes | yes |
+| Capability | Enma script | Extension |
+|------------|-------------|-----------|
+| `proc_t` / process memory | yes | no |
+| Render API | yes | partial / extension-specific |
+| Input API | yes | yes |
+| PCX script GUI widgets | yes | no |
 | Unicorn | yes | no |
-| Callbacks and routines | yes | no |
+| Zydis | yes | yes / partial |
 | Filesystem | yes | yes |
-| HTTP, clipboard, editor APIs | no | yes |
+| HTTP | Net API | extension-specific sync HTTP |
+| Clipboard | Win API | yes |
+| Register routine / callback | yes | no |
+| Editor manipulation | no | yes |
 
 See [Extensions](extensions-api.md) for the authoritative extension API boundary.
 
@@ -17885,9 +17972,46 @@ See [Extensions](extensions-api.md) for the authoritative extension API boundary
 4. Use Proc, CPU, Zydis, Render, GUI, and Custom Draw APIs as needed.
 5. Use [MCP](mcp-api.md) for AI-agent automation.
 
+## Permissions and gates
+
+| Permission | Affects | Failure behavior | Docs |
+|------------|---------|------------------|------|
+| `file_system_access` | FS read/write/list | `false` / `0` / empty | [Filesystem](filesystem-api.md) |
+| `kernel_rw_access` | kernel process access such as `get_eprocess` | `0` / log | [Proc](proc-api.md) |
+| `write_memory` | process memory writes | `false` / no-op | [Proc](proc-api.md) |
+| MCP tool permissions | local agent calls | JSON-RPC `-32001` with missing permission | [MCP](mcp-api.md) |
+| `PERM_FFI` | Enma FFI | compile/runtime permission error | [Enma advanced](../enma/lang-advanced.md) |
+
+## Return-value conventions
+
+| Return | Common meaning | Disambiguate with |
+|--------|----------------|-------------------|
+| `0` address / handle / size | missing, invalid, denied, or failed allocation | validity and permission checks |
+| empty string | empty data or failure | existence check first |
+| empty array | no results or failure | separate existence/status check if available |
+| `false` | validation failure, permission failure, missing target, or I/O failure | logs and precondition checks |
+
+## Resource lifetime
+
+| Resource | Created by | Destroyed by | Auto-cleanup on unload | User can inspect? |
+|----------|------------|--------------|------------------------|-------------------|
+| Font handle | `create_font`, `create_font_mem`, built-in getters | unload / owner cleanup | yes | no |
+| Bitmap handle | `create_bitmap` | unload / owner cleanup | yes | no |
+| Custom Draw resources | `create_shader`, buffers, textures, states | matching `destroy_*` or unload | yes | no |
+| GUI handle | GUI add/create calls | unload | yes | no |
+| Sound resource | load/play calls | stop/unload where exposed | yes | no |
+| Net socket / WebSocket handle | connect/create calls | close/unload where exposed | specify per API | no |
+| `proc_t` | `ref_process` | scope/unload | yes | no |
+
+Handles are encrypted `int64` values. Pass them back unchanged; never branch on their internal value except `0` failure checks.
+
+## Language boundary
+
+These pages describe Enma bindings. Legacy AngelScript examples may differ. Do not copy AngelScript handle syntax, array syntax, callback syntax, or GUI patterns into Enma without checking the Enma page or API index first.
+
 ## SDK
 
-Perception's Enma SDK is not public yet. Until it is published, treat upstream Enma SDK pages as language-runtime background only: they do not document Perception host registration, build/link steps, SDK headers/libraries, local test harness setup, package distribution, or whether `.emb` binaries can be compiled outside Perception and loaded by the platform.
+Perception's Enma SDK is not public yet. See [SDK status](sdk-status.md) for the current local-development boundary.
 
 
 ---
@@ -17920,6 +18044,8 @@ Use this mechanism when the answer is not explicitly present in the current page
 All render natives are auto-registered into every loaded script.
 
 Handles (`int64`) are encrypted pointers. Pass them back into other render calls. Don't dereference or arithmetic them.
+
+For custom HLSL shaders, compute shaders, GPU buffers, textures, render targets, depth buffers, and primitive topology, start with [Custom Draw](custom-draw-api.md). It is part of Render but large enough to treat as its own feature.
 
 ## `color` type
 
@@ -18180,6 +18306,63 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 ---
 
+## Source: `docs/perception/sdk-status.md`
+
+> For the complete documentation index, see [llms.txt](https://docs.perception.cx/perception/llms.txt).
+
+# SDK status and local development
+
+Perception's Enma SDK is not public yet. The public upstream Enma SDK docs are useful language-runtime background, but they do not define the supported Perception embedding contract.
+
+## Current support matrix
+
+| Question | Current answer |
+|----------|----------------|
+| Can users compile `.em` files outside Perception? | Not documented as supported for Perception. Use the Perception IDE/runtime workflow unless a release note says otherwise. |
+| Can users produce `.emb` modules for Perception? | Not documented as supported. Treat `.emb` loading as upstream Enma SDK behavior, not a Perception compatibility promise. |
+| Does Perception accept upstream Enma SDK output? | Unknown. No public binary-compatibility guarantee exists. |
+| Is the upstream Enma SDK binary-compatible with Perception's embedded runtime? | Unknown. Do not assume ABI or serialization compatibility. |
+| Is there a public Perception Enma CLI compiler? | Not documented. |
+| Are scripts source-only today? | Public docs only support source-level Perception scripting. |
+| Are there build flags, permissions, or packaging rules? | Permission gates are documented per API; no public SDK packaging rules are documented. |
+| Expected future SDK plan | Not public in this docs mirror. Watch [Changelogs](changelogs.md). |
+
+## Supported workflow today
+
+1. Write source Enma in [Perception IDE](ide.md) or another editor.
+2. Check API names against this docs mirror or the generated `llms.txt` index.
+3. Validate snippets/projects with this toolkit before relying on generated code.
+4. Load and run scripts through Perception's documented Enma script surface.
+
+## What not to assume
+
+* Do not assume upstream `.emb` output loads in Perception.
+* Do not assume host-native functions registered through the upstream SDK exist in Perception.
+* Do not assume private Perception host registration, build/link steps, headers, libraries, or package formats are stable.
+* Do not ship tooling that depends on Perception SDK binary compatibility until Perception publishes that contract.
+
+## Validation examples
+
+CLI:
+
+```bash
+pcx api draw_text
+pcx verify-project ./my-script
+python3 tools/check-llm-answer.py answer.md
+```
+
+MCP:
+
+```json
+{
+  "tool": "validate_code",
+  "language": "enma",
+  "code": "int64 main() { return 0; }"
+}
+```
+
+---
+
 ## Source: `docs/perception/sound-api.md`
 
 > For the complete documentation index, see [llms.txt](https://docs.perception.cx/perception/llms.txt). Markdown versions of documentation pages are available by appending `.md` to page URLs; this page is available as [Markdown](https://docs.perception.cx/perception/enma/sound-api.md).
@@ -18428,6 +18611,51 @@ The question should be specific, self-contained, and written in natural language
 The response will contain a direct answer to the question and relevant excerpts and sources from the documentation.
 
 Use this mechanism when the answer is not explicitly present in the current page, you need clarification or additional context, or you want to retrieve related documentation sections.
+
+---
+
+## Source: `docs/perception/versioning-and-migration.md`
+
+> For the complete documentation index, see [llms.txt](https://docs.perception.cx/perception/llms.txt).
+
+# Versioning and migration notes
+
+The Perception docs prove current symbol existence, but they do not always prove which historical build first introduced a symbol. Do not infer build compatibility from a current API page alone.
+
+## Symbol version metadata
+
+Machine-readable symbol metadata lives in [`../../knowledge/perception-symbol-versions.json`](../../knowledge/perception-symbol-versions.json). Unknown dates are explicit:
+
+```json
+{
+  "symbol": "draw_polygon",
+  "introduced": "unknown",
+  "first_documented": "2026-02-01-or-earlier",
+  "source": "docs/perception/render-api.md",
+  "changelog_source": null
+}
+```
+
+Use `introduced: "unknown"` when a symbol exists in docs but is not named in a changelog row.
+
+## Enma language versioning
+
+Enma is mirrored as a single unversioned language reference. The only dated language anchor in this toolkit is `Enma Open Beta — Phase 2 (May 2026)`, so exact introduction versions remain unknown for annotations, FFI, coroutines, `defer`, `match`, `goto`, exceptions, atomic types, preprocessor support, templates, pointer behavior, string behavior, and `.emb` serialization/linking.
+
+Until upstream publishes an Enma language changelog or per-feature `Introduced in` metadata, generated code should target the current documented runtime or ask the user for their Perception build.
+
+## Migration patterns
+
+| Old / historical pattern | Current Enma pattern | Since / status |
+|--------------------------|----------------------|----------------|
+| Scan functions with `&out` params | Return `array<uint64>` directly | 2026-03-14 changelog family |
+| AngelScript callback names | Enma `main()` plus routines/lifecycle | Enma beta |
+| AngelScript handles / refs | Enma values plus encrypted `int64` handles | Enma beta |
+| Old W2S helper assumptions | Row-major/transposed helpers where documented | See `knowledge/pcx-version-matrix.md` |
+
+## Wrong-language warning
+
+Perception history includes AngelScript-era examples and labels. These Enma pages are the source for Enma syntax. Do not copy AngelScript handle syntax, array syntax, callback syntax, or GUI patterns into Enma without checking the Enma-specific docs and API index.
 
 ---
 

@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "last_verified": "2026-06-25",
+  "notes": "Exact introduction versions are recorded as unknown unless named in changelogs. first_documented is a conservative docs-anchor, not a release guarantee.",
+  "symbols": [
+    {
+      "symbol": "draw_four_corner_gradient",
+      "introduced": "unknown",
+      "first_documented": "2026-02-01-or-earlier",
+      "source": "docs/perception/render-api.md",
+      "changelog_source": null
+    },
+    {
+      "symbol": "draw_polygon",
+      "introduced": "unknown",
+      "first_documented": "2026-02-01-or-earlier",
+      "source": "docs/perception/render-api.md",
+      "changelog_source": null
+    },
+    {
+      "symbol": "mat4.readas_*",
+      "introduced": "2026-02-03(b)",
+      "first_documented": "2026-02-03(b)",
+      "source": "knowledge/pcx-version-matrix.md",
+      "changelog_source": "docs/perception/changelogs.md"
+    },
+    {
+      "symbol": "mat4.writeas_*",
+      "introduced": "2026-02-03(b)",
+      "first_documented": "2026-02-03(b)",
+      "source": "knowledge/pcx-version-matrix.md",
+      "changelog_source": "docs/perception/changelogs.md"
+    },
+    {
+      "symbol": "alloc_vm",
+      "introduced": "unknown",
+      "first_documented": "2026-03-28-or-earlier",
+      "source": "docs/perception/proc-api.md",
+      "changelog_source": "docs/perception/changelogs.md"
+    },
+    {
+      "symbol": "free_vm",
+      "introduced": "unknown",
+      "first_documented": "2026-03-28-or-earlier",
+      "source": "docs/perception/proc-api.md",
+      "changelog_source": "docs/perception/changelogs.md"
+    },
+    {
+      "symbol": "Net API",
+      "introduced": "unknown",
+      "first_documented": "unknown",
+      "source": "docs/perception/net-api.md",
+      "changelog_source": null
+    },
+    {
+      "symbol": "Filesystem API",
+      "introduced": "unknown",
+      "first_documented": "unknown",
+      "source": "docs/perception/filesystem-api.md",
+      "changelog_source": null
+    }
+  ]
+}

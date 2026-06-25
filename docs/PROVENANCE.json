@@ -1,5 +1,5 @@
 {
-  "count": 83,
+  "count": 85,
   "drift_checkable": 67,
   "files": {
     "docs/AI_AGENT_OPERATING_MANUAL.md": {
@@ -357,6 +357,11 @@
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/enma/render-api.md"
     },
+    "docs/perception/sdk-status.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
+    },
     "docs/perception/sound-api.md": {
       "drift_check": true,
       "source": "gitbook",
@@ -366,6 +371,11 @@
       "drift_check": true,
       "source": "gitbook",
       "url": "https://docs.perception.cx/perception/enma/unicorn-api.md"
+    },
+    "docs/perception/versioning-and-migration.md": {
+      "drift_check": false,
+      "source": "local",
+      "url": null
     },
     "docs/perception/win-api.md": {
       "drift_check": true,
@@ -427,6 +437,8 @@
     "docs/marketplace-install.md",
     "docs/perception/changelogs.md",
     "docs/perception/llm-routing.md",
+    "docs/perception/sdk-status.md",
+    "docs/perception/versioning-and-migration.md",
     "docs/superpowers/plans/2026-06-24-pcx-mcp-schema-mirror.md",
     "docs/superpowers/plans/2026-06-24-rust-docs-pipeline.md",
     "docs/superpowers/plans/2026-06-25-auto-publish-release.md",

@@ -6,6 +6,8 @@ All render natives are auto-registered into every loaded script.
 
 Handles (`int64`) are encrypted pointers. Pass them back into other render calls. Don't dereference or arithmetic them.
 
+For custom HLSL shaders, compute shaders, GPU buffers, textures, render targets, depth buffers, and primitive topology, start with [Custom Draw](custom-draw-api.md). It is part of Render but large enough to treat as its own feature.
+
 ## `color` type
 
 `color` is a source-level module. Opt in with `import "color";`:
