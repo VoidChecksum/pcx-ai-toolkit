@@ -177,6 +177,50 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish
+
+  release-candidate-smoke:
+    name: Release candidate package smoke (${{ matrix.os }})
+    needs: [publish-pypi, publish-npm]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Download root Python package
+        uses: actions/download-artifact@v4
+        with:
+          name: root-python-package
+          path: dist
+
+      - name: Download npm package
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-package
+          path: npm-dist
+
+      - name: Smoke Python package
+        shell: bash
+        run: |
+          python -m pip install --find-links dist pcx-ai-toolkit
+          pcx doctor
+          pcx api draw_text --json
+
+      - name: Smoke npm package
+        shell: bash
+        run: |
+          npm install -g ./npm-dist/pcx-ai-toolkit-*.tgz
+          pcx api draw_text --json
+
   build-visualstudio:
     name: Build Enma Visual Studio 2022 Extension
     runs-on: windows-latest
@@ -234,7 +278,7 @@ jobs:
 
   release:
     name: Create GitHub Release
-    needs: [build-vscode, build-visualstudio, build-rust-cli]
+    needs: [build-vscode, build-visualstudio, build-rust-cli, release-candidate-smoke]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VoidChecksum/pcx-ai-toolkit/schemas/explain-finding.schema.json",
+  "title": "PCX explain_finding response",
+  "type": "object",
+  "required": ["kind", "symbol", "message", "next_action"],
+  "properties": {
+    "language": {"type": "string"},
+    "kind": {"type": "string"},
+    "symbol": {"type": "string"},
+    "message": {"type": "string"},
+    "reason": {"type": "string"},
+    "source": {"type": "string"},
+    "fix": {"type": "string"},
+    "minimal_patch": {"type": "string"},
+    "example": {"type": "string"},
+    "next_action": {"type": "string"}
+  },
+  "additionalProperties": true
+}

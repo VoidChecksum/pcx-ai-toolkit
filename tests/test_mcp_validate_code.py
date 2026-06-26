@@ -46,22 +46,26 @@ from server import (  # noqa: E402
     validate_code,
 )
 
+def mcp_payload(value):
+    return json.loads(value) if isinstance(value, str) else value
+
+
 
 class ValidateCodeTest(unittest.TestCase):
     def test_catches_hallucinated_function(self):
         code = 'import "vec";\nimport "color";\nvoid r(int64 d){ draw_esp(vec2(0,0), color(255,0,0,255)); }\nint64 main(){ register_routine(cast<int64>(r),0); return 1; }'
-        result = json.loads(validate_code(code, "enma"))
+        result = mcp_payload(validate_code(code, "enma"))
         self.assertFalse(result["ok"])
         self.assertTrue(any(f["symbol"] == "draw_esp" for f in result["findings"]))
 
     def test_allows_real_api_calls(self):
         code = 'import "vec";\nimport "color";\nvoid r(int64 d){ draw_text("hi", vec2(0,0), color(255,0,0,255), get_font20(), 0, color(0,0,0,0), 0.0); }\nint64 main(){ register_routine(cast<int64>(r),0); return 1; }'
-        result = json.loads(validate_code(code, "enma"))
+        result = mcp_payload(validate_code(code, "enma"))
         self.assertTrue(result["ok"], result["findings"])
 
     def test_enma_addon_symbols_require_imports(self):
         code = 'int64 main(){ float64 a = atan2(1.0, 2.0); return 1; }'
-        result = json.loads(validate_code(code, "enma"))
+        result = mcp_payload(validate_code(code, "enma"))
         self.assertFalse(result["ok"])
         finding = next(f for f in result["findings"] if f["symbol"] == "atan2")
         self.assertEqual(finding["kind"], "missing_import")
@@ -77,7 +81,7 @@ class ValidateCodeTest(unittest.TestCase):
         ]
         for code, symbol, fix in cases:
             with self.subTest(symbol=symbol):
-                result = json.loads(validate_code(code, "enma"))
+                result = mcp_payload(validate_code(code, "enma"))
                 self.assertFalse(result["ok"])
                 finding = next(f for f in result["findings"] if f["symbol"] == symbol)
                 self.assertEqual(finding["kind"], "missing_import")
@@ -85,19 +89,19 @@ class ValidateCodeTest(unittest.TestCase):
 
     def test_enma_addon_symbols_pass_with_imports(self):
         code = 'import "math";\nint64 main(){ float64 a = atan2(1.0, 2.0); return 1; }'
-        result = json.loads(validate_code(code, "enma"))
+        result = mcp_payload(validate_code(code, "enma"))
         self.assertTrue(result["ok"], result["findings"])
 
     def test_rejects_wrong_draw_text_shape(self):
         code = 'import "vec";\nimport "color";\nint64 main(){ draw_text("hi", 20, 20); return 1; }'
-        result = json.loads(validate_code(code, "enma"))
+        result = mcp_payload(validate_code(code, "enma"))
         self.assertFalse(result["ok"])
         kinds = {f["kind"] for f in result["findings"]}
         self.assertIn("argument_count_mismatch", kinds)
 
     def test_rejects_wrong_routine_shape(self):
         code = 'void draw(){ }\nint64 main(){ register_routine(draw, 0); return true; }'
-        result = json.loads(validate_code(code, "enma"))
+        result = mcp_payload(validate_code(code, "enma"))
         self.assertFalse(result["ok"])
         kinds = {f["kind"] for f in result["findings"]}
         self.assertIn("routine_missing_cast", kinds)
@@ -105,39 +109,43 @@ class ValidateCodeTest(unittest.TestCase):
 
     def test_rejects_angelscript_mode(self):
         code = 'int main(){ register_callback(on_tick, 16, 0); return 1; } void on_tick(int id, int data_index){}'
-        result = json.loads(validate_code(code, "angelscript"))
+        result = mcp_payload(validate_code(code, "angelscript"))
         self.assertEqual(result["error"], "unsupported language: angelscript; use enma")
 
     def test_rejects_unsupported_lua_mode(self):
-        result = json.loads(validate_code("function main() return 1 end", "lua"))
+        result = mcp_payload(validate_code("function main() return 1 end", "lua"))
         self.assertEqual(result["error"], "unsupported language: lua; use enma")
 
     def test_api_lookup_returns_source_backed_signature(self):
-        result = json.loads(api_lookup("draw_text", "enma"))
+        result = mcp_payload(api_lookup("draw_text", "enma"))
         self.assertTrue(result["found"])
         self.assertTrue(result["signatures"])
         self.assertTrue(all(sig["source"].startswith("https://docs.perception.cx/") for sig in result["signatures"]))
 
     def test_api_lookup_suggests_near_matches(self):
-        result = json.loads(api_lookup("draw_texxt", "enma"))
+        result = mcp_payload(api_lookup("draw_texxt", "enma"))
         self.assertFalse(result["found"])
         self.assertIn("draw_text", result["suggestions"])
 
+    def test_mcp_tools_return_structured_payloads_by_default(self):
+        self.assertIsInstance(api_lookup("draw_text", "enma"), dict)
+        self.assertIsInstance(mcp_search("register_routine lifecycle", 1), list)
+
     def test_list_and_get_skill(self):
-        skills = json.loads(list_skills())
+        skills = mcp_payload(list_skills())
         names = {item["name"] for item in skills}
         self.assertIn("pcx-enma-discipline", names)
         skill = get_skill("pcx-enma-discipline")
         self.assertIn("# Enma", skill)
 
     def test_recommend_context_for_enma_esp(self):
-        result = json.loads(recommend_context("write an ESP overlay", "enma"))
+        result = mcp_payload(recommend_context("write an ESP overlay", "enma"))
         self.assertIn("pcx-enma-discipline", result["skills"])
         self.assertIn("game-cheat-script-master", result["skills"])
         self.assertIn("api_lookup", result["mcp_tools"])
 
     def test_recommend_context_for_forum_changelog(self):
-        result = json.loads(recommend_context("explain the overlay changelog", ""))
+        result = mcp_payload(recommend_context("explain the overlay changelog", ""))
         self.assertIn("knowledge/perception-forum-insights.md", result["docs"])
         self.assertIn("docs/perception/changelogs.md", result["docs"])
         self.assertIn("validate_answer", result["mcp_tools"])
@@ -146,44 +154,44 @@ class ValidateCodeTest(unittest.TestCase):
         answer = '''```enma
 void r(int64 d) { draw_texxt("hi"); }
 ```'''
-        result = json.loads(validate_answer(answer, "draft.md"))
+        result = mcp_payload(validate_answer(answer, "draft.md"))
         self.assertFalse(result["ok"])
         self.assertEqual(result["blocks_checked"], 1)
         self.assertTrue(any(f["symbol"] == "draw_texxt" for f in result["findings"]))
 
     def test_project_template_tools_are_available(self):
-        templates = json.loads(list_project_templates("enma"))
+        templates = mcp_payload(list_project_templates("enma"))
         self.assertTrue(any(t["kind"] == "full" for t in templates))
-        plan = json.loads(generate_script_plan("ESP scaffold", "enma", "full", "game.exe", "source2"))
+        plan = mcp_payload(generate_script_plan("ESP scaffold", "enma", "full", "game.exe", "source2"))
         self.assertEqual(plan["language"], "enma")
         self.assertIn("pcx verify-project . --allow-placeholders --allow-unverified", plan["commands"])
 
     def test_scaffold_project_rejects_angelscript(self):
-        result = json.loads(scaffold_project("Dry Run", "angelscript", "full"))
+        result = mcp_payload(scaffold_project("Dry Run", "angelscript", "full"))
         self.assertEqual(result["error"], "unsupported language: angelscript; use enma")
 
     def test_scaffold_project_write_requires_explicit_env_opt_in(self):
-        result = json.loads(scaffold_project("Unsafe Write", "enma", "hello", output_dir="/tmp/pcx-unsafe-write", dry_run=False))
+        result = mcp_payload(scaffold_project("Unsafe Write", "enma", "hello", output_dir="/tmp/pcx-unsafe-write", dry_run=False))
         self.assertFalse(result["ok"])
         self.assertEqual(result["error"], "mcp_writes_disabled")
         self.assertIn("PCX_MCP_ALLOW_WRITES=1", result["message"])
 
     def test_suggest_imports_from_missing_enma_addon(self):
-        result = json.loads(suggest_imports("int64 main(){ float64 x = atan2(1.0, 2.0); return 1; }", "enma"))
+        result = mcp_payload(suggest_imports("int64 main(){ float64 x = atan2(1.0, 2.0); return 1; }", "enma"))
         self.assertIn('import "math";', result["imports"])
 
     def test_explain_finding_and_offset_drift_report(self):
-        explanation = json.loads(explain_finding(json.dumps({"kind": "missing_import", "symbol": "atan2", "fix": 'import "math";'}), "enma"))
+        explanation = mcp_payload(explain_finding(json.dumps({"kind": "missing_import", "symbol": "atan2", "fix": 'import "math";'}), "enma"))
         self.assertEqual(explanation["symbol"], "atan2")
         self.assertIn("Add the exact Enma import", explanation["next_action"])
 
-        drift = json.loads(offset_drift_report('{"A":"0x1000","B":"0x2000"}', '{"A":"0x1010","C":"0x3000"}'))
+        drift = mcp_payload(offset_drift_report('{"A":"0x1000","B":"0x2000"}', '{"A":"0x1010","C":"0x3000"}'))
         self.assertEqual(drift["summary"]["moved"], 1)
         self.assertEqual(drift["summary"]["missing"], 1)
         self.assertEqual(drift["summary"]["added"], 1)
 
     def test_search_uses_fts_backend_when_available(self):
-        result = json.loads(mcp_search("register_routine lifecycle", 3))
+        result = mcp_payload(mcp_search("register_routine lifecycle", 3))
         self.assertTrue(result)
         self.assertEqual(result[0]["backend"], "fts")
         self.assertIn("path", result[0])

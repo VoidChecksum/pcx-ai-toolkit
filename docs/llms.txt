@@ -25,9 +25,11 @@ Top-level operating manuals, FAQ, and routing references for AI tools using this
 - [Frequently Asked Questions](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/FAQ.md): A quick reference for common issues and questions when using pcx-ai-toolkit.
 - [PCX Documentation Navigation](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/NAVIGATION.md)
 - [Workflow Cookbook](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/WORKFLOW_COOKBOOK.md): Intent-first index for PCX, Perception MCP, RE workflows, task docs, and skills.
+- [CLI reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/cli-reference.md): Use pcx --help for the live command list. This page gives agents a small routing map.
 - [Distribution Checklist](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/distribution-checklist.md): Safe release/publishing path for pcx-ai-toolkit.
 - [Extension Installation Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/marketplace-install.md): Two VS Code extensions are available for pcx-ai-toolkit:
 - [MCP safety](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/mcp-safety.md): Perception MCP is loopback-only, but agents can still call tools that read, write, allocate, or execute inside a target process. Treat the MCP surface as a privileged local automation API.
+- [Knowledge MCP tool reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/mcp-tool-reference.md): pcx-knowledge-mcp exposes the toolkit corpus and validators to MCP clients. Outputs are structured objects/lists by default; set PCXMCPJSONSTRINGS=1 only for legacy clients that require JSON strings.
 - [Production-readiness follow-ups](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/production-readiness-followups.md): This file tracks large production-readiness work and whether it is done.
 
 ## Enma Language Docs
@@ -252,6 +254,7 @@ Python-facing CLI tools for validation, generation, and RE; hot binary-analysis 
 - [── Upstream endpoints ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-api-index.py): ENMAROOTURL = "https://docs.perception.cx/perception/enma/readme.md"
 - [Exclude only the generated bundles sitting directly under docs/.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-counts.py): if p.parent == (REPOROOT / "docs") and p.name.startswith("llms-"):
 - [build-coverage-dashboard](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-coverage-dashboard.py)
+- [Seeded from documented addon pages. The parser below can add symbols from docs,](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-enma-addon-metadata.py): # but these are the stable module boundaries the validator needs.
 - [── Repo layout ──────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-llms-index.py): REPOROOT = Path(file).resolve().parent.parent
 - [Files / dirs that are generated or local-only — never a drift source.](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/build-provenance.py): EXCLUDENAMES = {"INDEX.md"}
 - [Show a short, useful diff hint (first differing normalized line).](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-doc-drift.py): locallines = localnorm.splitlines()

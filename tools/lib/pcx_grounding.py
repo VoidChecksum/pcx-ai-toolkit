@@ -32,6 +32,7 @@ UNSUPPORTED_SYMBOLS_PATH = data_root() / "knowledge" / "unsupported-symbols.json
 PERMISSION_RULES_PATH = data_root() / "knowledge" / "permission-rules.json"
 DEPRECATED_SYMBOLS_PATH = data_root() / "knowledge" / "deprecated-symbols.json"
 SYMBOL_METADATA_PATH = data_root() / "knowledge" / "perception-symbol-versions.json"
+ENMA_ADDON_IMPORTS_PATH = data_root() / "knowledge" / "enma-addon-imports.json"
 
 def load_unsupported_symbols() -> dict[str, str]:
     if not UNSUPPORTED_SYMBOLS_PATH.exists():
@@ -98,6 +99,12 @@ def load_symbol_metadata() -> dict[str, dict[str, Any]]:
 
 def symbol_metadata(symbol: str) -> dict[str, Any]:
     return load_symbol_metadata().get(symbol, {})
+
+def load_enma_addon_imports() -> dict[str, Any]:
+    if not ENMA_ADDON_IMPORTS_PATH.exists():
+        return {}
+    raw_data: object = json.loads(ENMA_ADDON_IMPORTS_PATH.read_text(encoding="utf-8"))
+    return cast(dict[str, Any], raw_data) if isinstance(raw_data, dict) else {}
 
 def permissions_for_symbol(symbol: str, sig: dict[str, Any] | None = None) -> list[str]:
     source = str((sig or {}).get("source", ""))
@@ -204,6 +211,12 @@ ENMA_MODULE_HINTS: dict[str, set[str]] = {
     "sorted_map": {"sorted_map"},
     "list": {"list"},
 }
+_addon_imports = load_enma_addon_imports()
+for _mod, _names in cast(dict[str, object], _addon_imports.get("modules", {})).items():
+    if isinstance(_names, list):
+        ENMA_MODULE_HINTS.setdefault(str(_mod), set()).update(str(name) for name in _names)
+if isinstance(_addon_imports.get("import_required_types"), list):
+    ENMA_IMPORT_REQUIRED_TYPES = {str(name) for name in _addon_imports["import_required_types"]}
 
 LANGUAGE_BUILTIN_CALLS: dict[str, set[str]] = {
     "enma": {

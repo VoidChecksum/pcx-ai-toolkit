@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VoidChecksum/pcx-ai-toolkit/schemas/search-docs.schema.json",
+  "title": "PCX search_docs response",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["path", "score", "snippet", "backend"],
+    "properties": {
+      "path": {"type": "string"},
+      "score": {"type": "number"},
+      "snippet": {"type": "string"},
+      "backend": {"type": "string", "enum": ["fts", "keyword", "vector"]}
+    },
+    "additionalProperties": true
+  }
+}

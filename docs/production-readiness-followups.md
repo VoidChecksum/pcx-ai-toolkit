@@ -28,22 +28,24 @@ Status: initial schema surface done. Published schemas cover `api_lookup`, `vali
 
 Status: initial SQLite FTS5 backend done. The knowledge MCP uses in-memory FTS when available and falls back to keyword overlap.
 
-## Remaining follow-ups
 
 ### Structured MCP return objects
 
-Problem: MCP handlers still return JSON strings for broad client compatibility.
-
-Fix: migrate FastMCP handlers to structured dict/list returns after verifying target clients accept typed objects.
+Status: done with compatibility escape hatch. MCP tools now return dict/list payloads by default; set `PCX_MCP_JSON_STRINGS=1` for legacy clients that still require serialized JSON strings.
 
 ### Generated addon metadata
 
-Problem: addon import hints are still maintained in code.
-
-Fix: generate addon symbol/import metadata from `https://enma-1.gitbook.io/enma/llms-language.md` and addon pages.
+Status: done. `tools/build-enma-addon-metadata.py` generates `knowledge/enma-addon-imports.json`, and validators load that file before checking missing imports.
 
 ### Release-candidate OS install smoke
 
-Problem: CI matrix builds packages on three OSes, but release jobs still publish from Linux.
+Status: done. Release packages now run a Linux/Windows/macOS install smoke before the GitHub Release job.
 
-Fix: add release-candidate workflow that installs the built artifacts on Linux, Windows, and macOS before tag publication.
+### MCP response schemas
+
+Status: extended. Published schemas now cover search, context recommendation, finding explanation, and generated script plans.
+
+### CLI and MCP reference docs
+
+Status: done. See `docs/cli-reference.md` and `docs/mcp-tool-reference.md`.
+

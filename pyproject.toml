@@ -72,11 +72,11 @@ include-package-data = true
 
 [tool.setuptools.data-files]
 "." = ["VERSION", "README.md", "LICENSE"]
-"knowledge" = ["knowledge/pcx-api-index.json", "knowledge/unsupported-symbols.json", "knowledge/permission-rules.json", "knowledge/deprecated-symbols.json", "knowledge/mcp-schema-rules.json"]
+"knowledge" = ["knowledge/pcx-api-index.json", "knowledge/unsupported-symbols.json", "knowledge/permission-rules.json", "knowledge/deprecated-symbols.json", "knowledge/mcp-schema-rules.json", "knowledge/enma-addon-imports.json"]
 "templates" = ["templates/*.em", "templates/*.md"]
 "templates/full-project" = ["templates/full-project/*.em"]
 "templates/cheat-skeleton-em" = ["templates/cheat-skeleton-em/*.em", "templates/cheat-skeleton-em/*.md"]
-"docs" = ["docs/COUNTS.json", "docs/COVERAGE.json", "docs/COVERAGE.md", "docs/llms.txt", "docs/llms-perception-enma.md"]
+"docs" = ["docs/COUNTS.json", "docs/COVERAGE.json", "docs/COVERAGE.md", "docs/llms.txt", "docs/llms-perception-enma.md", "docs/cli-reference.md", "docs/mcp-tool-reference.md"]
 "docs/quickstarts" = ["docs/quickstarts/*.md"]
 "evals" = ["evals/*.json"]
 "schemas" = ["schemas/*.json"]

@@ -1,0 +1,51 @@
+{
+  "import_required_types": [
+    "color",
+    "hash_set",
+    "list",
+    "mat4",
+    "quat",
+    "regex",
+    "sorted_map",
+    "variant",
+    "vec2",
+    "vec3",
+    "vec4"
+  ],
+  "modules": {
+    "color": [
+      "color"
+    ],
+    "hash_set": [
+      "hash_set"
+    ],
+    "list": [
+      "list"
+    ],
+    "math3d": [
+      "mat4",
+      "quat"
+    ],
+    "regex": [
+      "regex"
+    ],
+    "sorted_map": [
+      "sorted_map"
+    ],
+    "variant": [
+      "variant",
+      "variant_bool",
+      "variant_box_owned",
+      "variant_float",
+      "variant_int",
+      "variant_null",
+      "variant_str"
+    ],
+    "vec": [
+      "vec2",
+      "vec3",
+      "vec4"
+    ]
+  },
+  "source": "docs/llms-perception-enma.md"
+}

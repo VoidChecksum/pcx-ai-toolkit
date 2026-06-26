@@ -401,6 +401,13 @@ def build_context_recommendation(task: str, language: str = "") -> dict[str, obj
 mcp = FastMCP("pcx-knowledge")
 
 
+def _mcp_result(payload: Any) -> Any:
+    """Return structured MCP payloads; set PCX_MCP_JSON_STRINGS=1 for legacy clients."""
+    if os.environ.get("PCX_MCP_JSON_STRINGS") == "1":
+        return json.dumps(payload, indent=2)
+    return payload
+
+
 @mcp.tool()
 def search(query: str, limit: int = 10) -> str:
     """Search the toolkit corpus by keyword.
@@ -409,7 +416,7 @@ def search(query: str, limit: int = 10) -> str:
     Searches docs, skills, knowledge, rules, templates, tools, signatures, mcp setup files.
     """
     results = INDEX.search(query, limit=max(1, min(limit, 50)))
-    return json.dumps(results, indent=2)
+    return _mcp_result(results)
 
 
 @mcp.tool()
@@ -460,10 +467,10 @@ def list_files(category: str = '') -> str:
     corpus = list_corpus()
     if category:
         if category not in corpus:
-            return json.dumps({'error': f'unknown category: {category}',
-                               'available': list(corpus.keys())}, indent=2)
-        return json.dumps({category: [rel(p) for p in corpus[category]]}, indent=2)
-    return json.dumps({cat: [rel(p) for p in files] for cat, files in corpus.items()}, indent=2)
+            return _mcp_result({'error': f'unknown category: {category}',
+                               'available': list(corpus.keys())})
+        return _mcp_result({category: [rel(p) for p in corpus[category]]})
+    return _mcp_result({cat: [rel(p) for p in files] for cat, files in corpus.items()})
 
 
 @mcp.tool()
@@ -502,7 +509,7 @@ def overview() -> str:
 @mcp.tool()
 def list_skills() -> str:
     """List all bundled AI skills with stable names, paths, and descriptions."""
-    return json.dumps(skill_index(), indent=2)
+    return _mcp_result(skill_index())
 
 
 @mcp.tool()
@@ -510,10 +517,10 @@ def get_skill(name: str) -> str:
     """Fetch a bundled AI skill by name, e.g. get_skill("pcx-enma-discipline")."""
     path = _skill_by_name(name)
     if path is None:
-        return json.dumps({
+        return _mcp_result({
             "error": f"skill not found: {name}",
             "available": [item["name"] for item in skill_index()],
-        }, indent=2)
+        })
     return path.read_text(encoding="utf-8", errors="ignore")
 
 
@@ -524,7 +531,7 @@ def recommend_context(task: str, language: str = "") -> str:
     Use this before loading large bundles. It returns an ordered load plan,
     skill names, docs, MCP tools, and CLI commands for Enma work.
     """
-    return json.dumps(build_context_recommendation(task, language), indent=2)
+    return _mcp_result(build_context_recommendation(task, language))
 
 
 # ── API grounding and code validation ─────────────────────────────────────────
@@ -552,11 +559,11 @@ def api_lookup(symbol: str, language: str = "") -> str:
     method, type, argument shape, or lifecycle binding.
     """
     if language and language not in {"enma", "em", ".em"}:
-        return json.dumps({"error": f"unsupported language: {language}; use enma"}, indent=2)
+        return _mcp_result({"error": f"unsupported language: {language}; use enma"})
     index = _load_api_index()
     if index is None:
-        return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
-    return json.dumps(lookup_symbol(index, symbol, "enma"), indent=2)
+        return _mcp_result({"error": f"API index not found at {API_INDEX_FILE}"})
+    return _mcp_result(lookup_symbol(index, symbol, "enma"))
 
 
 @mcp.tool()
@@ -572,14 +579,14 @@ def validate_code(code: str, language: str, source_path: str = "", runtime_mode:
     language must be enma.
     """
     if language not in {"enma", "em", ".em"}:
-        return json.dumps({"error": f"unsupported language: {language}; use enma"}, indent=2)
+        return _mcp_result({"error": f"unsupported language: {language}; use enma"})
     index = _load_api_index()
     if index is None:
         findings = [{"line": 0, "symbol": "", "kind": "index_missing",
                      "message": f"API index not found at {API_INDEX_FILE}; run `pcx build-api-index`"}]
     else:
         findings = validate_code_against_index(code, language, index, source_path, runtime_mode=runtime_mode)
-    return json.dumps({"findings": findings, "ok": not findings}, indent=2)
+    return _mcp_result({"findings": findings, "ok": not findings})
 
 
 @mcp.tool()
@@ -592,8 +599,8 @@ def validate_answer(answer: str, source_path: str = "answer.md") -> str:
     """
     index = _load_api_index()
     if index is None:
-        return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
-    return json.dumps(validate_answer_markdown(answer, index, source_path), indent=2)
+        return _mcp_result({"error": f"API index not found at {API_INDEX_FILE}"})
+    return _mcp_result(validate_answer_markdown(answer, index, source_path))
 
 
 
@@ -604,7 +611,7 @@ def search_docs(query: str, category: str = "", limit: int = 10) -> str:
     results = INDEX.search(query, limit=max(1, min(limit, 50)))
     if category:
         results = [r for r in results if str(r.get("path", "")).startswith(category.rstrip("/") + "/")]
-    return json.dumps(results[:limit], indent=2)
+    return _mcp_result(results[:limit])
 
 
 @mcp.tool()
@@ -619,7 +626,7 @@ def get_examples(api_family: str) -> str:
     needle = api_family.lower().strip()
     INDEX.ensure()
     hits = [r for r in INDEX.search(needle, limit=20) if any(part in str(r.get("path", "")) for part in ("examples/", "templates/", "docs/perception/"))]
-    return json.dumps({"family": needle, "examples": hits[:8]}, indent=2)
+    return _mcp_result({"family": needle, "examples": hits[:8]})
 
 
 @mcp.tool()
@@ -630,7 +637,7 @@ def get_negative_examples(symbol: str = "") -> str:
     symbols = data.get("symbols", {})
     if symbol:
         symbols = {symbol: symbols.get(symbol, "")} if symbol in symbols else {}
-    return json.dumps({"symbols": symbols}, indent=2)
+    return _mcp_result({"symbols": symbols})
 
 
 @mcp.tool()
@@ -638,9 +645,9 @@ def why_invalid(code: str, language: str = "enma", runtime_mode: str = "project"
     """Validate code and return findings plus one-line fixes."""
     index = _load_api_index()
     if index is None:
-        return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
+        return _mcp_result({"error": f"API index not found at {API_INDEX_FILE}"})
     findings = validate_code_against_index(code, language, index, "why_invalid", runtime_mode=runtime_mode)
-    return json.dumps({"ok": not findings, "findings": findings}, indent=2)
+    return _mcp_result({"ok": not findings, "findings": findings})
 
 @mcp.tool()
 def plan_perception_mcp_workflow(task: str, target_process: str = "", permissions: str = "") -> str:
@@ -654,9 +661,9 @@ def plan_perception_mcp_workflow(task: str, target_process: str = "", permission
 def list_project_templates(language: str = "") -> str:
     """List supported PCX scaffold templates for Enma."""
     try:
-        return json.dumps(available_templates(language or "enma"), indent=2)
+        return _mcp_result(available_templates(language or "enma"))
     except ValueError as exc:
-        return json.dumps({"error": str(exc)}, indent=2)
+        return _mcp_result({"error": str(exc)})
 
 
 @mcp.tool()
@@ -675,7 +682,7 @@ def generate_script_plan(
     try:
         plan = build_project_plan(task or "pcx-project", language, kind, target_process, engine)
     except ValueError as exc:
-        return json.dumps({"error": str(exc), "templates": available_templates("enma")}, indent=2)
+        return _mcp_result({"error": str(exc), "templates": available_templates("enma")})
     plan["task"] = task
     plan["mcp_sequence"] = [
         "recommend_context(task, language)",
@@ -684,7 +691,7 @@ def generate_script_plan(
         "validate_code or validate_answer",
         "validate_project when files exist",
     ]
-    return json.dumps(plan, indent=2)
+    return _mcp_result(plan)
 
 
 @mcp.tool()
@@ -714,13 +721,13 @@ def scaffold_project(
                 f"--target {json.dumps(target_process)} --engine {json.dumps(engine)} "
                 "--output <project-dir>"
             )
-            return json.dumps(plan, indent=2)
+            return _mcp_result(plan)
         if os.environ.get("PCX_MCP_ALLOW_WRITES") != "1":
-            return json.dumps({
+            return _mcp_result({
                 "ok": False,
                 "error": "mcp_writes_disabled",
                 "message": "Set PCX_MCP_ALLOW_WRITES=1 before starting pcx-knowledge-mcp to allow scaffold_project writes. Dry-run is the safe default.",
-            }, indent=2)
+            })
         result = write_scaffold_project(
             name or "pcx-project",
             language,
@@ -730,11 +737,11 @@ def scaffold_project(
             engine,
             overwrite,
         )
-        return json.dumps(result, indent=2)
+        return _mcp_result(result)
     except ValueError as exc:
-        return json.dumps({"error": str(exc)}, indent=2)
+        return _mcp_result({"error": str(exc)})
     except Exception as exc:  # noqa: BLE001
-        return json.dumps({"error": f"{type(exc).__name__}: {exc}"}, indent=2)
+        return _mcp_result({"error": f"{type(exc).__name__}: {exc}"})
 
 
 @mcp.tool()
@@ -762,7 +769,7 @@ def validate_project(path: str, allow_placeholders: bool = False, allow_unverifi
     payload["returncode"] = res.returncode
     if res.stderr.strip():
         payload["stderr"] = res.stderr
-    return json.dumps(payload, indent=2)
+    return _mcp_result(payload)
 
 
 def _coerce_finding(finding_json: str) -> dict[str, Any]:
@@ -798,7 +805,7 @@ def explain_finding(finding_json: str, language: str = "") -> str:
         "placeholder": "Replace scaffold placeholder text with target-specific evidence-backed logic before shipping.",
         "unverified": "Convert UNVERIFIED claims into E-NNN evidence entries before shipping.",
     }.get(kind, "Read the referenced source/signature, apply the smallest code change, then re-run validation."))
-    return json.dumps({
+    return _mcp_result({
         "language": language,
         "kind": kind,
         "symbol": symbol,
@@ -809,23 +816,23 @@ def explain_finding(finding_json: str, language: str = "") -> str:
         "minimal_patch": template.get("repair", fix),
         "example": template.get("example", ""),
         "next_action": advice,
-    }, indent=2)
+    })
 
 
 @mcp.tool()
 def suggest_imports(code: str, language: str = "enma") -> str:
     """Suggest missing Enma imports from source-backed validation findings."""
     if language != "enma":
-        return json.dumps({"imports": [], "note": "AngelScript does not use Enma addon imports."}, indent=2)
+        return _mcp_result({"imports": [], "note": "AngelScript does not use Enma addon imports."})
     index = _load_api_index()
     if index is None:
-        return json.dumps({"error": f"API index not found at {API_INDEX_FILE}"}, indent=2)
+        return _mcp_result({"error": f"API index not found at {API_INDEX_FILE}"})
     findings = validate_code_against_index(code, "enma", index)
     imports = []
     for finding in findings:
         if finding.get("kind") == "missing_import" and finding.get("fix"):
             imports.append(str(finding["fix"]))
-    return json.dumps({"imports": _dedupe(imports), "findings": findings}, indent=2)
+    return _mcp_result({"imports": _dedupe(imports), "findings": findings})
 
 
 def _flatten_offsets(payload: Any) -> dict[str, int]:
@@ -864,7 +871,7 @@ def offset_drift_report(old_offsets_json: str, new_offsets_json: str) -> str:
         old = _flatten_offsets(old_offsets_json)
         new = _flatten_offsets(new_offsets_json)
     except Exception as exc:  # noqa: BLE001
-        return json.dumps({"error": f"invalid JSON: {type(exc).__name__}: {exc}"}, indent=2)
+        return _mcp_result({"error": f"invalid JSON: {type(exc).__name__}: {exc}"})
     names = sorted(set(old) | set(new))
     rows = []
     for name in names:
@@ -881,7 +888,7 @@ def offset_drift_report(old_offsets_json: str, new_offsets_json: str) -> str:
                 "new": f"0x{new[name]:X}",
                 "delta": f"{'+' if delta >= 0 else '-'}0x{abs(delta):X}",
             })
-    return json.dumps({
+    return _mcp_result({
         "summary": {
             "old": len(old),
             "new": len(new),
@@ -891,7 +898,7 @@ def offset_drift_report(old_offsets_json: str, new_offsets_json: str) -> str:
             "added": sum(1 for row in rows if row["status"] == "NEW"),
         },
         "offsets": rows,
-    }, indent=2)
+    })
 
 
 # ── Resources: every file as a URI ─────────────────────────────────────────────

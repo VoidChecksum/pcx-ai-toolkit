@@ -93,11 +93,27 @@ class DistributionTest(unittest.TestCase):
 
     def test_root_python_package_ships_runtime_data(self):
         pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-        self.assertIn('"knowledge" = ["knowledge/pcx-api-index.json", "knowledge/unsupported-symbols.json", "knowledge/permission-rules.json", "knowledge/deprecated-symbols.json", "knowledge/mcp-schema-rules.json"]', pyproject)
+        for name in ("pcx-api-index", "unsupported-symbols", "permission-rules", "deprecated-symbols", "mcp-schema-rules", "enma-addon-imports"):
+            self.assertIn(f"knowledge/{name}.json", pyproject)
         self.assertIn('"evals" = ["evals/*.json"]', pyproject)
         self.assertIn('"templates/full-project"', pyproject)
         self.assertIn('"schemas" = ["schemas/*.json"]', pyproject)
         self.assertIn('"tools" = ["tools/update-toolkit.sh", "tools/update-toolkit.ps1"]', pyproject)
+        self.assertIn("knowledge/enma-addon-imports.json", pyproject)
+
+    def test_addon_import_metadata_is_generated(self):
+        metadata = REPO_ROOT / "knowledge" / "enma-addon-imports.json"
+        self.assertTrue(metadata.exists(), "missing generated Enma addon metadata")
+        text = metadata.read_text(encoding="utf-8")
+        self.assertIn('"variant"', text)
+        self.assertIn('"regex"', text)
+        result = __import__("subprocess").run(
+            [__import__("sys").executable, str(REPO_ROOT / "tools" / "build-enma-addon-metadata.py"), "--check"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_npm_package_exposes_pcx_bin_for_node_and_bun(self):
         package = (REPO_ROOT / "package.json").read_text(encoding="utf-8")
@@ -148,6 +164,20 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("windows-latest", package_job)
         self.assertIn("macos-latest", package_job)
 
+    def test_release_candidate_smoke_runs_on_all_oses(self):
+        workflow = (REPO_ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        self.assertIn("release-candidate-smoke:", workflow)
+        job = workflow.split("  release-candidate-smoke:", 1)[1].split("  build-visualstudio:", 1)[0]
+        self.assertIn("ubuntu-latest", job)
+        self.assertIn("windows-latest", job)
+        self.assertIn("macos-latest", job)
+        self.assertIn("python -m pip install --find-links dist pcx-ai-toolkit", job)
+        self.assertIn("npm install -g ./npm-dist/pcx-ai-toolkit-*.tgz", job)
+        self.assertIn("pcx doctor", job)
+        self.assertIn("pcx api draw_text --json", job)
+        release_job = workflow.split("  release:", 1)[1]
+        self.assertIn("release-candidate-smoke", release_job)
+
     def test_security_workflow_runs_dependency_audits(self):
         workflow = REPO_ROOT / ".github" / "workflows" / "security.yml"
         self.assertTrue(workflow.exists(), "missing security audit workflow")
@@ -166,13 +196,24 @@ class DistributionTest(unittest.TestCase):
         self.assertIn('"symbol"', text)
 
     def test_mcp_response_schemas_are_published(self):
-        for name in ("api-lookup.schema.json", "validate-code.schema.json", "scaffold-plan.schema.json"):
+        object_schemas = (
+            "api-lookup.schema.json",
+            "validate-code.schema.json",
+            "scaffold-plan.schema.json",
+            "recommend-context.schema.json",
+            "explain-finding.schema.json",
+            "generate-script-plan.schema.json",
+        )
+        for name in object_schemas:
             with self.subTest(schema=name):
                 schema = REPO_ROOT / "schemas" / name
                 self.assertTrue(schema.exists(), f"missing {name}")
                 text = schema.read_text(encoding="utf-8")
                 self.assertIn('"$schema"', text)
                 self.assertIn('"type": "object"', text)
+        search_schema = REPO_ROOT / "schemas" / "search-docs.schema.json"
+        self.assertTrue(search_schema.exists(), "missing search-docs.schema.json")
+        self.assertIn('"type": "array"', search_schema.read_text(encoding="utf-8"))
 
     def test_release_publishes_provenance_and_sbom(self):
         workflow = (REPO_ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")

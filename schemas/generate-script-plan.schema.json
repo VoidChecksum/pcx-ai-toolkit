@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VoidChecksum/pcx-ai-toolkit/schemas/generate-script-plan.schema.json",
+  "title": "PCX generate_script_plan response",
+  "type": "object",
+  "required": ["name", "language", "kind", "commands", "files"],
+  "properties": {
+    "name": {"type": "string"},
+    "language": {"type": "string"},
+    "kind": {"type": "string"},
+    "task": {"type": "string"},
+    "commands": {"type": "array", "items": {"type": "string"}},
+    "files": {"type": "array", "items": {"type": "string"}},
+    "docs": {"type": "array", "items": {"type": "string"}},
+    "skills": {"type": "array", "items": {"type": "string"}},
+    "mcp_sequence": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

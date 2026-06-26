@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VoidChecksum/pcx-ai-toolkit/schemas/recommend-context.schema.json",
+  "title": "PCX recommend_context response",
+  "type": "object",
+  "required": ["docs", "skills", "mcp_tools", "commands"],
+  "properties": {
+    "docs": {"type": "array", "items": {"type": "string"}},
+    "skills": {"type": "array", "items": {"type": "string"}},
+    "mcp_tools": {"type": "array", "items": {"type": "string"}},
+    "commands": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}
