@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VoidChecksum/pcx-ai-toolkit/schemas/scaffold-plan.schema.json",
+  "title": "PCX scaffold plan/response",
+  "type": "object",
+  "properties": {
+    "ok": { "type": "boolean" },
+    "dry_run": { "type": "boolean" },
+    "name": { "type": "string" },
+    "slug": { "type": "string" },
+    "language": { "type": "string" },
+    "kind": { "type": "string" },
+    "template": { "type": "string" },
+    "entrypoint": { "type": "string" },
+    "target_process": { "type": "string" },
+    "engine": { "type": "string" },
+    "docs": { "type": "array", "items": { "type": "string" } },
+    "skills": { "type": "array", "items": { "type": "string" } },
+    "commands": { "type": "array", "items": { "type": "string" } },
+    "project_dir": { "type": "string" },
+    "files": { "type": "array", "items": { "type": "string" } },
+    "error": { "type": "string" },
+    "message": { "type": "string" }
+  },
+  "additionalProperties": true
+}

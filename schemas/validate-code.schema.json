@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VoidChecksum/pcx-ai-toolkit/schemas/validate-code.schema.json",
+  "title": "PCX validate_code response",
+  "type": "object",
+  "required": ["ok", "findings"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "validation-finding.schema.json" }
+    },
+    "error": { "type": "string" }
+  },
+  "additionalProperties": true
+}

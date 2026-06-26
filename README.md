@@ -130,6 +130,10 @@ Release publishing uses PyPI Trusted Publisher and npm Trusted Publisher where c
 | Need all docs gates | `pcx docs-check` | Regeneration, drift, eval, focused tests |
 | Need MCP workflow | `mcp/pcx-knowledge-mcp/` | Search, fetch, lookup, validate, scaffold |
 
+Task guides: [validate Enma](docs/quickstarts/validate-enma.md), [use the knowledge MCP](docs/quickstarts/use-knowledge-mcp.md), [create a scaffold](docs/quickstarts/create-project.md), [run live Perception MCP checks](docs/quickstarts/live-perception-mcp.md).
+
+## Registry Publishing Setup
+
 ## Language contract
 
 This toolkit intentionally targets **Perception-supported Enma (`.em`)**.
@@ -147,6 +151,10 @@ Validation rule: if docs/API index do not prove it, do not use it
 AngelScript (`.as`), Lua, C++ helper syntax, JavaScript `await`, `ImGui::*`, and game-specific helpers are rejected or flagged by validators.
 
 ## AI workflow
+
+| Docs | Doc Lines | API Docs Indexed | API Functions | API Methods | Skills | Templates | MCP Tools | Native Tools |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 130 | 22,378 | 15 | 477 | 305 | 32 | 18 | 59 | 13 |
 
 ### Minimal context load
 

@@ -128,7 +128,7 @@ def permissions_for_symbol(symbol: str, sig: dict[str, Any] | None = None) -> li
 
 FENCE_RE = re.compile(r'^```\s*([A-Za-z_.-]*)[^\n]*\n(.*?)\n```', re.MULTILINE | re.DOTALL)
 
-ENMA_IMPORT_REQUIRED_TYPES = {"vec2", "vec3", "vec4", "color", "quat", "mat4"}
+ENMA_IMPORT_REQUIRED_TYPES = {"vec2", "vec3", "vec4", "color", "quat", "mat4", "variant", "regex", "hash_set", "sorted_map", "list"}
 ENMA_MODULE_HINTS: dict[str, set[str]] = {
     "vec": {"vec2", "vec3", "vec4"},
     "color": {"color"},
@@ -195,6 +195,14 @@ ENMA_MODULE_HINTS: dict[str, set[str]] = {
     "thread": {"sleep_us", "yield_cpu", "hardware_threads"},
     "array": {"push", "pop", "sort", "contains", "slice", "resize", "length"},
     "map": {"map", "imap", "get", "set", "contains", "remove"},
+    "variant": {
+        "variant", "variant_int", "variant_float", "variant_bool", "variant_str",
+        "variant_array", "variant_map", "variant_box", "variant_box_owned", "variant_null",
+    },
+    "regex": {"regex"},
+    "hash_set": {"hash_set"},
+    "sorted_map": {"sorted_map"},
+    "list": {"list"},
 }
 
 LANGUAGE_BUILTIN_CALLS: dict[str, set[str]] = {

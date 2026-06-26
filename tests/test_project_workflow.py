@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -105,6 +106,89 @@ class ProjectWorkflowTest(unittest.TestCase):
         row = json.loads(result.stdout)
         self.assertEqual(row["name"], "LocalPlayer")
         self.assertIn("source_sha256", row)
+
+    def test_lsp_check_reports_diagnostics_from_stdio_server(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            fake = Path(td) / "fake_lsp.py"
+            script = Path(td) / "bad.em"
+            script.write_text("int64 main(){ return 1; }\n", encoding="utf-8")
+            fake.write_text(
+                "import json, sys\n"
+                "def send(msg):\n"
+                "    body=json.dumps(msg)\n"
+                "    sys.stdout.write(f'Content-Length: {len(body)}\\r\\n\\r\\n{body}')\n"
+                "    sys.stdout.flush()\n"
+                "while True:\n"
+                "    line=sys.stdin.readline()\n"
+                "    if not line:\n"
+                "        break\n"
+                "    if line == '\\r\\n':\n"
+                "        continue\n"
+                "    if not line.lower().startswith('content-length:'):\n"
+                "        continue\n"
+                "    n=int(line.split(':',1)[1])\n"
+                "    sys.stdin.readline()\n"
+                "    msg=json.loads(sys.stdin.read(n))\n"
+                "    if msg.get('method') == 'initialize':\n"
+                "        send({'jsonrpc':'2.0','id':msg['id'],'result':{'capabilities':{}}})\n"
+                "    elif msg.get('method') == 'textDocument/didOpen':\n"
+                "        uri=msg['params']['textDocument']['uri']\n"
+                "        send({'jsonrpc':'2.0','method':'textDocument/publishDiagnostics','params':{'uri':uri,'diagnostics':[{'range':{'start':{'line':0,'character':0},'end':{'line':0,'character':5}},'severity':1,'message':'fake compiler error','code':'EN_FAKE'}]}})\n",
+                encoding="utf-8",
+            )
+            env = os.environ.copy()
+            env["PCX_LSP_COMMAND"] = f"{sys.executable} {fake}"
+            result = subprocess.run(
+                [sys.executable, str(PCX), "lsp-check", str(script), "--json"],
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=10,
+            )
+            self.assertEqual(result.returncode, 1, result.stderr + result.stdout)
+            payload = json.loads(result.stdout)
+            self.assertFalse(payload["ok"])
+            self.assertEqual(payload["diagnostics"][0]["code"], "EN_FAKE")
+
+    def test_verify_runs_lsp_check_when_configured(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            fake = Path(td) / "fake_lsp.py"
+            script = Path(td) / "good.em"
+            script.write_text("int64 main(){ return 1; }\n", encoding="utf-8")
+            touched = Path(td) / "lsp-called"
+            fake.write_text(
+                "import json, pathlib, sys\n"
+                f"pathlib.Path({str(touched)!r}).write_text('yes')\n"
+                "def send(msg):\n"
+                "    body=json.dumps(msg)\n"
+                "    sys.stdout.write(f'Content-Length: {len(body)}\\r\\n\\r\\n{body}')\n"
+                "    sys.stdout.flush()\n"
+                "while True:\n"
+                "    line=sys.stdin.readline()\n"
+                "    if not line:\n"
+                "        break\n"
+                "    if not line.lower().startswith('content-length:'):\n"
+                "        continue\n"
+                "    n=int(line.split(':',1)[1])\n"
+                "    sys.stdin.readline()\n"
+                "    msg=json.loads(sys.stdin.read(n))\n"
+                "    if msg.get('method') == 'initialize':\n"
+                "        send({'jsonrpc':'2.0','id':msg['id'],'result':{'capabilities':{}}})\n"
+                "    elif msg.get('method') == 'textDocument/didOpen':\n"
+                "        send({'jsonrpc':'2.0','method':'textDocument/publishDiagnostics','params':{'uri':msg['params']['textDocument']['uri'],'diagnostics':[]}})\n",
+                encoding="utf-8",
+            )
+            env = os.environ.copy()
+            env["PCX_LSP_COMMAND"] = f"{sys.executable} {fake}"
+            result = subprocess.run(
+                [sys.executable, str(PCX), "verify", str(script)],
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=10,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            self.assertTrue(touched.exists())
     def test_hallucination_eval_corpus_passes(self) -> None:
         result = subprocess.run([sys.executable, str(HALLUCINATION_EVAL), "--json"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)

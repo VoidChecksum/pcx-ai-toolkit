@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VoidChecksum/pcx-ai-toolkit/schemas/validation-finding.schema.json",
+  "title": "PCX validation finding",
+  "type": "object",
+  "required": ["kind", "line", "symbol", "message"],
+  "properties": {
+    "kind": { "type": "string" },
+    "line": { "type": "integer", "minimum": 0 },
+    "symbol": { "type": "string" },
+    "message": { "type": "string" },
+    "file": { "type": "string" },
+    "fix": { "type": "string" },
+    "suggestions": { "type": "array", "items": { "type": "string" } },
+    "signatures": { "type": "array" },
+    "available_languages": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

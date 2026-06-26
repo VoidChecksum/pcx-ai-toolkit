@@ -27,6 +27,8 @@ Top-level operating manuals, FAQ, and routing references for AI tools using this
 - [Workflow Cookbook](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/WORKFLOW_COOKBOOK.md): Intent-first index for PCX, Perception MCP, RE workflows, task docs, and skills.
 - [Distribution Checklist](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/distribution-checklist.md): Safe release/publishing path for pcx-ai-toolkit.
 - [Extension Installation Guide](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/marketplace-install.md): Two VS Code extensions are available for pcx-ai-toolkit:
+- [MCP safety](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/mcp-safety.md): Perception MCP is loopback-only, but agents can still call tools that read, write, allocate, or execute inside a target process. Treat the MCP surface as a privileged local automation API.
+- [Production-readiness follow-ups](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/production-readiness-followups.md): This file tracks large production-readiness work and whether it is done.
 
 ## Enma Language Docs
 
@@ -146,6 +148,7 @@ Behavioral / discipline skills loaded automatically by AI tools (Claude Code / O
 - [Performance Budget — Frame-Time Targets for PCX Scripts](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-perf-budget/SKILL.md): Turns game-cheat-guidelines rule #4 (separate update from render) into enforceable numeric budgets, so the question "is my script too slow?" gets answered with monous() measurements instead of vibes. 
 - [PCX Reverse-Engineering Discipline — Finding Offsets Without Fooling Yourself](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-re-discipline/SKILL.md): Workflow discipline for reverse engineering and offset maintenance: locating structs, generating signatures, resolving RIP-relative addresses, and keeping an offset table alive across game patches. De
 - [Streamproof Overlay — Capture Compatibility for PCX Renders](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx-streamproof/SKILL.md): When PCX overlay output shows up in screen captures and when it doesn't, mapped per capture method (OBS, Discord, GeForce ShadowPlay, NVIDIA Highlights, PrintScreen, Steam screenshot, capture cards). 
+- [PCX CLI Skill](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/pcx/SKILL.md): This skill allows the user to run pcx commands directly in the Claude Code harness via /pcx <args>.
 - [perception-mcp-re-workflows](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/perception-mcp-re-workflows/SKILL.md): Use for reverse-engineering investigations that need Perception MCP workflow chains and claim/evidence proof.
 - [perception-mcp-safety](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/perception-mcp-safety/SKILL.md): Use before Perception MCP write, allocation, kernel, or broad scan operations to enforce permissions and rollback.
 - [perception-mcp-session](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/.claude/skills/perception-mcp-session/SKILL.md): Use for live Perception MCP sessions: acquiring handles, making calls, retrying stale handles once, recording transcripts, and cleaning up.

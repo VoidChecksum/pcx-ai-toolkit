@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VoidChecksum/pcx-ai-toolkit/schemas/api-lookup.schema.json",
+  "title": "PCX API lookup response",
+  "type": "object",
+  "required": ["symbol", "found", "signatures", "suggestions"],
+  "properties": {
+    "symbol": { "type": "string" },
+    "found": { "type": "boolean" },
+    "languages": { "type": "array", "items": { "type": "string" } },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "kind": { "type": "string" },
+          "return_type": { "type": "string" },
+          "arg_types": { "type": "array", "items": { "type": "string" } },
+          "language": { "type": "string" },
+          "source": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "suggestions": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

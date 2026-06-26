@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 180**
+**Source files included: 183**
 
 ---
 
@@ -597,6 +597,110 @@ The extension adds syntax highlighting and LSP-powered completions to the VS IDE
 - **No completions in VS Code**: Check that the LSP server path in your workspace settings matches the built server location (`lsp/enma-lsp/server/dist/server.js`).
 - **Run `pcx doctor`** to automatically diagnose extension and LSP issues.
 - **Still stuck?** See [docs/FAQ.md](FAQ.md) or open a [GitHub Issue](https://github.com/VoidChecksum/pcx-ai-toolkit/issues) with label `lsp`.
+
+---
+
+## Source: `docs/mcp-safety.md`
+
+# MCP safety
+
+Perception MCP is loopback-only, but agents can still call tools that read, write, allocate, or execute inside a target process. Treat the MCP surface as a privileged local automation API.
+
+## Safe default tools
+
+Read-only discovery is safe for normal planning:
+
+- `system/info`
+- `process/list`
+- `process/info_by_pid`
+- `process/info_by_name`
+- `process/get_modules`
+- `process/read_virtual_memory`
+- `process/disassemble`
+- `script/get_context`
+- `script/validate`
+
+## Dangerous tools
+
+Require explicit authorization, a named target process, and a written plan before use:
+
+- `process/write_virtual_memory`
+- `process/write_typed_value`
+- `process/write_string`
+- `process/copy_memory`
+- `process/fill_memory`
+- `process/allocate_memory`
+- `process/free_memory`
+- `script/execute`
+
+## Required write workflow
+
+1. Confirm explicit authorization for the target.
+2. Resolve a fresh handle with `process/reference_by_pid` or `process/reference_by_name`.
+3. Read the original bytes/value first.
+4. Apply the smallest write possible.
+5. Read back and verify the expected value.
+6. Release the handle with `process/dereference` or `process/cleanup_references`.
+
+If any step is unclear, stop before calling a dangerous tool.
+
+## Knowledge MCP file writes
+
+`pcx-knowledge-mcp` keeps `scaffold_project` dry-run by default. Real writes require starting the server with `PCX_MCP_ALLOW_WRITES=1` so accidental agent calls cannot create files silently.
+
+---
+
+## Source: `docs/production-readiness-followups.md`
+
+# Production-readiness follow-ups
+
+This file tracks large production-readiness work and whether it is done.
+
+## Completed in this hardening pass
+
+### LSP-backed validation
+
+Status: done. `pcx lsp-check <file.em>` talks to the Enma language server over stdio, and `pcx verify` runs it when a built server or `PCX_LSP_COMMAND` is available.
+
+### Package install matrix
+
+Status: done. CI package smoke now runs on Linux, Windows, and macOS.
+
+### Enma addon coverage
+
+Status: done for documented import-gating gaps. Import hints now cover `variant`, `regex`, `hash_set`, `sorted_map`, and `list` in addition to the older addon set.
+
+### live Perception MCP integration
+
+Status: done as an optional test harness. Set `PCX_MCP_URL` to run live tests for `script/get_context` and `script/validate`.
+
+### Typed MCP schemas
+
+Status: initial schema surface done. Published schemas cover `api_lookup`, `validate_code`, `validation-finding`, and `scaffold_project`/plan responses.
+
+### Search quality
+
+Status: initial SQLite FTS5 backend done. The knowledge MCP uses in-memory FTS when available and falls back to keyword overlap.
+
+## Remaining follow-ups
+
+### Structured MCP return objects
+
+Problem: MCP handlers still return JSON strings for broad client compatibility.
+
+Fix: migrate FastMCP handlers to structured dict/list returns after verifying target clients accept typed objects.
+
+### Generated addon metadata
+
+Problem: addon import hints are still maintained in code.
+
+Fix: generate addon symbol/import metadata from `https://enma-1.gitbook.io/enma/llms-language.md` and addon pages.
+
+### Release-candidate OS install smoke
+
+Problem: CI matrix builds packages on three OSes, but release jobs still publish from Linux.
+
+Fix: add release-candidate workflow that installs the built artifacts on Linux, Windows, and macOS before tag publication.
 
 ---
 
@@ -25699,6 +25803,30 @@ The honest answer to many "how do I hide this from Discord" questions is "you ca
 | 6 | Differential diagnosis | "Friend on Discord sees X" almost always = capture-path mismatch, not a script bug |
 
 **Cross-references:** `docs/perception/render-api.md` (authoritative surface list for your PCX version), `knowledge/anti-cheat-architecture.md` (per-AC screenshot mechanisms), `skill://anti-cheat-re` (detection-surface methodology), `skill://pcx-perf-budget` (overlay render cost considerations for streamers running on a single-PC topology).
+
+---
+
+## Source: `.claude/skills/pcx/SKILL.md`
+
+---
+name: pcx
+description: Runs the PCX AI Toolkit CLI directly from Claude Code. Use this for `/pcx update` or any other pcx command.
+---
+
+# PCX CLI Skill
+
+This skill allows the user to run `pcx` commands directly in the Claude Code harness via `/pcx <args>`.
+
+When the user types `/pcx update` or `/pcx <command>`, you MUST execute it using the bash tool.
+Do not guess the output, just run `pcx <args>` (or `./tools/pcx <args>` if local) via bash.
+
+Example:
+If user says `/pcx update`, you run:
+<call:bash>
+command: "pcx update"
+</call:bash>
+
+If `pcx` is not in PATH, fallback to `npm/bin/pcx.js update` or `python tools/pcx.py update`.
 
 ---
 

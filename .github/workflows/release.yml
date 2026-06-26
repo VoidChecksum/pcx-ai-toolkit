@@ -94,6 +94,7 @@ jobs:
         run: |
           mkdir -p pcx-bin
           cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs
+          cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs.exe
 
       - name: Build root Python package
         run: |
@@ -147,6 +148,7 @@ jobs:
         run: |
           mkdir -p pcx-bin
           cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs
+          cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs.exe
 
       - name: Build npm package
         run: |
@@ -267,6 +269,22 @@ jobs:
           sha256sum pcx-rs >> SHA256SUMS.txt
           cat SHA256SUMS.txt
 
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: release-artifacts/sbom.spdx.json
+
+      - name: Attest release artifacts
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            release-artifacts/*.vsix
+            release-artifacts/pcx-rs
+            release-artifacts/SHA256SUMS.txt
+            release-artifacts/sbom.spdx.json
+
       - name: Create / update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -274,6 +292,7 @@ jobs:
             release-artifacts/*.vsix
             release-artifacts/SHA256SUMS.txt
             release-artifacts/pcx-rs
+            release-artifacts/sbom.spdx.json
           generate_release_notes: true
           body: |
             ## PCX Toolkit Release

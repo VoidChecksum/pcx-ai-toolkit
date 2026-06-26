@@ -253,6 +253,55 @@ jobs:
           PY
 
 
+  package-smoke:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build Rust CLI for package smoke
+        working-directory: tools/pe-parser
+        run: cargo build --release --bin pcx-rs
+
+      - name: Stage Rust CLI for package smoke
+        shell: bash
+        run: |
+          mkdir -p pcx-bin
+          if [ -f tools/pe-parser/target/release/pcx-rs.exe ]; then
+            cp tools/pe-parser/target/release/pcx-rs.exe pcx-bin/pcx-rs.exe
+            cp tools/pe-parser/target/release/pcx-rs.exe pcx-bin/pcx-rs
+          else
+            cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs
+            cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs.exe
+          fi
+
+      - name: Build and smoke-test Python package
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+          python -m pip install --find-links dist pcx-ai-toolkit
+          pcx api draw_text --json
+          pcx verify templates/hello-world.em
+
+      - name: Build and smoke-test npm package
+        shell: bash
+        run: |
+          npm pack
+          npm install -g ./pcx-ai-toolkit-*.tgz
+          pcx api draw_text --json
+
   build-lsp:
     runs-on: ubuntu-latest
     steps:

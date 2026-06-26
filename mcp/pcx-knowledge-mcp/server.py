@@ -46,6 +46,8 @@ from __future__ import annotations
 
 import json
 import re
+import os
+import sqlite3
 import subprocess
 import sys
 from pathlib import Path
@@ -139,6 +141,7 @@ class KeywordIndex:
 
     def __init__(self):
         self.docs: list[tuple[Path, str, set[str]]] = []  # (path, full_text, token set)
+        self._fts: sqlite3.Connection | None = None
         self._loaded = False
 
     def load(self) -> None:
@@ -153,6 +156,7 @@ class KeywordIndex:
                     continue
                 tokens = self._tokenize(text + ' ' + rel(p))
                 self.docs.append((p, text, tokens))
+        self._build_fts()
         self._loaded = True
 
     @staticmethod
@@ -160,8 +164,43 @@ class KeywordIndex:
         # Cheap word tokenization: lowercased alphanumeric+underscore runs of len>=3.
         return set(t for t in re.findall(r'[A-Za-z_][A-Za-z0-9_]{2,}', text.lower()))
 
+    def _build_fts(self) -> None:
+        try:
+            conn = sqlite3.connect(":memory:")
+            conn.execute("CREATE VIRTUAL TABLE docs USING fts5(path, content)")
+            conn.executemany(
+                "INSERT INTO docs(path, content) VALUES (?, ?)",
+                [(rel(path), text) for path, text, _tokens in self.docs],
+            )
+            self._fts = conn
+        except sqlite3.Error:
+            self._fts = None
+
+    def _search_fts(self, query: str, limit: int) -> list[dict] | None:
+        if self._fts is None:
+            return None
+        tokens = sorted(self._tokenize(query))
+        if not tokens:
+            return []
+        match = " OR ".join(tokens)
+        try:
+            rows = self._fts.execute(
+                "SELECT path, bm25(docs) AS rank, snippet(docs, 1, '', '', ' … ', 12) "
+                "FROM docs WHERE docs MATCH ? ORDER BY rank LIMIT ?",
+                (match, limit),
+            ).fetchall()
+        except sqlite3.Error:
+            return None
+        return [
+            {"path": str(path), "score": round(float(-rank), 3), "snippet": str(snippet), "backend": "fts"}
+            for path, rank, snippet in rows
+        ]
+
     def search(self, query: str, limit: int = 10) -> list[dict]:
         self.load()
+        fts = self._search_fts(query, limit)
+        if fts:
+            return fts
         qtokens = self._tokenize(query)
         if not qtokens:
             return []
@@ -183,7 +222,7 @@ class KeywordIndex:
 
         scored.sort(key=lambda t: t[0], reverse=True)
         return [
-            {'path': rel(p), 'score': round(s, 3), 'snippet': snippet}
+            {'path': rel(p), 'score': round(s, 3), 'snippet': snippet, 'backend': 'keyword'}
             for s, p, snippet in scored[:limit]
         ]
 
@@ -676,6 +715,12 @@ def scaffold_project(
                 "--output <project-dir>"
             )
             return json.dumps(plan, indent=2)
+        if os.environ.get("PCX_MCP_ALLOW_WRITES") != "1":
+            return json.dumps({
+                "ok": False,
+                "error": "mcp_writes_disabled",
+                "message": "Set PCX_MCP_ALLOW_WRITES=1 before starting pcx-knowledge-mcp to allow scaffold_project writes. Dry-run is the safe default.",
+            }, indent=2)
         result = write_scaffold_project(
             name or "pcx-project",
             language,

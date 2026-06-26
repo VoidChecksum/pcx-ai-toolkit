@@ -41,6 +41,7 @@ from server import (  # noqa: E402
     recommend_context,
     scaffold_project,
     suggest_imports,
+    search as mcp_search,
     validate_answer,
     validate_code,
 )
@@ -65,6 +66,22 @@ class ValidateCodeTest(unittest.TestCase):
         finding = next(f for f in result["findings"] if f["symbol"] == "atan2")
         self.assertEqual(finding["kind"], "missing_import")
         self.assertEqual(finding["fix"], 'import "math";')
+
+    def test_documented_enma_addons_require_imports(self):
+        cases = [
+            ('int64 main(){ variant v = variant_int(1); return 1; }', "variant", 'import "variant";'),
+            ('int64 main(){ regex r = regex("[0-9]+"); return 1; }', "regex", 'import "regex";'),
+            ('int64 main(){ hash_set<int64> s; return 1; }', "hash_set", 'import "hash_set";'),
+            ('int64 main(){ sorted_map<int64, int64> m; return 1; }', "sorted_map", 'import "sorted_map";'),
+            ('int64 main(){ list<int64> xs; return 1; }', "list", 'import "list";'),
+        ]
+        for code, symbol, fix in cases:
+            with self.subTest(symbol=symbol):
+                result = json.loads(validate_code(code, "enma"))
+                self.assertFalse(result["ok"])
+                finding = next(f for f in result["findings"] if f["symbol"] == symbol)
+                self.assertEqual(finding["kind"], "missing_import")
+                self.assertEqual(finding["fix"], fix)
 
     def test_enma_addon_symbols_pass_with_imports(self):
         code = 'import "math";\nint64 main(){ float64 a = atan2(1.0, 2.0); return 1; }'
@@ -145,6 +162,12 @@ void r(int64 d) { draw_texxt("hi"); }
         result = json.loads(scaffold_project("Dry Run", "angelscript", "full"))
         self.assertEqual(result["error"], "unsupported language: angelscript; use enma")
 
+    def test_scaffold_project_write_requires_explicit_env_opt_in(self):
+        result = json.loads(scaffold_project("Unsafe Write", "enma", "hello", output_dir="/tmp/pcx-unsafe-write", dry_run=False))
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["error"], "mcp_writes_disabled")
+        self.assertIn("PCX_MCP_ALLOW_WRITES=1", result["message"])
+
     def test_suggest_imports_from_missing_enma_addon(self):
         result = json.loads(suggest_imports("int64 main(){ float64 x = atan2(1.0, 2.0); return 1; }", "enma"))
         self.assertIn('import "math";', result["imports"])
@@ -158,6 +181,12 @@ void r(int64 d) { draw_texxt("hi"); }
         self.assertEqual(drift["summary"]["moved"], 1)
         self.assertEqual(drift["summary"]["missing"], 1)
         self.assertEqual(drift["summary"]["added"], 1)
+
+    def test_search_uses_fts_backend_when_available(self):
+        result = json.loads(mcp_search("register_routine lifecycle", 3))
+        self.assertTrue(result)
+        self.assertEqual(result[0]["backend"], "fts")
+        self.assertIn("path", result[0])
 
 
 if __name__ == "__main__":

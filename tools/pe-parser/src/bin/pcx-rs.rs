@@ -96,7 +96,7 @@ fn print_help(repo_root: &Path) {
     println!();
     println!("Compatibility commands delegated to Python until ported:");
     println!("  setup, lint");
-    println!("  build-api-index, check-mcp, check-matrix, new");
+    println!("  build-api-index");
 }
 
 fn normalize_lang(lang: Option<&str>) -> Result<Option<&str>, String> {
@@ -1025,6 +1025,19 @@ fn cmd_build_provenance(repo_root: &Path, args: &[String]) -> i32 {
     }
 }
 
+fn cmd_check_mcp(repo_root: &Path, args: &[String]) -> i32 {
+    let json = args.iter().any(|a| a == "--json");
+    let check = args.iter().any(|a| a == "--check");
+    pe_parser::check_mcp::check_mcp_config(repo_root, json, check)
+}
+
+fn cmd_check_matrix(repo_root: &Path, args: &[String]) -> i32 {
+    let json = args.iter().any(|a| a == "--json");
+    let strict = args.iter().any(|a| a == "--strict");
+    pe_parser::check_matrix::check_version_matrix(repo_root, json, strict)
+}
+
+
 fn cmd_check_drift(repo_root: &Path, args: &[String]) -> i32 {
     let json = args.iter().any(|a| a == "--json");
     let limit = args
@@ -1414,6 +1427,8 @@ fn main() {
         "create" | "new" => cmd_create(&repo_root, &args.args),
         "check-answer" => cmd_check_answer(&repo_root, &args.args),
         "check-drift" => cmd_check_drift(&repo_root, &args.args),
+        "check-mcp" => cmd_check_mcp(&repo_root, &args.args),
+        "check-matrix" => cmd_check_matrix(&repo_root, &args.args),
         "build-provenance" => cmd_build_provenance(&repo_root, &args.args),
         "counts" => cmd_counts(&repo_root, &args.args),
         "update" => cmd_update(&repo_root, &args.args),

@@ -31,6 +31,7 @@ Usage:
 import argparse
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -358,6 +359,114 @@ def cmd_create(args: list[str]) -> int:
     return 0
 
 
+def _lsp_command() -> list[str] | None:
+    override = os.environ.get("PCX_LSP_COMMAND", "").strip()
+    if override:
+        return shlex.split(override)
+    launcher = REPO_ROOT / "lsp" / "enma-lsp" / "bin" / "enma-language-server.js"
+    bundle = REPO_ROOT / "lsp" / "enma-lsp" / "server" / "dist" / "server.js"
+    if launcher.exists() and bundle.exists() and shutil.which("node"):
+        return ["node", str(launcher), "--stdio"]
+    return None
+
+
+def _write_lsp_message(proc: subprocess.Popen[bytes], payload: dict[str, object]) -> None:
+    body = json.dumps(payload).encode("utf-8")
+    header = f"Content-Length: {len(body)}\r\n\r\n".encode("ascii")
+    assert proc.stdin is not None
+    proc.stdin.write(header + body)
+    proc.stdin.flush()
+
+
+
+
+def _parse_lsp_messages(blob: bytes) -> list[dict[str, object]]:
+    messages: list[dict[str, object]] = []
+    pos = 0
+    while pos < len(blob):
+        sep = blob.find(b"\r\n\r\n", pos)
+        if sep < 0:
+            break
+        header = blob[pos:sep].decode("ascii", errors="ignore")
+        length = 0
+        for line in header.splitlines():
+            if line.lower().startswith("content-length:"):
+                length = int(line.split(":", 1)[1].strip())
+                break
+        start = sep + 4
+        end = start + length
+        if length <= 0 or end > len(blob):
+            break
+        messages.append(json.loads(blob[start:end].decode("utf-8")))
+        pos = end
+    return messages
+
+
+def run_lsp_check(path: Path, timeout: float = 5.0) -> dict[str, object]:
+    cmd = _lsp_command()
+    if cmd is None:
+        return {"ok": False, "skipped": True, "error": "enma LSP is not built; run pcx setup"}
+    uri = path.resolve().as_uri()
+    text = path.read_text(encoding="utf-8", errors="replace")
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    _write_lsp_message(proc, {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {"rootUri": path.parent.resolve().as_uri(), "capabilities": {}},
+    })
+    _write_lsp_message(proc, {"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}})
+    _write_lsp_message(proc, {
+        "jsonrpc": "2.0",
+        "method": "textDocument/didOpen",
+        "params": {"textDocument": {"uri": uri, "languageId": "enma", "version": 1, "text": text}},
+    })
+    assert proc.stdin is not None
+    proc.stdin.close()
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        stdout, stderr = proc.communicate()
+    diagnostics: list[dict[str, object]] | None = None
+    for msg in _parse_lsp_messages(stdout):
+        if msg.get("method") != "textDocument/publishDiagnostics":
+            continue
+        params = msg.get("params", {})
+        if isinstance(params, dict) and params.get("uri") == uri:
+            raw = params.get("diagnostics", [])
+            diagnostics = raw if isinstance(raw, list) else []
+            break
+    if diagnostics is None:
+        err = stderr.decode("utf-8", errors="replace").strip()
+        return {"ok": False, "error": err or "timed out waiting for LSP diagnostics", "diagnostics": []}
+    return {"ok": not diagnostics, "diagnostics": diagnostics}
+
+
+def cmd_lsp_check(args: list[str]) -> int:
+    json_mode = "--json" in args
+    paths = [a for a in args if not a.startswith("-")]
+    if not paths or any(a in ("-h", "--help") for a in args):
+        print("Usage: pcx lsp-check <file.em> [--json]")
+        return 0 if any(a in ("-h", "--help") for a in args) else 1
+    path = Path(paths[0])
+    if not path.exists():
+        print(f"Error: file not found: {path}", file=sys.stderr)
+        return 2
+    result = run_lsp_check(path)
+    if json_mode:
+        print(json.dumps(result, indent=2))
+    elif result.get("ok"):
+        print("LSP diagnostics clean")
+    else:
+        for diag in result.get("diagnostics", []):
+            if isinstance(diag, dict):
+                print(f"{diag.get('code', 'LSP')}: {diag.get('message', '')}")
+        if result.get("skipped"):
+            print(result.get("error", "LSP check skipped"))
+    return 0 if result.get("ok") else 1
+
+
 def cmd_verify(args: list[str]) -> int:
     """Run lint + symbol-check on one script.
 
@@ -384,9 +493,10 @@ def cmd_verify(args: list[str]) -> int:
     rc = run_python_tool("symbol-check", [target])
     if rc != 0:
         return rc
-
-    # LSP server diagnostics are not exposed through a CLI entry point yet.
-    # When available, this step will run them as a final compiler-grade check.
+    if _lsp_command() is not None:
+        rc = cmd_lsp_check([target])
+        if rc != 0:
+            return rc
     return 0
 
 
@@ -523,7 +633,7 @@ def main() -> int:
     ap.add_argument("-V", "--version", action="version",
                     version=f"pcx-ai-toolkit v{get_version()}")
     ap.add_argument("command", nargs="?", help=(
-        "Command to run: setup, update, lint, symbol-check, api, check-answer, "
+        "Command to run: setup, update, lint, symbol-check, lsp-check, api, check-answer, "
         "create, build-api-index, verify, verify-project, plan, mcp-plan, mcp-session, "
         "mcp-record, mcp-replay, mcp-summarize, evidence, model-eval, docs-check, check-drift, "
         "check-mcp, check-matrix, counts, prompt, agent-install, ai-smoke, version, doctor, new, help"
@@ -560,6 +670,9 @@ def main() -> int:
 
     if cmd == "symbol-check":
         return run_python_tool("symbol-check", sub_args)
+
+    if cmd == "lsp-check":
+        return cmd_lsp_check(sub_args)
 
     if cmd in ("api", "api-lookup"):
         return run_python_tool("api-lookup", sub_args)

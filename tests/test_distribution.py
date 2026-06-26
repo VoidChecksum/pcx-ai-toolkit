@@ -83,18 +83,20 @@ class DistributionTest(unittest.TestCase):
         text = workflow.read_text(encoding="utf-8")
         self.assertIn("mkdir -p pcx-bin", text)
         self.assertIn("cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs", text)
+        self.assertIn("cp tools/pe-parser/target/release/pcx-rs pcx-bin/pcx-rs.exe", text)
         self.assertLess(text.index("cargo build --release --bin pcx-rs"), text.index("python -m build"))
         self.assertLess(text.index("cargo build --release --bin pcx-rs"), text.index("npm pack --dry-run"))
 
     def test_root_python_package_ships_rust_cli(self):
         pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-        self.assertIn('"pcx-bin" = ["pcx-bin/pcx-rs"]', pyproject)
+        self.assertIn('"pcx-bin" = ["pcx-bin/pcx-rs", "pcx-bin/pcx-rs.exe"]', pyproject)
 
     def test_root_python_package_ships_runtime_data(self):
         pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
         self.assertIn('"knowledge" = ["knowledge/pcx-api-index.json", "knowledge/unsupported-symbols.json", "knowledge/permission-rules.json", "knowledge/deprecated-symbols.json", "knowledge/mcp-schema-rules.json"]', pyproject)
         self.assertIn('"evals" = ["evals/*.json"]', pyproject)
         self.assertIn('"templates/full-project"', pyproject)
+        self.assertIn('"schemas" = ["schemas/*.json"]', pyproject)
         self.assertIn('"tools" = ["tools/update-toolkit.sh", "tools/update-toolkit.ps1"]', pyproject)
 
     def test_npm_package_exposes_pcx_bin_for_node_and_bun(self):
@@ -111,6 +113,88 @@ class DistributionTest(unittest.TestCase):
         shim = (REPO_ROOT / "npm" / "bin" / "pcx.js").read_text(encoding="utf-8")
         self.assertIn("pcx-rs", shim)
         self.assertLess(shim.index("pcx-rs"), shim.index("pcx.py"))
+
+    def test_readme_counts_match_generated_counts(self):
+        import json
+        import re
+
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        counts = json.loads((REPO_ROOT / "docs" / "COUNTS.json").read_text(encoding="utf-8"))
+        api = json.loads((REPO_ROOT / "knowledge" / "pcx-api-index.json").read_text(encoding="utf-8"))
+        row = re.search(r"\|\s*(\d+)\s*\|\s*([\d,]+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|", readme)
+        self.assertIsNotNone(row, "README knowledge count row missing")
+        docs, doc_lines, api_docs, api_functions, api_methods, skills, templates, mcp_tools, native_tools = row.groups()
+        self.assertEqual(int(docs), counts["docs"])
+        self.assertEqual(int(doc_lines.replace(",", "")), counts["doc_lines"])
+        self.assertEqual(int(api_docs), api["doc_count"])
+        self.assertEqual(int(api_functions), len(api["functions"]))
+        self.assertEqual(int(api_methods), len(api["methods"]))
+        self.assertEqual(int(skills), counts["skills"])
+        self.assertEqual(int(templates), counts["templates"])
+        self.assertEqual(int(mcp_tools), counts["mcp_tools"])
+        self.assertEqual(int(native_tools), counts["native_tools"])
+
+    def test_ci_has_clean_package_smoke_job(self):
+        workflow = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        self.assertIn("package-smoke:", workflow)
+        self.assertIn("python -m build", workflow)
+        self.assertIn("python -m pip install --find-links dist pcx-ai-toolkit", workflow)
+        self.assertIn("npm pack", workflow)
+        self.assertIn("npm install -g ./pcx-ai-toolkit-", workflow)
+        self.assertIn("pcx api draw_text", workflow)
+        package_job = workflow.split("  package-smoke:", 1)[1].split("  build-lsp:", 1)[0]
+        self.assertIn("matrix:", package_job)
+        self.assertIn("ubuntu-latest", package_job)
+        self.assertIn("windows-latest", package_job)
+        self.assertIn("macos-latest", package_job)
+
+    def test_security_workflow_runs_dependency_audits(self):
+        workflow = REPO_ROOT / ".github" / "workflows" / "security.yml"
+        self.assertTrue(workflow.exists(), "missing security audit workflow")
+        text = workflow.read_text(encoding="utf-8")
+        self.assertIn("pip-audit", text)
+        self.assertIn("npm audit", text)
+        self.assertIn("cargo audit", text)
+        self.assertIn("github/codeql-action/init", text)
+
+    def test_validation_schema_is_published(self):
+        schema = REPO_ROOT / "schemas" / "validation-finding.schema.json"
+        self.assertTrue(schema.exists(), "missing validation finding schema")
+        text = schema.read_text(encoding="utf-8")
+        self.assertIn('"kind"', text)
+        self.assertIn('"line"', text)
+        self.assertIn('"symbol"', text)
+
+    def test_mcp_response_schemas_are_published(self):
+        for name in ("api-lookup.schema.json", "validate-code.schema.json", "scaffold-plan.schema.json"):
+            with self.subTest(schema=name):
+                schema = REPO_ROOT / "schemas" / name
+                self.assertTrue(schema.exists(), f"missing {name}")
+                text = schema.read_text(encoding="utf-8")
+                self.assertIn('"$schema"', text)
+                self.assertIn('"type": "object"', text)
+
+    def test_release_publishes_provenance_and_sbom(self):
+        workflow = (REPO_ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+        self.assertIn("actions/attest-build-provenance", workflow)
+        self.assertIn("anchore/sbom-action", workflow)
+        self.assertIn("release-artifacts/sbom.spdx.json", workflow)
+
+    def test_mcp_safety_doc_exists(self):
+        doc = REPO_ROOT / "docs" / "mcp-safety.md"
+        self.assertTrue(doc.exists(), "missing MCP safety guide")
+        text = doc.read_text(encoding="utf-8")
+        self.assertIn("process/write_virtual_memory", text)
+        self.assertIn("script/execute", text)
+        self.assertIn("explicit authorization", text)
+
+    def test_production_followups_are_tracked(self):
+        roadmap = REPO_ROOT / "docs" / "production-readiness-followups.md"
+        self.assertTrue(roadmap.exists(), "missing production follow-up tracker")
+        text = roadmap.read_text(encoding="utf-8")
+        self.assertIn("LSP-backed validation", text)
+        self.assertIn("Enma addon coverage", text)
+        self.assertIn("live Perception MCP integration", text)
 
 
 if __name__ == "__main__":
