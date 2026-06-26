@@ -20,6 +20,7 @@ Use `pcx --help` for the live command list. This page gives agents a small routi
 | `pcx counts` | Regenerate/check published corpus counts. |
 | `pcx prompt` | Print the copy-paste anti-hallucination prompt. |
 | `pcx agent-install --dry-run` | Show MCP/client install plan without writing. |
+| `pcx prism [--json]` | Print an optional Prism memory setup plan for PCX workflows. |
 | `pcx ai-smoke` | Run small AI/tooling smoke checks. |
 | `pcx doctor` | Diagnose install and packaging issues. |
 | `pcx new` | Alias for project scaffolding. |

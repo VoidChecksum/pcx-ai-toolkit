@@ -237,6 +237,28 @@ class DistributionTest(unittest.TestCase):
         self.assertIn("Enma addon coverage", text)
         self.assertIn("live Perception MCP integration", text)
 
+    def test_prism_command_and_docs_exist(self):
+        import json
+        import subprocess
+        import sys
+
+        doc = REPO_ROOT / "docs" / "quickstarts" / "use-prism-memory.md"
+        self.assertTrue(doc.exists(), "missing Prism quickstart")
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        cli_ref = (REPO_ROOT / "docs" / "cli-reference.md").read_text(encoding="utf-8")
+        self.assertIn("pcx prism", readme)
+        self.assertIn("pcx prism [--json]", cli_ref)
+        result = subprocess.run(
+            [sys.executable, str(REPO_ROOT / "tools" / "pcx.py"), "prism", "--json"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        plan = json.loads(result.stdout)
+        self.assertIn("prism init", "\n".join(plan["install"]))
+        self.assertIn("pcx verify <file.em>", "\n".join(plan["teach"] + plan["use"]))
+
 
 if __name__ == "__main__":
     unittest.main()

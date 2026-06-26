@@ -129,8 +129,9 @@ Release publishing uses PyPI Trusted Publisher and npm Trusted Publisher where c
 | Need answer validation | `pcx check-answer answer.md` | Checks fenced code blocks |
 | Need all docs gates | `pcx docs-check` | Regeneration, drift, eval, focused tests |
 | Need MCP workflow | `mcp/pcx-knowledge-mcp/` | Search, fetch, lookup, validate, scaffold |
+| Need persistent agent memory | `pcx prism` | Optional Prism setup plan for PCX workflows |
 
-Task guides: [validate Enma](docs/quickstarts/validate-enma.md), [use the knowledge MCP](docs/quickstarts/use-knowledge-mcp.md), [create a scaffold](docs/quickstarts/create-project.md), [run live Perception MCP checks](docs/quickstarts/live-perception-mcp.md).
+Task guides: [validate Enma](docs/quickstarts/validate-enma.md), [use the knowledge MCP](docs/quickstarts/use-knowledge-mcp.md), [create a scaffold](docs/quickstarts/create-project.md), [run live Perception MCP checks](docs/quickstarts/live-perception-mcp.md), [use Prism memory](docs/quickstarts/use-prism-memory.md).
 
 ## Registry Publishing Setup
 
@@ -154,7 +155,7 @@ AngelScript (`.as`), Lua, C++ helper syntax, JavaScript `await`, `ImGui::*`, and
 
 | Docs | Doc Lines | API Docs Indexed | API Functions | API Methods | Skills | Templates | MCP Tools | Native Tools |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 132 | 22,452 | 15 | 477 | 305 | 32 | 18 | 59 | 13 |
+| 133 | 22,496 | 15 | 477 | 305 | 32 | 18 | 59 | 13 |
 
 ### Minimal context load
 

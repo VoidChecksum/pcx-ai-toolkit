@@ -605,6 +605,54 @@ def cmd_mcp_plan(args: list[str]) -> int:
     print(plan_perception_mcp_json(task, ns.target, ns.permissions, capabilities))
     return 0
 
+def cmd_prism(args: list[str]) -> int:
+    ap = argparse.ArgumentParser(prog="pcx prism")
+    ap.add_argument("--json", action="store_true", help="print Prism integration plan as JSON")
+    ns = ap.parse_args(args)
+    plan = {
+        "purpose": "Use Prism as an optional memory layer for PCX/Enma work.",
+        "install": [
+            "git clone https://github.com/ProsusAI/prism.git",
+            "cd prism && ./install.sh",
+            "cd <pcx-project> && prism init",
+        ],
+        "teach": [
+            "prism learn \"Use pcx api before every Perception host API call\"",
+            "prism learn \"Run pcx verify before handing off Enma scripts\"",
+            "prism learn \"Use docs/llms-perception-enma.md as the primary Enma context pack\"",
+        ],
+        "use": [
+            "pcx prompt --model claude",
+            "pcx api <symbol>",
+            "pcx verify <file.em>",
+            "prism status",
+        ],
+        "safety": [
+            "Prism is optional; PCX does not require it.",
+            "Do not capture unauthorized target details, credentials, or private offsets.",
+            "Keep PCX validation authoritative; Prism memories are hints, not proofs.",
+        ],
+    }
+    if ns.json:
+        print(json.dumps(plan, indent=2))
+    else:
+        print("PCX + Prism memory plan")
+        print("\nInstall:")
+        for item in plan["install"]:
+            print(f"- {item}")
+        print("\nTeach Prism PCX rules:")
+        for item in plan["teach"]:
+            print(f"- {item}")
+        print("\nUse:")
+        for item in plan["use"]:
+            print(f"- {item}")
+        print("\nSafety:")
+        for item in plan["safety"]:
+            print(f"- {item}")
+    return 0
+
+
+
 
 def cmd_docs_check() -> int:
     """Run source regeneration, drift, eval, and focused tests before shipping."""
@@ -634,7 +682,7 @@ def main() -> int:
                     version=f"pcx-ai-toolkit v{get_version()}")
     ap.add_argument("command", nargs="?", help=(
         "Command to run: setup, update, lint, symbol-check, lsp-check, api, check-answer, "
-        "create, build-api-index, verify, verify-project, plan, mcp-plan, mcp-session, "
+        "create, build-api-index, verify, verify-project, plan, prism, mcp-plan, mcp-session, "
         "mcp-record, mcp-replay, mcp-summarize, evidence, model-eval, docs-check, check-drift, "
         "check-mcp, check-matrix, counts, prompt, agent-install, ai-smoke, version, doctor, new, help"
     ))
@@ -755,6 +803,9 @@ def main() -> int:
 
     if cmd == "plan":
         return cmd_plan(sub_args)
+
+    if cmd == "prism":
+        return cmd_prism(sub_args)
 
     if cmd == "new":
         return cmd_new(sub_args)
