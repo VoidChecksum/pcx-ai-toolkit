@@ -59,7 +59,6 @@ ANTI_DEBUG_IMPORTS = [
 
 
 # ── PE parser imports ─────────────────────────────────────────────────────────
-import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tools.lib.pe_parse import (
     parse_pe as _parse_pe, rva_to_off, read_u32, read_u16, read_u64

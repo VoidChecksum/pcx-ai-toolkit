@@ -47,7 +47,6 @@
     "CONTRIBUTING.md",
     "visualstudio/README.md",
     "tools/pe-parser/Cargo.toml",
-    ".github/workflows/*.yml",
     "tools/pe-parser/src/**/*",
     "VERSION"
   ],

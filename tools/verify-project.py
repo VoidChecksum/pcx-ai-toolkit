@@ -19,6 +19,7 @@ from typing import Any
 
 
 TOOL_DIR = Path(__file__).resolve().parent
+REPO_ROOT = TOOL_DIR.parent
 
 
 def collect_scripts(root: Path) -> list[Path]:

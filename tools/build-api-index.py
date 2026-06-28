@@ -22,7 +22,6 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Sized
 from pathlib import Path
 from typing import cast
 
@@ -320,7 +319,6 @@ def main() -> int:
             return 1
         functions = typed_index.get("functions", {})
         methods = typed_index.get("methods", {})
-        assert isinstance(functions, Sized) and isinstance(methods, Sized)
         print(f"OK: {OUT_FILE} is up to date ({typed_index['doc_count']} docs, "
               f"{len(functions)} functions, {len(methods)} methods).")
         return 0
@@ -332,8 +330,6 @@ def main() -> int:
     methods = typed_index.get("methods", {})
     types = typed_index.get("types", [])
     modules = typed_index.get("modules", [])
-    assert isinstance(functions, Sized) and isinstance(methods, Sized)
-    assert isinstance(types, Sized) and isinstance(modules, Sized)
     return 0
 
 

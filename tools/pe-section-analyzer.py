@@ -36,7 +36,6 @@ def entropy(data: bytes) -> float:
 
 
 # ── PE parser imports ─────────────────────────────────────────────────────────
-import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tools.lib.pe_parse import parse_pe
 

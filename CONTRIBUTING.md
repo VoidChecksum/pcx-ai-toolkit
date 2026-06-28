@@ -20,7 +20,7 @@
 
 - All docs are Markdown (`.md`)
 - Code examples must use real API signatures from the official Perception.cx docs
-- Enma code must follow the coding standards in `rules/CLAUDE.md`
+- Enma code must follow the coding standards in `CLAUDE.md`
 - Every API function in a cheatsheet includes its return type and parameter types
 - Working code examples must be complete (compilable with the right imports)
 

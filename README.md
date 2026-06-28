@@ -133,8 +133,6 @@ Release publishing uses PyPI Trusted Publisher and npm Trusted Publisher where c
 
 Task guides: [validate Enma](docs/quickstarts/validate-enma.md), [use the knowledge MCP](docs/quickstarts/use-knowledge-mcp.md), [create a scaffold](docs/quickstarts/create-project.md), [run live Perception MCP checks](docs/quickstarts/live-perception-mcp.md), [use Prism memory](docs/quickstarts/use-prism-memory.md).
 
-## Registry Publishing Setup
-
 ## Language contract
 
 This toolkit intentionally targets **Perception-supported Enma (`.em`)**.
@@ -223,16 +221,11 @@ Coverage truth is generated from committed artifacts. Do not hand-count these nu
 
 | Metric | Current |
 |---|---:|
-| Documentation files | 88 |
-| Documentation lines | 21,687 |
-| Knowledge files | 26 |
-| MCP tools | 59 |
-| Native tools | 13 |
-| Templates | 18 |
 | API families indexed | 12 |
+| API pages indexed | 20 |
 | Symbols indexed | 216 |
-| Symbols with signatures | 212 |
-| Hallucination eval cases | 53 |
+| Symbols with signatures | 213 |
+| Hallucination eval cases | 150 |
 | Drift-checkable sources | 67 |
 
 See [docs/COVERAGE.md](docs/COVERAGE.md) and [docs/COVERAGE.json](docs/COVERAGE.json) for generated target status.

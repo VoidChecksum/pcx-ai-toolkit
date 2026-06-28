@@ -34,7 +34,6 @@ IMAGE_SCN_MEM_EXECUTE = 0x20000000
 
 
 # ── PE parser imports ─────────────────────────────────────────────────────────
-import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from tools.lib.pe_parse import parse_pe
 

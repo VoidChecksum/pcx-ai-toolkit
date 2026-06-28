@@ -2,7 +2,7 @@
 
 ## 1. Quick Setup (Automated)
 
-Run the setup command from the repository root. This compiles the LSP servers, registers all 23 AI skills to Claude Code, and adds the `pcx` CLI tool to your system `PATH`:
+Run the setup command from the repository root. This compiles the LSP servers, registers all 30 AI skills to Claude Code, and adds the `pcx` CLI tool to your system `PATH`:
 
 ```bash
 # Linux / macOS / WSL

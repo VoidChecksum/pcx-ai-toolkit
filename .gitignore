@@ -37,3 +37,8 @@ visualstudio/*/Server/**
 target/
 tools/bin/
 pcx-bin/
+# Python caches
+.mypy_cache/
+.pyright/
+.ruff_cache/
+*.whl

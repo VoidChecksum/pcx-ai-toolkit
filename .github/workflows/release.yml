@@ -134,7 +134,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
       - name: Use npm trusted publishing CLI
@@ -194,7 +194,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "20"
 
       - name: Download root Python package
         uses: actions/download-artifact@v4
