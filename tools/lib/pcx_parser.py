@@ -110,12 +110,13 @@ METHOD_CALL_RE = re.compile(r'\b([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]
 
 def _is_keyword(name: str, lang: str) -> bool:
     common = {
-        "if", "else", "for", "while", "do", "switch", "case", "default",
-        "return", "break", "continue", "goto", "sizeof", "typeof", "cast",
+        "if", "else", "elseif", "then", "for", "while", "do", "switch", "case", "default",
+        "return", "break", "continue", "goto", "sizeof", "typeof", "cast", "function",
+        "local", "repeat", "until", "in", "not", "and", "or", "end",
         "new", "delete", "try", "catch", "throw", "namespace", "using",
         "public", "private", "protected", "static", "const", "constexpr",
         "class", "struct", "enum", "union", "template", "typename",
-        "interface", "mixin", "funcdef", "true", "false", "null",
+        "interface", "mixin", "funcdef", "true", "false", "null", "nil",
     }
     return name in common
 
@@ -189,6 +190,12 @@ def extract_function_defs(code: str, lang: str) -> list[tuple[str, int]]:
     """Return (name, line) for function definitions in supported PCX languages."""
     out: list[tuple[str, int]] = []
     clean = strip_strings(strip_c_comments(code))
+    if lang == "lua":
+        for lineno, line in enumerate(clean.splitlines(), 1):
+            m = re.match(r'^\s*(?:local\s+)?function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(', line)
+            if m and not _is_keyword(m.group(1), lang):
+                out.append((m.group(1), lineno))
+        return out
     pending: tuple[str, int] | None = None
     for lineno, line in enumerate(clean.splitlines(), 1):
         stripped = line.strip()
@@ -354,9 +361,9 @@ def _signature_lines(text: str) -> list[tuple[int, str]]:
                     out.append((start_line, expanded))
                 pending = []
             continue
-        if "(" in line and ")" not in line and re.match(
-            r'^(?:const\s+)?[A-Za-z_][A-Za-z0-9_<>,\[\]*@\s]*\s+@?[A-Za-z_][A-Za-z0-9_:.\-/]*\s*\(',
-            line,
+        if "(" in line and ")" not in line and (
+            re.match(r'^(?:const\s+)?[A-Za-z_][A-Za-z0-9_<>,\[\]*@\s]*\s+@?[A-Za-z_][A-Za-z0-9_:.\-/]*\s*\(', line)
+            or re.match(r'^(?:[A-Za-z_][A-Za-z0-9_]*[:.])?[A-Za-z_][A-Za-z0-9_]*\s*\(', line)
         ):
             pending = [line]
             start_line = lineno
@@ -378,10 +385,91 @@ def _expanded_return_types(ret_expr: str, names: list[str]) -> list[str]:
     return [_base_type(item) for item in returns]
 
 
+LUA_SIG_RE = re.compile(
+    r'^\s*(?:(?:local\s+)?[A-Za-z_][A-Za-z0-9_,\s]*\s*=\s*)?'
+    r'([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*(?:-->\s*([^;]+))?\s*;?\s*$'
+)
+LUA_METHOD_SIG_RE = re.compile(
+    r'^\s*(?:(?:local\s+)?[A-Za-z_][A-Za-z0-9_,\s]*\s*=\s*)?'
+    r'([A-Za-z_][A-Za-z0-9_]*)[:.]([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*(?:-->\s*([^;]+))?\s*;?\s*$'
+)
+
+def _split_lua_args(args_str: str) -> list[str]:
+    s = args_str.strip()
+    if not s:
+        return []
+    depth = 0
+    parts: list[str] = [""]
+    for ch in s:
+        if ch in "([{":
+            depth += 1
+            parts[-1] += ch
+        elif ch in ")]}":
+            depth = max(0, depth - 1)
+            parts[-1] += ch
+        elif ch == "," and depth == 0:
+            parts.append("")
+        else:
+            parts[-1] += ch
+    return [part.strip() for part in parts if part.strip()]
+
+
+def _looks_like_lua_signature_args(args_str: str) -> bool:
+    return all(re.match(r'^(?:optional:\s*)?[A-Za-z_][A-Za-z0-9_]*$', arg) for arg in _split_lua_args(args_str))
+
+
+def _lua_arg_names(args_str: str) -> list[str]:
+    return [_base_type(arg.replace("optional:", "")) for arg in _split_lua_args(args_str)]
+
+
+def _lua_signatures_from_line(line: str, language: str, source: str, lineno: int) -> list[dict[str, object]]:
+    clean = re.sub(r'\s*--.*$', "", line.strip())
+    if not clean or clean.startswith("function "):
+        return []
+    mm = LUA_METHOD_SIG_RE.match(clean)
+    if mm:
+        parent, name, args, ret = mm.groups()
+        if _is_keyword(name, language) or not _looks_like_lua_signature_args(args):
+            return []
+        arg_types = _lua_arg_names(args)
+        return [{
+            "name": name,
+            "language": language,
+            "source": source,
+            "kind": "method",
+            "parent_type": parent,
+            "arity": len(arg_types),
+            "arg_types": arg_types,
+            "return_type": _base_type(ret or "any"),
+            "line": lineno,
+        }]
+    gm = LUA_SIG_RE.match(clean)
+    if not gm:
+        return []
+    name, args, ret = gm.groups()
+    if _is_keyword(name, language) or not _looks_like_lua_signature_args(args):
+        return []
+    arg_types = _lua_arg_names(args)
+    return [{
+        "name": name,
+        "language": language,
+        "source": source,
+        "kind": "global",
+        "parent_type": None,
+        "arity": len(arg_types),
+        "arg_types": arg_types,
+        "return_type": _base_type(ret or "any"),
+        "line": lineno,
+    }]
+
+
 def extract_api_signatures(text: str, language: str, source: str) -> list[dict[str, object]]:
     """Yield signature dicts from a markdown code fence body."""
     found: list[dict[str, object]] = []
     for lineno, line in _signature_lines(text):
+        if language == "lua":
+            found.extend(_lua_signatures_from_line(line, language, source, lineno))
+            continue
         sm = SIG_METHOD_SLASH_RE.match(line)
         if sm:
             ret, parent, names, args = sm.groups()

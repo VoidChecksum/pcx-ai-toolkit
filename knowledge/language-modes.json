@@ -1,0 +1,89 @@
+{
+  "default": "angelscript",
+  "modes": {
+    "enma": {
+      "id": "enma",
+      "name": "Enma",
+      "extensions": [
+        ".em"
+      ],
+      "aliases": [
+        "enma",
+        "em",
+        ".em"
+      ],
+      "entrypoint": "main.em",
+      "llms_pack": "docs/llms-perception-enma.md",
+      "docs": [
+        "docs/AI_AGENT_OPERATING_MANUAL.md",
+        "docs/perception/llm-routing.md",
+        "docs/llms-perception-enma.md",
+        "docs/perception/lifecycle-and-routines.md"
+      ],
+      "skills": [
+        "game-cheat-script-master",
+        "pcx-enma-discipline",
+        "pcx-re-discipline",
+        "re-evidence-log"
+      ],
+      "verify_command": "pcx verify <file.em>",
+      "production_status": "future-aot-transition"
+    },
+    "angelscript": {
+      "id": "angelscript",
+      "name": "AngelScript",
+      "extensions": [
+        ".as"
+      ],
+      "aliases": [
+        "angelscript",
+        "angel-script",
+        "angel_script",
+        "as",
+        ".as"
+      ],
+      "entrypoint": "main.as",
+      "llms_pack": "docs/llms-perception-angelscript.md",
+      "docs": [
+        "docs/AI_AGENT_OPERATING_MANUAL.md",
+        "docs/perception/llm-routing.md",
+        "docs/llms-perception-angelscript.md",
+        "https://docs.perception.cx/perception/angel-script/life-cycle.md"
+      ],
+      "skills": [
+        "game-cheat-script-master",
+        "pcx-re-discipline",
+        "re-evidence-log"
+      ],
+      "verify_command": "pcx verify <file.as>",
+      "production_status": "current-production"
+    },
+    "lua": {
+      "id": "lua",
+      "name": "Lua",
+      "extensions": [
+        ".lua"
+      ],
+      "aliases": [
+        "lua",
+        ".lua",
+        "luau"
+      ],
+      "entrypoint": "main.lua",
+      "llms_pack": "docs/llms-perception-lua.md",
+      "docs": [
+        "docs/AI_AGENT_OPERATING_MANUAL.md",
+        "docs/perception/llm-routing.md",
+        "docs/llms-perception-lua.md",
+        "https://docs.perception.cx/perception/lua-script/overview.md"
+      ],
+      "skills": [
+        "game-cheat-script-master",
+        "pcx-re-discipline",
+        "re-evidence-log"
+      ],
+      "verify_command": "pcx verify <file.lua>",
+      "production_status": "current-production"
+    }
+  }
+}

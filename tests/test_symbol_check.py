@@ -107,22 +107,25 @@ int64 main() {
         finally:
             path.unlink(missing_ok=True)
 
-    def test_angelscript_files_are_unsupported(self):
+    def test_angelscript_callback_script_clean(self):
         code = """
 int main() {
     register_callback(on_tick, 16, 0);
     return 1;
 }
 
-void on_tick(int id, int data_index) {}
+void on_tick(int id, int data_index) {
+    float w, h;
+    get_view(w, h);
+    draw_text("hi", 20, 20, 255,255,255,255, get_font20(), TE_SHADOW, 0,0,0,180, 1.0f);
+}
 """
-        path = Path("/tmp/pcx_unsupported_as_test.as")
+        path = Path("/tmp/pcx_supported_as_test.as")
         path.write_text(code, encoding="utf-8")
         try:
             rc, out, err = _run(str(path))
-            self.assertEqual(rc, 1, f".as should be unsupported:\n{out}\n{err}")
-            self.assertIn("unsupported", out.lower() + err.lower())
-            self.assertIn("Enma", out + err)
+            self.assertEqual(rc, 0, f".as should pass symbol-check:\n{out}\n{err}")
+            self.assertIn("clean", out)
         finally:
             path.unlink(missing_ok=True)
 

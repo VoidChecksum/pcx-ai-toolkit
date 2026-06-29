@@ -66,6 +66,16 @@ if [ "$CURRENT_BRANCH" = "HEAD" ]; then
     REMOTE_BRANCH="origin/main"
 fi
 
+if [ "$CHECK_ONLY" -eq 0 ]; then
+    STATUS="$(git status --porcelain)"
+    if [ -n "$STATUS" ]; then
+        echo "Uncommitted changes detected — stash or commit before updating." >&2
+        echo "$STATUS" >&2
+        exit 3
+    fi
+fi
+
+
 # ── fetch ────────────────────────────────────────────────────────────────────
 
 echo "Fetching from origin..."
@@ -95,14 +105,6 @@ if [ "$CHECK_ONLY" -eq 1 ]; then
     exit 1
 fi
 
-# ── safety: abort if local has uncommitted or untracked changes ─────────────
-
-STATUS="$(git status --porcelain)"
-if [ -n "$STATUS" ]; then
-    echo "Uncommitted changes detected — stash or commit before updating." >&2
-    echo "$STATUS" >&2
-    exit 3
-fi
 
 # ── update ───────────────────────────────────────────────────────────────────
 

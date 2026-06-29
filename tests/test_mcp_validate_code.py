@@ -107,14 +107,16 @@ class ValidateCodeTest(unittest.TestCase):
         self.assertIn("routine_missing_cast", kinds)
         self.assertIn("invalid_entrypoint_return", kinds)
 
-    def test_rejects_angelscript_mode(self):
-        code = 'int main(){ register_callback(on_tick, 16, 0); return 1; } void on_tick(int id, int data_index){}'
+    def test_accepts_angelscript_mode(self):
+        code = 'int main(){ register_callback(on_tick, 16, 0); return 1; } void on_tick(int id, int data_index){ draw_text("hi", 20, 20, 255,255,255,255, get_font20(), TE_SHADOW, 0,0,0,180, 1.0f); }'
         result = mcp_payload(validate_code(code, "angelscript"))
-        self.assertEqual(result["error"], "unsupported language: angelscript; use enma")
+        self.assertTrue(result["ok"], result["findings"])
 
-    def test_rejects_unsupported_lua_mode(self):
-        result = mcp_payload(validate_code("function main() return 1 end", "lua"))
-        self.assertEqual(result["error"], "unsupported language: lua; use enma")
+    def test_accepts_lua_mode(self):
+        code = 'function main() log("loaded") return 1 end function on_frame() draw_text("hi", 20, 20, 255, 255, 255, 255, get_font20(), TE_SHADOW, 0, 0, 0, 180, 1.0) end'
+        result = mcp_payload(validate_code(code, "lua"))
+        self.assertTrue(result["ok"], result["findings"])
+
 
     def test_api_lookup_returns_source_backed_signature(self):
         result = mcp_payload(api_lookup("draw_text", "enma"))
@@ -166,9 +168,10 @@ void r(int64 d) { draw_texxt("hi"); }
         self.assertEqual(plan["language"], "enma")
         self.assertIn("pcx verify-project . --allow-placeholders --allow-unverified", plan["commands"])
 
-    def test_scaffold_project_rejects_angelscript(self):
-        result = mcp_payload(scaffold_project("Dry Run", "angelscript", "full"))
-        self.assertEqual(result["error"], "unsupported language: angelscript; use enma")
+    def test_scaffold_project_supports_angelscript_overlay(self):
+        result = mcp_payload(scaffold_project("Dry Run", "angelscript", "overlay"))
+        self.assertEqual(result["language"], "angelscript")
+        self.assertEqual(result["entrypoint"], "main.as")
 
     def test_scaffold_project_write_requires_explicit_env_opt_in(self):
         result = mcp_payload(scaffold_project("Unsafe Write", "enma", "hello", output_dir="/tmp/pcx-unsafe-write", dry_run=False))

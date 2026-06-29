@@ -66,6 +66,7 @@ except ImportError:
 # Make the shared parser available to validate_code
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "tools" / "lib"))
+from pcx_language_modes import language_mode, normalize_language
 from pcx_grounding import (  # noqa: E402
     load_api_index,
     lookup_symbol,
@@ -367,8 +368,8 @@ def build_context_recommendation(task: str, language: str = "") -> dict[str, obj
         skills.extend(["pcx-enma-discipline", "game-hacking-pcx"])
         docs.extend(["docs/llms-perception-enma.md", "docs/perception/lifecycle-and-routines.md"])
     if lang in {"angelscript", "angel-script", ".as", "as"} or ".as" in text:
-        docs.append("docs/llms-perception-enma.md")
-
+        skills.extend(["game-hacking-pcx"])
+        docs.extend(["docs/llms-perception-angelscript.md", "docs/angelscript/quickstart.md"])
     for triggers, payload in CONTEXT_RULES:
         if tokens & triggers:
             skills.extend(payload["skills"])
@@ -389,8 +390,8 @@ def build_context_recommendation(task: str, language: str = "") -> dict[str, obj
         "docs": _dedupe(docs),
         "mcp_tools": _dedupe(tools),
         "commands": [
-            "pcx api <symbol>",
-            "pcx symbol-check <file.em>",
+            "pcx api <symbol> --lang <language>",
+            "pcx symbol-check <file.em|file.as>",
             "pcx check-answer <answer.md>",
         ],
     }
@@ -555,15 +556,17 @@ def _load_api_index() -> dict | None:
 def api_lookup(symbol: str, language: str = "") -> str:
     """Look up an exact Perception API symbol with source-backed signatures.
 
-    language may be empty or enma. Use this before inventing a function,
+    language may be empty, enma, or angelscript. Use this before inventing a function,
     method, type, argument shape, or lifecycle binding.
     """
-    if language and language not in {"enma", "em", ".em"}:
-        return _mcp_result({"error": f"unsupported language: {language}; use enma"})
+    try:
+        normalized = normalize_language(language or "")
+    except ValueError as exc:
+        return _mcp_result({"error": str(exc)})
     index = _load_api_index()
     if index is None:
         return _mcp_result({"error": f"API index not found at {API_INDEX_FILE}"})
-    return _mcp_result(lookup_symbol(index, symbol, "enma"))
+    return _mcp_result(lookup_symbol(index, symbol, normalized))
 
 
 @mcp.tool()
@@ -576,10 +579,12 @@ def validate_code(code: str, language: str, source_path: str = "", runtime_mode:
     An empty findings list means no hallucinated or cross-language symbols were
     detected.
 
-    language must be enma.
+    language must be a supported PCX mode such as enma or angelscript.
     """
-    if language not in {"enma", "em", ".em"}:
-        return _mcp_result({"error": f"unsupported language: {language}; use enma"})
+    try:
+        language = normalize_language(language)
+    except ValueError as exc:
+        return _mcp_result({"error": str(exc)})
     index = _load_api_index()
     if index is None:
         findings = [{"line": 0, "symbol": "", "kind": "index_missing",
@@ -659,9 +664,9 @@ def plan_perception_mcp_workflow(task: str, target_process: str = "", permission
 
 @mcp.tool()
 def list_project_templates(language: str = "") -> str:
-    """List supported PCX scaffold templates for Enma."""
+    """List supported PCX scaffold templates."""
     try:
-        return _mcp_result(available_templates(language or "enma"))
+        return _mcp_result(available_templates(language or ""))
     except ValueError as exc:
         return _mcp_result({"error": str(exc)})
 

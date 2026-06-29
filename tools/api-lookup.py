@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Look up a Perception Enma API symbol from the generated index.
+"""Look up a Perception API symbol from the generated index.
 
 This is the fast, deterministic oracle to use before trusting an LLM-proposed
 function, method, type, or signature.
@@ -7,6 +7,7 @@ function, method, type, or signature.
 Usage:
     python3 tools/api-lookup.py draw_text
     python3 tools/api-lookup.py draw_text --lang enma
+    python3 tools/api-lookup.py register_callback --lang angelscript
     python3 tools/api-lookup.py draw_text --json
 """
 from __future__ import annotations
@@ -21,6 +22,7 @@ from typing import Any
 
 TOOL_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOL_DIR / "lib"))
+from pcx_language_modes import normalize_language  # noqa: E402
 from pcx_paths import data_root  # noqa: E402
 from pcx_grounding import load_api_index, lookup_symbol  # noqa: E402
 
@@ -72,7 +74,7 @@ def main() -> int:
 
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("symbol", help="function, method, or type name")
-    ap.add_argument("--lang", default="", help="restrict lookup to Enma (default)")
+    ap.add_argument("--lang", default="", help="restrict lookup to language mode (default: enma)")
     ap.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     args = ap.parse_args()
 
@@ -80,12 +82,13 @@ def main() -> int:
         print(f"ERROR: {INDEX_FILE} missing; run `python3 tools/build-api-index.py`", file=sys.stderr)
         return 2
 
-    language = (args.lang or "enma").lower()
-    if language not in {"enma", "em", ".em"}:
-        print(f"ERROR: unsupported --lang {args.lang!r}; use enma", file=sys.stderr)
+    try:
+        language = normalize_language(args.lang or "")
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
         return 2
     index = load_api_index(INDEX_FILE)
-    result = lookup_symbol(index, args.symbol, "enma")
+    result = lookup_symbol(index, args.symbol, language)
     if args.json:
         print(json.dumps(result, indent=2))
     else:

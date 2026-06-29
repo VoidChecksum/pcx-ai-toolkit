@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Symbol-level hallucination checker for Enma scripts.
+"""Symbol-level hallucination checker for PCX scripts.
 
 Loads knowledge/pcx-api-index.json (built by tools/build-api-index.py) and
 reports unknown function/method calls and unknown declared types. This catches
 the most common LLM hallucinations: invented function names, wrong method
-names, and missing imports for Enma addon modules.
+names, missing imports for Enma addon modules, and cross-language API drift.
 
 Usage:
     python tools/symbol-check.py file.em
@@ -25,6 +25,7 @@ from typing import Any, cast
 
 TOOL_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOL_DIR / "lib"))
+from pcx_language_modes import language_for_path, normalize_language, supported_languages  # noqa: E402
 from pcx_paths import data_root  # noqa: E402
 from pcx_grounding import load_api_index, validate_code_against_index  # noqa: E402
 
@@ -41,25 +42,25 @@ def load_index(path: Path) -> dict[str, Any]:
 
 
 def detect_language(path: Path) -> str:
-    ext = path.suffix.lower()
-    if ext == ".em":
-        return "enma"
-    if ext == ".as":
-        raise ValueError("unsupported language: .as/AngelScript is deprecated; use Enma (.em)")
-    text = path.read_text(encoding="utf-8", errors="ignore").strip()
-    if text.startswith("import \"") or "register_routine" in text[:500]:
-        return "enma"
-    return "enma"
+    try:
+        return language_for_path(path)
+    except ValueError:
+        text = path.read_text(encoding="utf-8", errors="ignore").strip()
+        if text.startswith("import \"") or "register_routine" in text[:500]:
+            return "enma"
+        if "register_callback" in text[:500] or text.startswith("int main("):
+            return "angelscript"
+        return normalize_language("")
 
 
 def collect_files(target: Path) -> list[Path]:
     if target.is_file():
         return [target]
-    return sorted(p for p in target.rglob("*") if p.suffix.lower() == ".em")
+    return sorted(p for p in target.rglob("*") if p.suffix.lower() in {".em", ".as"})
 
 
 def _project_functions(paths: list[Path]) -> dict[str, set[str]]:
-    funcs: dict[str, set[str]] = {"enma": set()}
+    funcs: dict[str, set[str]] = {lang: set() for lang in supported_languages()}
     for path in paths:
         language = detect_language(path)
         text = path.read_text(encoding="utf-8", errors="ignore")
@@ -110,7 +111,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("target", help="file or directory to check")
     ap.add_argument("--json", action="store_true", help="emit machine-readable JSON")
-    ap.add_argument("--lang", choices=["enma"], help="force Enma language detection")
+    ap.add_argument("--lang", choices=supported_languages(), help="force language detection")
     args = ap.parse_args()
 
     try:

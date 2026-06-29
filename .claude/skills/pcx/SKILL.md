@@ -1,6 +1,7 @@
 ---
 name: pcx
 description: Runs the PCX AI Toolkit CLI directly from Claude Code. Use this for `/pcx update` or any other pcx command.
+license: MIT
 ---
 
 # PCX CLI Skill

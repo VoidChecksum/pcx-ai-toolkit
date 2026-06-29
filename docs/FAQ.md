@@ -86,15 +86,15 @@ See `knowledge/offset-methodology.md` and the `pcx-patch-day-playbook` skill for
 
 | | Enma | AngelScript |
 |---|---|---|
-| **Primary use** | Modern PCX scripting and new projects | Compatibility with existing `.as` scripts |
+| **Primary use** | Future AOT/migration target | Current production scripts |
 | **Type safety** | Strong static typing | Strong static typing |
 | **Lifecycle** | `int64 main()` + `register_routine` | `int main()` + `register_callback` |
-| **Process handle** | `proc_t` value with RAII cleanup | `proc_t@` handle with explicit `deref()` |
-| **Render style** | `vec2(...)` and `color(...)` values | Raw/value shapes from the AS API pages |
-| **File extension** | `.em` |
-| **Skill** | `pcx-enma-discipline` |
+| **Process handle** | `proc_t` value with RAII cleanup | `proc_t` handle with explicit `deref()` |
+| **Render style** | `vec2(...)` and `color(...)` values | Scalar/value shapes from the AS API pages |
+| **File extension** | `.em` | `.as` |
+| **Validation** | `pcx verify file.em` | `pcx verify file.as` |
 
-For new scripts, use Enma. AngelScript is deprecated and unsupported.
+For current production scripts, use AngelScript. Use Enma only when explicitly targeting Enma or migration prep.
 
 ---
 

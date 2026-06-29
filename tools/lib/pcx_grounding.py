@@ -1,6 +1,6 @@
 """Source-grounded PCX API lookup and validation helpers.
 
-The API index is generated from the official Perception Enma docs.  This module keeps all hallucination checks on that generated contract so
+The API index is generated from official Perception language docs. This module keeps all hallucination checks on that generated contract so
 CLI tools and MCP tools report the same findings and source URLs.
 """
 from __future__ import annotations
@@ -11,6 +11,7 @@ import re
 from pathlib import Path
 from typing import Any, cast
 
+from pcx_language_modes import load_language_modes, normalize_language, supported_languages
 from pcx_parser import (
     extract_calls,
     extract_declarations,
@@ -20,13 +21,13 @@ from pcx_parser import (
 from pcx_paths import data_root
 
 
-SUPPORTED_LANGUAGES = {"enma"}
+SUPPORTED_LANGUAGES = set(supported_languages())
 
-LANG_ALIASES = {
-    "enma": "enma",
-    "em": "enma",
-    ".em": "enma",
-}
+LANG_ALIASES = {}
+for _language, _mode in load_language_modes()["modes"].items():
+    LANG_ALIASES[str(_language)] = str(_language)
+    for _alias in _mode.get("aliases", []):
+        LANG_ALIASES[str(_alias).lower()] = str(_language)
 
 UNSUPPORTED_SYMBOLS_PATH = data_root() / "knowledge" / "unsupported-symbols.json"
 PERMISSION_RULES_PATH = data_root() / "knowledge" / "permission-rules.json"
@@ -223,6 +224,14 @@ LANGUAGE_BUILTIN_CALLS: dict[str, set[str]] = {
         "print", "println", "time_ms", "assert", "heap_collect", "heap_count",
         "set_budget", "set_memory_budget", "register_event", "fire_event", "clear_events",
     },
+    "angelscript": {
+        "abs", "acos", "asin", "atan", "atan2", "ceil", "cos", "floor", "log", "max", "min",
+        "pow", "sin", "sqrt", "tan", "log", "register_callback", "unregister_callback", "log",
+    },
+    "lua": {
+        "assert", "error", "ipairs", "next", "pairs", "pcall", "print", "select", "tonumber", "tostring",
+        "type", "xpcall", "require", "string", "table", "math",
+    },
 }
 
 FORBIDDEN_CALLS_BY_LANGUAGE: dict[str, dict[str, str]] = {
@@ -232,11 +241,33 @@ FORBIDDEN_CALLS_BY_LANGUAGE: dict[str, dict[str, str]] = {
         "get_view": "AngelScript viewport helper; use get_view_width() and get_view_height()",
         "deref": "AngelScript handle cleanup; Enma proc_t is RAII-managed",
     },
+    "angelscript": {
+        "register_routine": "Enma lifecycle; use register_callback(fn, interval_ms, data_index)",
+        "println": "Enma console helper; use log(...) in AngelScript",
+    },
+    "lua": {
+        "register_routine": "Enma lifecycle; use main() plus on_frame() in Lua",
+        "register_callback": "AngelScript lifecycle; use main() plus on_frame() in Lua",
+        "println": "Enma console helper; use log(...) in Lua",
+    },
 }
 
 FORBIDDEN_TYPES_BY_LANGUAGE: dict[str, dict[str, str]] = {
     "enma": {
         "dictionary": "AngelScript dictionary; use map<K,V> or imap<V> in Enma",
+    },
+    "angelscript": {
+        "vec2": "Enma value type; AngelScript Render API uses scalar x/y arguments",
+        "color": "Enma value type; AngelScript Render API uses scalar RGBA arguments",
+        "wstring": "Enma wide string type; AngelScript Proc API converts UTF-16 through string rws/wws helpers",
+    },
+    "lua": {
+        "vec2": "Enma value type; Lua Render API uses scalar x/y arguments",
+        "vec3": "Enma value type; Lua Render API uses scalar numeric arguments",
+        "vec4": "Enma value type; Lua Render API uses scalar numeric arguments",
+        "color": "Enma value type; Lua Render API uses scalar RGBA arguments",
+        "dictionary": "AngelScript dictionary; use Lua tables",
+        "array": "AngelScript array; use Lua tables",
     },
 }
 
@@ -547,6 +578,13 @@ def _validate_enma_semantics(code: str) -> list[dict[str, Any]]:
             "vector",
             "Use Enma `T[]` arrays, not C++ `vector<T>`.",
         ))
+    for match in re.finditer(r"\b(vector[234]?)\s*\(", clean):
+        findings.append(_finding(
+            "unknown_call",
+            _line_for_offset(clean, match.start()),
+            match.group(1),
+            "C++/AngelScript vector constructor is not a Perception Enma API; use documented vec types/functions.",
+        ))
     for match in re.finditer(r"\bmap\s*<\s*([^,>]+)", clean):
         key = match.group(1).strip()
         if key != "string":
@@ -610,8 +648,9 @@ def _symbol_context(index: dict[str, Any], symbol: str, language: str) -> dict[s
     elif any_lang["signatures"]:
         context["available_languages"] = any_lang["languages"]
         context["signatures"] = any_lang["signatures"][:5]
-    if any_lang["suggestions"]:
-        context["suggestions"] = any_lang["suggestions"][:5]
+    suggestions = exact.get("suggestions") or any_lang.get("suggestions") or []
+    if suggestions:
+        context["suggestions"] = suggestions[:5]
     return context
 
 
@@ -623,15 +662,17 @@ def validate_code_against_index(
     extra_user_functions: set[str] | None = None,
     runtime_mode: str = "project",
 ) -> list[dict[str, Any]]:
-    """Validate Enma code for unknown symbols."""
-    if language not in SUPPORTED_LANGUAGES:
-        return [_finding("unsupported_language", 0, language,
-                         f"unsupported language: {language}; use enma")]
+    """Validate PCX script code for unknown or wrong-language symbols."""
+    try:
+        language = normalize_language(language)
+    except ValueError as exc:
+        return [_finding("unsupported_language", 0, language, str(exc))]
 
     findings: list[dict[str, Any]] = []
     if language == "enma":
         findings.extend(_validate_enma_semantics(code))
         findings.extend(_validate_enma_lifecycle(code))
+    if language in {"enma", "lua"}:
         findings.extend(_validate_call_shapes(code, index, language))
     user_funcs = {name for name, _ in extract_function_defs(code, language)}
     if extra_user_functions:
@@ -648,23 +689,12 @@ def validate_code_against_index(
     for name, line in extract_calls(code, language):
         if name in user_funcs:
             continue
-        if name in unsupported_symbols and name not in known_functions and name not in known_methods:
-            findings.append(_finding(
-                "unsupported_symbol",
-                line,
-                name,
-                unsupported_symbols[name],
-                suggestions=lookup_symbol(index, name).get("suggestions", [])[:5],
-            ))
-            continue
-
         if name in deprecated_symbols:
             meta = deprecated_symbols[name]
             replacement = meta.get("replacement", "")
             message = f"{name} is deprecated" + (f"; use {replacement}" if replacement else "")
             findings.append(_finding("deprecated_symbol", line, name, message, replacement=replacement, reason=meta.get("reason", "")))
             continue
-
         if runtime_mode == "script_execute" and (name.startswith("gui_") or name in ENMA_MODULE_HINTS.get("thread", set())):
             findings.append(_finding(
                 "runtime_mode_unsupported",
@@ -673,7 +703,6 @@ def validate_code_against_index(
                 "Perception script/execute does not register GUI/thread addons; use a project script instead.",
             ))
             continue
-
         if name in forbidden_calls:
             findings.append(_finding(
                 "wrong_language_symbol",
@@ -683,11 +712,6 @@ def validate_code_against_index(
                 **_symbol_context(index, name, language),
             ))
             continue
-
-        permission_aliases = {
-            "PERM_FILE": {"PERM_FILE", "file_system_access"},
-            "file_system_access": {"PERM_FILE", "file_system_access"},
-        }
 
         if language == "enma":
             provider = next((mod for mod, names in ENMA_MODULE_HINTS.items() if name in names), "")
@@ -703,6 +727,10 @@ def validate_code_against_index(
                     fix=f'import "{provider}";',
                 ))
                 continue
+            permission_aliases = {
+                "PERM_FILE": {"PERM_FILE", "file_system_access"},
+                "file_system_access": {"PERM_FILE", "file_system_access"},
+            }
             meta = symbol_metadata(name)
             meta_permissions = list(meta.get("permissions", [])) if isinstance(meta.get("permissions", []), list) else []
             rule_permissions = permissions_for_symbol(name)
@@ -737,27 +765,28 @@ def validate_code_against_index(
                 ))
 
         lang_sigs = signatures_for(index, name, language)
-        any_sigs = signatures_for(index, name)
-        if lang_sigs or name in user_funcs or name in known_types or name in language_builtins:
+        if lang_sigs or name in user_funcs or (name in known_types and name not in unsupported_symbols) or name in language_builtins:
             continue
-        if any_sigs:
+        if language == "enma" and name in unsupported_symbols:
             findings.append(_finding(
-                "wrong_language_symbol",
+                "unsupported_symbol",
                 line,
                 name,
-                f"'{name}' exists in {', '.join(sorted(languages_for_symbol(index, name)))} but not in {language}",
-                **_symbol_context(index, name, language),
+                unsupported_symbols[name],
+                suggestions=lookup_symbol(index, name).get("suggestions", [])[:5],
             ))
             continue
-        if language == "enma" and name in {"main", "on_render", "on_update", "on_unload"}:
+        if language == "enma" and name in {"main", "on_unload"}:
             continue
-        if name in known_functions or name in known_methods:
+        if language == "angelscript" and name in {"main", "on_unload"}:
+            continue
+        if language == "lua" and name in {"main", "on_frame", "on_unload"}:
             continue
         findings.append(_finding(
             "unknown_call",
             line,
             name,
-            f"'{name}' is not a known Perception Enma function/method",
+            f"'{name}' is not a known Perception {language} function/method",
             **_symbol_context(index, name, language),
         ))
 
@@ -780,10 +809,9 @@ def validate_code_against_index(
             "unknown_type",
             line,
             base,
-            f"'{base}' is not a known Perception Enma type (in declaration of '{name}')",
+            f"'{base}' is not a known Perception {language} type (in declaration of '{name}')",
             suggestions=lookup_symbol(index, base).get("suggestions", [])[:5],
         ))
-
     if language == "enma":
         imports = set(extract_enma_imports(code))
         used_types = {t for t in ENMA_IMPORT_REQUIRED_TYPES if re.search(r'\b' + re.escape(t) + r'\b', code)}

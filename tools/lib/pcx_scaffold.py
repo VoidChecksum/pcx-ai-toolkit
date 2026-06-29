@@ -1,7 +1,7 @@
-"""Project scaffolding helpers for Perception.cx Enma.
+"""Project scaffolding helpers for Perception.cx script modes.
 
 The CLI and MCP server both use this module so project creation stays
-deterministic and testable.  It intentionally copies from checked-in templates
+deterministic and testable. It intentionally copies from checked-in templates
 instead of generating large source strings from memory.
 """
 from __future__ import annotations
@@ -14,16 +14,11 @@ from pathlib import Path
 from typing import Any
 
 
+from pcx_language_modes import language_mode, normalize_language
 from pcx_paths import data_root
 
 REPO_ROOT = data_root()
 TEMPLATES_DIR = REPO_ROOT / "templates"
-
-LANG_ALIASES = {
-    "enma": "enma",
-    "em": "enma",
-    ".em": "enma",
-}
 
 
 @dataclass(frozen=True)
@@ -42,14 +37,13 @@ TEMPLATE_SPECS: tuple[TemplateSpec, ...] = (
     TemplateSpec("enma", "aimbot", "aimbot-skeleton.em", "Single-file Enma aimbot scaffold", "aimbot-skeleton.em"),
     TemplateSpec("enma", "minimap", "minimap.em", "Single-file Enma radar/minimap scaffold", "minimap.em"),
     TemplateSpec("enma", "hello", "hello-world.em", "Minimal Enma lifecycle starter", "hello-world.em"),
+    TemplateSpec("angelscript", "overlay", "angelscript-overlay.as", "Single-file AngelScript overlay/proc starter", "main.as"),
+    TemplateSpec("lua", "overlay", "lua-overlay.lua", "Single-file Lua overlay/proc starter", "main.lua"),
 )
 
 
-def normalize_language(language: str) -> str:
-    lang = LANG_ALIASES.get(language.strip().lower())
-    if not lang:
-        raise ValueError(f"unsupported language: {language}; use enma")
-    return lang
+def normalize_template_language(language: str) -> str:
+    return normalize_language(language)
 
 
 def available_templates(language: str = "") -> list[dict[str, str]]:
@@ -102,15 +96,15 @@ def build_project_plan(
 ) -> dict[str, Any]:
     spec = select_template(language, kind)
     project = slugify(name)
+    mode = language_mode(spec.language)
     docs = [
         "docs/AI_AGENT_OPERATING_MANUAL.md",
         "docs/perception/llm-routing.md",
         "knowledge/pcx-api-cheatsheet.md",
         "knowledge/offset-methodology.md",
+        *mode.get("docs", []),
     ]
-    skills = ["game-cheat-script-master", "pcx-re-discipline", "re-evidence-log"]
-    docs.extend(["docs/llms-perception-enma.md", "docs/perception/lifecycle-and-routines.md"])
-    skills.append("pcx-enma-discipline")
+    skills = list(mode.get("skills", []))
 
     return {
         "name": name,
@@ -167,7 +161,7 @@ def _replace_target_process(paths: list[Path], target_process: str) -> None:
     if not target_process or target_process == "game.exe":
         return
     for path in paths:
-        if path.suffix.lower() not in {".em", ".md", ".json"}:
+        if path.suffix.lower() not in {".em", ".as", ".lua", ".md", ".json"}:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         updated = text.replace('"game.exe"', json.dumps(target_process))

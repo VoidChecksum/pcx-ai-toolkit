@@ -27,6 +27,8 @@
     "tools/**/*.sh",
     "pcx-bin/pcx-rs*",
     "tools/**/*.ps1",
+    "tools/go/**",
+    "tools/go/**/*",
     "knowledge/*.json",
     "knowledge/**/*",
     "templates/**/*",
@@ -48,7 +50,10 @@
     "visualstudio/README.md",
     "tools/pe-parser/Cargo.toml",
     "tools/pe-parser/src/**/*",
-    "VERSION"
+    "VERSION",
+    "docs/lua/**/*.md",
+    "templates/*.lua",
+    "knowledge/lua-cheatsheet.md"
   ],
   "scripts": {
     "pack:check": "bun pm pack --dry-run"

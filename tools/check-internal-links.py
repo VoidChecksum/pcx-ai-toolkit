@@ -10,6 +10,7 @@ link_re = re.compile(r'\[[^\]]*\]\(([^)]+)\)')
 code_fence = re.compile(r'```[\s\S]*?```', re.MULTILINE)
 broken = []
 for md in glob.glob('**/*.md', recursive=True):
+    md = md.replace(os.sep, '/')
     if md.startswith('lsp/'): continue
     if md.startswith('docs/llms-'): continue
     d = os.path.dirname(md)

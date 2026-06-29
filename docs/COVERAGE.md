@@ -9,7 +9,7 @@
 - Core Enma API pages indexed: 13/13
 - Platform/tooling pages indexed: 5/5
 - Metadata/status pages indexed: 2/2
-- API families indexed: 12
+- API families indexed: 16
 - Symbols indexed: 216
 - Symbols with explicit permission metadata: 216
 - Symbols requiring non-empty permissions: 26
@@ -34,7 +34,7 @@
 | Symbols with failure metadata | 216 | 216 | pass |
 | Known hallucinations covered | 113 | 100 | pass |
 | Eval cases | 150 | 150 | pass |
-| Eval cases with expected findings | 142 | 100 | pass |
+| Eval cases with expected findings | 141 | 100 | pass |
 | Total Perception pages indexed | 20 | 20 | pass |
 
 ## Perception Page Classes
@@ -82,10 +82,14 @@
 ## Indexed API Families
 
 - `cpu`
+- `engine-specific`
+- `extended-math`
 - `filesystem`
 - `gui`
 - `input`
+- `json`
 - `lifecycle`
+- `mutex`
 - `net`
 - `proc`
 - `render`

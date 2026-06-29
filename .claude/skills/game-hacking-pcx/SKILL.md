@@ -136,11 +136,11 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 ## How To Use These Docs
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
-2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/readme.md` and read the relevant `.md` sub-page
-3. **If asked for AngelScript or `.as`**: stop — this toolkit is Enma-only
+2. **Before writing AngelScript code**: start from `https://docs.perception.cx/perception/angel-script/overview.md` and read the relevant `.md` sub-page
+3. **Before writing Enma code**: use Enma only for explicit `.em` or migration/AOT work, then start from `https://docs.perception.cx/perception/enma/readme.md`
 4. **If unsure about a type, function, or parameter**: read the upstream doc, don't guess
 5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
-6. **For a starting project scaffold**: use `templates/cheat-skeleton-em/`
+6. **For a starting AngelScript project scaffold**: use `templates/angelscript-overlay.as` or `pcx create --language angelscript --kind overlay`
 
 ## Anti-Hallucination Rule
 

@@ -34,14 +34,27 @@ class ApiLookupTest(unittest.TestCase):
         self.assertFalse(data["found"])
         self.assertIn("draw_text", data["suggestions"])
 
-    def test_angelscript_lookup_is_unsupported(self):
+    def test_angelscript_lookup_is_supported(self):
         result = subprocess.run(
             [sys.executable, str(API_LOOKUP), "register_callback", "--lang", "angelscript", "--json"],
             capture_output=True,
             text=True,
         )
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("unsupported", result.stderr.lower() + result.stdout.lower())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertTrue(data["found"])
+        self.assertTrue(any(sig["language"] == "angelscript" for sig in data["signatures"]))
+    def test_lua_lookup_is_supported(self):
+        result = subprocess.run(
+            [sys.executable, str(API_LOOKUP), "draw_text", "--lang", "lua", "--json"],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertTrue(data["found"])
+        self.assertTrue(any(sig["language"] == "lua" for sig in data["signatures"]))
+
     def test_enma_language_addon_lookup_returns_source(self):
         result = subprocess.run(
             [sys.executable, str(API_LOOKUP), "json_object", "--lang", "enma", "--json"],

@@ -2,13 +2,17 @@
   "api": {
     "callable_symbols": 213,
     "callable_symbols_with_signatures": 213,
-    "families_indexed": 12,
+    "families_indexed": 16,
     "family_names": [
       "cpu",
+      "engine-specific",
+      "extended-math",
       "filesystem",
       "gui",
       "input",
+      "json",
       "lifecycle",
+      "mutex",
       "net",
       "proc",
       "render",
@@ -155,7 +159,7 @@
   ],
   "hallucinations": {
     "eval_cases": 150,
-    "eval_cases_with_expected_findings": 142,
+    "eval_cases_with_expected_findings": 141,
     "known_symbols": 113
   },
   "missing": {

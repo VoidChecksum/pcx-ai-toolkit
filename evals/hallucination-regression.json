@@ -96,8 +96,8 @@
       "input": "import \"vec\"; import \"color\"; void r(int64 d){ draw_esp(vec2(0,0), color(255,0,0,255)); } int64 main(){ register_routine(cast<int64>(r),0); return 1; }",
       "expected_findings": [
         {
-          "code": "unknown_call",
-          "symbol": "r",
+          "code": "unsupported_symbol",
+          "symbol": "draw_esp",
           "severity": "error"
         }
       ]
@@ -299,18 +299,12 @@
       ]
     },
     {
-      "name": "enma-rejects-language-lua-main",
+      "name": "lua-accepts-minimal-main",
       "mode": "code",
       "language": "lua",
-      "should_pass": false,
+      "should_pass": true,
       "input": "function main() return 1 end",
-      "expected_findings": [
-        {
-          "code": "unsupported_language",
-          "symbol": "lua",
-          "severity": "error"
-        }
-      ]
+      "expected_findings": []
     },
     {
       "name": "enma-rejects-language-python-print",

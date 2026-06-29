@@ -39,13 +39,13 @@ class ApiIndexTest(unittest.TestCase):
         self.assertTrue(required_types.issubset(types),
                         f"missing types: {required_types - types}")
 
-    def test_no_angelscript_symbols_present(self):
+    def test_angelscript_symbols_present(self):
         data = json.loads(INDEX_FILE.read_text(encoding="utf-8"))
-        for section in ("functions", "methods"):
-            for entries in data.get(section, {}).values():
-                self.assertTrue(all(sig.get("language") == "enma" for sig in entries))
-        self.assertNotIn("register_callback", data.get("functions", {}))
-        self.assertNotIn("deref", data.get("methods", {}))
+        funcs = data.get("functions", {})
+        methods = data.get("methods", {})
+        self.assertTrue(any(sig.get("language") == "angelscript" for sig in funcs.get("register_callback", [])))
+        self.assertTrue(any(sig.get("language") == "angelscript" for sig in methods.get("deref", [])))
+        self.assertTrue(any(sig.get("language") == "enma" for sig in funcs.get("register_routine", [])))
 
     def test_language_addon_symbols_present(self):
         data = json.loads(INDEX_FILE.read_text(encoding="utf-8"))
@@ -58,8 +58,8 @@ class ApiIndexTest(unittest.TestCase):
                             for sig in funcs.get("json_object", [])))
         self.assertTrue(any(sig.get("language") == "enma"
                             for sig in methods.get("pretty", [])))
-        self.assertFalse(any(sig.get("language") == "angelscript"
-                             for entries in funcs.values() for sig in entries))
+        self.assertTrue(any(sig.get("language") == "angelscript"
+                            for entries in funcs.values() for sig in entries))
 
     def test_builder_check_passes(self):
         result = subprocess.run(

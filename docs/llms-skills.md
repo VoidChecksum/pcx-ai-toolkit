@@ -94,8 +94,8 @@ The task is...
     → docs/perception/<area>-api.md for the API that errored, AND
       knowledge/common-patterns.md for any worked example using it.
 
-  Unsupported `.as` / AngelScript request
-    → docs/perception/llm-routing.md first; stop and keep the AI contract Enma-only.
+  AngelScript `.as` implementation
+    → docs/llms-perception-angelscript.md first; verify symbols with `pcx api --lang angelscript`.
 ```
 
 The discipline is per-task, not per-session. A 30-minute session might read 4 different docs — that's fine. Re-loading the cheatsheet at the start of each tool session is also fine; it's small and grounds the AI's API surface.
@@ -317,7 +317,7 @@ This is the highest-skill move in AI pair programming — recognizing when "more
 | 6 | Diff-review every multi-file change | Five-minute scan for the 8 high-value pattern matches catches ~90% of violations |
 | 7 | When stuck, change the question | Specific tool-call asks beat "try harder"; the unstuck question is more concrete |
 
-**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 59 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `docs/perception/llm-routing.md` (Enma-only routing contract).
+**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 59 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `docs/perception/llm-routing.md` (AngelScript/Enma language-mode routing contract).
 
 ---
 
@@ -1876,11 +1876,11 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 ## How To Use These Docs
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
-2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/readme.md` and read the relevant `.md` sub-page
-3. **If asked for AngelScript or `.as`**: stop — this toolkit is Enma-only
+2. **Before writing AngelScript code**: start from `https://docs.perception.cx/perception/angel-script/overview.md` and read the relevant `.md` sub-page
+3. **Before writing Enma code**: use Enma only for explicit `.em` or migration/AOT work, then start from `https://docs.perception.cx/perception/enma/readme.md`
 4. **If unsure about a type, function, or parameter**: read the upstream doc, don't guess
 5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
-6. **For a starting project scaffold**: use `templates/cheat-skeleton-em/`
+6. **For a starting AngelScript project scaffold**: use `templates/angelscript-overlay.as` or `pcx create --language angelscript --kind overlay`
 
 ## Anti-Hallucination Rule
 
@@ -5725,6 +5725,7 @@ The honest answer to many "how do I hide this from Discord" questions is "you ca
 ---
 name: pcx
 description: Runs the PCX AI Toolkit CLI directly from Claude Code. Use this for `/pcx update` or any other pcx command.
+license: MIT
 ---
 
 # PCX CLI Skill

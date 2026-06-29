@@ -61,8 +61,9 @@ class ProjectWorkflowTest(unittest.TestCase):
             self.assertEqual(verify.returncode, 0, verify.stderr + verify.stdout)
             self.assertTrue(json.loads(verify.stdout)["ok"])
 
-    def test_create_rejects_angelscript(self) -> None:
+    def test_create_angelscript_overlay_project(self) -> None:
         with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "as"
             result = subprocess.run(
                 [
                     sys.executable,
@@ -73,15 +74,86 @@ class ProjectWorkflowTest(unittest.TestCase):
                     "--language",
                     "angelscript",
                     "--kind",
-                    "full",
+                    "overlay",
+                    "--target",
+                    "demo.exe",
                     "--output",
-                    str(Path(td) / "as"),
+                    str(out),
                 ],
                 capture_output=True,
                 text=True,
             )
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("unsupported", result.stderr.lower() + result.stdout.lower())
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            meta = json.loads((out / "pcx-project.json").read_text(encoding="utf-8"))
+            self.assertEqual(meta["language"], "angelscript")
+            self.assertEqual(meta["entrypoint"], "main.as")
+            script = (out / "as-project.as").read_text(encoding="utf-8")
+            self.assertIn('TARGET_PROCESS = "demo.exe"', script)
+
+    def test_create_defaults_to_angelscript_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "default-as"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(PCX),
+                    "create",
+                    "--name",
+                    "Default AS",
+                    "--kind",
+                    "overlay",
+                    "--target",
+                    "demo.exe",
+                    "--output",
+                    str(out),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            meta = json.loads((out / "pcx-project.json").read_text(encoding="utf-8"))
+            self.assertEqual(meta["language"], "angelscript")
+            self.assertEqual(meta["entrypoint"], "main.as")
+
+    def test_create_lua_overlay_project(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "lua"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(PCX),
+                    "create",
+                    "--name",
+                    "Lua Project",
+                    "--language",
+                    "lua",
+                    "--kind",
+                    "overlay",
+                    "--target",
+                    "demo.exe",
+                    "--output",
+                    str(out),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+            meta = json.loads((out / "pcx-project.json").read_text(encoding="utf-8"))
+            self.assertEqual(meta["language"], "lua")
+            self.assertEqual(meta["entrypoint"], "main.lua")
+            script = (out / "lua-project.lua").read_text(encoding="utf-8")
+            self.assertIn('TARGET_PROCESS = "demo.exe"', script)
+
+    def test_lua_context_does_not_block_lua(self) -> None:
+        text = (REPO_ROOT / "docs" / "llms-perception-lua.md").read_text(encoding="utf-8")
+        self.assertIn("pcx api <symbol> --lang lua", text)
+        self.assertIn("Perception Lua", text)
+
+    def test_angelscript_context_does_not_block_as(self) -> None:
+        text = (REPO_ROOT / "docs" / "llms-perception-angelscript.md").read_text(encoding="utf-8")
+        self.assertNotIn("toolkit is Enma-only", text)
+        self.assertNotIn("AngelScript (`.as`) is deprecated", text)
+        self.assertIn("pcx api <symbol> --lang angelscript", text)
 
     def test_re_importer_converts_symbol_csv_from_stdin(self) -> None:
         result = subprocess.run(

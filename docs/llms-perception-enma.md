@@ -13,41 +13,62 @@
 # Perception-First LLM Routing
 
 Use this page before writing any Perception.cx script in this toolkit. The repo
-is scoped to **Enma (`.em`) only**. AngelScript (`.as`) is deprecated and is not
-part of the AI contract.
+supports **AngelScript (`.as`) and Lua (`.lua`) as current production targets**
+and **Enma (`.em`) as the future AOT transition target**. Never mix syntax or
+APIs between modes.
 
 ## Load Order
 
-For Enma work:
+For AngelScript work:
+
+1. Read `docs/llms-perception-angelscript.md` or the official AngelScript page
+   matching the API surface under `https://docs.perception.cx/perception/angel-script/`.
+2. Read `docs/angelscript/quickstart.md` before writing `main()`, callbacks,
+   render code, or proc code.
+3. Verify every host API and add-on symbol with `pcx api <symbol> --lang
+   angelscript` or MCP `api_lookup(symbol, "angelscript")`.
+4. Validate final `.as` code with `pcx symbol-check <file.as>`, `pcx verify
+   <file.as>`, or MCP `validate_code(code, "angelscript")`.
+
+For Lua work:
+
+1. Read `docs/llms-perception-lua.md` or the official Lua page matching the API
+   surface under `https://docs.perception.cx/perception/lua-script/`.
+2. Read `docs/lua/quickstart.md` before writing `main()`, callbacks, render
+   code, or proc code.
+3. Verify every host API and add-on symbol with `pcx api <symbol> --lang lua`
+   or MCP `api_lookup(symbol, "lua")`.
+4. Validate final `.lua` code with `pcx symbol-check <file.lua>`, `pcx verify
+   <file.lua>`, or MCP `validate_code(code, "lua")`.
+
+For Enma migration/AOT work:
 
 1. Read `docs/perception/readme.md` for the registered Enma surface and official
    conventions.
 2. Read `docs/perception/lifecycle-and-routines.md` before writing `main()` or
-   callbacks.
+   routines.
 3. Read the relevant Enma API page under `docs/perception/*.md` before using any
    host function.
 4. Read `knowledge/enma-cheatsheet.md` and
    `.claude/skills/pcx-enma-discipline/SKILL.md` for language gotchas.
 
-For `.as` or AngelScript requests, stop and say this toolkit only supports Enma.
+## Language Contracts
 
-## Non-Negotiable Enma Contract
+| Concern | AngelScript `.as` | Lua `.lua` | Enma `.em` |
+|---|---|---|---|
+| Status | Current production surface | Current production surface | Future AOT transition |
+| Entry point | `int main()` | `function main()` | `int64 main()` |
+| Repeating work | `register_callback(fn, interval_ms, data_index)` | `register_callback(fn, interval_ms, data_index)` or `on_frame()` | `register_routine(cast<int64>(fn), data)` |
+| Callback shape | `void fn(int id, int data_index)` | `function fn(id, data_index)` | `void fn(int64 data)` |
+| Logging | `log(...)` | `log(...)` | `println(...)` |
+| Process ref | `proc_t` handle; call `deref()` | `process` userdata; call `deref_process(proc)` | `proc_t` value, RAII |
+| Arrays | `array<T>` | tables | `T[]`, `.push()`, `.pop()` |
+| Maps | `dictionary` | tables | `map<K,V>` / `imap<V>` |
+| Render positions | scalar `x, y` arguments unless the AS page says otherwise | scalar `x, y` arguments unless the Lua page says otherwise | `vec2(...)` values |
+| Render colors | scalar RGBA arguments unless the AS page says otherwise | scalar RGBA arguments unless the Lua page says otherwise | `color(r,g,b,a)` values |
 
-| Concern | Enma `.em` |
-|---|---|
-| Entry point | `int64 main()` |
-| Repeating work | `register_routine(cast<int64>(fn), data)` |
-| Callback shape | `void fn(int64 data)` |
-| Logging | `println(...)` |
-| Process ref | `proc_t` value, RAII |
-| Arrays | `T[]`, `.push()`, `.pop()` |
-| Maps | `map<K,V>` for string keys, `imap<V>` for integer keys |
-| Casts | `cast<T>(x)` |
-| Render positions | `vec2(...)` values |
-| Render colors | `color(r,g,b,a)` value |
-
-If a generated answer uses AngelScript lifecycle, handle, array, dictionary, or
-raw render-shape idioms, treat it as wrong.
+If generated code mixes AngelScript/Lua lifecycle, containers, or render calls
+into Enma, or Enma `vec2`/`color` wrappers into AngelScript/Lua, treat it as wrong.
 
 ## Perception Enma Facts From Upstream
 
@@ -71,18 +92,24 @@ The official Perception Enma overview states:
 
 Before producing code:
 
-1. Use Enma unless the user asks for something outside toolkit scope.
-2. If the target language is not Enma, stop and say this toolkit is Enma-only.
-3. Load `docs/llms-perception-enma.md` or the load-order pages above.
-4. Verify every PCX function name and parameter shape against the matching API
-   page, `pcx api <symbol>`, or MCP `api_lookup(symbol, "enma")`.
-5. Prefer symbolic offsets and placeholders over version-specific magic values
+1. Infer the target language from the user, filename, or explicit `--language`.
+   Default to AngelScript for current Perception production scripts; use Lua
+   when requested or when the source file is `.lua`; use Enma only when the task
+   explicitly asks for Enma or migration prep.
+2. Load the matching context pack:
+   - AngelScript: `docs/llms-perception-angelscript.md`
+   - Lua: `docs/llms-perception-lua.md`
+   - Enma: `docs/llms-perception-enma.md`
+3. Verify every PCX function name and parameter shape against the matching API
+   page, `pcx api <symbol> --lang <language>`, or MCP
+   `api_lookup(symbol, "<language>")`.
+4. Prefer symbolic offsets and placeholders over version-specific magic values
    unless the user supplied verified offsets.
-6. Keep update/scanning work out of render callbacks.
-7. Before presenting final code, run `pcx symbol-check <file.em>` or MCP
-   `validate_code(code, "enma")` when available.
-8. Before copying a generated Markdown answer into a project, run
-   `pcx check-answer <answer.md>` to validate fenced Enma code.
+5. Keep update/scanning work out of render callbacks.
+6. Before presenting final code, run `pcx symbol-check <file.as|file.lua|file.em>`
+   or MCP `validate_code(code, "<language>")` when available.
+7. Before copying a generated Markdown answer into a project, run
+   `pcx check-answer <answer.md>` to validate fenced code.
 
 When uncertain, answer with the exact docs that must be checked instead of
 inventing a plausible API.
@@ -19911,11 +19938,11 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 ## How To Use These Docs
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
-2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/readme.md` and read the relevant `.md` sub-page
-3. **If asked for AngelScript or `.as`**: stop — this toolkit is Enma-only
+2. **Before writing AngelScript code**: start from `https://docs.perception.cx/perception/angel-script/overview.md` and read the relevant `.md` sub-page
+3. **Before writing Enma code**: use Enma only for explicit `.em` or migration/AOT work, then start from `https://docs.perception.cx/perception/enma/readme.md`
 4. **If unsure about a type, function, or parameter**: read the upstream doc, don't guess
 5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
-6. **For a starting project scaffold**: use `templates/cheat-skeleton-em/`
+6. **For a starting AngelScript project scaffold**: use `templates/angelscript-overlay.as` or `pcx create --language angelscript --kind overlay`
 
 ## Anti-Hallucination Rule
 

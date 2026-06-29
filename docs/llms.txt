@@ -12,6 +12,8 @@ See `docs/INDEX.md` for the complete file index. The most useful single-file con
 ## Single-File Context Packs
 
 - [Enma Context Pack](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-perception-enma.md): Single-file context pack for AI tools writing Enma scripts. Bundles the language docs, platform APIs, behavioral skills, and quick-reference knowledge most relevant when working in Enma.
+- [AngelScript Context Pack](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-perception-angelscript.md): Single-file context pack for AI tools writing current Perception AngelScript `.as` scripts while Enma AOT is unreleased.
+- [Lua Context Pack](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-perception-lua.md): Single-file context pack for AI tools writing current Perception Lua `.lua` scripts.
 - [Full Skills Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-skills.md): every AI skill in one file.
 - [Full Knowledge Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-knowledge.md): every knowledge reference in one file.
 - [Full Toolkit Bundle](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/llms-full.txt): the entire toolkit concatenated.
@@ -87,6 +89,12 @@ The native Perception.cx scripting language: syntax, addons, SDK, lifecycle.
 - [Safety](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/sdk-safety.md): Safety mechanisms at every layer.
 - [Serialization & Linking](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/sdk-serialization-and-linking.md): Compile once, distribute the binary; no source required at runtime.
 - [Type Registration](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/enma/sdk-type-registration.md): typebuilder exposes native types to scripts: fields, methods, properties, operators (full set including opCmp, compound assign, ++/--), subscript, iteration, conversion, factory, destructor.
+
+## Lua Language Docs
+
+Current Perception Lua scripting surface: lifecycle, examples, and PCX API usage.
+
+- [Perception Lua Quickstart](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/docs/lua/quickstart.md): Source: https://docs.perception.cx/perception/lua-script/overview.md
 
 ## Enma Platform APIs
 
@@ -164,6 +172,7 @@ Behavioral / discipline skills loaded automatically by AI tools (Claude Code / O
 Quick references for engines, anti-cheat architecture, patterns, methodology.
 
 - [Aimbot Math Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/aimbot-math.md): This is the math companion to common-patterns.md. That file
+- [Perception AngelScript Cheat Sheet](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/angelscript-cheatsheet.md): Use this for current production .as scripts. Verify every symbol with pcx api <symbol> --lang angelscript or MCP apilookup(symbol, "angelscript") before final code.
 - [Kernel Anti-Cheat Architecture Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/anti-cheat-architecture.md): Architecture, components, and detection techniques for major kernel-level anti-cheat systems. Read this before starting AC analysis — it tells you what you're looking at and what each AC is known to m
 - [Cheat Script Cookbook](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/cheat-script-cookbook.md): This file is the practical companion to game-cheat-guidelines and game-hacking-pcx.
 - [Common Enma Scripting Patterns for Perception.cx](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/common-patterns.md): proct gproc;
@@ -179,6 +188,7 @@ Quick references for engines, anti-cheat architecture, patterns, methodology.
 - [Perception.cx Game Support Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/game-targets.md): Every game with active scripts in the Perception.cx Script Market (as of June 2026), organized by category. This toolkit supports AngelScript (AS) and Enma only; market entries below are listed as Ang
 - [GUI Design Patterns](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/gui-design-patterns.md): The Perception.cx sidebar GUI is a fixed-width vertical strip. Good layouts make features discoverable, tunings easy to find, and state visible at a glance. The 12 game-cheat-guidelines say "GUI for e
 - [Kernel-Level Reverse Engineering Tools](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/kernel-re-tools.md): Tools for reversing kernel drivers, analyzing anti-cheat systems, and inspecting kernel state. Organized by workflow stage.
+- [Perception Lua Cheat Sheet](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/lua-cheatsheet.md): Use this for current Perception Lua (.lua) scripts. Verify every symbol with pcx api <symbol> --lang lua or MCP apilookup(symbol, "lua") before final code.
 - [Network Protocol Reverse Engineering Reference](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/network-protocol-re.md): How to reverse-engineer a game's network protocol — capture, dissect, identify message boundaries, decode payloads. The defensive / educational half of network RE; pairs with the engine-RE references 
 - [Obfuscation & Protector Taxonomy](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/obfuscation-taxonomy.md): Architecture, VM internals, protection layers, and known weaknesses for every major commercial and open-source binary protector. Read this before starting deobfuscation — it tells you what you're figh
 - [Offset Finding and Maintenance Methodology](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/knowledge/offset-methodology.md): 1. Open the function in IDA/Ghidra. Find the instruction that loads/references the value you need.
@@ -196,11 +206,7 @@ Project-rules drop-ins for Claude Code / Cursor / Cline / Copilot / Aider / Zed 
 
 - [Agent Definitions for PCX Scripting Projects](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/AGENTS.md): Analyzes game binaries to find data structures, pointers, and function signatures.
 - [Perception.cx Scripting Project](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CLAUDE.md): Languages: Enma (.em) only
-- [Cline Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CLINE.md): Drop-in custom instructions for Cline, the VS Code AI agent. Sibling to rules/CLAUDE.md (Claude Code drop-in) and rules/CURSOR.md (Cursor drop-in). Cline reads its custom instructions on every turn, s
-- [GitHub Copilot Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/COPILOT.md): Drop-in custom instructions for GitHub Copilot. Sibling to rules/CLAUDE.md (Claude Code), rules/CURSOR.md (Cursor), rules/CLINE.md (Cline). Copilot reads .github/copilot-instructions.md for repo-wide 
-- [Cursor Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/CURSOR.md): Drop-in project rules for Cursor (the IDE), parallel to CLAUDE.md but tailored for Cursor's context system.
 - [Karpathy Discipline for PCX Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/KARPATHY.md): Drop-in work-discipline rules for any AI tool writing Perception.cx scripts. Companion to CLAUDE.md (which covers code standards). Copy both into your project.
-- [Windsurf Rules — Perception.cx Scripting](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/rules/WINDSURF.md): Drop-in project rules for Windsurf (the IDE) and Cascade. Parallel to rules/CLAUDE.md and rules/CURSOR.md but tailored for Windsurf's context system and Cascade agent.
 
 ## Enma Templates
 
@@ -265,20 +271,20 @@ Python-facing CLI tools for validation, generation, and RE; hot binary-analysis 
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-mcp-workflows.py): """Static validation for deterministic Perception MCP workflow plans."""
 - [check-skill-contract](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-skill-contract.py)
 - [Scripting-API surface keywords that make a changelog release "API-relevant".](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/check-version-matrix.py): APIKEYWORDS = re.compile(
-- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dump-strings-xor.py): import os
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dump-strings-xor.py): sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(file))))
 - [Internal representation: the parsed table is a list of (category, entries)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/dumper-to-enma.py): # groups. category is None when the source has no natural grouping; otherwise
 - [── Parse rules (tolerant of formatting variation) ────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/evidence-log-validator.py): # const <type> OFFNAME ...   |   const string SIGNAME ...
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/evidence.py): """Evidence graph CLI for RE claims."""
 - [hallucination-eval](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/hallucination-eval.py)
-- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/identify-protector.py): import os
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/identify-protector.py): sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(file))))
 - [knowledge-index](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/knowledge-index.py)
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/mock-perception-mcp.py): """Small deterministic Perception MCP mock server for CI and examples."""
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/model-eval.py): """Score model output against PCX compatibility criteria."""
-- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/module-export-mapper.py): import os
-- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/offset-diff.py): import os
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/module-export-mapper.py): sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(file))))
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/offset-diff.py): sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(file))))
 - [A normalized pattern is a list where each element is an int byte (0-255)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pattern-format-converter.py): # or None for a wildcard. All parsing converts to this; all emitting reads it.
 - [ANSI colors (disabled on Windows if not supported)](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pcx.py): def supportscolor() -> bool:
-- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pe-section-analyzer.py): import os
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/pe-section-analyzer.py): sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(file))))
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/perception-mcp-doctor.py): """Perception MCP health checks."""
 - [mypy: ignore-errors](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/perception-mcp-record.py): """Record, replay, and summarize Perception MCP JSONL transcripts."""
 - [perception-mcp-session](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/perception-mcp-session.py)
@@ -289,7 +295,7 @@ Python-facing CLI tools for validation, generation, and RE; hot binary-analysis 
 - [── Hash algorithms ──────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/resolve-api-hashes.py): def ror13add(name: bytes) -> int:
 - [── Rule registry ─────────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/script-linter.py): # rule number -> (severity, one-liner). Severity is fixed per rule, not per hit.
 - [1. Update submodules](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/setup-core.py): print("[..] Checking git submodules...")
-- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/sig-uniqueness-checker.py): import os
+- [── PE parser imports ─────────────────────────────────────────────────────────](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/sig-uniqueness-checker.py): sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(file))))
 - [skills](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/skills.py)
 - [symbol-check](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/symbol-check.py)
 - [verify-project](https://github.com/VoidChecksum/pcx-ai-toolkit/raw/main/tools/verify-project.py)

@@ -4,7 +4,7 @@
 
 > **Generated** by `tools/build-llms-index.py` — do not edit manually. Re-generate by running the tool from the repo root. CI verifies the committed bundle matches the current source.
 
-**Source files included: 185**
+**Source files included: 184**
 
 ---
 
@@ -18,24 +18,27 @@ unsupported language bindings, and stale context loading.
 
 ## Non-Negotiable Scope
 
-The supported script language is **Enma (`.em`)**.
-
-AngelScript (`.as`), Lua, and other historical PCX scripting surfaces are outside
-this toolkit's AI contract. If a task asks for them, stop and state that this
-toolkit is Enma-only.
+The supported script languages are **AngelScript (`.as`)** and **Enma (`.em`)**.
+AngelScript is the current production target while Enma is the future AOT
+transition target. Lua and other historical PCX scripting surfaces are outside
+this toolkit's AI contract.
 
 ## Load Order
 
 1. Read `docs/perception/llm-routing.md`.
-2. Confirm the target is Enma (`.em`).
-3. Load `docs/llms-perception-enma.md`.
+2. Confirm the target language:
+   - AngelScript (`.as`) for current production scripts.
+   - Enma (`.em`) only for explicit Enma or migration/AOT work.
+3. Load the matching context pack:
+   - AngelScript: `docs/llms-perception-angelscript.md`
+   - Enma: `docs/llms-perception-enma.md`
 4. Load the relevant skill:
    - Game cheat work: `game-cheat-script-master`
    - Enma syntax/binding work: `pcx-enma-discipline`
    - MCP calls: `mcp-tool-routing`
    - Offset/RE work: `pcx-re-discipline` and `re-evidence-log`
-5. Verify every host API and language/add-on symbol with `pcx api` or MCP
-   `api_lookup`.
+5. Verify every host API and language/add-on symbol with `pcx api --lang
+   <language>` or MCP `api_lookup`.
 6. Validate generated code with `pcx symbol-check`, MCP `validate_code`, or MCP
    `validate_answer`.
 
@@ -49,11 +52,11 @@ Use this sequence in MCP-aware clients:
 
 ```text
 overview()
-recommend_context(task, "enma")
+recommend_context(task, "angelscript")
 get_skill(name)
 get_file(path)
-api_lookup(symbol, "enma")
-validate_code(code, "enma")
+api_lookup(symbol, "angelscript")
+validate_code(code, "angelscript")
 validate_answer(markdown)
 ```
 
@@ -65,9 +68,9 @@ question.
 Use this sequence in terminal-based workflows:
 
 ```bash
-pcx api draw_text
-pcx api atan2
-pcx symbol-check script.em
+pcx api draw_text --lang angelscript
+pcx symbol-check script.as
+pcx verify script.as
 pcx verify script.em
 pcx check-answer answer.md
 python3 tools/check-llm-contract.py
@@ -111,7 +114,7 @@ doc or lookup must be checked next.
 - Core Enma API pages indexed: 13/13
 - Platform/tooling pages indexed: 5/5
 - Metadata/status pages indexed: 2/2
-- API families indexed: 12
+- API families indexed: 16
 - Symbols indexed: 216
 - Symbols with explicit permission metadata: 216
 - Symbols requiring non-empty permissions: 26
@@ -136,7 +139,7 @@ doc or lookup must be checked next.
 | Symbols with failure metadata | 216 | 216 | pass |
 | Known hallucinations covered | 113 | 100 | pass |
 | Eval cases | 150 | 150 | pass |
-| Eval cases with expected findings | 142 | 100 | pass |
+| Eval cases with expected findings | 141 | 100 | pass |
 | Total Perception pages indexed | 20 | 20 | pass |
 
 ## Perception Page Classes
@@ -184,10 +187,14 @@ doc or lookup must be checked next.
 ## Indexed API Families
 
 - `cpu`
+- `engine-specific`
+- `extended-math`
 - `filesystem`
 - `gui`
 - `input`
+- `json`
 - `lifecycle`
+- `mutex`
 - `net`
 - `proc`
 - `render`
@@ -288,15 +295,15 @@ See `knowledge/offset-methodology.md` and the `pcx-patch-day-playbook` skill for
 
 | | Enma | AngelScript |
 |---|---|---|
-| **Primary use** | Modern PCX scripting and new projects | Compatibility with existing `.as` scripts |
+| **Primary use** | Future AOT/migration target | Current production scripts |
 | **Type safety** | Strong static typing | Strong static typing |
 | **Lifecycle** | `int64 main()` + `register_routine` | `int main()` + `register_callback` |
-| **Process handle** | `proc_t` value with RAII cleanup | `proc_t@` handle with explicit `deref()` |
-| **Render style** | `vec2(...)` and `color(...)` values | Raw/value shapes from the AS API pages |
-| **File extension** | `.em` |
-| **Skill** | `pcx-enma-discipline` |
+| **Process handle** | `proc_t` value with RAII cleanup | `proc_t` handle with explicit `deref()` |
+| **Render style** | `vec2(...)` and `color(...)` values | Scalar/value shapes from the AS API pages |
+| **File extension** | `.em` | `.as` |
+| **Validation** | `pcx verify file.em` | `pcx verify file.as` |
 
-For new scripts, use Enma. AngelScript is deprecated and unsupported.
+For current production scripts, use AngelScript. Use Enma only when explicitly targeting Enma or migration prep.
 
 ---
 
@@ -14671,6 +14678,56 @@ Use this mechanism when the answer is not explicitly present in the current page
 
 ---
 
+## Source: `docs/lua/quickstart.md`
+
+# Perception Lua Quickstart
+
+Source: https://docs.perception.cx/perception/lua-script/overview.md
+
+Lua (`.lua`) is a current Perception scripting surface for UI, rendering, memory analysis, process interaction, and PCX add-ons. Verify every symbol with `pcx api <symbol> --lang lua` before final code.
+
+## Lifecycle
+
+Source: https://docs.perception.cx/perception/lua-script/life-cycle.md
+
+```lua
+function main()
+    log("Lua script loaded")
+    return 1
+end
+
+function on_frame()
+    draw_text("Hello", 20, 20, 255, 255, 255, 255, get_font20(), TE_SHADOW, 0, 0, 0, 180, 1.0)
+end
+
+function on_unload()
+end
+```
+
+`main()` is required. A script remains active only when `main()` returns `> 0` and `on_frame()` exists. Use `on_unload()` for cleanup. Do not run infinite loops in `main()`.
+
+## Render discipline
+
+Source: https://docs.perception.cx/perception/lua-script/render-api.md
+
+Lua render APIs use scalar coordinates and RGBA arguments. Do not use Enma `vec2(...)` or `color(...)` wrappers in Lua.
+
+## Proc discipline
+
+Source: https://docs.perception.cx/perception/lua-script/proc-api.md
+
+Use `process` userdata handles from `ref_process(...)`, release them with `deref_process(process)`, and treat addresses as `uint64` virtual addresses.
+
+## Validation
+
+```bash
+pcx api draw_text --lang lua
+pcx symbol-check script.lua
+pcx verify script.lua
+```
+
+---
+
 ## Source: `docs/perception/analyzer.md`
 
 > For the complete documentation index, see [llms.txt](https://docs.perception.cx/perception/llms.txt). Markdown versions of documentation pages are available by appending `.md` to page URLs; this page is available as [Markdown](https://docs.perception.cx/perception/perception-analyzer.md).
@@ -17844,41 +17901,62 @@ Use this mechanism when the answer is not explicitly present in the current page
 # Perception-First LLM Routing
 
 Use this page before writing any Perception.cx script in this toolkit. The repo
-is scoped to **Enma (`.em`) only**. AngelScript (`.as`) is deprecated and is not
-part of the AI contract.
+supports **AngelScript (`.as`) and Lua (`.lua`) as current production targets**
+and **Enma (`.em`) as the future AOT transition target**. Never mix syntax or
+APIs between modes.
 
 ## Load Order
 
-For Enma work:
+For AngelScript work:
+
+1. Read `docs/llms-perception-angelscript.md` or the official AngelScript page
+   matching the API surface under `https://docs.perception.cx/perception/angel-script/`.
+2. Read `docs/angelscript/quickstart.md` before writing `main()`, callbacks,
+   render code, or proc code.
+3. Verify every host API and add-on symbol with `pcx api <symbol> --lang
+   angelscript` or MCP `api_lookup(symbol, "angelscript")`.
+4. Validate final `.as` code with `pcx symbol-check <file.as>`, `pcx verify
+   <file.as>`, or MCP `validate_code(code, "angelscript")`.
+
+For Lua work:
+
+1. Read `docs/llms-perception-lua.md` or the official Lua page matching the API
+   surface under `https://docs.perception.cx/perception/lua-script/`.
+2. Read `docs/lua/quickstart.md` before writing `main()`, callbacks, render
+   code, or proc code.
+3. Verify every host API and add-on symbol with `pcx api <symbol> --lang lua`
+   or MCP `api_lookup(symbol, "lua")`.
+4. Validate final `.lua` code with `pcx symbol-check <file.lua>`, `pcx verify
+   <file.lua>`, or MCP `validate_code(code, "lua")`.
+
+For Enma migration/AOT work:
 
 1. Read `docs/perception/readme.md` for the registered Enma surface and official
    conventions.
 2. Read `docs/perception/lifecycle-and-routines.md` before writing `main()` or
-   callbacks.
+   routines.
 3. Read the relevant Enma API page under `docs/perception/*.md` before using any
    host function.
 4. Read `knowledge/enma-cheatsheet.md` and
    `.claude/skills/pcx-enma-discipline/SKILL.md` for language gotchas.
 
-For `.as` or AngelScript requests, stop and say this toolkit only supports Enma.
+## Language Contracts
 
-## Non-Negotiable Enma Contract
+| Concern | AngelScript `.as` | Lua `.lua` | Enma `.em` |
+|---|---|---|---|
+| Status | Current production surface | Current production surface | Future AOT transition |
+| Entry point | `int main()` | `function main()` | `int64 main()` |
+| Repeating work | `register_callback(fn, interval_ms, data_index)` | `register_callback(fn, interval_ms, data_index)` or `on_frame()` | `register_routine(cast<int64>(fn), data)` |
+| Callback shape | `void fn(int id, int data_index)` | `function fn(id, data_index)` | `void fn(int64 data)` |
+| Logging | `log(...)` | `log(...)` | `println(...)` |
+| Process ref | `proc_t` handle; call `deref()` | `process` userdata; call `deref_process(proc)` | `proc_t` value, RAII |
+| Arrays | `array<T>` | tables | `T[]`, `.push()`, `.pop()` |
+| Maps | `dictionary` | tables | `map<K,V>` / `imap<V>` |
+| Render positions | scalar `x, y` arguments unless the AS page says otherwise | scalar `x, y` arguments unless the Lua page says otherwise | `vec2(...)` values |
+| Render colors | scalar RGBA arguments unless the AS page says otherwise | scalar RGBA arguments unless the Lua page says otherwise | `color(r,g,b,a)` values |
 
-| Concern | Enma `.em` |
-|---|---|
-| Entry point | `int64 main()` |
-| Repeating work | `register_routine(cast<int64>(fn), data)` |
-| Callback shape | `void fn(int64 data)` |
-| Logging | `println(...)` |
-| Process ref | `proc_t` value, RAII |
-| Arrays | `T[]`, `.push()`, `.pop()` |
-| Maps | `map<K,V>` for string keys, `imap<V>` for integer keys |
-| Casts | `cast<T>(x)` |
-| Render positions | `vec2(...)` values |
-| Render colors | `color(r,g,b,a)` value |
-
-If a generated answer uses AngelScript lifecycle, handle, array, dictionary, or
-raw render-shape idioms, treat it as wrong.
+If generated code mixes AngelScript/Lua lifecycle, containers, or render calls
+into Enma, or Enma `vec2`/`color` wrappers into AngelScript/Lua, treat it as wrong.
 
 ## Perception Enma Facts From Upstream
 
@@ -17902,18 +17980,24 @@ The official Perception Enma overview states:
 
 Before producing code:
 
-1. Use Enma unless the user asks for something outside toolkit scope.
-2. If the target language is not Enma, stop and say this toolkit is Enma-only.
-3. Load `docs/llms-perception-enma.md` or the load-order pages above.
-4. Verify every PCX function name and parameter shape against the matching API
-   page, `pcx api <symbol>`, or MCP `api_lookup(symbol, "enma")`.
-5. Prefer symbolic offsets and placeholders over version-specific magic values
+1. Infer the target language from the user, filename, or explicit `--language`.
+   Default to AngelScript for current Perception production scripts; use Lua
+   when requested or when the source file is `.lua`; use Enma only when the task
+   explicitly asks for Enma or migration prep.
+2. Load the matching context pack:
+   - AngelScript: `docs/llms-perception-angelscript.md`
+   - Lua: `docs/llms-perception-lua.md`
+   - Enma: `docs/llms-perception-enma.md`
+3. Verify every PCX function name and parameter shape against the matching API
+   page, `pcx api <symbol> --lang <language>`, or MCP
+   `api_lookup(symbol, "<language>")`.
+4. Prefer symbolic offsets and placeholders over version-specific magic values
    unless the user supplied verified offsets.
-6. Keep update/scanning work out of render callbacks.
-7. Before presenting final code, run `pcx symbol-check <file.em>` or MCP
-   `validate_code(code, "enma")` when available.
-8. Before copying a generated Markdown answer into a project, run
-   `pcx check-answer <answer.md>` to validate fenced Enma code.
+5. Keep update/scanning work out of render callbacks.
+6. Before presenting final code, run `pcx symbol-check <file.as|file.lua|file.em>`
+   or MCP `validate_code(code, "<language>")` when available.
+7. Before copying a generated Markdown answer into a project, run
+   `pcx check-answer <answer.md>` to validate fenced code.
 
 When uncertain, answer with the exact docs that must be checked instead of
 inventing a plausible API.
@@ -20264,8 +20348,8 @@ The task is...
     → docs/perception/<area>-api.md for the API that errored, AND
       knowledge/common-patterns.md for any worked example using it.
 
-  Unsupported `.as` / AngelScript request
-    → docs/perception/llm-routing.md first; stop and keep the AI contract Enma-only.
+  AngelScript `.as` implementation
+    → docs/llms-perception-angelscript.md first; verify symbols with `pcx api --lang angelscript`.
 ```
 
 The discipline is per-task, not per-session. A 30-minute session might read 4 different docs — that's fine. Re-loading the cheatsheet at the start of each tool session is also fine; it's small and grounds the AI's API surface.
@@ -20487,7 +20571,7 @@ This is the highest-skill move in AI pair programming — recognizing when "more
 | 6 | Diff-review every multi-file change | Five-minute scan for the 8 high-value pattern matches catches ~90% of violations |
 | 7 | When stuck, change the question | Specific tool-call asks beat "try harder"; the unstuck question is more concrete |
 
-**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 59 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `docs/perception/llm-routing.md` (Enma-only routing contract).
+**Cross-references:** `rules/CLAUDE.md`, `rules/CURSOR.md`, `rules/CLINE.md`, `rules/COPILOT.md` (the per-tool drop-ins this skill wraps); `skill://mcp-tool-routing` (which of the 59 Perception MCP tools for which task — the technique-4 backbone); `skill://game-cheat-guidelines` (the 12 rules technique #5 enforces); `skill://pcx-patch-day-playbook` (the workflow when the script breaks after a game update — applies techniques 4, 5, 7); `docs/perception/llm-routing.md` (AngelScript/Enma language-mode routing contract).
 
 ---
 
@@ -22046,11 +22130,11 @@ workflows, use `pcx api`, `pcx symbol-check`, and `pcx check-answer`.
 ## How To Use These Docs
 
 1. **Before starting a game-cheat script**: load `skill://game-cheat-script-master` and read `knowledge/cheat-script-cookbook.md`
-2. **Before writing Enma code**: start from `https://docs.perception.cx/perception/enma/readme.md` and read the relevant `.md` sub-page
-3. **If asked for AngelScript or `.as`**: stop — this toolkit is Enma-only
+2. **Before writing AngelScript code**: start from `https://docs.perception.cx/perception/angel-script/overview.md` and read the relevant `.md` sub-page
+3. **Before writing Enma code**: use Enma only for explicit `.em` or migration/AOT work, then start from `https://docs.perception.cx/perception/enma/readme.md`
 4. **If unsure about a type, function, or parameter**: read the upstream doc, don't guess
 5. **If the doc says a function is "gated"**: it requires a permission flag — mention this to the user
-6. **For a starting project scaffold**: use `templates/cheat-skeleton-em/`
+6. **For a starting AngelScript project scaffold**: use `templates/angelscript-overlay.as` or `pcx create --language angelscript --kind overlay`
 
 ## Anti-Hallucination Rule
 
@@ -25895,6 +25979,7 @@ The honest answer to many "how do I hide this from Discord" questions is "you ca
 ---
 name: pcx
 description: Runs the PCX AI Toolkit CLI directly from Claude Code. Use this for `/pcx update` or any other pcx command.
+license: MIT
 ---
 
 # PCX CLI Skill
@@ -27531,6 +27616,107 @@ strafes.
   [`input-api`](../docs/perception/input-api.md),
   [`win-api`](../docs/perception/win-api.md); Enma math:
   [`addon-vec`](../docs/enma/addon-vec.md), [`addon-math`](../docs/enma/addon-math.md).
+
+---
+
+## Source: `knowledge/angelscript-cheatsheet.md`
+
+# Perception AngelScript Cheat Sheet
+
+Use this for current production `.as` scripts. Verify every symbol with `pcx api <symbol> --lang angelscript` or MCP `api_lookup(symbol, "angelscript")` before final code.
+
+## Official source set
+
+The Perception AngelScript docs are the source of truth:
+
+- Overview: `https://docs.perception.cx/perception/angel-script/overview.md`
+- Life Cycle: `https://docs.perception.cx/perception/angel-script/life-cycle.md`
+- Engine: `https://docs.perception.cx/perception/angel-script/engine.md`
+- Atomic Types: `https://docs.perception.cx/perception/angel-script/atomic-types.md`
+- Unicorn: `https://docs.perception.cx/perception/angel-script/unicorn.md`
+- Render API: `https://docs.perception.cx/perception/angel-script/render-api.md`
+- Input API: `https://docs.perception.cx/perception/angel-script/input-api.md`
+- Proc API: `https://docs.perception.cx/perception/angel-script/proc-api.md`
+- Mutex API: `https://docs.perception.cx/perception/angel-script/mutex-api.md`
+- GUI API: `https://docs.perception.cx/perception/angel-script/gui-api.md`
+- System API: `https://docs.perception.cx/perception/angel-script/system-api-cpu-and-disassembly.md`
+- Net API: `https://docs.perception.cx/perception/angel-script/net-api.md`
+- File System: `https://docs.perception.cx/perception/angel-script/file-system.md`
+- Extended Math API: `https://docs.perception.cx/perception/angel-script/extended-math-api.md`
+- Win API: `https://docs.perception.cx/perception/angel-script/win-api.md`
+- Engine Specific API: `https://docs.perception.cx/perception/angel-script/engine-specific-api.md`
+- Json API: `https://docs.perception.cx/perception/angel-script/json-api.md`
+- Utilities: `https://docs.perception.cx/perception/angel-script/utilities.md`
+- Zydis Encoder: `https://docs.perception.cx/perception/angel-script/zydis-encoder.md`
+- Intrinsics: `https://docs.perception.cx/perception/angel-script/intrinsics.md`
+- Sound API: `https://docs.perception.cx/perception/angel-script/sound-api.md`
+- Bit Reinterpret Helpers: `https://docs.perception.cx/perception/angel-script/bit-reinterpret-helpers.md`
+
+## Lifecycle
+
+```cpp
+int main()
+```
+
+Return `> 0` to stay loaded. Return `<= 0` to unload. Register recurring work instead of looping forever in `main()`.
+
+```cpp
+void on_tick(int id, int data_index)
+{
+    // work here
+}
+
+int main()
+{
+    register_callback(on_tick, 16, 0);
+    return 1;
+}
+
+void on_unload()
+{
+    // cleanup here
+}
+```
+
+## Language rules
+
+- Use AngelScript containers: `array<T>`, `dictionary`, `any`.
+- Use `string` for text unless an API page documents another type.
+- Do not use Enma-only `vec2(...)`, `color(...)`, `T[]`, `map<K,V>`, `imap<V>`, `cast<int64>(fn)`, or `register_routine(...)` in `.as` code.
+- Do not use Lua syntax or JavaScript async helpers.
+
+## Render rules
+
+AngelScript Render API calls use the exact scalar/value shapes documented on the AngelScript Render API page. Common Enma wrappers such as `vec2(x, y)` and `color(r, g, b, a)` are wrong in `.as` unless an AngelScript page explicitly documents that value type.
+
+Example text draw shape:
+
+```cpp
+draw_text("PCX", 20, 20, 255, 255, 255, 255, get_font20(), TE_SHADOW, 0, 0, 0, 180, 1.0f);
+```
+
+## Proc rules
+
+Use `proc_t` and `uint64` addresses. Always release acquired process handles with `deref()` when done or inside `on_unload()`.
+
+```cpp
+proc_t p = ref_process("game.exe");
+if (p.pid() == 0)
+{
+    log("process not found");
+    return 0;
+}
+uint64 base = p.base_address();
+p.deref();
+```
+
+## Verification commands
+
+```bash
+pcx api draw_text --lang angelscript
+pcx symbol-check script.as
+pcx verify script.as
+```
 
 ---
 
@@ -31811,6 +31997,64 @@ Tools for reversing kernel drivers, analyzing anti-cheat systems, and inspecting
 
 ---
 
+## Source: `knowledge/lua-cheatsheet.md`
+
+# Perception Lua Cheat Sheet
+
+Use this for current Perception Lua (`.lua`) scripts. Verify every symbol with `pcx api <symbol> --lang lua` or MCP `api_lookup(symbol, "lua")` before final code.
+
+## Official source set
+
+The Perception Lua docs are the source of truth: https://docs.perception.cx/perception/lua-script/overview.md
+
+Core surfaces include lifecycle, render, input, proc, GUI, system, net, file system, math, engine, JSON, utilities, sound, CS2 extended API, Zydis encoder, and intrinsics.
+
+## Lifecycle
+
+```lua
+function main()
+    log("PCX Lua loaded")
+    return 1
+end
+
+function on_frame()
+    draw_text("PCX Lua", 20, 20, 255, 255, 255, 255, get_font20(), TE_SHADOW, 0, 0, 0, 180, 1.0)
+end
+
+function on_unload()
+end
+```
+
+## Render
+
+Use scalar `x, y` and `r, g, b, a` arguments. Do not use Enma `vec2` or `color` wrappers.
+
+```lua
+draw_rect_filled(20, 20, 300, 88, 20, 20, 20, 210, 8.0, RR_TOP_LEFT)
+draw_text("Hello", 36, 46, 255, 255, 255, 255, get_font20(), TE_SHADOW, 0, 0, 0, 180, 1.0)
+```
+
+## Proc
+
+```lua
+local proc = ref_process("game.exe")
+if not proc then return 0 end
+local base = proc:base_address()
+deref_process(proc)
+```
+
+Release `process` handles with `deref_process(proc)` when done or in `on_unload()`.
+
+## Validation commands
+
+```bash
+pcx api draw_text --lang lua
+pcx symbol-check script.lua
+pcx verify script.lua
+```
+
+---
+
 ## Source: `knowledge/network-protocol-re.md`
 
 # Network Protocol Reverse Engineering Reference
@@ -34822,331 +35066,6 @@ See `knowledge/pcx-doc-roots.md` for the full sourcing policy.
 
 ---
 
-## Source: `rules/CLINE.md`
-
-Start here: `docs/perception/llm-routing.md`.
-
-# Cline Rules — Perception.cx Scripting
-
-Drop-in custom instructions for [Cline](https://github.com/cline/cline), the VS Code AI agent. Sibling to `rules/CLAUDE.md` (Claude Code drop-in) and `rules/CURSOR.md` (Cursor drop-in). Cline reads its custom instructions on every turn, so this file is intentionally tight — long rules eat the token budget without changing behavior.
-
-## How to Use
-
-Either:
-
-1. Paste the contents below into Cline's `Custom Instructions` field
-   (`Settings → Cline → Custom Instructions`), or
-2. Save as `.clinerules` at the project root if your Cline version supports auto-loading.
-
-Cline will apply these rules on every message in the project.
-
----
-
-## Project Context
-
-- **Languages.** Enma (`.em`) only.
-- **Platform.** Perception.cx scripting runtime (`perception.cx`).
-- **API docs.** Live under `docs/`:
-  - `docs/enma/` — Enma language + standard library + SDK (50 files)
-  - `docs/perception/` — Enma APIs (17 files)
-- **Read before writing API calls.** Cline does not have these APIs in its pretraining; it must `@`-reference the relevant doc file before producing code.
-
-## Coding Standards
-
-- Addresses are `uint64`. Always. No `int64` for memory addresses.
-- Float literals get the `f` suffix for `float32` (`1.5f`); bare `1.5` is `float64`.
-- After `ref_process` check `.alive()`; after any `ru64` / `find_code_pattern` / `get_module_base` check for `0`.
-- Update routines do reads + logic; render routines do drawing only. Never mix.
-- Use sigs (`find_code_pattern`) over hardcoded offsets; resolve RIP-relative displacements correctly.
-- One feature per file (`esp.em`, `aim.em`, `radar.em`); shared state in `globals.em`.
-- Construct `color`, `vec2`, `vec3` per frame — they're stack structs, no cost.
-- Mark unverified offsets with `// UNVERIFIED` and cite their evidence entry (`// E-NNN`).
-
-## The 12 Guidelines (one-line form)
-
-Long form: `.claude/skills/game-cheat-guidelines/SKILL.md`.
-
-1. Ground every offset — cite sig + source.
-2. `uint64` for all addresses.
-3. Null-check every pointer chain link.
-4. Update routine reads; render routine draws.
-5. Sigs over hardcoded offsets.
-6. One feature, one file.
-7. Construct render primitives per frame.
-8. `f` suffix on float32 literals.
-9. Minimize memory writes.
-10. World-to-screen once, correctly (check `w > 0.001`).
-11. GUI for every tunable, no magic constants.
-12. Verify against the live binary.
-
-## File Structure
-
-Recommended layout (`templates/full-project/` is the scaffold):
-
-```
-project/
-├── globals.em       # proc_t, base address, entity cache, config state
-├── offsets.em       # all sigs + resolved addresses (E-NNN cross-refs)
-├── esp.em           # one feature per file
-├── aim.em
-├── menu.em          # GUI sidebar — every tunable bound here
-├── main.em          # entry: attach, resolve, register routines
-└── evidence/        # per-binary evidence log (skill://re-evidence-log)
-```
-
-Bundle order respects the layered import graph: `globals → offsets → feature(s) → menu → main`. See `.claude/skills/script-bundler/SKILL.md`.
-
-## MCP Setup
-
-Wire the Perception MCP server into Cline via `cline_mcp_settings.json` (Cline's MCP config file path is in `Settings → MCP Servers → Configure MCP Servers`):
-
-```json
-{
-  "mcpServers": {
-    "perception": {
-      "transport": "http",
-      "url": "http://127.0.0.1:42069/mcp",
-      "description": "Perception.cx MCP — live process / memory / disasm tools"
-    }
-  }
-}
-```
-
-Authoritative tool list: `mcp/perception-mcp-config.json`. Routing guide for which of the 59 tools to use when: `.claude/skills/mcp-tool-routing/SKILL.md`. The Perception IDE must be running with MCP enabled (`Settings → Perception MCP → Enable MCP server`).
-
-## Karpathy Workflow
-
-Long form: `rules/KARPATHY.md`. Short form:
-
-1. **Think before coding.** Surface assumptions; ask if uncertain.
-2. **Simplicity first.** Minimum code that solves the problem.
-3. **Surgical changes.** Touch only what you must.
-4. **Goal-driven execution.** Define "done" before starting.
-
-## Cline-Specific Notes
-
-- **Auto-approval.** Read-only MCP tools (`process/read_virtual_memory`, `process/read_typed_value`, `process/read_string`, `process/read_pointer_chain`, `process/list`, `process/info_by_*`, `process/list_module_exports`, `process/get_module_imports`, `process/disassemble`, `process/find_pattern`, `process/find_xrefs`, `process/scan_*`) are safe to auto-approve. Keep write / execute tools gated (`process/write_virtual_memory`, `process/write_typed_value`, `process/write_string`, `process/copy_memory`, `process/fill_memory`, `process/allocate_memory`, `process/free_memory`, `script/execute`).
-- **Plan / Act split.** For multi-step RE work, start in **Plan** mode; produce the workflow as a sequence of MCP calls; approve; switch to **Act**. The 12 Guidelines shape the plan most usefully *in Plan mode* — they catch the wrong instinct before any tool runs.
-- **Token budget.** Documentation is ~35k lines across `docs/`. Do not preload it all into context. Instead, `@`-reference *specific* doc files when needed: `@docs/perception/render-api.md`, `@docs/enma/addon-math.md`. For per-task lookups, prefer `@knowledge/pcx-api-cheatsheet.md` (15 KB, all APIs at a glance) over the full corpus.
-- **Workflow checkpoints.** Cline supports checkpoint/restore. Use checkpoints before any operation touching `process/write_virtual_memory` (or any `process/write_*` / `process/allocate_memory`), `script/execute`, or external state; the rollback path is the safety net.
-- **Diff review.** Cline shows file diffs before applying. Read them — never blanket-approve a multi-file change; the 12 Guidelines (especially #2 `uint64`, #4 update/render split, #8 `f` suffix) are the highest-value pattern matches to scan for.
-
-## Cross-References
-
-- `rules/CLAUDE.md` — Claude Code drop-in
-- `rules/CURSOR.md` — Cursor drop-in
-- `rules/AGENTS.md` — agent role definitions for multi-agent workflows
-- `rules/KARPATHY.md` — workflow discipline (4 principles)
-- `mcp/cline-setup.md` — does not exist; this file is the Cline setup guide
-- `mcp/cursor-setup.md`, `mcp/claude-code-setup.md`, `mcp/aider-setup.md` — sibling IDE setups
-
----
-
-## Source: `rules/COPILOT.md`
-
-Start here: `docs/perception/llm-routing.md`.
-
-# GitHub Copilot Rules — Perception.cx Scripting
-
-Drop-in custom instructions for GitHub Copilot. Sibling to `rules/CLAUDE.md` (Claude Code), `rules/CURSOR.md` (Cursor), `rules/CLINE.md` (Cline). Copilot reads `.github/copilot-instructions.md` for repo-wide rules and a per-workspace custom-instructions field for IDE-side rules — both apply on every completion request, so this file is intentionally tight.
-
-## How to Use
-
-Either:
-
-1. Save as `.github/copilot-instructions.md` at the repo root — Copilot picks it up automatically for any developer working in the repo, no per-workspace config needed.
-2. Paste into your IDE's Copilot custom-instructions field (VS Code: `Settings → GitHub Copilot → Chat: Custom Instructions`) — per-workspace, applies only to your editor.
-
-Most projects want option 1; option 2 is for adding personal preferences on top of the shared repo rules.
-
----
-
-## Project Context
-
-- **Languages.** Enma (`.em`) only.
-- **Platform.** Perception.cx scripting runtime.
-- **API docs.** Live under `docs/`:
-  - `docs/enma/` — Enma language + standard library + SDK
-  - `docs/perception/` — Enma APIs
-- **Read before writing API calls.** Copilot does not have these APIs in pretraining; it will hallucinate confident-looking names. Always grep / link the relevant doc file when an API is needed.
-
-## Coding Standards
-
-- Addresses are `uint64`. No `int64`, no `int` for memory addresses.
-- Float literals get the `f` suffix for `float32` (`1.5f`); bare `1.5` is `float64`.
-- After `ref_process` check `.alive()`; after any `ru64` / `find_code_pattern` / `get_module_base` check for `0`.
-- Update routines do reads + logic; render routines do drawing only. Never mix.
-- Sigs (`find_code_pattern`) over hardcoded offsets; resolve RIP-relative displacements correctly.
-- One feature per file (`esp.em`, `aim.em`, `radar.em`); shared state in `globals.em`.
-- Construct `color`, `vec2`, `vec3` per frame.
-- Mark unverified offsets with `// UNVERIFIED` and cite `// E-NNN` evidence entry.
-
-## The 12 Guidelines (one-line form)
-
-Long form: `.claude/skills/game-cheat-guidelines/SKILL.md`.
-
-1. Ground every offset — cite sig + source.
-2. `uint64` for all addresses.
-3. Null-check every pointer chain link.
-4. Update routine reads; render routine draws.
-5. Sigs over hardcoded offsets.
-6. One feature, one file.
-7. Construct render primitives per frame.
-8. `f` suffix on float32 literals.
-9. Minimize memory writes.
-10. World-to-screen once, correctly (check `w > 0.001`).
-11. GUI for every tunable, no magic constants.
-12. Verify against the live binary.
-
-## File Structure
-
-Recommended layout (`templates/full-project/`):
-
-```
-project/
-├── globals.em       # process handle, base address, entity cache, config state
-├── offsets.em       # all sigs + resolved addresses (with E-NNN cross-refs)
-├── esp.em           # one feature per file
-├── aim.em
-├── menu.em          # GUI sidebar — every tunable bound here
-├── main.em          # entry: attach, resolve, register routines
-└── evidence/        # per-binary evidence log
-```
-
-## What Copilot Is Good At Here
-
-- Inline completions: routine boilerplate, GUI sections with N widgets, common loop shapes.
-- Doc-comment generation: turn a one-line description into a documented function header.
-- Pattern-following: once you've written one feature module the right way, Copilot mimics its shape well in the next module.
-- Test scaffolding for validation tooling around scripts.
-- Rote refactors confined to a single file (renames within scope, extracting a helper).
-
-## What Copilot Is Bad At Here
-
-- **Multi-file refactors.** Use Cursor / Cline / Aider for cross-file changes; Copilot's window is too narrow.
-- **API names from less-common APIs.** It will hallucinate `proc.read_mat3x4_fl32` because the more common APIs follow that shape. Verify every API name against `docs/`.
-- **Enforcing the 12 guidelines unprompted.** It does not scan its own completions for `int64`-on-an-address or missing `f` suffixes. You must.
-- **MCP-aware work.** Copilot does not speak MCP. Binary-level RE (find_pattern, disassemble, struct_dump) happens in another tool; Copilot handles only the script-side editing.
-
-## Workflow Notes
-
-- **Inline vs Chat.** Use Copilot Chat (sidebar) for explanation and review; use inline completions for typing-out. Different surfaces, different strengths.
-- **Steer with comments.** When Copilot hallucinates an API, write `// from: docs/perception/render-api.md` as a comment above the cursor — Copilot reads it as context for the next completion.
-- **Pair with an MCP-aware tool.** Use the Perception IDE (or Cursor with MCP) for binary discovery; bring the resolved sig back into your editor; let Copilot complete the script around it.
-- **Diff-review every multi-line completion.** Pattern to scan for:
-  - `int64` or `int32` near `addr` / `offset` / `base` / `ptr` (rule #2 violation)
-  - Bare float literals in `draw_*` calls (rule #8)
-  - `proc.ru64(...)` without a subsequent `if ... == 0` check (rule #3)
-  - `color(...)` / `vec2(...)` / `vec3(...)` constructed outside a render routine (rule #7)
-- **Don't accept long completions.** A 60-line block is too much to review in flight; accept 5-15 lines at a time and check each one.
-
-## Karpathy Workflow
-
-Long form: `rules/KARPATHY.md`. Short form:
-
-1. **Think before coding.** Surface assumptions; ask if uncertain.
-2. **Simplicity first.** Minimum code that solves the problem.
-3. **Surgical changes.** Touch only what you must.
-4. **Goal-driven execution.** Define "done" before starting.
-
-Copilot completions tend to over-suggest (more code than asked for). The Karpathy second principle is the right counterweight — when a completion grows beyond the request, trim it before accepting.
-
-## Cross-References
-
-- `rules/CLAUDE.md` — Claude Code drop-in
-- `rules/CURSOR.md` — Cursor drop-in
-- `rules/CLINE.md` — Cline drop-in
-- `rules/KARPATHY.md` — workflow discipline
-- `rules/AGENTS.md` — agent role definitions for multi-agent workflows
-- `.claude/skills/ai-pair-programming/SKILL.md` — the cross-tool workflow that wraps all four IDE drop-ins
-
----
-
-## Source: `rules/CURSOR.md`
-
-Start here: `docs/perception/llm-routing.md`.
-
-# Cursor Rules — Perception.cx Scripting
-
-Drop-in project rules for Cursor (the IDE), parallel to `CLAUDE.md` but tailored for Cursor's context system.
-
-**How to use this.** Either copy this file's body into your project root as `.cursorrules`, or paste it into Cursor's `Rules for AI` setting (`Cursor Settings → Rules for AI`). `.cursorrules` is read as persistent system instructions on every request — keep it tight so it doesn't burn context on every prompt. This file is the project-level version of those instructions; the global setting is the per-user version.
-
-## Project Context
-
-- Platform: Perception.cx. Scripts attach to a game process, read state, and draw an overlay.
-- **Read the relevant doc before writing any API call.** Point Cursor at these with `@`:
-  - Enma language: `@docs/enma/llms-language.md` (complete single-page reference)
-  - PCX Enma APIs: `@docs/perception/` (proc, render, gui, input, cpu, zydis, unicorn, net, win, fs, sound, lifecycle, mcp)
-  - Quick references: `@knowledge/enma-cheatsheet.md`, `@knowledge/pcx-api-cheatsheet.md`
-  - Common patterns: `@knowledge/common-patterns.md`
-
-## Coding Standards
-
-- Addresses are `uint64` — never `int64`. Sign-extension breaks high usermode addresses.
-- `float32` literals need an `f` suffix: `0.2f`, not `0.2`. Vertex buffers and the GPU care.
-- `color(r,g,b,a)` and `vec2(x,y)` are value types — construct fresh every frame, no globals.
-- `import "vec"; import "color";` required before using those types.
-- `main()` returns `> 0` to stay loaded, `<= 0` to unload immediately.
-- Routines: `register_routine(cast<int64>(fn), 0)` — separate update and render routines.
-- `signed ↔ unsigned` is a compile error — use `cast<uint64>(x)`.
-- `float → int` is a compile error — use `cast<int32>(f)`.
-- Failed reads return 0 — validate every pointer in a chain before dereferencing.
-- Pattern scans over hardcoded offsets — sigs survive game patches.
-- RAII: `proc_t` releases on scope exit. No GC. Destructors are deterministic.
-
-## The 12 Guidelines (one-line form)
-
-Long form with WRONG/RIGHT examples: `.claude/skills/game-cheat-guidelines/SKILL.md`.
-
-1. Ground every offset — cite the source (sig, SDK header, IDA xref); mark guesses `UNVERIFIED`.
-2. `uint64` for all addresses — no sign-extension bugs.
-3. Validate every pointer — check for 0 after every `ru64` / `find_code_pattern` / `ref_process`.
-4. Separate update from render — no memory reads in the draw path.
-5. Sigs over hardcodes — survive game patches.
-6. One feature, one file — no monolith scripts.
-7. Construct colors/vecs every frame — they're 4-8 byte stack values.
-8. `f` suffix on float32 literals — the GPU cares.
-9. Minimize memory writes — reads are detection-invisible.
-10. World-to-screen once, correctly — check `w > 0.001`, match the engine matrix layout.
-11. GUI for all tunables — no magic constants in code.
-12. Verify with live reads — trust the binary, not cached offsets.
-
-## File Structure
-
-One feature per file. Use the AI Composer to scaffold across these without merging features into one file:
-
-```
-project/
-├── main.em         # Entry point, setup, routine registration
-├── globals.em      # Shared state (proc handle, entity cache, config)
-├── offsets.em      # Named sig constants + resolver functions
-├── features/       # One file per feature (esp.em, aim.em, radar.em)
-├── menu.em         # GUI sidebar widgets + config load/save
-└── config.txt      # Persisted settings
-```
-
-## MCP Setup
-
-The Perception MCP wiring (`.cursor/mcp.json`), docs-to-workspace, and LSP `settings.json` steps live in `mcp/cursor-setup.md`. Follow that file once per project — don't reproduce the steps here.
-
-## Karpathy Workflow
-
-How to work (not what the code looks like) is in `rules/KARPATHY.md`. The short version:
-
-1. Think before coding — name the target, the offset source, and the tradeoff first.
-2. Simplicity first — ship the box, not the framework.
-3. Surgical changes — one feature, one diff; clean only your own orphans.
-4. Goal-driven execution — done = visible criteria met on the live target, not "it compiles."
-
-## What Cursor Does Best Here
-
-- **`@` referencing docs by path** — pull the exact API page into context before generating a call, e.g. `@docs/perception/render.md` before writing `draw_*`, instead of letting the model guess signatures.
-- **AI Composer for multi-file edits** — adding a feature means a new file under `features/` plus a routine registration in `main.em` and a GUI section in `menu.em`. Composer handles that spread while respecting one-feature-per-file; reject any diff that folds the new feature into an existing module.
-- **`.cursorrules` persistence** — these standards apply to every generation automatically, so prompts can stay short ("add a distance-filtered box ESP") and still produce code that null-checks chains, suffixes float32, and binds tunables to GUI widgets.
-
----
-
 ## Source: `rules/KARPATHY.md`
 
 # Karpathy Discipline for PCX Scripting
@@ -35181,88 +35100,6 @@ The four Karpathy principles, rewritten for cheat development and reverse engine
 | Goal-driven execution | Done = visible criteria met on the live target |
 
 Full detail with examples: `skill://pcx-coding-discipline` (writing scripts) and `skill://pcx-re-discipline` (reverse engineering).
-
----
-
-## Source: `rules/WINDSURF.md`
-
-Start here: `docs/perception/llm-routing.md`.
-
-# Windsurf Rules — Perception.cx Scripting
-
-Drop-in project rules for Windsurf (the IDE) and Cascade. Parallel to `rules/CLAUDE.md` and `rules/CURSOR.md` but tailored for Windsurf's context system and Cascade agent.
-
-**How to use this.** Save as `.windsurfrules` at your project root. Windsurf/Cascade reads `.windsurfrules` automatically as persistent instructions on every prompt. Keep it concise to save Cascade's context token budget.
-
----
-
-## Project Context
-
-- **Platform:** Perception.cx. Scripts attach to a game process, read state, and draw an overlay.
-- **Read the relevant doc before writing any API call.** Point Windsurf/Cascade to these files:
-  - Enma language: `docs/enma/llms-language.md` (complete single-page reference)
-  - PCX Enma APIs: `docs/perception/` (proc, render, gui, input, cpu, zydis, unicorn, net, win, fs, sound, lifecycle, mcp)
-  - Quick references: `knowledge/enma-cheatsheet.md`, `knowledge/pcx-api-cheatsheet.md`
-  - Common patterns: `knowledge/common-patterns.md`
-
----
-
-## Coding Standards
-
-- **Addresses are `uint64`** — never `int64`. Sign-extension breaks high usermode addresses.
-- **`float32` literals need an `f` suffix**: `0.2f`, not `0.2`. Vertex buffers and the GPU care.
-- **`color(r,g,b,a)` and `vec2(x,y)` are value types** — construct fresh every frame, no globals.
-- **`import "vec"; import "color";`** required before using those types.
-- **`main()` returns `> 0` to stay loaded**, `<= 0` to unload immediately.
-- **Routines:** `register_routine(cast<int64>(fn), 0)` — separate update and render routines.
-- **`signed ↔ unsigned` is a compile error** — use `cast<uint64>(x)`.
-- **`float → int` is a compile error** — use `cast<int32>(f)`.
-- **Failed reads return 0** — validate every pointer in a chain before dereferencing.
-- **Pattern scans over hardcoded offsets** — sigs survive game patches.
-- **RAII:** `proc_t` releases on scope exit. No GC. Destructors are deterministic.
-
----
-
-## The 12 Guidelines (one-line form)
-
-Long form with WRONG/RIGHT examples: `.claude/skills/game-cheat-guidelines/SKILL.md`.
-
-1. Ground every offset — cite the source (sig, SDK header, IDA xref); mark guesses `UNVERIFIED`.
-2. `uint64` for all addresses — no sign-extension bugs.
-3. Validate every pointer — check for 0 after every `ru64` / `find_code_pattern` / `ref_process`.
-4. Separate update from render — no memory reads in the draw path.
-5. Sigs over hardcodes — survive game patches.
-6. One feature, one file — no monolith scripts.
-7. Construct colors/vecs every frame — they're 4-8 byte stack values.
-8. `f` suffix on float32 literals — the GPU cares.
-9. Minimize memory writes — reads are detection-invisible.
-10. World-to-screen once, correctly — check `w > 0.001`, match the engine matrix layout.
-11. GUI for all tunables — no magic constants in code.
-12. Verify with live reads — trust the binary, not cached offsets.
-
----
-
-## File Structure
-
-One feature per file. Use Cascade to scaffold across these without merging features into one file:
-
-```
-project/
-├── main.em         # Entry point, setup, routine registration
-├── globals.em      # Shared state (proc handle, entity cache, config)
-├── offsets.em      # Named sig constants + resolver functions
-├── features/       # One file per feature (esp.em, aim.em, radar.em)
-├── menu.em         # GUI sidebar widgets + config load/save
-└── config.txt      # Persisted settings
-```
-
----
-
-## Windsurf / Cascade Specifics
-
-- **Using Cascade's Agent Mode:** Cascade can run commands and edit files. Safe to auto-approve read-only MCP commands. Gating is recommended for write/execute operations.
-- **Context Pinning:** In Windsurf, you can pin specific reference files (like `knowledge/pcx-api-cheatsheet.md`) to the Cascade context so it keeps them active in chat history.
-- **LSP Setup:** Refer to the LSP section in the setup docs for editor compilation diagnostics.
 
 ---
 

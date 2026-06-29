@@ -38,17 +38,19 @@ from pcx_parser import (  # noqa: E402
 
 # ── Upstream endpoints ─────────────────────────────────────────────────────────
 ENMA_ROOT_URL = "https://docs.perception.cx/perception/enma/readme.md"
+ANGELSCRIPT_ROOT_URL = "https://docs.perception.cx/perception/angel-script/overview.md"
+LUA_ROOT_URL = "https://docs.perception.cx/perception/lua-script/overview.md"
 LLMS_INDEX_URL = "https://docs.perception.cx/perception/llms.txt"
 ENMA_LANGUAGE_ROOT_URL = "https://enma-1.gitbook.io/enma/llms-language.md"
 
 ENMA_PREFIX = "/perception/enma/"
-
-# Language primitives that are not API symbols but must not be flagged as unknown.
-ENMA_BUILTIN_TYPES = {
-    "bool", "char", "wchar", "wchar_t", "int8", "int16", "int32", "int64",
-    "uint8", "uint16", "uint32", "uint64", "aint8", "aint16", "aint32", "aint64",
-    "float32", "float64", "double", "string", "wstring", "void", "null", "auto",
-    "proc_t", "array", "hash_set", "sorted_map", "list", "map", "variant",
+ANGELSCRIPT_PREFIX = "/perception/angel-script/"
+LUA_PREFIX = "/perception/lua-script/"
+BUILTIN_TYPES = {
+    "bool", "char", "wchar", "wchar_t", "int", "int8", "int16", "int32", "int64",
+    "uint", "uint8", "uint16", "uint32", "uint64", "aint8", "aint16", "aint32", "aint64",
+    "float", "float32", "float64", "double", "string", "wstring", "void", "null", "auto",
+    "proc_t", "array", "dictionary", "any", "grid", "hash_set", "sorted_map", "list", "map", "variant",
     "json_value",
 }
 
@@ -109,8 +111,10 @@ def _page_url(path: str) -> str:
 
 
 def _language_from_path(path: str) -> str:
-    if path.startswith(ENMA_PREFIX):
-        return "enma"
+    if path.startswith(ANGELSCRIPT_PREFIX):
+        return "angelscript"
+    if path.startswith(LUA_PREFIX):
+        return "lua"
     return "enma"
 
 
@@ -154,14 +158,16 @@ def _find_inline_signature_blocks(text: str, language: str) -> list[str]:
 
 
 def _discover_sub_pages() -> list[str]:
-    """Return absolute paths (e.g. /perception/enma/proc-api.md) under the two roots.
+    """Return absolute paths under the supported Perception language roots."""
+    paths: set[str] = {ENMA_PREFIX + "readme.md", ANGELSCRIPT_PREFIX + "overview.md", LUA_PREFIX + "overview.md"}
 
-    The root pages themselves are included.  llms.txt is used only for
-    enumeration; every page content is fetched directly from its own URL.
-    """
-    paths: set[str] = {ENMA_PREFIX + "readme.md"}
+    llms = _fetch(LLMS_INDEX_URL)
+    for m in re.finditer(r'\]\((https://docs\.perception\.cx[^)]+)\)', llms):
+        url = urllib.parse.urlparse(urllib.parse.urldefrag(m.group(1).strip())[0])
+        path = url.path
+        if path.startswith((ENMA_PREFIX, ANGELSCRIPT_PREFIX, LUA_PREFIX)) and path.endswith(".md"):
+            paths.add(path)
 
-    # The Enma root explicitly links to its sub-pages.
     enma_root = _fetch(ENMA_ROOT_URL)
     for m in re.finditer(r'\[([^\]]*)\]\(([^)]+)\)', enma_root):
         href = urllib.parse.urldefrag(m.group(2).strip())[0]
@@ -200,7 +206,7 @@ def build_index() -> dict[str, object]:
     types: set[str] = set()
     modules: dict[str, set[str]] = {}
 
-    types.update(ENMA_BUILTIN_TYPES)
+    types.update(BUILTIN_TYPES)
 
     page_paths = _discover_sub_pages()
     pages = _fetch_pages(page_paths)
@@ -286,7 +292,7 @@ def build_index() -> dict[str, object]:
     return {
         "version": 1,
         "generated_by": "tools/build-api-index.py",
-        "source_roots": [ENMA_ROOT_URL, ENMA_LANGUAGE_ROOT_URL],
+        "source_roots": [ENMA_ROOT_URL, ANGELSCRIPT_ROOT_URL, LUA_ROOT_URL, ENMA_LANGUAGE_ROOT_URL],
         "functions": sig_list_to_json(functions),
         "methods": sig_list_to_json(methods),
         "types": sorted(types),

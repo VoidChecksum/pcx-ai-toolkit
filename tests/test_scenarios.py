@@ -23,7 +23,7 @@ class ScenarioCoverageTest(unittest.TestCase):
         }
         root = REPO_ROOT / "examples" / "scenarios"
         found = {
-            str(path.relative_to(root))
+            path.relative_to(root).as_posix()
             for path in root.rglob("*")
             if path.suffix in {".em", ".md"} and path.name != "README.md"
         }

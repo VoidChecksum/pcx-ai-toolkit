@@ -57,7 +57,7 @@ def main() -> int:
     modules = infer_symbols(text)
     required_types = sorted({s for mod in ("vec", "color", "math3d", "variant", "regex", "hash_set", "sorted_map", "list") for s in modules.get(mod, set()) if not s.startswith(("variant_",))})
     payload = {
-        "source": str(source.relative_to(REPO_ROOT) if source.is_relative_to(REPO_ROOT) else source),
+        "source": (source.relative_to(REPO_ROOT) if source.is_relative_to(REPO_ROOT) else source).as_posix(),
         "modules": {k: sorted(v) for k, v in sorted(modules.items())},
         "import_required_types": required_types,
     }

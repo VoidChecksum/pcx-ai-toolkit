@@ -31,6 +31,7 @@ Usage:
 import argparse
 import json
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -39,6 +40,7 @@ from pathlib import Path
 
 TOOL_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOL_DIR / "lib"))
+from pcx_language_modes import default_language, language_for_path, language_mode, supported_languages  # noqa: E402
 from pcx_paths import data_root, tool_dir  # noqa: E402
 from pcx_scaffold import available_templates, build_project_plan, scaffold_project, slugify  # noqa: E402
 from pcx_grounding import load_api_index, validate_code_against_index  # noqa: E402
@@ -291,12 +293,12 @@ def _choose(prompt: str, choices: list[str], default: str) -> str:
 
 
 def cmd_create(args: list[str]) -> int:
-    """Create an Enma project scaffold."""
-    ap = argparse.ArgumentParser(description="Create a PCX Enma project scaffold")
+    """Create a PCX project scaffold."""
+    ap = argparse.ArgumentParser(description="Create a PCX project scaffold")
     ap.add_argument("--wizard", action="store_true", help="prompt interactively for missing values")
     ap.add_argument("--name", default="", help="project name")
-    ap.add_argument("--language", "--lang", default="", help="enma (default)")
-    ap.add_argument("--kind", default="", help="template kind: full, cheat, overlay, aimbot, minimap, hello")
+    ap.add_argument("--language", "--lang", default="", help="language mode: enma or angelscript (default: registry default)")
+    ap.add_argument("--kind", default="", help="template kind; use --list to inspect language-specific choices")
     ap.add_argument("--target", default="game.exe", help="target process name to substitute into templates")
     ap.add_argument("--engine", default="generic", help="engine profile label, e.g. source2, unreal, re-engine")
     ap.add_argument("--output", "-o", default="", help="output directory")
@@ -324,7 +326,7 @@ def cmd_create(args: list[str]) -> int:
             if not name:
                 name = input("Project name [pcx-project]: ").strip() or "pcx-project"
             if not language:
-                language = _choose("Language", ["enma"], "enma")
+                language = _choose("Language", supported_languages(), default_language())
             if not kind:
                 choices = [item["kind"] for item in available_templates(language)]
                 kind = _choose("Template kind", choices, choices[0])
@@ -334,8 +336,8 @@ def cmd_create(args: list[str]) -> int:
                 engine = input("Engine profile [generic]: ").strip() or "generic"
 
         name = name or "pcx-project"
-        language = language or "enma"
-        kind = kind or "full"
+        language = language or default_language()
+        kind = kind or available_templates(language)[0]["kind"]
         output = Path(parsed.output) if parsed.output else Path.cwd() / slugify(name)
         plan = build_project_plan(name, language, kind, target, engine)
         if parsed.plan:
@@ -358,11 +360,13 @@ def cmd_create(args: list[str]) -> int:
     print("  pcx verify-project . --allow-placeholders --allow-unverified")
     return 0
 
-
 def _lsp_command() -> list[str] | None:
     override = os.environ.get("PCX_LSP_COMMAND", "").strip()
     if override:
-        return shlex.split(override)
+        if override.startswith(sys.executable):
+            rest = override[len(sys.executable):].strip()
+            return [sys.executable, *shlex.split(rest, posix=os.name != "nt")]
+        return shlex.split(override, posix=os.name != "nt")
     launcher = REPO_ROOT / "lsp" / "enma-lsp" / "bin" / "enma-language-server.js"
     bundle = REPO_ROOT / "lsp" / "enma-lsp" / "server" / "dist" / "server.js"
     if launcher.exists() and bundle.exists() and shutil.which("node"):
@@ -378,13 +382,15 @@ def _write_lsp_message(proc: subprocess.Popen[bytes], payload: dict[str, object]
     proc.stdin.flush()
 
 
-
-
 def _parse_lsp_messages(blob: bytes) -> list[dict[str, object]]:
     messages: list[dict[str, object]] = []
     pos = 0
     while pos < len(blob):
         sep = blob.find(b"\r\n\r\n", pos)
+        sep_len = 4
+        if sep < 0:
+            sep = blob.find(b"\n\n", pos)
+            sep_len = 2
         if sep < 0:
             break
         header = blob[pos:sep].decode("ascii", errors="ignore")
@@ -393,12 +399,30 @@ def _parse_lsp_messages(blob: bytes) -> list[dict[str, object]]:
             if line.lower().startswith("content-length:"):
                 length = int(line.split(":", 1)[1].strip())
                 break
-        start = sep + 4
+        start = sep + sep_len
         end = start + length
-        if length <= 0 or end > len(blob):
+        if length <= 0:
             break
-        messages.append(json.loads(blob[start:end].decode("utf-8")))
-        pos = end
+        chunk = blob[start:end]
+        try:
+            messages.append(json.loads(chunk.decode("utf-8")))
+            pos = end
+            continue
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            text = blob[start:].decode("utf-8", errors="replace")
+            obj, used = json.JSONDecoder().raw_decode(text)
+            messages.append(obj)
+            pos = start + len(text[:used].encode("utf-8"))
+    if not any(msg.get("method") == "textDocument/publishDiagnostics" for msg in messages):
+        text = blob.decode("utf-8", errors="replace")
+        decoder = json.JSONDecoder()
+        for match in re.finditer(r"\{", text):
+            try:
+                obj, _used = decoder.raw_decode(text[match.start():])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(obj, dict) and obj.get("jsonrpc") == "2.0" and obj not in messages:
+                messages.append(obj)
     return messages
 
 
@@ -415,7 +439,6 @@ def run_lsp_check(path: Path, timeout: float = 5.0) -> dict[str, object]:
         "method": "initialize",
         "params": {"rootUri": path.parent.resolve().as_uri(), "capabilities": {}},
     })
-    _write_lsp_message(proc, {"jsonrpc": "2.0", "method": "notifications/initialized", "params": {}})
     _write_lsp_message(proc, {
         "jsonrpc": "2.0",
         "method": "textDocument/didOpen",
@@ -433,7 +456,7 @@ def run_lsp_check(path: Path, timeout: float = 5.0) -> dict[str, object]:
         if msg.get("method") != "textDocument/publishDiagnostics":
             continue
         params = msg.get("params", {})
-        if isinstance(params, dict) and params.get("uri") == uri:
+        if isinstance(params, dict):
             raw = params.get("diagnostics", [])
             diagnostics = raw if isinstance(raw, list) else []
             break
@@ -470,10 +493,10 @@ def cmd_lsp_check(args: list[str]) -> int:
 def cmd_verify(args: list[str]) -> int:
     """Run lint + symbol-check on one script.
 
-    Usage: pcx verify <file.em>
+    Usage: pcx verify <file.em|file.as>
     """
     if not args or any(a in ("-h", "--help") for a in args):
-        print("Usage: pcx verify <file.em>")
+        print("Usage: pcx verify <file.em|file.as>")
         return 0 if any(a in ("-h", "--help") for a in args) else 1
 
     target = args[0]
@@ -482,18 +505,21 @@ def cmd_verify(args: list[str]) -> int:
         print(f"Error: file not found: {target}", file=sys.stderr)
         return 2
 
-    if path.suffix.lower() == ".as":
-        print("Error: unsupported language: .as/AngelScript is deprecated; use Enma (.em)", file=sys.stderr)
-        return 1
     print(f"Verifying {target}...")
-    rc = run_python_tool("script-linter", ["--strict", target])
-    if rc != 0:
-        return rc
+    try:
+        language = language_for_path(path)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    if language == "enma":
+        rc = run_python_tool("script-linter", ["--strict", target])
+        if rc != 0:
+            return rc
 
     rc = run_python_tool("symbol-check", [target])
     if rc != 0:
         return rc
-    if _lsp_command() is not None:
+    if language == "enma" and _lsp_command() is not None:
         rc = cmd_lsp_check([target])
         if rc != 0:
             return rc
@@ -504,14 +530,16 @@ def cmd_verify(args: list[str]) -> int:
 def cmd_prompt(args: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="pcx prompt")
     ap.add_argument("--model", default="generic", choices=["generic", "claude", "cursor", "copilot", "cline", "windsurf", "gemini", "openai", "qwen"])
+    ap.add_argument("--language", "--lang", default="enma", help="language mode: enma or angelscript")
     ns = ap.parse_args(args)
-    print(f"PCX AI prompt for {ns.model}:")
-    print("""Before writing Perception code:
+    mode = language_mode(ns.language)
+    print(f"PCX AI prompt for {ns.model} ({mode['name']}):")
+    print(f"""Before writing Perception code:
 1. Load docs/AI_AGENT_OPERATING_MANUAL.md
 2. Load docs/perception/llm-routing.md
-3. Use Enma (.em) only
-4. Load docs/llms-perception-enma.md
-5. Verify every Perception host API and Enma addon symbol with pcx api or MCP api_lookup
+3. Use {mode['name']} ({', '.join(mode['extensions'])}) only
+4. Load {mode['llms_pack']}
+5. Verify every Perception host API symbol with pcx api --lang {mode['id']} or MCP api_lookup
 6. Validate code with pcx symbol-check, pcx verify, or MCP validate_code
 If the docs/API index do not prove a symbol exists, say so instead of guessing.""")
     return 0

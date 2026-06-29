@@ -23,8 +23,6 @@ AI_DOCS = [
 ]
 
 FORBIDDEN_PATTERNS = {
-    "deleted Lua skill": re.compile(r"pcx-lua-discipline"),
-    "deleted Lua bundle": re.compile(r"llms-perception-lua"),
     "deleted bridge doc": re.compile(r"pcx-cross-language-bridge"),
     "old docs count": re.compile(r"43,000\+? lines|139\s+files|35,000\+? lines"),
     "old MCP count": re.compile(r"37\s+Perception\s+MCP"),

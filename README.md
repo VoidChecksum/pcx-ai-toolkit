@@ -153,7 +153,7 @@ AngelScript (`.as`), Lua, C++ helper syntax, JavaScript `await`, `ImGui::*`, and
 
 | Docs | Doc Lines | API Docs Indexed | API Functions | API Methods | Skills | Templates | MCP Tools | Native Tools |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| 133 | 22,496 | 15 | 477 | 305 | 32 | 18 | 59 | 13 |
+| 133 | 22,496 | 53 | 828 | 377 | 32 | 18 | 59 | 13 |
 
 ### Minimal context load
 

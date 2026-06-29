@@ -18,10 +18,6 @@ MUST_REFERENCE_ROUTING = [
     "docs/INDEX.md",
     "docs/llms.txt",
     "rules/CLAUDE.md",
-    "rules/CURSOR.md",
-    "rules/CLINE.md",
-    "rules/COPILOT.md",
-    "rules/WINDSURF.md",
     ".github/copilot-instructions.md",
     ".clinerules",
     ".cursorrules",
@@ -30,6 +26,8 @@ MUST_REFERENCE_ROUTING = [
 
 BUNDLES = [
     "docs/llms-perception-enma.md",
+    "docs/llms-perception-angelscript.md",
+    "docs/llms-perception-lua.md",
 ]
 
 
@@ -63,9 +61,6 @@ def main() -> int:
         if pos != first_source:
             errors.append(f"{rel}: {ROUTING} must be the first source block")
 
-    llms = read("docs/llms.txt") if (REPO_ROOT / "docs/llms.txt").exists() else ""
-    if "llms-perception-lua.md" in llms or "## Lua APIs" in llms or "## Lua Language" in llms:
-        errors.append("docs/llms.txt: public LLM index must be Enma only")
 
     if errors:
         print("LLM contract check failed:")

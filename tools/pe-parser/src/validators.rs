@@ -41,7 +41,7 @@ fn language_for(p: &Path) -> Option<&'static str> {
         .as_str()
     {
         "em" => Some("enma"),
-        "as" => Some("unsupported"),
+        "as" => Some("angelscript"),
         _ => None,
     }
 }
@@ -275,8 +275,8 @@ pub fn symbol_check(root: &Path, target: &Path) -> Result<Vec<ValidationFinding>
                 file: p.display().to_string(),
                 line: 0,
                 kind: "unsupported_language",
-                symbol: ".as".to_string(),
-                message: "unsupported language: .as/AngelScript is deprecated; use Enma (.em)".to_string(),
+                symbol: p.extension().and_then(|e| e.to_str()).unwrap_or("").to_string(),
+                message: "unsupported script language; use AngelScript (.as) or Enma (.em)".to_string(),
             });
             continue;
         }

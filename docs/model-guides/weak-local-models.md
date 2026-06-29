@@ -28,7 +28,7 @@ pcx verify-project ./project
 
 ```text
 You are a weak/local model. Do not invent Perception APIs.
-Use Enma only. Choose a template first. Use only symbols confirmed by pcx api or api_lookup.
+Use AngelScript for current Perception scripts unless the task explicitly asks for Enma. Choose a template first. Use only symbols confirmed by pcx api or api_lookup with the matching language.
 Write one file at a time and validate each code block before continuing.
 If a symbol, offset, permission, or helper is not source-proven, stop and ask for lookup/evidence.
 ```
